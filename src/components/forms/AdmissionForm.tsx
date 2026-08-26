@@ -1,0 +1,660 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { TurnstileWidget } from "./TurnstileWidget";
+import { site, waLink } from "@/lib/site";
+import { cleanIndianMobile } from "@/lib/phone";
+import { cn } from "@/lib/utils";
+import { Icon } from "@/components/ui/Icon";
+
+export type CourseOption = { slug: string; nameEn: string; nameGu: string; family: string };
+export type AdmissionContext = { course?: string; timing?: "morning" | "evening"; src?: string };
+
+type Data = {
+  locale: "en" | "gu";
+  fullName: string;
+  whatsapp: string;
+  email: string;
+  courseSlug: string;
+  preferredTiming: "" | "morning" | "evening";
+  ageBand: "" | "under18" | "18-25" | "26-40" | "40plus";
+  guardianName: string;
+  guardianPhone: string;
+  occupation: string;
+  experience: string;
+  area: string;
+  heardFrom: string;
+  goal: string;
+  privacy: boolean;
+  comms: boolean;
+};
+
+const DRAFT_KEY = "kds-admission-draft";
+const MOBILE = /^[6-9]\d{9}$/;
+
+const empty = (locale: "en" | "gu"): Data => ({
+  locale,
+  fullName: "",
+  whatsapp: "",
+  email: "",
+  courseSlug: "",
+  preferredTiming: "",
+  ageBand: "",
+  guardianName: "",
+  guardianPhone: "",
+  occupation: "",
+  experience: "",
+  area: "",
+  heardFrom: "",
+  goal: "",
+  privacy: false,
+  comms: false
+});
+
+/** Focus targets for each error key (error summary + auto-focus). */
+const FOCUS_ID: Record<string, string> = {
+  fullName: "adm-fullName",
+  whatsapp: "adm-whatsapp",
+  courseSlug: "adm-course-legend",
+  preferredTiming: "adm-timing-legend",
+  ageBand: "adm-ageBand",
+  guardianName: "adm-guardianName",
+  guardianPhone: "adm-guardianPhone",
+  occupation: "adm-occupation",
+  experience: "adm-experience",
+  area: "adm-area",
+  consent: "adm-privacy"
+};
+
+/**
+ * Admission form (audit upgrades): context arrives from course/batch CTAs and
+ * preselects step 2; retries are idempotent; validation errors get a summary
+ * with focus management; every control is wired with aria-invalid and
+ * aria-describedby; step changes are announced and focused.
+ */
+export function AdmissionForm({
+  courses,
+  context
+}: {
+  courses: CourseOption[];
+  context?: AdmissionContext;
+}) {
+  const t = useTranslations("admissionForm");
+  const uiLocale = useLocale() as "en" | "gu";
+
+  const [data, setData] = useState<Data>(() => empty(uiLocale));
+  const [step, setStep] = useState(0);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState(false);
+  const [serverError, setServerError] = useState(false);
+  const [restored, setRestored] = useState(false);
+  const [fromContext, setFromContext] = useState(false);
+  const [token, setToken] = useState<string | undefined>();
+  const [done, setDone] = useState<{ reference: string; waUrl: string } | null>(null);
+
+  const startedAt = useRef(Date.now());
+  const idemKey = useRef<string>("");
+  const utm = useRef({ utmSource: "", utmCampaign: "" });
+  const honeypot = useRef<HTMLInputElement>(null);
+  const stepHeading = useRef<HTMLHeadingElement>(null);
+  const successHeading = useRef<HTMLHeadingElement>(null);
+
+  const validContextCourse =
+    context?.course && courses.some((c) => c.slug === context.course) ? context.course : undefined;
+
+  /* ---- restore draft, apply CTA context (context wins), capture utm ---- */
+  useEffect(() => {
+    let next = empty(uiLocale);
+    let nextStep = 0;
+    try {
+      const p = new URLSearchParams(window.location.search);
+      utm.current = {
+        utmSource: p.get("utm_source") ?? "",
+        utmCampaign: p.get("utm_campaign") ?? ""
+      };
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw) as { data: Data; step: number; idem?: string };
+        if (saved?.data?.fullName || saved?.data?.courseSlug) {
+          next = { ...next, ...saved.data };
+          nextStep = Math.min(saved.step ?? 0, 3);
+          setRestored(true);
+        }
+        if (saved?.idem) idemKey.current = saved.idem;
+      }
+    } catch {}
+    if (!idemKey.current) idemKey.current = crypto.randomUUID();
+    if (validContextCourse) {
+      next = {
+        ...next,
+        courseSlug: validContextCourse,
+        preferredTiming: context?.timing ?? next.preferredTiming
+      };
+      setFromContext(true);
+    }
+    setData(next);
+    setStep(nextStep);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* ---- persist draft (incl. idempotency key) ---- */
+  useEffect(() => {
+    if (done) return;
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ data, step, idem: idemKey.current }));
+    } catch {}
+  }, [data, step, done]);
+
+  /* ---- focus the success heading when the form completes ---- */
+  useEffect(() => {
+    if (done) successHeading.current?.focus();
+  }, [done]);
+
+  const set = <K extends keyof Data>(key: K, value: Data[K]) => {
+    setData((d) => ({ ...d, [key]: value }));
+    setErrors((e) => {
+      if (!(key in e) && !(key === "privacy" || key === "comms" ? "consent" in e : false)) return e;
+      const nextErrs = { ...e };
+      delete nextErrs[key];
+      if (key === "privacy" || key === "comms") delete nextErrs.consent;
+      return nextErrs;
+    });
+  };
+
+  const validate = (s: number): Record<string, string> => {
+    const e: Record<string, string> = {};
+    if (s === 0) {
+      if (data.fullName.trim().length < 2) e.fullName = t("errors.required");
+      if (!MOBILE.test(cleanIndianMobile(data.whatsapp))) e.whatsapp = t("errors.phone");
+    }
+    if (s === 1) {
+      if (!data.courseSlug) e.courseSlug = t("errors.required");
+      if (!data.preferredTiming) e.preferredTiming = t("errors.required");
+    }
+    if (s === 2) {
+      if (!data.ageBand) e.ageBand = t("errors.required");
+      if (data.ageBand === "under18") {
+        if (data.guardianName.trim().length < 2) e.guardianName = t("errors.required");
+        if (!MOBILE.test(cleanIndianMobile(data.guardianPhone))) e.guardianPhone = t("errors.phone");
+      }
+      if (!data.occupation) e.occupation = t("errors.required");
+      if (!data.experience) e.experience = t("errors.required");
+      if (!data.area.trim()) e.area = t("errors.required");
+      // heardFrom is optional (audit: attribution must not block admission)
+    }
+    if (s === 3 && (!data.privacy || !data.comms)) e.consent = t("errors.consent");
+    return e;
+  };
+
+  const focusField = (key: string) => {
+    const el = document.getElementById(FOCUS_ID[key] ?? "");
+    el?.focus();
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
+  const go = (next: number) => {
+    setStep(next);
+    setRestored(false);
+    requestAnimationFrame(() => stepHeading.current?.focus());
+  };
+
+  const onNext = () => {
+    const e = validate(step);
+    setErrors(e);
+    const keys = Object.keys(e);
+    if (keys.length === 0) go(step + 1);
+    else requestAnimationFrame(() => focusField(keys[0]));
+  };
+
+  const onSubmit = async () => {
+    const e = validate(3);
+    setErrors(e);
+    if (Object.keys(e).length > 0) {
+      requestAnimationFrame(() => focusField(Object.keys(e)[0]));
+      return;
+    }
+    setBusy(true);
+    setServerError(false);
+    try {
+      const res = await fetch("/api/admission", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...data,
+          whatsapp: cleanIndianMobile(data.whatsapp),
+          guardianPhone: data.guardianPhone ? cleanIndianMobile(data.guardianPhone) : "",
+          startedAt: startedAt.current,
+          turnstileToken: token,
+          idempotencyKey: idemKey.current,
+          website: honeypot.current?.value ?? "",
+          utmSource: utm.current.utmSource || context?.src || "",
+          utmCampaign: utm.current.utmCampaign
+        })
+      });
+      const out = (await res.json()) as { ok: boolean; reference?: string; waUrl?: string };
+      if (!res.ok || !out.ok || !out.reference) throw new Error("submit failed");
+      const waUrl = out.waUrl ?? waLink(t("success.waMessage", { ref: out.reference }));
+      setDone({ reference: out.reference, waUrl });
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch {}
+    } catch {
+      setServerError(true);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /* ------------------------------- success -------------------------------- */
+  if (done) {
+    return (
+      <div className="card p-8 text-center md:p-12">
+        <span className="seal-in mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-dashed border-success">
+          <Icon name="check" size={30} className="text-success" strokeWidth={2} />
+        </span>
+        <h2 ref={successHeading} tabIndex={-1} className="text-h2 mt-4 font-display outline-none">
+          {t("success.title")}
+        </h2>
+        <p className="mt-5 text-smallmeta text-stone">{t("success.refLabel")}</p>
+        <p className="font-mono text-h3 font-bold tracking-wide text-vermilion-deep">
+          {done.reference}
+        </p>
+        <p className="prose-measure mx-auto mt-4 text-stone">{t("success.body")}</p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <a href={done.waUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+            {t("success.waButton")}
+          </a>
+          <a href={site.mapsUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+            {t("success.mapButton")}
+          </a>
+        </div>
+        <p className="mt-6 text-smallmeta text-stone">{t("responseNote")}</p>
+        <p className="mt-1 text-smallmeta text-stone">{t("success.demoNote")}</p>
+      </div>
+    );
+  }
+
+  /* ------------------------------ field bits ------------------------------ */
+  const stepNames = t.raw("steps") as string[];
+  const errKeys = Object.keys(errors);
+  const errId = (k: string) => `adm-${k}-err`;
+
+  const err = (k: string) =>
+    errors[k] ? (
+      <p id={errId(k)} className="field-error">
+        {errors[k]}
+      </p>
+    ) : null;
+
+  const textField = (
+    key: keyof Data,
+    label: string,
+    opts?: { placeholder?: string; type?: string; inputMode?: "numeric"; autoComplete?: string }
+  ) => (
+    <div>
+      <label className="label" htmlFor={`adm-${key}`}>
+        {label}
+      </label>
+      <input
+        id={`adm-${key}`}
+        type={opts?.type ?? "text"}
+        className={cn("input", errors[key] && "input-error")}
+        placeholder={opts?.placeholder}
+        value={String(data[key])}
+        onChange={(e) => set(key, e.target.value as never)}
+        inputMode={opts?.inputMode}
+        autoComplete={opts?.autoComplete}
+        aria-invalid={errors[key] ? true : undefined}
+        aria-describedby={errors[key] ? errId(key) : undefined}
+      />
+      {err(key)}
+    </div>
+  );
+
+  const selectField = (
+    key: keyof Data,
+    label: string,
+    options: Array<{ v: string; label: string }>
+  ) => (
+    <div>
+      <label className="label" htmlFor={`adm-${key}`}>
+        {label}
+      </label>
+      <select
+        id={`adm-${key}`}
+        className={cn("input", errors[key] && "input-error")}
+        value={String(data[key])}
+        onChange={(e) => set(key, e.target.value as never)}
+        aria-invalid={errors[key] ? true : undefined}
+        aria-describedby={errors[key] ? errId(key) : undefined}
+      >
+        <option value="">—</option>
+        {options.map((o) => (
+          <option key={o.v} value={o.v}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      {err(key)}
+    </div>
+  );
+
+  const contextCourse = courses.find((c) => c.slug === data.courseSlug);
+
+  return (
+    <div className="card p-6 md:p-10">
+      {/* progress stitch */}
+      <h2
+        ref={stepHeading}
+        tabIndex={-1}
+        className="text-smallmeta font-bold text-vermilion-deep outline-none"
+      >
+        {t("stepLabel", { current: step + 1, total: 4 })} · {stepNames[step]}
+      </h2>
+      <p className="sr-only" aria-live="polite">
+        {t("stepLabel", { current: step + 1, total: 4 })} {stepNames[step]}
+      </p>
+      <div
+        role="progressbar"
+        aria-valuemin={1}
+        aria-valuemax={4}
+        aria-valuenow={step + 1}
+        aria-label={t("stepLabel", { current: step + 1, total: 4 })}
+        className="mt-3 h-0.5 w-full bg-line/50"
+      >
+        <div
+          className="stitch-line h-full transition-[width] duration-300"
+          style={{ width: `${((step + 1) / 4) * 100}%` }}
+        />
+      </div>
+
+      {fromContext && contextCourse && step === 0 ? (
+        <p className="mt-4 flex flex-wrap items-center gap-2 rounded-lg bg-ivory-2 px-4 py-2 text-smallmeta font-semibold">
+          {t("contextApplying")}{" "}
+          <span className="text-vermilion-deep">
+            {uiLocale === "gu" ? contextCourse.nameGu : contextCourse.nameEn}
+          </span>
+          <button
+            type="button"
+            onClick={() => go(1)}
+            className="stitch-link ml-auto text-xs font-bold text-stone"
+          >
+            {t("contextChange")}
+          </button>
+        </p>
+      ) : null}
+
+      {restored ? (
+        <p className="mt-4 rounded-lg bg-ivory-2 px-4 py-2 text-smallmeta font-semibold text-stone">
+          ↩ {t("draftRestored")}
+        </p>
+      ) : null}
+
+      {errKeys.length > 0 ? (
+        <div
+          role="alert"
+          className="mt-4 rounded-lg border border-error/40 bg-error/5 p-4 text-smallmeta"
+        >
+          <p className="font-bold text-error">{t("errors.summaryTitle")}</p>
+          <ul className="mt-2 space-y-1">
+            {errKeys.map((k) => (
+              <li key={k}>
+                <button
+                  type="button"
+                  onClick={() => focusField(k)}
+                  className="stitch-link font-semibold text-carbon"
+                >
+                  {errors[k]}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      <div key={step} className="step-in mt-8 space-y-6">
+        {/* ------------------------------ STEP 1 ------------------------------ */}
+        {step === 0 ? (
+          <>
+            <fieldset>
+              <legend className="label">{t("fields.language")}</legend>
+              <div className="flex gap-3">
+                {(["gu", "en"] as const).map((l) => (
+                  <label key={l} className="choice-chip">
+                    <input
+                      type="radio"
+                      name="locale"
+                      className="sr-only"
+                      checked={data.locale === l}
+                      onChange={() => set("locale", l)}
+                    />
+                    {l === "gu" ? "ગુજરાતી" : "English"}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            {textField("fullName", t("fields.fullName"), {
+              placeholder: t("fields.fullNamePh"),
+              autoComplete: "name"
+            })}
+            {textField("whatsapp", t("fields.whatsapp"), {
+              placeholder: t("fields.whatsappPh"),
+              inputMode: "numeric",
+              autoComplete: "tel"
+            })}
+            {textField("email", t("fields.email"), { type: "email", autoComplete: "email" })}
+          </>
+        ) : null}
+
+        {/* ------------------------------ STEP 2 ------------------------------ */}
+        {step === 1 ? (
+          <>
+            <fieldset aria-describedby={errors.courseSlug ? errId("courseSlug") : undefined}>
+              <legend id="adm-course-legend" tabIndex={-1} className="label outline-none">
+                {t("fields.course")}
+              </legend>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {courses.map((c) => (
+                  <label key={c.slug} className="choice-chip !justify-start">
+                    <input
+                      type="radio"
+                      name="courseSlug"
+                      className="sr-only"
+                      checked={data.courseSlug === c.slug}
+                      onChange={() => set("courseSlug", c.slug)}
+                    />
+                    <span>{uiLocale === "gu" ? c.nameGu : c.nameEn}</span>
+                  </label>
+                ))}
+              </div>
+              {err("courseSlug")}
+            </fieldset>
+            <fieldset aria-describedby={errors.preferredTiming ? errId("preferredTiming") : undefined}>
+              <legend id="adm-timing-legend" tabIndex={-1} className="label outline-none">
+                {t("fields.timing")}
+              </legend>
+              <div className="flex flex-wrap gap-3">
+                {(
+                  [
+                    { v: "morning", label: t("options.timingMorning") },
+                    { v: "evening", label: t("options.timingEvening") }
+                  ] as const
+                ).map((o) => (
+                  <label key={o.v} className="choice-chip">
+                    <input
+                      type="radio"
+                      name="preferredTiming"
+                      className="sr-only"
+                      checked={data.preferredTiming === o.v}
+                      onChange={() => set("preferredTiming", o.v)}
+                    />
+                    {o.label}
+                  </label>
+                ))}
+              </div>
+              {err("preferredTiming")}
+            </fieldset>
+          </>
+        ) : null}
+
+        {/* ------------------------------ STEP 3 ------------------------------ */}
+        {step === 2 ? (
+          <>
+            {selectField("ageBand", t("fields.ageBand"), [
+              { v: "under18", label: t("options.age1") },
+              { v: "18-25", label: t("options.age2") },
+              { v: "26-40", label: t("options.age3") },
+              { v: "40plus", label: t("options.age4") }
+            ])}
+            {data.ageBand === "under18" ? (
+              <div className="grid gap-5 rounded-xl border border-dashed border-vermilion bg-ivory-2 p-4 sm:grid-cols-2">
+                {textField("guardianName", t("fields.guardianName"))}
+                {textField("guardianPhone", t("fields.guardianPhone"), { inputMode: "numeric" })}
+              </div>
+            ) : null}
+            {selectField("occupation", t("fields.occupation"), [
+              { v: "student", label: t("options.occ1") },
+              { v: "homemaker", label: t("options.occ2") },
+              { v: "tailor", label: t("options.occ3") },
+              { v: "working", label: t("options.occ4") },
+              { v: "other", label: t("options.occ5") }
+            ])}
+            {selectField("experience", t("fields.experience"), [
+              { v: "beginner", label: t("options.exp1") },
+              { v: "hand", label: t("options.exp2") },
+              { v: "operator", label: t("options.exp3") }
+            ])}
+            {textField("area", t("fields.area"), { placeholder: t("fields.areaPh") })}
+            {selectField("heardFrom", t("fields.heardFrom"), [
+              { v: "instagram", label: t("options.heard1") },
+              { v: "youtube", label: t("options.heard2") },
+              { v: "friend", label: t("options.heard3") },
+              { v: "google", label: t("options.heard4") },
+              { v: "walkby", label: t("options.heard5") },
+              { v: "other", label: t("options.heard6") }
+            ])}
+            <div>
+              <label className="label" htmlFor="adm-goal">
+                {t("fields.goal")}
+              </label>
+              <textarea
+                id="adm-goal"
+                rows={3}
+                className="input"
+                value={data.goal}
+                onChange={(e) => set("goal", e.target.value)}
+              />
+            </div>
+          </>
+        ) : null}
+
+        {/* ------------------------------ STEP 4 ------------------------------ */}
+        {step === 3 ? (
+          <>
+            <h3 className="text-h4 font-display">{t("review.title")}</h3>
+            <dl className="space-y-3 text-smallmeta">
+              {(
+                [
+                  [t("fields.fullName"), data.fullName, 0],
+                  [t("fields.whatsapp"), data.whatsapp, 0],
+                  [
+                    t("fields.course"),
+                    contextCourse?.[uiLocale === "gu" ? "nameGu" : "nameEn"] ?? "",
+                    1
+                  ],
+                  [
+                    t("fields.timing"),
+                    data.preferredTiming === "morning"
+                      ? t("options.timingMorning")
+                      : t("options.timingEvening"),
+                    1
+                  ],
+                  [t("fields.area"), data.area, 2]
+                ] as Array<[string, string, number]>
+              ).map(([label, value, s]) => (
+                <div
+                  key={label}
+                  className="flex items-baseline justify-between gap-4 border-b border-line/60 pb-2"
+                >
+                  <div>
+                    <dt className="font-bold text-stone">{label}</dt>
+                    <dd>{value}</dd>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => go(s)}
+                    className="stitch-link text-xs font-bold text-vermilion-deep"
+                  >
+                    {t("review.edit")}
+                  </button>
+                </div>
+              ))}
+            </dl>
+
+            <div className="space-y-3" aria-describedby={errors.consent ? errId("consent") : undefined}>
+              <label className="flex items-start gap-3 text-smallmeta">
+                <input
+                  id="adm-privacy"
+                  type="checkbox"
+                  checked={data.privacy}
+                  onChange={(e) => set("privacy", e.target.checked)}
+                  className="mt-1 h-4 w-4 accent-vermilion"
+                  aria-invalid={errors.consent ? true : undefined}
+                />
+                <span>{t("consents.privacy")}</span>
+              </label>
+              <label className="flex items-start gap-3 text-smallmeta">
+                <input
+                  id="adm-comms"
+                  type="checkbox"
+                  checked={data.comms}
+                  onChange={(e) => set("comms", e.target.checked)}
+                  className="mt-1 h-4 w-4 accent-vermilion"
+                  aria-invalid={errors.consent ? true : undefined}
+                />
+                <span>{t("consents.comms")}</span>
+              </label>
+              {err("consent")}
+            </div>
+
+            {/* Honeypot */}
+            <div className="hidden" aria-hidden="true">
+              <label htmlFor="adm-website">{t("fields.website")}</label>
+              <input ref={honeypot} id="adm-website" type="text" tabIndex={-1} autoComplete="off" />
+            </div>
+
+            <TurnstileWidget onToken={setToken} />
+            <p className="text-xs text-stone">{t("turnstileNote")}</p>
+            <p className="text-smallmeta text-stone">{t("responseNote")}</p>
+            {serverError ? (
+              <p role="alert" className="field-error">
+                {t("errors.generic")}
+              </p>
+            ) : null}
+          </>
+        ) : null}
+      </div>
+
+      {/* ------------------------------- nav -------------------------------- */}
+      <div className="mt-10 flex items-center justify-between gap-3">
+        {step > 0 ? (
+          <button type="button" onClick={() => go(step - 1)} className="btn btn-ghost">
+            ← {t("buttons.back")}
+          </button>
+        ) : (
+          <span />
+        )}
+        {step < 3 ? (
+          <button type="button" onClick={onNext} className="btn btn-primary">
+            {t("buttons.next")} <Icon name="arrow" size={16} className="arrow" />
+          </button>
+        ) : (
+          <button type="button" onClick={onSubmit} disabled={busy} className="btn btn-primary">
+            {busy ? t("buttons.submitting") : t("buttons.submit")}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}

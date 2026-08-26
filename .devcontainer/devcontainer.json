@@ -1,0 +1,11 @@
+{
+  "name": "karma-design-studio",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
+  "postCreateCommand": "npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": ["bradlc.vscode-tailwindcss", "dbaeumer.vscode-eslint"]
+    }
+  },
+  "forwardPorts": [3000]
+}

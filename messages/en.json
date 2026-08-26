@@ -1,0 +1,465 @@
+{
+  "meta": {
+    "home": {
+      "title": "Embroidery Academy & Design Lab in Surat | Karma Design Studio",
+      "description": "Learn embroidery on real machines in Surat: Zardosi, beads, sequence, coding, laser, tufting and emCAD design. Free demo class, evening batches till 10:30 pm."
+    },
+    "courses": {
+      "title": "Machine Embroidery Courses in Surat | Karma Design Studio",
+      "description": "Live-machine embroidery courses: Zardosi, 4-beads, sequence, coding, chain/multi, laser, tufting and emCAD design. Book a free demo class."
+    },
+    "admissions": {
+      "title": "Admissions & Upcoming Batches | Karma Design Studio, Surat",
+      "description": "Joining is simple: start with a free demo class. See upcoming batches, timings till 10:30 pm, the student handbook and the admission form."
+    },
+    "admissionForm": {
+      "title": "Admission Form | Karma Design Studio",
+      "description": "Apply in 4 short steps. No online payment needed; confirm on WhatsApp with your reference number."
+    },
+    "work": {
+      "title": "Student Work Gallery | Karma Design Studio, Surat",
+      "description": "Student embroidery from live batches: zardosi, beads, sequence, laser, tufting and emCAD screen-to-stitch pairs."
+    },
+    "services": {
+      "title": "Embroidery Design Services & Job Work in Surat | Karma Design Studio",
+      "description": "Design development, emCAD digitizing, sampling, embroidered patches and production job work for garment businesses. Send a design brief."
+    },
+    "about": {
+      "title": "About the Studio, Machines & Trainers | Karma Design Studio",
+      "description": "Surat's embroidery academy and design lab: real machines, working-designer trainers, and training from design screen to finished stitch."
+    },
+    "stories": {
+      "title": "Student Success Stories | Karma Design Studio, Surat",
+      "description": "Student outcomes shared with consent: businesses started, jobs landed, skills that pay."
+    },
+    "contact": {
+      "title": "Contact & Visit Us | Karma Design Studio, Mota Varachha, Surat",
+      "description": "WhatsApp us, call, or walk in. Open daily with evening batches till 10:30 pm in Mota Varachha, Surat."
+    },
+    "verify": {
+      "title": "Verify a Certificate | Karma Design Studio",
+      "description": "Check any Karma Design Studio certificate by its number. Every certificate carries a QR code that points here."
+    }
+  },
+  "nav": {
+    "courses": "Courses",
+    "admissions": "Admissions",
+    "work": "Student Work",
+    "services": "Services",
+    "about": "About",
+    "contact": "Contact",
+    "cta": "Book Free Demo"
+  },
+  "common": {
+    "bookDemo": "Book a Free Demo Class",
+    "exploreCourses": "Explore courses",
+    "whatsapp": "WhatsApp us",
+    "call": "Call",
+    "seeAll": "See all",
+    "sampleTag": "Sample: replace before launch",
+    "sampleDataNote": "Sample schedule shown until the studio's live batch list is connected.",
+    "skipToContent": "Skip to content",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "langBanner": {
+      "question": "ગુજરાતીમાં વાંચવું છે?",
+      "action": "ગુજરાતીમાં જુઓ",
+      "dismiss": "Stay in English"
+    },
+    "waPrefillDemo": "Hi Karma Design Studio! 👑 મને ફ્રી ડેમો ક્લાસ બુક કરવો છે. નામ: ____ | કોર્સ: ____ | ટાઇમ: સવાર/સાંજ",
+    "waPrefillBusiness": "Hi! I need embroidery design / digitizing / job work. Product: ____ | Qty: ____ | Deadline: ____",
+    "descriptor": "Embroidery Academy · Design Lab"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Skill શીખો, Future બનાવો",
+      "h1": "Learn embroidery on real machines. Build a career that's yours.",
+      "sub": "Surat's embroidery academy and design lab: from design on screen to finished stitch. Zardosi, beads, sequence, coding, laser, tufting and emCAD, taught hands-on at the studio.",
+      "secondary": "Explore courses",
+      "proof1": "Live machine training",
+      "proof2": "Free demo class",
+      "proof3": "Evening batches till 10:30 pm",
+      "videoLabel": "Hero loop: software screen → machine stitching → finished piece (shoot list #1)",
+      "stage1": "The design on screen",
+      "stage2": "The machine at work",
+      "stage3": "The finished stitch",
+      "shot1": "emCAD design open on the studio screen (shoot #1a)",
+      "shot2": "Machine stitching the same design, close-up (shoot #1b)",
+      "shot3": "The finished embroidered piece (shoot #1c)"
+    },
+    "path": {
+      "h2": "What are you here to build?",
+      "learnTitle": "Learn professionally",
+      "learnDesc": "Build real embroidery, software and machine skills through structured studio training.",
+      "learnA1": "Explore courses",
+      "learnA2": "See upcoming batches",
+      "learnPhoto": "Students at machines during evening batch",
+      "bizTitle": "Develop embroidery designs",
+      "bizDesc": "Get professional design development, digitizing and machine-ready embroidery support for your production.",
+      "bizA1": "Explore services",
+      "bizA2": "Submit a design brief",
+      "bizPhoto": "Finished commercial samples on the studio table"
+    },
+    "families": {
+      "h2": "Choose the skill you want to master.",
+      "sub": "Eight courses, three doors. Every one taught on live machines.",
+      "see": "See courses"
+    },
+    "sts": {
+      "h2": "See how a digital idea becomes finished embroidery.",
+      "sub": "Drag the slider: one real project, from emCAD screen to stitched fabric. This is the complete workflow every course teaches.",
+      "stage1": "The design (emCAD)",
+      "stage2": "The stitch path",
+      "stage3": "The finished piece",
+      "hint": "Drag or use arrow keys",
+      "sliderLabel": "Reveal the project stages"
+    },
+    "how": {
+      "h2": "Learn the complete workflow, not isolated techniques.",
+      "line": "Every course connects design sense, software, materials and machine work, so you understand why a design succeeds, not just which button to press.",
+      "s1t": "Understand the design",
+      "s1d": "Read artwork the way the trade reads it: technique, density, material.",
+      "s2t": "Build it in software",
+      "s2d": "emCAD pathing and machine-ready files, from the first week it's relevant.",
+      "s3t": "Prepare the machine",
+      "s3d": "Frames, tension, threading: set up like a professional, not a passenger.",
+      "s4t": "Test and finish the piece",
+      "s4d": "Stitch, check, fix, finish. Your hands learn what quality feels like."
+    },
+    "work": {
+      "h2": "Made in class. Built with real skills.",
+      "sub": "Student pieces from live batches, with the technique on the label.",
+      "seeAll": "See all student work"
+    },
+    "batches": {
+      "h2": "Find a batch that fits your schedule.",
+      "sub": "Seats per batch are limited, so machine time stays personal.",
+      "seeAll": "See all batches",
+      "course": "Course",
+      "starts": "Starts",
+      "days": "Days",
+      "time": "Time",
+      "seats": "Seats",
+      "language": "Language",
+      "seatsLeft": "{count} seats left",
+      "lastSeats": "Last {count} seats",
+      "full": "Batch full: join waitlist",
+      "bookDemo": "Book demo",
+      "empty": "No upcoming batches are published right now. Message us on WhatsApp for the current schedule.",
+      "error": "The batch list couldn't load right now. WhatsApp us and we'll share the current schedule directly."
+    },
+    "stories": {
+      "h2": "What changed after the course?",
+      "seeAll": "More success stories",
+      "before": "Before",
+      "after": "Now"
+    },
+    "business": {
+      "h2": "Need designs, digitizing or job work?",
+      "line": "The same studio that trains professionals develops designs and production embroidery for garment businesses.",
+      "a1": "Explore services",
+      "a2": "Submit a design brief"
+    },
+    "videos": {
+      "h2": "Latest from the studio",
+      "sub": "Live machines, real batches, real students: straight from our YouTube.",
+      "channel": "Visit our YouTube channel"
+    },
+    "cta": {
+      "h2": "Seats per batch are limited, so machine time stays personal.",
+      "sub": "Book your free demo this week.",
+      "signoff": "Skill શીખો, Future બનાવો."
+    },
+    "visit": {
+      "h2": "Come see the machines before you decide.",
+      "sub": "A real studio floor in Mota Varachha. Walk in during studio hours, or book the free demo and just come."
+    }
+  },
+  "coursesPage": {
+    "title": "Courses",
+    "intro": "Eight live-machine courses across three families. Start where you are; the pathway below shows where each course leads.",
+    "nextBatch": "Next batch",
+    "pathway": {
+      "h2": "The career pathway",
+      "line": "Courses connect. Many students start at a machine technique, add emCAD design, and move into production or their own unit.",
+      "steps": "Foundation at the machine → Core technique (Zardosi / Beads / Sequence / Coding) → emCAD design → Advanced production or your own business"
+    }
+  },
+  "courseDetail": {
+    "whoTitle": "Who this course is for",
+    "outcomesTitle": "What you'll be able to do",
+    "modulesTitle": "What you'll learn, module by module",
+    "modulesNote": "Draft syllabus: final module topics are confirmed with the studio (see admissions FAQ).",
+    "machinesTitle": "The machines you'll train on",
+    "machinesBody": "Every student gets machine time in every session. Photos and machine names go here after the studio shoot.",
+    "machinesPhoto": "This course's machine, photographed on the studio floor",
+    "batchesTitle": "Upcoming batches for this course",
+    "certTitle": "Certificate requirements",
+    "certBody": "The certificate needs your attendance, completed practicals and a finished final project. Every certificate carries a QR code verifiable on this website.",
+    "faqTitle": "Common questions",
+    "relatedTitle": "Related courses",
+    "durationLabel": "Duration",
+    "weeks": "{count} weeks",
+    "confirmDuration": "Duration shared at counselling",
+    "levelLabel": "Level",
+    "levelValue": "Beginner-friendly",
+    "langLabel": "Language",
+    "langValue": "ગુજરાતી + Hindi + English terms",
+    "demoCta": "Book a free demo of this course",
+    "stickyCta": "Book free demo"
+  },
+  "admissionsPage": {
+    "title": "Joining is simple. Start with a free demo.",
+    "sub": "No online payment exists on this website. The path in is a conversation and a chair at a machine.",
+    "steps": [
+      "Message us or walk in",
+      "Attend a free demo class",
+      "Pick your course and batch",
+      "Fill the admission form",
+      "Start at the machines"
+    ],
+    "feesTitle": "About fees",
+    "feesBody": "Fees depend on the course and batch. We share the exact fee at your demo or on WhatsApp, before you decide anything. No online payment is needed to book a demo.",
+    "batchesTitle": "Upcoming batches",
+    "handbookTitle": "Student handbook, in short",
+    "handbook": [
+      "Attendance is marked every session; certificate eligibility needs the attendance shown below.",
+      "Missed practicals are adjusted within your batch where possible: tell your trainer early.",
+      "Machines are shared responsibility: setup and care are part of the training.",
+      "Bring a notebook; materials for practicals are provided at the studio.",
+      "Phones on silent during machine time, for safety and focus.",
+      "Respect for trainers, students and the space is non-negotiable."
+    ],
+    "eligTitle": "Certificate eligibility",
+    "eligBody": "Attendance of at least 75%, completed practicals, and a finished final project reviewed by your trainer. Every certificate carries a verification QR.",
+    "faqTitle": "Questions people actually ask",
+    "formCta": "Fill the admission form",
+    "formNote": "Takes about 2 minutes, in Gujarati or English."
+  },
+  "admissionForm": {
+    "title": "Admission form",
+    "sub": "Four short steps. Your draft saves on this device, so nothing is lost.",
+    "stepLabel": "Step {current} of {total}",
+    "steps": [
+      "You",
+      "Course",
+      "Details",
+      "Review"
+    ],
+    "fields": {
+      "language": "Preferred language",
+      "fullName": "Full name",
+      "fullNamePh": "Your name",
+      "whatsapp": "WhatsApp number",
+      "whatsappPh": "10-digit mobile number",
+      "email": "Email (optional)",
+      "course": "Which course interests you?",
+      "timing": "Preferred timing",
+      "ageBand": "Your age",
+      "guardianName": "Parent / guardian name",
+      "guardianPhone": "Parent / guardian phone",
+      "occupation": "You are currently",
+      "experience": "Machine experience",
+      "area": "Your area in Surat",
+      "areaPh": "e.g. Mota Varachha",
+      "heardFrom": "How did you hear about us? (optional)",
+      "goal": "Anything you want to tell or ask us? (optional)",
+      "website": "Website"
+    },
+    "options": {
+      "timingMorning": "Morning / day",
+      "timingEvening": "Evening (till 10:30 pm)",
+      "age1": "Under 18",
+      "age2": "18-25",
+      "age3": "26-40",
+      "age4": "40+",
+      "occ1": "Student",
+      "occ2": "Homemaker",
+      "occ3": "Tailor / boutique",
+      "occ4": "Working",
+      "occ5": "Other",
+      "exp1": "Complete beginner",
+      "exp2": "Some hand embroidery",
+      "exp3": "Machine operator",
+      "heard1": "Instagram",
+      "heard2": "YouTube",
+      "heard3": "Friend or family",
+      "heard4": "Google",
+      "heard5": "Passed the studio",
+      "heard6": "Other"
+    },
+    "consents": {
+      "privacy": "I agree to the privacy policy: my details are used only to contact me about admission.",
+      "comms": "The studio may contact me on WhatsApp or by call about my application."
+    },
+    "review": {
+      "title": "Check your details",
+      "edit": "Edit"
+    },
+    "errors": {
+      "required": "Please fill this in",
+      "phone": "Please enter a valid 10-digit mobile number",
+      "consent": "Please tick both boxes to continue",
+      "generic": "Something went wrong. Please try again, or WhatsApp us directly.",
+      "summaryTitle": "Please fix the following:"
+    },
+    "buttons": {
+      "next": "Next",
+      "back": "Back",
+      "submit": "Submit application",
+      "submitting": "Submitting…"
+    },
+    "success": {
+      "title": "Done! Your application is in.",
+      "refLabel": "Your reference",
+      "body": "Tap below to confirm on WhatsApp: it takes one message and holds your place in the conversation.",
+      "waButton": "Confirm on WhatsApp",
+      "waMessage": "Hi! My admission reference is {ref}. Please confirm my seat. / મારો એડમિશન રેફરન્સ {ref} છે, સીટ કન્ફર્મ કરશો.",
+      "mapButton": "Save our address",
+      "demoNote": "Demo classes run through the week; we'll suggest a slot when you message."
+    },
+    "draftRestored": "We restored your saved draft.",
+    "turnstileNote": "Protected by Cloudflare Turnstile.",
+    "responseNote": "We reply on WhatsApp during studio hours, usually the same day.",
+    "contextApplying": "Applying for:",
+    "contextChange": "Change course"
+  },
+  "workPage": {
+    "title": "Made in class. Built with real skills.",
+    "sub": "Filter by technique. Items marked with a pair open the screen-to-stitch view.",
+    "all": "All",
+    "pairTag": "Screen → stitch pair",
+    "empty": "No pieces in this technique yet. New student work is added every month."
+  },
+  "servicesPage": {
+    "title": "Professional embroidery design support for your next collection.",
+    "sub": "The studio side of Karma: design development, digitizing and production embroidery for garment businesses. No prices online; quotes by conversation.",
+    "howTitle": "How working with us goes",
+    "howSteps": [
+      "Send a brief",
+      "We review and quote",
+      "Sample shared",
+      "Revisions",
+      "Delivery"
+    ],
+    "guideTitle": "What to send with your brief",
+    "guide": [
+      "Product or garment type, and where the embroidery sits",
+      "Reference image or existing design file, if any",
+      "Design dimensions and colour count",
+      "Quantity and required completion date",
+      "Machine or file format you need, if known"
+    ],
+    "confidential": "Design files are confidential: stored privately, never public.",
+    "formTitle": "Tell us what you're making",
+    "form": {
+      "name": "Your name",
+      "company": "Company / brand (optional)",
+      "phone": "Phone / WhatsApp",
+      "email": "Email (optional)",
+      "productType": "Product or garment type",
+      "technique": "Technique needed (if known)",
+      "dimensions": "Design dimensions",
+      "quantity": "Quantity",
+      "colourCount": "Colour count",
+      "fileFormat": "File format needed",
+      "deadline": "Required completion date",
+      "details": "Anything else we should know",
+      "files": "Reference images or design files (optional, up to 3)",
+      "submit": "Send the brief",
+      "submitting": "Sending…",
+      "filesHelp": "Up to 3 files, 8 MB each: PNG, JPG, WebP, PDF, AI or ZIP.",
+      "privacyNote": "By sending, you agree your details are used only to respond to this brief."
+    },
+    "success": {
+      "title": "Brief received.",
+      "refLabel": "Your reference",
+      "body": "We'll review and reply with questions or a quote. For anything urgent, WhatsApp us with the reference.",
+      "waButton": "WhatsApp about this brief",
+      "waMessage": "Hi! I sent a design brief, reference {ref}. Sharing more details here.",
+      "files": "{count, plural, =0 {No files attached} one {# file received securely} other {# files received securely}}"
+    }
+  },
+  "aboutPage": {
+    "title": "A studio that teaches, and a studio that ships.",
+    "storyTitle": "The story",
+    "storyBody": "The founding story goes here, in the owner's own words: why Karma started, what the crown means, and what 'from design screen to finished stitch' looks like on this floor every day. (Collected via the five-question interview in the content checklist.)",
+    "studioTitle": "The studio",
+    "studioPhoto1": "Machine floor, wide shot during evening batch",
+    "studioPhoto2": "Building entrance and signboard",
+    "machinesTitle": "The machine wall",
+    "machinesBody": "Every machine students train on, photographed and named: zardosi, 4-beads, sequence, coding, chain, multi-head, laser and the tufting frames, plus the emCAD design stations.",
+    "trainersTitle": "Real trainers, real work",
+    "trainersNote": "Trainer profiles appear here with real names, photos and specialties once confirmed: no stand-ins, ever. (Content checklist, Q7.)",
+    "numbersTitle": "In numbers",
+    "n1": "students trained",
+    "n2": "machine courses",
+    "n3": "evening batches till",
+    "numbersNote": "Numbers shown are the studio's public claims; each is verified before launch (content checklist, Q9).",
+    "karmaTitle": "Why 'Karma'",
+    "karmaBody": "The owner's answer goes here: what the name and the crown 👑 stand for."
+  },
+  "storiesPage": {
+    "title": "What changed after the course?",
+    "sub": "Named outcomes, with consent: businesses started, jobs landed, rates raised."
+  },
+  "contactPage": {
+    "title": "Come see the machines.",
+    "sub": "WhatsApp first, call second, or simply walk in during studio hours.",
+    "visitTitle": "Visit us",
+    "hoursLabel": "Hours",
+    "addressLabel": "Address",
+    "directionsNote": "Landmark directions and a photo of the entrance go here after the shoot, so first-time visitors find the right door.",
+    "mapCta": "Open in Google Maps",
+    "entranceLabel": "Building entrance photo (shoot list)",
+    "demoNote": "The free demo class is the best first visit: book it and just come."
+  },
+  "verifyPage": {
+    "title": "Verify a certificate",
+    "sub": "Every Karma Design Studio certificate carries a number and a QR code that points here.",
+    "inputLabel": "Certificate number",
+    "inputPh": "e.g. KDS-C-0231",
+    "button": "Verify",
+    "validTitle": "Verified",
+    "validBody": "This certificate was issued by Karma Design Studio & Classes, Surat.",
+    "invalidTitle": "Not found",
+    "invalidBody": "This number doesn't match an issued certificate. Check the number, or contact the studio: hiring managers are welcome to call.",
+    "unavailable": "Verification is coming online with the studio's records system. Please contact the studio to verify this certificate directly.",
+    "fields": {
+      "name": "Issued to",
+      "course": "Course",
+      "date": "Completion date",
+      "certNo": "Certificate number",
+      "status": "Status"
+    },
+    "revoked": "This certificate has been revoked. Contact the studio for details."
+  },
+  "notFound": {
+    "title": "This page slipped a stitch.",
+    "body": "The link is broken or the page moved. The courses and the free demo are one tap away.",
+    "homeCta": "Go home",
+    "coursesCta": "See courses"
+  },
+  "footer": {
+    "descriptor": "Embroidery Academy & Design Lab, Surat",
+    "line": "From design screen to finished stitch: live-machine embroidery training and professional design services.",
+    "learn": "Learn",
+    "students": "Admissions & students",
+    "servicesCol": "Services",
+    "visit": "Visit us",
+    "legal": "Legal",
+    "admissionForm": "Admission form",
+    "batches": "Upcoming batches",
+    "verify": "Verify a certificate",
+    "briefLink": "Send a design brief",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "dataRequest": "Data request",
+    "rights": "© {year} Karma Design Studio, Surat. All rights reserved."
+  },
+  "errorPage": {
+    "title": "Something went wrong.",
+    "body": "The page hit an error. Try again; if it repeats, WhatsApp us and we'll help you directly.",
+    "retry": "Try again"
+  }
+}

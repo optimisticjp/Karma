@@ -1,0 +1,413 @@
+/*
+ * Karma Design Studio design system v2: "The Digital Thread".
+ * Single vermilion accent, editorial scale, borders over shadows.
+ * Full spec: docs/design-system.md. Tailwind v4: @theme tokens = utilities.
+ */
+
+@import "tailwindcss";
+
+/* Self-hosted fonts (npm-served, same-origin) */
+@import "@fontsource-variable/fraunces/soft.css";          /* EN display, wght+SOFT only (payload trim) */
+@import "@fontsource-variable/noto-serif-gujarati";        /* GU display serif      */
+@import "@fontsource-variable/manrope";                    /* EN body / UI          */
+@import "@fontsource-variable/noto-sans-gujarati";         /* GU body / UI          */
+
+@theme {
+  /* ------ palette: restrained neutrals + ONE accent ------ */
+  --color-ivory: #f7f3ea;        /* page background            */
+  --color-ivory-2: #f1ece0;      /* alternating section band   */
+  --color-card: #fffdf8;         /* soft white surfaces        */
+  --color-line: #dad5cb;         /* thread grey borders        */
+  --color-carbon: #20211e;       /* primary text               */
+  --color-stone: #6d6b64;        /* secondary text             */
+  --color-vermilion: #c54832;    /* THE accent: fills, stitch lines, large text */
+  --color-vermilion-deep: #a93a27; /* small-text links + hovers (AA on ivory)   */
+  --color-success: #2f7d46;      /* status only */
+  --color-warn: #b7791f;         /* status only */
+  --color-error: #b3261e;        /* status only */
+
+  /* ------ fonts ------ */
+  --font-display: "Fraunces Variable", "Noto Serif Gujarati Variable", Georgia, serif;
+  --font-body: "Manrope Variable", "Noto Sans Gujarati Variable", system-ui, sans-serif;
+
+  /* ------ editorial type scale (desktop endpoints per spec) ------ */
+  --text-display-xl: clamp(2.75rem, 1.95rem + 3.9vw, 4.75rem);
+  --text-display-xl--line-height: 1.05;
+  --text-display-xl--letter-spacing: -0.02em;
+  --text-display: clamp(2.5rem, 1.85rem + 3.1vw, 4rem);
+  --text-display--line-height: 1.06;
+  --text-display--letter-spacing: -0.02em;
+  --text-h1: clamp(2.25rem, 1.75rem + 2.4vw, 3.5rem);
+  --text-h1--line-height: 1.1;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h2: clamp(1.875rem, 1.45rem + 2vw, 2.875rem);
+  --text-h2--line-height: 1.17;
+  --text-h2--letter-spacing: -0.015em;
+  --text-h3: clamp(1.5rem, 1.32rem + 0.85vw, 2rem);
+  --text-h3--line-height: 1.25;
+  --text-h3--letter-spacing: -0.01em;
+  --text-h4: clamp(1.25rem, 1.2rem + 0.25vw, 1.5rem);
+  --text-h4--line-height: 1.33;
+  --text-lead: clamp(1.125rem, 1.06rem + 0.3vw, 1.25rem);
+  --text-lead--line-height: 1.6;
+  --text-bodylg: 1.125rem;
+  --text-bodylg--line-height: 1.67;
+  --text-smallmeta: 0.875rem;
+  --text-smallmeta--line-height: 1.57;
+  --text-eyebrow: 0.75rem;
+  --text-eyebrow--line-height: 1.33;
+  --text-btn: 0.9375rem;
+  --text-btn--line-height: 1.33;
+
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---------------------------------- base ---------------------------------- */
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body {
+    background-color: var(--color-ivory);
+    color: var(--color-carbon);
+    font-family: var(--font-body);
+    font-size: 1rem;            /* 16 / 26 */
+    line-height: 1.625;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-variation-settings: "SOFT" 60;
+    text-wrap: balance;
+    color: var(--color-carbon);
+  }
+  h1 { font-weight: 560; }
+  h2 { font-weight: 540; }
+  h3 { font-weight: 520; }
+  h4 { font-weight: 500; }
+
+  /* Gujarati: Noto Serif headings, Noto Sans body, taller rhythm.
+     NEVER uppercase or letterspace Gujarati. */
+  :lang(gu) { line-height: 1.8; }
+  :lang(gu) body, :lang(gu) p, :lang(gu) li, :lang(gu) label,
+  :lang(gu) input, :lang(gu) select, :lang(gu) textarea, :lang(gu) button {
+    font-family: "Noto Sans Gujarati Variable", "Manrope Variable", system-ui, sans-serif;
+  }
+  :lang(gu) h1, :lang(gu) h2, :lang(gu) h3, :lang(gu) h4 {
+    font-family: "Noto Serif Gujarati Variable", "Fraunces Variable", serif;
+    letter-spacing: 0;
+    font-variation-settings: normal;
+    line-height: 1.3;
+  }
+
+  ::selection { background: var(--color-vermilion); color: var(--color-card); }
+  :focus-visible {
+    outline: 2px solid var(--color-vermilion-deep);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+/* ------------------------------- components ------------------------------- */
+
+@layer components {
+  /* Grid: 1280 content, 1440 wide media, 64px outer margins on large */
+  .container-site {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 80rem;
+    padding-inline: 1.25rem;
+  }
+  .container-wide {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 90rem;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .container-site, .container-wide { padding-inline: 2rem; }
+  }
+  @media (min-width: 1280px) {
+    .container-site, .container-wide { padding-inline: 4rem; }
+  }
+  .prose-measure { max-width: 68ch; }
+
+  /* Section rhythm: major 80/104/144 · standard 64/88/112 · compact 48/64/80 */
+  .section-major   { padding-block: 5rem; }
+  .section         { padding-block: 4rem; }
+  .section-compact { padding-block: 3rem; }
+  @media (min-width: 768px) {
+    .section-major   { padding-block: 6.5rem; }
+    .section         { padding-block: 5.5rem; }
+    .section-compact { padding-block: 4rem; }
+  }
+  @media (min-width: 1024px) {
+    .section-major   { padding-block: 9rem; }
+    .section         { padding-block: 7rem; }
+    .section-compact { padding-block: 5rem; }
+  }
+
+  /* Eyebrow: 12px caps for Latin; weight + colour only for Gujarati */
+  .eyebrow {
+    font-size: var(--text-eyebrow);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-vermilion-deep);
+  }
+  :lang(gu) .eyebrow, .eyebrow:lang(gu) {
+    letter-spacing: 0;
+    text-transform: none;
+    font-size: 0.875rem;
+  }
+
+  /* Subtle embroidery grid (hero / process sections only) */
+  .bg-grid {
+    background-image:
+      repeating-linear-gradient(0deg, rgb(32 33 30 / 0.04) 0 1px, transparent 1px 32px),
+      repeating-linear-gradient(90deg, rgb(32 33 30 / 0.04) 0 1px, transparent 1px 32px);
+  }
+
+  /* Signature stitch line: vermilion thread, draws once in ≤450ms */
+  .stitch-line {
+    height: 2px;
+    background-image: repeating-linear-gradient(
+      90deg, var(--color-vermilion) 0 8px, transparent 8px 14px
+    );
+  }
+  .js .stitch-draw {
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 450ms var(--ease-out-soft);
+  }
+  .is-in .stitch-draw, .stitch-draw.is-in { transform: scaleX(1); }
+
+  .stitch-link {
+    position: relative;
+    text-decoration: none;
+    color: inherit;
+  }
+  .stitch-link::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: -3px; height: 2px; width: 100%;
+    background-image: repeating-linear-gradient(
+      90deg, var(--color-vermilion) 0 6px, transparent 6px 10px
+    );
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 200ms var(--ease-out-soft);
+  }
+  .stitch-link:hover::after,
+  .stitch-link:focus-visible::after,
+  .stitch-link[aria-current="page"]::after { transform: scaleX(1); }
+
+  /* Buttons: 48px+ height, 12px radius, 15px medium, arrow shifts 4px */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: var(--text-btn);
+    line-height: var(--text-btn--line-height);
+    padding: 0.8125rem 1.5rem;
+    transition:
+      background-color 200ms var(--ease-out-soft),
+      border-color 200ms var(--ease-out-soft),
+      color 200ms var(--ease-out-soft);
+    cursor: pointer;
+  }
+  :lang(gu) .btn { min-height: 3.25rem; padding-block: 0.9375rem; }
+  .btn-primary { background: var(--color-vermilion); color: var(--color-card); }
+  .btn-primary:hover { background: var(--color-vermilion-deep); }
+  .btn-secondary {
+    border: 1.5px solid var(--color-carbon);
+    color: var(--color-carbon);
+    background: transparent;
+  }
+  .btn-secondary:hover { border-color: var(--color-vermilion); color: var(--color-vermilion-deep); }
+  .btn-ghost { color: var(--color-carbon); padding-inline: 0.75rem; }
+  .on-dark .btn-secondary { border-color: var(--color-ivory); color: var(--color-ivory); }
+  .on-dark .btn-secondary:hover { border-color: var(--color-vermilion); color: var(--color-ivory); }
+
+  .arrow { display: inline-block; transition: translate 200ms var(--ease-out-soft); }
+  .btn:hover .arrow, a:hover .arrow, .card-lift:hover .arrow { translate: 4px 0; }
+
+  /* Cards: borders over shadows */
+  .card {
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    border-radius: 0.875rem;
+    transition:
+      border-color 200ms var(--ease-out-soft),
+      box-shadow 200ms var(--ease-out-soft);
+  }
+  .card-lift:hover, .card-lift:focus-within {
+    border-color: var(--color-vermilion);
+    box-shadow: 0 1px 2px rgb(32 33 30 / 0.06);
+  }
+  .card-lift:hover .card-img, .card-lift:focus-within .card-img { transform: scale(1.03); }
+  .card-img { transition: transform 200ms var(--ease-out-soft); }
+
+  /* Outlined process numerals */
+  .numeral {
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 2.9rem + 2.6vw, 5.5rem);
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--color-vermilion);
+  }
+
+  /* Technique labels: quiet, typographic (photography brings the colour) */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    border: 1px solid var(--color-line);
+    background: var(--color-card);
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--color-stone);
+  }
+
+  .sample-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-stone);
+    background: var(--color-ivory-2);
+    border: 1px dashed var(--color-line);
+    border-radius: 999px;
+    padding: 0.125rem 0.625rem;
+  }
+
+  /* Reveal: fade up ≤12px, quick */
+  .js .reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 300ms var(--ease-out-soft),
+      transform 300ms var(--ease-out-soft);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  .reveal.is-in { opacity: 1; transform: none; }
+  /* No-JS: content must never stay hidden (audit). */
+
+  /* Masonry gallery (varied proportions) */
+  .masonry { columns: 1; column-gap: 1.5rem; }
+  @media (min-width: 640px) { .masonry { columns: 2; } }
+  @media (min-width: 1024px) { .masonry { columns: 3; column-gap: 2rem; } }
+  .masonry > * { break-inside: avoid; margin-bottom: 1.5rem; }
+  @media (min-width: 1024px) { .masonry > * { margin-bottom: 2rem; } }
+
+  /* Certificate seal entrance */
+  @keyframes seal-in { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
+  .seal-in { animation: seal-in 320ms var(--ease-out-soft) both; }
+}
+
+/* ------------------------------ form controls ----------------------------- */
+
+@layer components {
+  .label {
+    display: block;
+    font-size: var(--text-smallmeta);
+    font-weight: 600;
+    color: var(--color-carbon);
+    margin-bottom: 0.375rem;
+  }
+  .input {
+    display: block;
+    width: 100%;
+    border-radius: 0.625rem;
+    border: 1px solid var(--color-line);
+    background: var(--color-card);
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    color: var(--color-carbon);
+    transition: border-color 150ms var(--ease-out-soft), box-shadow 150ms var(--ease-out-soft);
+  }
+  .input:focus {
+    outline: none;
+    border-color: var(--color-vermilion);
+    box-shadow: 0 0 0 3px rgb(197 72 50 / 0.16);
+  }
+  .input-error { border-color: var(--color-error); }
+  .field-error {
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-error);
+  }
+  .choice-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 0.625rem;
+    border: 1.5px solid var(--color-line);
+    background: var(--color-card);
+    padding: 0.625rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 150ms var(--ease-out-soft), background-color 150ms var(--ease-out-soft);
+  }
+  .choice-chip:has(input:checked) {
+    border-color: var(--color-vermilion);
+    background: rgb(197 72 50 / 0.06);
+  }
+  .choice-chip:has(input:focus-visible) {
+    outline: 2px solid var(--color-vermilion-deep);
+    outline-offset: 2px;
+  }
+  @keyframes step-in {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: none; }
+  }
+  .step-in { animation: step-in 220ms var(--ease-out-soft); }
+}
+
+@layer components {
+  /* Small caps label that self-neutralises for Gujarati (audit fix) */
+  .microlabel {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-stone);
+  }
+  :lang(gu) .microlabel, .microlabel:lang(gu) {
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  /* Anchored sections must clear the sticky header */
+  [id] { scroll-margin-top: 6rem; }
+
+  /* Loading skeleton */
+  @keyframes skeleton-pulse { 50% { opacity: 0.55; } }
+  .skeleton {
+    background: var(--color-ivory-2);
+    border-radius: 0.5rem;
+    animation: skeleton-pulse 1.4s ease-in-out infinite;
+  }
+}
+
+/* --------------------------- motion preferences --------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal, .stitch-draw, .seal-in {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+  .card, .btn, .stitch-link::after, .card-img, .arrow { transition: none !important; }
+  * { animation-duration: 0.001s !important; }
+}

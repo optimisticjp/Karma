@@ -1,0 +1,178 @@
+/**
+ * Bilingual collections. Anything not yet verified with the owner carries
+ * sample: true and renders with a visible "Sample: replace before launch"
+ * tag (no-ghost-content rule, master plan 2.5). Real assets replace these
+ * via docs/content-checklist.md.
+ */
+
+export type Faq = { qEn: string; qGu: string; aEn: string; aGu: string };
+
+export const faqs: Faq[] = [
+  {
+    qEn: "I've never touched a machine. Can I still join?",
+    qGu: "મેં ક્યારેય મશીનને હાથ નથી લગાડ્યો. તો પણ જોડાઈ શકું?",
+    aEn: "Yes. Most of our students start from zero. Training begins at the machine on day one, at your pace, with a trainer beside you.",
+    aGu: "હા. અમારા મોટા ભાગના સ્ટુડન્ટ્સ શૂન્યથી શરૂ કરે છે. પહેલા દિવસથી જ મશીન પર, તમારી ઝડપે, ટ્રેનર સાથે ટ્રેનિંગ થાય છે."
+  },
+  {
+    qEn: "Is machine practice really included, or is it mostly theory?",
+    qGu: "મશીન પ્રેક્ટિસ ખરેખર મળે છે કે મોટા ભાગે થિયરી જ છે?",
+    aEn: "Training is hands-on at live machines; theory appears only where it makes your hands better.",
+    aGu: "ટ્રેનિંગ લાઇવ મશીન પર હાથે કરીને થાય છે; થિયરી એટલી જ, જેટલી કામમાં આવે."
+  },
+  {
+    qEn: "Which language is training in?",
+    qGu: "ટ્રેનિંગ કઈ ભાષામાં થાય છે?",
+    aEn: "Gujarati and Hindi, with English terms where the trade uses them (emCAD, machine names, and so on).",
+    aGu: "ગુજરાતી અને હિન્દીમાં, અને જ્યાં ટ્રેડમાં English શબ્દો વપરાય છે ત્યાં એ જ (emCAD, મશીનનાં નામ વગેરે)."
+  },
+  {
+    qEn: "I work during the day. Are evening batches available?",
+    qGu: "હું દિવસે કામ કરું છું. સાંજની બેચ મળે?",
+    aEn: "Yes. The studio runs evening batches until 10:30 pm, exactly for working people and homemakers.",
+    aGu: "હા. કામ કરતા લોકો અને ગૃહિણીઓ માટે જ સ્ટુડિયોમાં સાંજની બેચ રાત્રે 10:30 સુધી ચાલે છે."
+  },
+  {
+    qEn: "Do I need to pay online to book a demo?",
+    qGu: "ડેમો બુક કરવા ઓનલાઇન પેમેન્ટ કરવું પડે?",
+    aEn: "No. The demo class is free and no online payment exists on this website. Fees are discussed in person or on WhatsApp before you decide anything.",
+    aGu: "ના. ડેમો ક્લાસ ફ્રી છે અને આ વેબસાઇટ પર કોઈ ઓનલાઇન પેમેન્ટ નથી. તમે નિર્ણય લો એ પહેલાં ફી રૂબરૂ અથવા WhatsApp પર જણાવવામાં આવે છે."
+  },
+  {
+    qEn: "What are the fees?",
+    qGu: "ફી કેટલી છે?",
+    aEn: "Fees depend on the course and batch. We share the exact fee at your demo or on WhatsApp, before you decide anything.",
+    aGu: "ફી કોર્સ અને બેચ પ્રમાણે હોય છે. તમે નિર્ણય લો એ પહેલાં, ડેમો વખતે અથવા WhatsApp પર અમે ચોક્કસ ફી જણાવીશું."
+  },
+  {
+    qEn: "Will I get a certificate?",
+    qGu: "સર્ટિફિકેટ મળશે?",
+    aEn: "Yes, on completing attendance, practicals and your final project. Every certificate carries a QR code anyone can verify on this website.",
+    aGu: "હા, હાજરી, પ્રેક્ટિકલ અને ફાઇનલ પ્રોજેક્ટ પૂરા કરવા પર. દરેક સર્ટિફિકેટ પર QR કોડ હોય છે, જે કોઈ પણ આ વેબસાઇટ પર ચકાસી શકે."
+  },
+  {
+    qEn: "What if I miss classes?",
+    qGu: "ક્લાસ ચૂકી જાઉં તો?",
+    aEn: "Tell your trainer; missed practicals are adjusted within your batch where possible. Certificate eligibility needs the attendance shown on the Admissions page.",
+    aGu: "ટ્રેનરને જણાવો; શક્ય હોય ત્યાં ચૂકેલી પ્રેક્ટિકલ તમારી બેચમાં ગોઠવી અપાય છે. સર્ટિફિકેટ માટે એડમિશન પેજ પર દર્શાવેલી હાજરી જરૂરી છે."
+  },
+  {
+    qEn: "Can I visit the studio before applying?",
+    qGu: "એપ્લાય કરતાં પહેલાં સ્ટુડિયો જોવા આવી શકું?",
+    aEn: "Please do. Walk in during studio hours or message us on WhatsApp first; the free demo is the best way to see how we teach.",
+    aGu: "જરૂર આવો. સ્ટુડિયોના સમયમાં સીધા આવો અથવા પહેલા WhatsApp કરો; અમે કેવી રીતે શીખવીએ છીએ એ જોવાનો શ્રેષ્ઠ રસ્તો ફ્રી ડેમો છે."
+  },
+  {
+    qEn: "Do you also take business design or job-work orders?",
+    qGu: "તમે બિઝનેસ ડિઝાઇન કે જોબ-વર્કના ઓર્ડર પણ લો છો?",
+    aEn: "Yes. Design development, emCAD digitizing, patches and production job work: see the Services page and send a brief.",
+    aGu: "હા. ડિઝાઇન ડેવલપમેન્ટ, emCAD ડિજિટાઇઝિંગ, પેચિસ અને પ્રોડક્શન જોબ વર્ક: સર્વિસિસ પેજ જુઓ અને બ્રીફ મોકલો."
+  },
+  {
+    qEn: "Is there an age limit? Can students under 18 join?",
+    qGu: "ઉંમરની કોઈ મર્યાદા છે? 18થી નાના સ્ટુડન્ટ જોડાઈ શકે?",
+    aEn: "Under-18 students join with a parent or guardian's consent, which the admission form collects.",
+    aGu: "18થી નાના સ્ટુડન્ટ્સ માતા-પિતા/વાલીની સંમતિ સાથે જોડાય છે; એડમિશન ફોર્મમાં એ વિગત લેવાય છે."
+  }
+];
+
+/* ------------------------------ success stories --------------------------- */
+
+export type Story = {
+  sample: boolean;
+  nameEn: string;
+  nameGu: string;
+  courseEn: string;
+  courseGu: string;
+  quoteEn: string;
+  quoteGu: string;
+  beforeEn: string;
+  beforeGu: string;
+  afterEn: string;
+  afterGu: string;
+  photoLabel: string;
+};
+
+// ⚠️ SAMPLE stories: layout demonstrations only. Replace with six real,
+// consented outcomes (content-checklist Q8) before launch. The sample flag
+// renders a visible tag so nothing fake can ship silently.
+export const stories: Story[] = [
+  {
+    sample: true,
+    nameEn: "Sample: student name",
+    nameGu: "નમૂનો: સ્ટુડન્ટનું નામ",
+    courseEn: "Sample: course name",
+    courseGu: "નમૂનો: કોર્સનું નામ",
+    quoteEn:
+      "Replace with the student's own sentence about what changed after the course.",
+    quoteGu: "કોર્સ પછી શું બદલાયું એ વિશે સ્ટુડન્ટનું પોતાનું વાક્ય અહીં મૂકો.",
+    beforeEn: "Tailor with a small shop",
+    beforeGu: "નાની દુકાનવાળા ટેલર",
+    afterEn: "Runs a 3-machine zardosi unit",
+    afterGu: "3 મશીનનું ઝરદોશી યુનિટ ચલાવે છે",
+    photoLabel: "Student portrait at their machine (with consent)"
+  },
+  {
+    sample: true,
+    nameEn: "Sample: student name",
+    nameGu: "નમૂનો: સ્ટુડન્ટનું નામ",
+    courseEn: "Sample: course name",
+    courseGu: "નમૂનો: કોર્સનું નામ",
+    quoteEn:
+      "Replace with a real quote: what they struggled with, and what they do now.",
+    quoteGu: "સાચું ક્વોટ મૂકો: શું અઘરું લાગતું હતું, અને હવે શું કરે છે.",
+    beforeEn: "Homemaker, new to machines",
+    beforeGu: "ગૃહિણી, મશીનથી અજાણ",
+    afterEn: "Takes boutique orders from home",
+    afterGu: "ઘરેથી બુટિકના ઓર્ડર લે છે",
+    photoLabel: "Student with finished piece (with consent)"
+  }
+];
+
+/* --------------------------------- gallery -------------------------------- */
+
+export type GalleryItem = {
+  sample: boolean;
+  technique: string;
+  ratio: "4/5" | "1/1" | "3/2";
+  titleEn: string;
+  titleGu: string;
+  noteEn: string;
+  noteGu: string;
+  hasPair: boolean; // screen-to-stitch pair available
+  photoLabel: string;
+};
+
+export const techniqueChips: Record<string, { labelEn: string; labelGu: string; color: string }> =
+  {
+    zardosi: { labelEn: "Zardosi", labelGu: "ઝરદોશી", color: "" },
+    beads: { labelEn: "Beads", labelGu: "બીડ્સ", color: "" },
+    sequence: { labelEn: "Sequence", labelGu: "સિકવન્સ", color: "" },
+    coding: { labelEn: "Coding", labelGu: "કોડિંગ", color: "" },
+    laser: { labelEn: "Laser", labelGu: "લેસર", color: "" },
+    tufting: { labelEn: "Tufting", labelGu: "ટફ્ટિંગ", color: "" },
+    emcad: { labelEn: "emCAD", labelGu: "emCAD", color: "" }
+  };
+
+export const galleryItems: GalleryItem[] = [
+  { sample: true, technique: "zardosi", ratio: "4/5", titleEn: "Bridal zardosi panel", titleGu: "બ્રાઇડલ ઝરદોશી પેનલ", noteEn: "Final project, evening batch", noteGu: "ફાઇનલ પ્રોજેક્ટ, સાંજની બેચ", hasPair: true, photoLabel: "Zardosi bridal panel, macro" },
+  { sample: true, technique: "sequence", ratio: "1/1", titleEn: "Festive sequence dupatta", titleGu: "ફેસ્ટિવ સિકવન્સ દુપટ્ટા", noteEn: "Week 5 production drill", noteGu: "અઠવાડિયું 5, પ્રોડક્શન પ્રેક્ટિસ", hasPair: false, photoLabel: "Sequence dupatta shimmer" },
+  { sample: true, technique: "emcad", ratio: "3/2", titleEn: "Peacock motif, screen to stitch", titleGu: "મોર મોટિફ, સ્ક્રીનથી સ્ટિચ સુધી", noteEn: "emCAD design + stitched result", noteGu: "emCAD ડિઝાઇન + સીવેલું પરિણામ", hasPair: true, photoLabel: "emCAD peacock design beside stitched fabric" },
+  { sample: true, technique: "beads", ratio: "4/5", titleEn: "4-beads border run", titleGu: "4-બીડ્સ બોર્ડર રન", noteEn: "First full production run", noteGu: "પહેલો આખો પ્રોડક્શન રન", hasPair: false, photoLabel: "Beads border close-up" },
+  { sample: true, technique: "tufting", ratio: "1/1", titleEn: "Tufted name board", titleGu: "ટફ્ટેડ નેમ બોર્ડ", noteEn: "Weekend batch product", noteGu: "વીકએન્ડ બેચની પ્રોડક્ટ", hasPair: false, photoLabel: "Tufted rug piece, colourful" },
+  { sample: true, technique: "laser", ratio: "4/5", titleEn: "Laser-cut appliqué yoke", titleGu: "લેસર-કટ એપ્લિક યોક", noteEn: "Combined laser + embroidery", noteGu: "લેસર + એમ્બ્રોઇડરી સાથે", hasPair: true, photoLabel: "Laser-cut fabric layered piece" }
+];
+
+/* --------------------------------- services -------------------------------- */
+
+export type ServiceItem = { titleEn: string; titleGu: string; descEn: string; descGu: string };
+
+// ⚠️ CONFIRM-WITH-OWNER: final service list before launch (plan 9.6).
+export const services: ServiceItem[] = [
+  { titleEn: "Embroidery design development", titleGu: "એમ્બ્રોઇડરી ડિઝાઇન ડેવલપમેન્ટ", descEn: "Original designs developed for your garment, from concept to approved artwork.", descGu: "તમારા ગારમેન્ટ માટે ઓરિજિનલ ડિઝાઇન: કન્સેપ્ટથી ફાઇનલ આર્ટવર્ક સુધી." },
+  { titleEn: "emCAD digitizing", titleGu: "emCAD ડિજિટાઇઝિંગ", descEn: "Your artwork converted into clean, machine-ready embroidery files.", descGu: "તમારું આર્ટવર્ક ચોખ્ખી, મશીન-રેડી એમ્બ્રોઇડરી ફાઇલમાં." },
+  { titleEn: "Sampling & stitch-path optimisation", titleGu: "સેમ્પલિંગ અને સ્ટિચ-પાથ ઓપ્ટિમાઇઝેશન", descEn: "Sample runs, density and pathing fixes before production, so production doesn't pay for mistakes.", descGu: "પ્રોડક્શન પહેલાં સેમ્પલ, ડેન્સિટી અને પાથિંગ સુધારા, જેથી ભૂલોની કિંમત પ્રોડક્શન ન ચૂકવે." },
+  { titleEn: "Customised embroidered patches", titleGu: "કસ્ટમાઇઝ્ડ એમ્બ્રોઇડરી પેચિસ", descEn: "Logo and brand patches, small or bulk quantities.", descGu: "લોગો અને બ્રાન્ડ પેચિસ, નાની કે મોટી માત્રામાં." },
+  { titleEn: "Production job work", titleGu: "પ્રોડક્શન જોબ વર્ક", descEn: "Zardosi, beads, sequence, coding and laser job work on your material.", descGu: "તમારા મટીરિયલ પર ઝરદોશી, બીડ્સ, સિકવન્સ, કોડિંગ અને લેસર જોબ વર્ક." },
+  { titleEn: "Design corrections & consulting", titleGu: "ડિઝાઇન કરેક્શન અને કન્સલ્ટિંગ", descEn: "Fixing files that stitch badly, and advice on technique, material and cost.", descGu: "ખરાબ સીવાતી ફાઇલોના સુધારા, અને ટેકનિક, મટીરિયલ તથા કોસ્ટ પર સલાહ." }
+];

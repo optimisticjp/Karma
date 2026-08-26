@@ -1,0 +1,26 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "karma-design-studio",
+  "main": ".open-next/worker.js",
+  // Must be 2025-04-01 or later so env vars/secrets auto-populate process.env.
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": { "enabled": true },
+  // R2 bucket for confidential B2B design files (create it first:
+  //   npx wrangler r2 bucket create karma-brief-files
+  // then uncomment):
+  // "r2_buckets": [
+  //   { "binding": "BRIEF_FILES", "bucket_name": "karma-brief-files" }
+  // ],
+  // Non-secret runtime vars. Secrets (DATABASE_URL, RESEND_API_KEY,
+  // TURNSTILE_SECRET_KEY, CRON_SECRET) are set with `npx wrangler secret put`.
+  "vars": {
+    "NEXT_PUBLIC_SITE_URL": "https://karmadesignstudio.in",
+    "STUDIO_EMAIL": "karmadesignclasses@gmail.com",
+    "STUDIO_WHATSAPP": "919904376340"
+  }
+}
