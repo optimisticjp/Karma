@@ -15,7 +15,7 @@ export function Hero() {
   const proofs = [t("proof1"), t("proof2"), t("proof3")];
 
   return (
-    <section className="bg-grid section">
+    <section className="bg-grid section-major">
       <div className="container-site grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
         <div>
           <Reveal>
@@ -25,7 +25,7 @@ export function Hero() {
             <h1 className="text-display mt-6 lg:text-display-xl">{t("h1")}</h1>
           </Reveal>
           <Reveal delay={120}>
-            <p className="text-lead mt-6 max-w-xl text-stone">{t("sub")}</p>
+            <p className="u-lede">{t("sub")}</p>
           </Reveal>
           <Reveal delay={180}>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -77,12 +77,15 @@ export function Hero() {
                 <PhotoSlot label={t("shot3")} ratio="free" className="rounded-none border-0" />
               </div>
             </div>
-            <figcaption className="mt-3 flex items-center justify-between gap-2 text-smallmeta font-bold text-carbon">
+            {/* Stacked on small phones (Gujarati labels run long and three
+                across truncates to nonsense), inline from sm upward. */}
+            <figcaption className="mt-4 grid gap-2 text-smallmeta font-bold text-carbon sm:grid-cols-3 sm:gap-3">
               {[t("stage1"), t("stage2"), t("stage3")].map((label, i) => (
-                <span key={label} className="flex min-w-0 items-center gap-1.5">
-                  <span className="font-display text-vermilion-deep">0{i + 1}</span>
-                  <span className="truncate">{label}</span>
-                  {i < 2 ? <Icon name="arrow" size={14} className="text-vermilion-deep" /> : null}
+                <span key={label} className="flex items-baseline gap-2">
+                  <span className="font-display text-vermilion-deep" aria-hidden="true">
+                    0{i + 1}
+                  </span>
+                  <span>{label}</span>
                 </span>
               ))}
             </figcaption>

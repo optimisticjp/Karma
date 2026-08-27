@@ -36,7 +36,7 @@ export function CourseCard({
           <PhotoSlot
             label={course.photoLabel}
             ratio={horizontal ? "4/3" : "3/2"}
-            className="card-img h-full rounded-none border-0"
+            className="card-img media-unveil h-full rounded-none border-0"
           />
         </div>
         <div className="flex flex-1 flex-col p-5 md:p-6">
@@ -44,7 +44,7 @@ export function CourseCard({
             {gu ? fam.nameGu : fam.nameEn}
           </p>
           <h3 className="text-h4 mt-1.5 flex items-baseline justify-between gap-3 font-display">
-            <span>{gu ? course.nameGu : course.nameEn}</span>
+            <span className="card-title">{gu ? course.nameGu : course.nameEn}</span>
             <Icon name="arrow" size={18} className="arrow text-vermilion-deep" />
           </h3>
           <p className="mt-2 text-smallmeta text-stone">{gu ? course.leadGu : course.leadEn}</p>

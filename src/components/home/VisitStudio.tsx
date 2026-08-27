@@ -13,7 +13,7 @@ export function VisitStudio() {
   const gu = locale === "gu";
 
   return (
-    <section className="section-compact bg-ivory-2">
+    <section className="section-major bg-ivory-2">
       <div className="container-site grid items-center gap-10 lg:grid-cols-2">
         <div>
           <SectionHeading title={t("h2")} sub={t("sub")} />

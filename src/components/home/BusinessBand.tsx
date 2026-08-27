@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 export function BusinessBand() {
   const t = useTranslations("home.business");
   return (
-    <section className="section-compact bg-ivory-2">
+    <section className="section">
       <div className="container-site flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
         <div className="max-w-xl">
           <h2 className="text-h3 font-display">{t("h2")}</h2>

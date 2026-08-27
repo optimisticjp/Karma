@@ -6,7 +6,7 @@ export default function Loading() {
       <div className="skeleton h-10 w-2/3 max-w-md" />
       <div className="skeleton mt-4 h-5 w-full max-w-xl" />
       <div className="skeleton mt-2 h-5 w-5/6 max-w-lg" />
-      <div className="mt-10 grid gap-5 md:grid-cols-3">
+      <div className="u-section-body grid gap-5 md:grid-cols-3">
         <div className="skeleton h-48" />
         <div className="skeleton h-48" />
         <div className="skeleton h-48" />

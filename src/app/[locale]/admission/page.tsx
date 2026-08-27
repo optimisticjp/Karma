@@ -44,7 +44,7 @@ export default async function AdmissionFormPage({
     <section className="section-compact">
       <div className="container-site max-w-3xl">
         <h1 className="text-h2 font-display">{t("title")}</h1>
-        <p className="mt-3 text-stone">{t("sub")}</p>
+        <p className="u-lede">{t("sub")}</p>
         <div className="mt-8">
           <AdmissionForm courses={options} context={context} />
         </div>

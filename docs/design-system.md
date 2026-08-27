@@ -71,3 +71,61 @@ Banned: parallax, scroll hijacking, confetti, cursor followers, loops.
 ## Where it lives
 Tokens and primitives: `src/app/globals.css` (@theme + @layer components).
 Change tokens only with a comment explaining why, and update this file.
+
+---
+
+## Vertical rhythm (added in the polish pass)
+
+**The single habit that makes good content look amateur: choosing the gap
+between a heading and its supporting text by eye, per component.** Before
+this pass the same relationship used `mt-1`, `mt-2`, `mt-3`, `mt-4`, `mt-5`,
+`mt-6` and `mt-10` in different files. No single value was wrong; the
+inconsistency was. A reader cannot name it, but they feel the page was
+assembled rather than designed.
+
+Spacing between related text is now a system value, never a judgment call:
+
+| Relationship | Token | Value | Class |
+| --- | --- | --- | --- |
+| Eyebrow → heading | `--space-eyebrow-to-h` | 16px | `.u-eyebrow-gap` |
+| Heading → supporting paragraph | `--space-h-to-lede` | 20px | `.u-lede` |
+| Paragraph → action row | `--space-lede-to-action` | 32px | `.u-actions` |
+| Section heading block → its content | `--space-heading-to-content` | 48px / 64px lg | `.u-section-body` |
+
+`.u-lede` also caps the measure at 60ch. Lead paragraphs read worse at the
+68ch used for body copy.
+
+**Do not** write `mt-3`/`mt-5`/`mt-6` for these relationships again. If a new
+relationship needs a gap, add a token here first.
+
+## Section rhythm: use all three tiers
+
+`section-major` (144/104/80), `section` (112/88/64) and `section-compact`
+(80/64/48) exist so the page has dynamics. Before this pass `section-major`
+appeared **zero** times and half the homepage sat at `section-compact`: the
+tightest setting, played on repeat. That is the whole reason the page felt
+cramped despite correct tokens.
+
+Current allocation on the homepage:
+- `section-major`: Hero, ScreenToStitch, VisitStudio, CtaBand (the four moments)
+- `section`: the working sections
+- `section-compact`: minor/tail blocks only (LatestVideos)
+
+Roughly one major moment per three standard sections. More than that and
+nothing feels major.
+
+## Card and grid metrics
+- Card padding: `p-6 md:p-8` (24px mobile → 32px desktop). Never `p-4`/`p-5`.
+- Grid gaps: `gap-6 lg:gap-8` (24px → 32px).
+- Borders over shadows, always.
+
+## Interactions (three, all reduced-motion safe)
+1. **`.rule-stitch`** — the brand thread draws under every section heading on
+   scroll. Lives in `SectionHeading`, reuses the shared observer. ~22 per page.
+2. **`.card-title`** — dashed vermilion underline grows across a card title on
+   hover. Pure CSS, no JS.
+3. **`.media-unveil`** — photography wipes in via `clip-path` instead of
+   popping. Registered by `<UnveilWatcher />` (mounted once in the locale
+   layout), which observes elements directly, re-scans on DOM changes, and
+   force-reveals after 1.2s. **A failed animation must never cost a photo:**
+   never rely on an ancestor to trigger this class.

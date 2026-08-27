@@ -173,6 +173,40 @@
     "visit": {
       "h2": "Come see the machines before you decide.",
       "sub": "A real studio floor in Mota Varachha. Walk in during studio hours, or book the free demo and just come."
+    },
+    "trainers": {
+      "h2": "You learn from people who still do the work.",
+      "sub": "Not lecturers. Working embroiderers and designers who sit at these machines when class is not running.",
+      "more": "More about the studio"
+    },
+    "investment": {
+      "eyebrow": "Fees",
+      "h2": "What it costs, and what that includes.",
+      "sub": "Fees depend on the course and batch, so we go through the exact number with you at the free demo. Here is what the fee always covers.",
+      "includedTitle": "Included in every course fee",
+      "included": [
+        "Machine time in class: you train on the actual production machine, not a demo unit",
+        "Thread, needles and practice fabric for classwork",
+        "Course notes and the stitch settings we use in production",
+        "Your final project piece to keep and show",
+        "Certificate on completion, subject to the attendance rule",
+        "Doubt-clearing with your trainer during studio hours"
+      ],
+      "notIncludedTitle": "Not included, so there are no surprises",
+      "notIncluded": [
+        "Material for large personal projects beyond classwork",
+        "A machine to take home",
+        "emCAD software licence for your own computer"
+      ],
+      "howTitle": "How we share the number",
+      "howBody": "Come for the free demo, see the machines, and we will tell you the fee for the course and batch you actually want. No obligation, no pressure to decide the same day.",
+      "noGateway": "There is no online payment on this website. Fees are paid in person at the studio, with a receipt.",
+      "askCta": "Ask about fees"
+    },
+    "faq": {
+      "h2": "The questions people ask before they come.",
+      "sub": "Straight answers. If yours is not here, ask on WhatsApp and a person will reply.",
+      "all": "See all questions"
     }
   },
   "coursesPage": {

@@ -23,7 +23,7 @@ export default async function StudentWorkPage({ params }: { params: Promise<{ lo
     <section className="section-compact">
       <div className="container-site">
         <h1 className="text-display max-w-3xl">{t("title")}</h1>
-        <p className="text-lead prose-measure mt-5 text-stone">{t("sub")}</p>
+        <p className="u-lede prose-measure">{t("sub")}</p>
         <div className="mt-10">
           <GalleryGrid items={[...galleryItems]} />
         </div>

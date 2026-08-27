@@ -54,7 +54,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
       <section className="section-compact bg-ivory-2">
         <div className="container-site">
           <SectionHeading title={t("machinesTitle")} sub={t("machinesBody")} />
-          <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="u-section-body grid grid-cols-2 gap-4 lg:grid-cols-4">
             {machineSlots.map((c) => (
               <PhotoSlot key={c.slug} label={c.photoLabel} ratio="1/1" />
             ))}
@@ -75,7 +75,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
       <section className="section-compact">
         <div className="container-site">
           <SectionHeading title={t("numbersTitle")} />
-          <dl className="mt-8 grid gap-8 sm:grid-cols-3">
+          <dl className="u-section-body grid gap-8 sm:grid-cols-3">
             {verifiedFacts.studentsTrained500 ? (
               <div>
                 <dd className="numeral"><CountUp value={500} suffix="+" /></dd>

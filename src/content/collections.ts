@@ -176,3 +176,58 @@ export const services: ServiceItem[] = [
   { titleEn: "Production job work", titleGu: "પ્રોડક્શન જોબ વર્ક", descEn: "Zardosi, beads, sequence, coding and laser job work on your material.", descGu: "તમારા મટીરિયલ પર ઝરદોશી, બીડ્સ, સિકવન્સ, કોડિંગ અને લેસર જોબ વર્ક." },
   { titleEn: "Design corrections & consulting", titleGu: "ડિઝાઇન કરેક્શન અને કન્સલ્ટિંગ", descEn: "Fixing files that stitch badly, and advice on technique, material and cost.", descGu: "ખરાબ સીવાતી ફાઇલોના સુધારા, અને ટેકનિક, મટીરિયલ તથા કોસ્ટ પર સલાહ." }
 ];
+
+/* ------------------------------- trainers ---------------------------------
+ * ⚠ CONFIRM-WITH-OWNER (content-checklist Q7): real names, roles, photos and
+ * consent. Until then every entry stays sample:true and renders a SampleTag.
+ * NEVER invent a trainer. Delete a row rather than guess at one.
+ * -------------------------------------------------------------------------- */
+export type Trainer = {
+  sample: boolean;
+  nameEn: string;
+  nameGu: string;
+  roleEn: string;
+  roleGu: string;
+  focusEn: string;
+  focusGu: string;
+  photoLabel: string;
+};
+
+export const trainers: Trainer[] = [
+  {
+    sample: true,
+    nameEn: "Sample: lead trainer name",
+    nameGu: "નમૂનો: મુખ્ય ટ્રેનરનું નામ",
+    roleEn: "Machine embroidery, all techniques",
+    roleGu: "મશીન એમ્બ્રોઇડરી, બધી ટેકનિક",
+    focusEn:
+      "Years on the production floor before teaching. Specialities and student results appear here once confirmed.",
+    focusGu:
+      "ભણાવતાં પહેલાં પ્રોડક્શન ફ્લોર પર વર્ષોનો અનુભવ. કન્ફર્મ થયા પછી અહીં સ્પેશિયાલિટી અને પરિણામ આવશે.",
+    photoLabel: "Trainer portrait at their machine (with consent)"
+  },
+  {
+    sample: true,
+    nameEn: "Sample: design trainer name",
+    nameGu: "નમૂનો: ડિઝાઇન ટ્રેનરનું નામ",
+    roleEn: "emCAD design and digitizing",
+    roleGu: "emCAD ડિઝાઇન અને ડિજિટાઇઝિંગ",
+    focusEn:
+      "Works on live client files, so classes use the same standards production actually demands.",
+    focusGu:
+      "લાઇવ ક્લાયન્ટ ફાઇલ પર કામ કરે છે, એટલે ક્લાસમાં પ્રોડક્શન જેવા જ ધોરણો શીખવાય છે.",
+    photoLabel: "Trainer portrait at the emCAD station (with consent)"
+  },
+  {
+    sample: true,
+    nameEn: "Sample: founder name",
+    nameGu: "નમૂનો: સ્થાપકનું નામ",
+    roleEn: "Founder, Karma Design Studio",
+    roleGu: "સ્થાપક, Karma Design Studio",
+    focusEn:
+      "The reason the studio exists, in their own words, once the founding interview is recorded.",
+    focusGu:
+      "સ્ટુડિયો શા માટે શરૂ થયો, એ એમના પોતાના શબ્દોમાં, ઇન્ટરવ્યૂ રેકોર્ડ થયા પછી.",
+    photoLabel: "Owner portrait at a machine (shoot list)"
+  }
+];

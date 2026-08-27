@@ -15,7 +15,7 @@ export function Stories() {
   const gu = locale === "gu";
 
   return (
-    <section className="section-compact">
+    <section className="section">
       <div className="container-site">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <SectionHeading title={t("h2")} />
@@ -26,7 +26,7 @@ export function Stories() {
             {t("seeAll")} <Icon name="arrow" size={16} className="arrow" />
           </Link>
         </div>
-        <div className="mt-10 grid gap-6 md:grid-cols-2">
+        <div className="u-section-body grid gap-6 lg:gap-8 md:grid-cols-2">
           {stories.map((s, i) => (
             <Reveal key={i} delay={i * 80}>
               <figure className="card grid h-full gap-6 p-6 sm:grid-cols-[120px_1fr] md:p-8">

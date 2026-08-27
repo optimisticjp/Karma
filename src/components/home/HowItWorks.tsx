@@ -19,7 +19,7 @@ export function HowItWorks() {
     <section className="section">
       <div className="container-site">
         <SectionHeading title={t("h2")} sub={t("line")} />
-        <div className="relative mt-14">
+        <div className="relative u-section-body">
           <Reveal
             variant="draw"
             className="absolute left-0 right-0 top-[5px] hidden lg:block"

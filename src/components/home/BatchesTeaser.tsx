@@ -52,7 +52,7 @@ export function BatchesTeaser() {
   };
 
   return (
-    <section className="section-compact" id="upcoming-batches">
+    <section className="section" id="upcoming-batches">
       <div className="container-site">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <SectionHeading title={t("h2")} sub={t("sub")} />
@@ -82,7 +82,7 @@ export function BatchesTeaser() {
               ) : null}
               <ul className="grid gap-4 md:grid-cols-3">
                 {state.rows.map((r) => (
-                  <li key={r.id} className="card card-lift flex flex-col p-5">
+                  <li key={r.id} className="card card-lift flex flex-col p-6 md:p-8">
                     <p className="font-semibold">
                       {locale === "gu" ? r.courseNameGu : r.courseNameEn}
                     </p>
@@ -114,7 +114,7 @@ export function BatchesTeaser() {
           ) : null}
 
           {state.kind === "empty" ? (
-            <div className="card p-6">
+            <div className="card p-6 md:p-8">
               <p className="font-semibold">{t("empty")}</p>
               <a
                 href={`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(tc("waPrefillDemo"))}`}
@@ -128,7 +128,7 @@ export function BatchesTeaser() {
           ) : null}
 
           {state.kind === "error" ? (
-            <div className="card border-warn p-6">
+            <div className="card border-warn p-6 md:p-8">
               <p className="font-semibold">{t("error")}</p>
               <a
                 href={`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(tc("waPrefillDemo"))}`}

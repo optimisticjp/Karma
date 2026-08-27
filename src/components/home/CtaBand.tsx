@@ -11,7 +11,7 @@ export function CtaBand() {
   return (
     <section className="on-dark bg-carbon">
       <div aria-hidden="true" className="stitch-line" />
-      <div className="container-site section text-center">
+      <div className="container-site section-major text-center">
         <h2 className="text-h2 mx-auto max-w-3xl text-ivory">{t("h2")}</h2>
         <p className="mt-4 text-lead text-ivory/80">{t("sub")}</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">

@@ -28,7 +28,7 @@ export function WorkStrip() {
               <li key={g.titleEn} className="w-64 flex-none snap-start md:w-72">
                 <div className="card card-lift h-full overflow-hidden">
                   <div className="relative">
-                    <PhotoSlot label={g.photoLabel} ratio="4/5" className="card-img rounded-none border-0" />
+                    <PhotoSlot label={g.photoLabel} ratio="4/5" className="card-img media-unveil rounded-none border-0" />
                     <span className="chip absolute left-3 top-3">
                       {locale === "gu" ? chip?.labelGu : chip?.labelEn}
                     </span>

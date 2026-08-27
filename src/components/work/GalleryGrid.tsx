@@ -59,7 +59,7 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
             return (
               <li key={g.titleEn} className="card card-lift overflow-hidden">
                 <div className="relative">
-                  <PhotoSlot label={g.photoLabel} ratio={g.ratio} className="card-img rounded-none border-0" />
+                  <PhotoSlot label={g.photoLabel} ratio={g.ratio} className="card-img media-unveil rounded-none border-0" />
                   <span className="chip absolute left-3 top-3">
                     {locale === "gu" ? chip?.labelGu : chip?.labelEn}
                   </span>

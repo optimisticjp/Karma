@@ -46,7 +46,7 @@ export async function LatestVideos() {
               href={site.socials.youtube}
               target="_blank"
               rel="noopener noreferrer"
-              className="card card-lift flex items-center justify-between gap-4 p-6"
+              className="card card-lift flex items-center justify-between gap-4 p-6 md:p-8"
             >
               <p className="font-semibold">▶ {t("channel")}</p>
               <span aria-hidden="true" className="text-vermilion-deep">→</span>

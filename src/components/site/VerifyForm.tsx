@@ -15,7 +15,7 @@ export function VerifyForm() {
   };
 
   return (
-    <div className="card p-6">
+    <div className="card p-6 md:p-8">
       <label className="label" htmlFor="cert-no">{t("inputLabel")}</label>
       <div className="flex flex-col gap-3 sm:flex-row">
         <input

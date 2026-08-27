@@ -7,6 +7,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { WhatsAppFab } from "@/components/site/WhatsAppFab";
 import { LangBanner } from "@/components/site/LangBanner";
+import { UnveilWatcher } from "@/components/ui/Reveal";
 import { JsonLd } from "@/components/site/JsonLd";
 import { site } from "@/lib/site";
 import "../globals.css";
@@ -78,6 +79,7 @@ export default async function LocaleLayout({
           <Footer />
           <WhatsAppFab />
           <LangBanner />
+          <UnveilWatcher />
         </NextIntlClientProvider>
         <JsonLd data={businessLd} />
       </body>

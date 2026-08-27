@@ -89,7 +89,7 @@ export default async function CourseDetailPage({
           <div>
             <p className="eyebrow">{gu ? fam.nameGu : fam.nameEn}</p>
             <h1 className="text-display mt-4">{name}</h1>
-            <p className="text-lead mt-5 max-w-xl text-stone">{gu ? course.leadGu : course.leadEn}</p>
+            <p className="u-lede">{gu ? course.leadGu : course.leadEn}</p>
 
             <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-smallmeta">
               <div>
@@ -149,7 +149,7 @@ export default async function CourseDetailPage({
       <section className="section-compact">
         <div className="container-site">
           <SectionHeading title={t("modulesTitle")} sub={t("modulesNote")} />
-          <div className="mt-8 max-w-3xl">
+          <div className="u-section-body max-w-3xl">
             <ModuleAccordion modules={course.modules} />
           </div>
         </div>
@@ -204,7 +204,7 @@ export default async function CourseDetailPage({
           <section className="section-compact">
             <div className="container-site">
               <SectionHeading title={t("relatedTitle")} />
-              <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="u-section-body grid gap-6 lg:gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 {related.map((c) => (
                   <CourseCard key={c.slug} course={c} />
                 ))}

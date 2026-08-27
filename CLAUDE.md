@@ -73,6 +73,14 @@ Mota Varachha, Surat. The full strategy lives in
     commit; the i18n parity test enforces rule #1 mechanically. New
     validation logic, security helpers, and message keys need tests.
 
+14. **Vertical rhythm is a system, not a judgment call.** Use `.u-lede`,
+    `.u-eyebrow-gap`, `.u-actions`, `.u-section-body` for text relationships.
+    Do NOT reintroduce ad-hoc `mt-3`/`mt-5`/`mt-6` for heading→paragraph gaps.
+    Use all three section tiers: `section-major` for the page's few real
+    moments, `section` as default, `section-compact` only for minor blocks.
+    Cards are `p-6 md:p-8`; grids are `gap-6 lg:gap-8`. Spec:
+    `docs/design-system.md`.
+
 ## Where things live
 - Pages: `src/app/[locale]/…` (catch-all 404 at `[...rest]`)
 - API: `src/app/api/{admission,brief,cron/digest,health}/route.ts`

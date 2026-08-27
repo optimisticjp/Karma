@@ -47,7 +47,7 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ loc
       <section className="section-compact">
         <div className="container-site">
           <h1 className="text-display max-w-3xl">{t("title")}</h1>
-          <p className="text-lead prose-measure mt-5 text-stone">{t("sub")}</p>
+          <p className="u-lede prose-measure">{t("sub")}</p>
         </div>
       </section>
 
@@ -65,14 +65,14 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ loc
       </section>
 
       <section className="section-compact">
-        <div className="container-site grid gap-6 md:grid-cols-2">
-          <div className="card p-6">
+        <div className="container-site grid gap-6 lg:gap-8 md:grid-cols-2">
+          <div className="card p-6 md:p-8">
             <h2 className="text-h4 font-display">{t("feesTitle")}</h2>
-            <p className="mt-3 text-stone">{t("feesBody")}</p>
+            <p className="u-lede">{t("feesBody")}</p>
           </div>
-          <div className="card p-6">
+          <div className="card p-6 md:p-8">
             <h2 className="text-h4 font-display">{t("eligTitle")}</h2>
-            <p className="mt-3 text-stone">{t("eligBody")}</p>
+            <p className="u-lede">{t("eligBody")}</p>
           </div>
         </div>
       </section>
@@ -89,7 +89,7 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ loc
       <section className="section-compact bg-ivory-2">
         <div className="container-site">
           <SectionHeading title={t("handbookTitle")} />
-          <ul className="mt-8 grid gap-4 md:grid-cols-2">
+          <ul className="u-section-body grid gap-4 md:grid-cols-2">
             {handbook.map((h) => (
               <li key={h} className="flex gap-3">
                 <Icon name="scissors" size={18} className="mt-1 text-vermilion-deep" />
@@ -103,7 +103,7 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ loc
       <section className="section-compact">
         <div className="container-site">
           <SectionHeading title={t("faqTitle")} />
-          <div className="mt-8 max-w-3xl space-y-3">
+          <div className="u-section-body max-w-3xl space-y-3">
             {faqs.map((f, i) => (
               <details key={i} className="card group p-0" open={i === 0}>
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-semibold [&::-webkit-details-marker]:hidden">

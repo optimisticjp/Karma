@@ -29,9 +29,9 @@ export default async function StoriesPage({ params }: { params: Promise<{ locale
     <section className="section-compact">
       <div className="container-site">
         <h1 className="text-display max-w-3xl">{t("title")}</h1>
-        <p className="text-lead prose-measure mt-5 text-stone">{t("sub")}</p>
+        <p className="u-lede prose-measure">{t("sub")}</p>
 
-        <div className="mt-10 grid gap-6 md:grid-cols-2">
+        <div className="u-section-body grid gap-6 lg:gap-8 md:grid-cols-2">
           {stories.map((s, i) => (
             <figure key={i} className="card grid h-full gap-6 p-6 sm:grid-cols-[120px_1fr] md:p-8">
               <PhotoSlot label={s.photoLabel} ratio="4/5" className="hidden sm:flex" />

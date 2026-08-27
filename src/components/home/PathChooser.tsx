@@ -14,16 +14,16 @@ export function PathChooser() {
   const t = useTranslations("home.path");
 
   return (
-    <section className="section-compact">
+    <section className="section">
       <div className="container-site">
         <SectionHeading title={t("h2")} />
-        <div className="mt-10 grid gap-6 lg:grid-cols-12">
+        <div className="u-section-body grid gap-6 lg:gap-8 lg:grid-cols-12">
           <Reveal className="lg:col-span-7">
             <div className="card card-lift flex h-full flex-col overflow-hidden">
-              <PhotoSlot label={t("learnPhoto")} ratio="16/9" className="card-img rounded-none border-0" />
+              <PhotoSlot label={t("learnPhoto")} ratio="16/9" className="card-img media-unveil rounded-none border-0" />
               <div className="flex flex-1 flex-col p-6 md:p-8">
-                <h3 className="text-h3">{t("learnTitle")}</h3>
-                <p className="mt-3 text-stone">{t("learnDesc")}</p>
+                <h3 className="text-h3"><span className="card-title">{t("learnTitle")}</span></h3>
+                <p className="u-lede">{t("learnDesc")}</p>
                 <div className="mt-auto flex flex-wrap gap-x-6 gap-y-2 pt-6 font-semibold">
                   <Link className="stitch-link inline-flex items-center gap-1.5 text-vermilion-deep" href="/courses">
                     {t("learnA1")} <Icon name="arrow" size={16} className="arrow" />
@@ -39,8 +39,8 @@ export function PathChooser() {
           <Reveal delay={80} className="lg:col-span-5">
             <div className="card card-lift flex h-full flex-col p-6 md:p-8">
               <Icon name="spool" size={28} className="text-vermilion-deep" />
-              <h3 className="text-h3 mt-5">{t("bizTitle")}</h3>
-              <p className="mt-3 text-stone">{t("bizDesc")}</p>
+              <h3 className="text-h3 mt-5"><span className="card-title">{t("bizTitle")}</span></h3>
+              <p className="u-lede">{t("bizDesc")}</p>
               <div className="mt-auto flex flex-wrap gap-x-6 gap-y-2 pt-6 font-semibold">
                 <Link className="stitch-link inline-flex items-center gap-1.5 text-vermilion-deep" href="/services">
                   {t("bizA1")} <Icon name="arrow" size={16} className="arrow" />

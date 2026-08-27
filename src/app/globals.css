@@ -58,6 +58,15 @@
   --text-eyebrow--line-height: 1.33;
   --text-btn: 0.9375rem;
   --text-btn--line-height: 1.33;
+  --text-btn--letter-spacing: 0.01em;
+
+  /* Systematic vertical rhythm. Spacing between related text is a SYSTEM
+     value, never a per-component judgment call. This is the single habit
+     that separates designed pages from assembled ones. */
+  --space-eyebrow-to-h: 1rem;    /* 16 */
+  --space-h-to-lede: 1.25rem;    /* 20 */
+  --space-lede-to-action: 2rem;  /* 32 */
+  --space-heading-to-content: 3rem;  /* 48 mobile */
 
   --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -99,6 +108,12 @@
     font-variation-settings: normal;
     line-height: 1.3;
   }
+
+  /* Prevents single-word orphans on the last line of paragraphs. */
+  p { text-wrap: pretty; }
+
+  /* Numbers that sit in columns must not jitter between rows. */
+  table, .tabular, time, .numeral { font-variant-numeric: tabular-nums; }
 
   ::selection { background: var(--color-vermilion); color: var(--color-card); }
   :focus-visible {
@@ -307,6 +322,63 @@
   .masonry > * { break-inside: avoid; margin-bottom: 1.5rem; }
   @media (min-width: 1024px) { .masonry > * { margin-bottom: 2rem; } }
 
+  /* ---------------- systematic rhythm utilities ----------------
+     Use these instead of ad-hoc mt-3 / mt-5 / mt-6 choices. */
+  .u-eyebrow-gap { margin-top: 0; margin-bottom: var(--space-eyebrow-to-h); }
+  .u-lede {
+    margin-top: var(--space-h-to-lede);
+    max-width: 60ch;
+    font-size: var(--text-lead);
+    line-height: var(--text-lead--line-height);
+    color: var(--color-stone);
+  }
+  .u-actions { margin-top: var(--space-lede-to-action); }
+  /* Section heading block -> the content it introduces. */
+  .u-section-body { margin-top: var(--space-heading-to-content); }
+  @media (min-width: 1024px) { .u-section-body { margin-top: 4rem; } }
+
+  /* ============ INTERACTION 1: section rule draws on scroll ============
+     Every section heading gets the brand thread drawing beneath it.
+     Reuses the existing IntersectionObserver: no new JS. */
+  .rule-stitch {
+    position: relative;
+    display: block;
+    height: 2px;
+    width: 4.5rem;
+    margin-top: 1.25rem;
+    background-image: repeating-linear-gradient(
+      90deg, var(--color-vermilion) 0 8px, transparent 8px 14px
+    );
+    transform-origin: left;
+  }
+  .js .rule-stitch { transform: scaleX(0); transition: transform 450ms var(--ease-out-soft); }
+  .js .is-in .rule-stitch, .js .rule-stitch.is-in { transform: scaleX(1); }
+
+  /* ============ INTERACTION 2: card title stitches on hover ============
+     Pure CSS. Ties every card to the brand motif on contact. */
+  .card-lift .card-title {
+    position: relative;
+    display: inline;
+    background-image: repeating-linear-gradient(
+      90deg, var(--color-vermilion) 0 6px, transparent 6px 10px
+    );
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 2px;
+    transition: background-size 260ms var(--ease-out-soft);
+    padding-bottom: 2px;
+  }
+  .card-lift:hover .card-title,
+  .card-lift:focus-within .card-title { background-size: 100% 2px; }
+
+  /* ============ INTERACTION 3: media unveils instead of popping ============
+     A soft wipe as photography scrolls in: reads as craft, not animation. */
+  .js .media-unveil {
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 620ms var(--ease-out-soft);
+  }
+  .js .media-unveil.is-in, .js .is-in .media-unveil { clip-path: inset(0 0 0 0); }
+
   /* Certificate seal entrance */
   @keyframes seal-in { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
   .seal-in { animation: seal-in 320ms var(--ease-out-soft) both; }
@@ -402,12 +474,14 @@
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal, .stitch-draw, .seal-in {
+  .reveal, .stitch-draw, .seal-in, .rule-stitch, .media-unveil {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
     animation: none !important;
+    clip-path: none !important;
   }
+  .card-lift .card-title { transition: none !important; }
   .card, .btn, .stitch-link::after, .card-img, .arrow { transition: none !important; }
   * { animation-duration: 0.001s !important; }
 }

@@ -26,9 +26,9 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
     <section className="section-compact">
       <div className="container-site">
         <h1 className="text-display max-w-3xl">{t("title")}</h1>
-        <p className="text-lead prose-measure mt-5 text-stone">{t("sub")}</p>
+        <p className="u-lede prose-measure">{t("sub")}</p>
 
-        <div className="mt-10 grid gap-8 lg:grid-cols-2">
+        <div className="u-section-body grid gap-8 lg:grid-cols-2">
           <div className="space-y-4">
             <a
               href={`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(tc("waPrefillDemo"))}`}
@@ -50,7 +50,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
             <p className="pt-2 text-smallmeta text-stone">{t("demoNote")}</p>
           </div>
 
-          <div className="card p-6">
+          <div className="card p-6 md:p-8">
             <h2 className="text-h4 font-display">{t("visitTitle")}</h2>
             <dl className="mt-4 space-y-4 text-stone">
               <div>

@@ -114,7 +114,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
           <div key={s.h} className="mt-8">
             <h2 className="text-h4 font-display">{s.h}</h2>
             {s.p.map((p) => (
-              <p key={p} className="mt-3 text-stone">{p}</p>
+              <p key={p} className="u-lede">{p}</p>
             ))}
           </div>
         ))}

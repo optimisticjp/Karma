@@ -28,7 +28,7 @@ export default async function CoursesPage({ params }: { params: Promise<{ locale
       <section className="section-compact">
         <div className="container-site">
           <h1 className="text-display">{t("title")}</h1>
-          <p className="text-lead prose-measure mt-5 text-stone">{t("intro")}</p>
+          <p className="u-lede prose-measure">{t("intro")}</p>
         </div>
       </section>
 
@@ -43,7 +43,7 @@ export default async function CoursesPage({ params }: { params: Promise<{ locale
                 title={l === "gu" ? f.nameGu : f.nameEn}
                 sub={l === "gu" ? f.introGu : f.introEn}
               />
-              <div className="mt-8 grid gap-6 lg:grid-cols-2">
+              <div className="u-section-body grid gap-6 lg:gap-8 lg:grid-cols-2">
                 {list.map((c) => (
                   <CourseCard key={c.slug} course={c} layout="horizontal" />
                 ))}
@@ -57,7 +57,7 @@ export default async function CoursesPage({ params }: { params: Promise<{ locale
       <section className="section-compact">
         <div className="container-site">
           <SectionHeading title={t("pathway.h2")} sub={t("pathway.line")} />
-          <p className="card mt-8 p-6 font-display text-h4 leading-relaxed text-stone">
+          <p className="card mt-8 p-6 md:p-8 font-display text-h4 leading-relaxed text-stone">
             {t("pathway.steps")}
           </p>
         </div>

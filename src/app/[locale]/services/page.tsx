@@ -32,7 +32,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
       <section className="section-compact">
         <div className="container-site">
           <h1 className="text-display max-w-3xl">{t("title")}</h1>
-          <p className="text-lead prose-measure mt-5 text-stone">{t("sub")}</p>
+          <p className="u-lede prose-measure">{t("sub")}</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <a href="#brief" className="btn btn-primary">{t("form.submit")}</a>
             <a
@@ -49,9 +49,9 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
 
       <section className="section-compact bg-ivory-2">
         <div className="container-site">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 lg:gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {services.map((s) => (
-              <div key={s.titleEn} className="card p-6">
+              <div key={s.titleEn} className="card p-6 md:p-8">
                 <h2 className="text-h4 font-display">{gu ? s.titleGu : s.titleEn}</h2>
                 <p className="mt-2 text-smallmeta text-stone">{gu ? s.descGu : s.descEn}</p>
               </div>

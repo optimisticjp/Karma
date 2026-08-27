@@ -32,7 +32,7 @@ export function ScreenToStitch() {
   );
 
   return (
-    <section className="section bg-ivory-2">
+    <section className="section-major bg-ivory-2">
       <div className="container-wide">
         <SectionHeading title={t("h2")} sub={t("sub")} />
         <div className="mx-auto mt-10 max-w-3xl">
