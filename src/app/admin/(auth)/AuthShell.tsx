@@ -1,0 +1,56 @@
+import Link from "next/link";
+import type { AdminLocale } from "@/lib/admin/i18n";
+
+/**
+ * Chrome for the four unauthenticated console screens (login, MFA setup, MFA
+ * challenge, invite acceptance).
+ *
+ * Karma's own typography and tokens, not Supabase's branding: ivory ground,
+ * one vermilion stitch line, precise borders, no illustration dependency, no
+ * stock photography, no full-screen gimmick. It has to work at 360px in a
+ * studio at 10pm.
+ */
+export function AuthShell({
+  locale,
+  eyebrow,
+  title,
+  lede,
+  children,
+  footer
+}: {
+  locale: AdminLocale;
+  eyebrow?: string;
+  title: string;
+  lede?: string;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+}) {
+  return (
+    <div lang={locale} className="flex min-h-screen flex-col bg-ivory bg-grid">
+      <main
+        id="main"
+        className="mx-auto flex w-full max-w-[30rem] flex-1 flex-col justify-center px-5 py-12"
+      >
+        <div className="panel p-6 md:p-8">
+          {/* .microlabel self-neutralises its caps + tracking for Gujarati. */}
+          <p className="microlabel">Karma Design Studio</p>
+          <span aria-hidden className="stitch-line mt-3 block w-[4.5rem]" />
+
+          {eyebrow ? <p className="eyebrow mt-6">{eyebrow}</p> : null}
+          <h1 className={`text-h3 ${eyebrow ? "u-eyebrow-gap" : "mt-6"}`}>{title}</h1>
+          {lede ? <p className="u-lede text-bodylg">{lede}</p> : null}
+
+          <div className="u-actions">{children}</div>
+        </div>
+
+        {footer ? <div className="mt-6 text-smallmeta text-stone">{footer}</div> : null}
+
+        <p className="mt-8 text-smallmeta text-stone">
+          <Link href="/en" className="stitch-link">
+            karmadesignstudio
+          </Link>
+        </p>
+      </main>
+    </div>
+  );
+}

@@ -2,10 +2,13 @@
  * Seeds the verified course catalog and (if empty) a starter set of batches.
  * Usage: npm run db:seed   (needs DATABASE_URL in .env)
  * Idempotent: courses upsert by slug; batches only insert when none exist.
+ *
+ * Runs OUTSIDE the Cloudflare request runtime, so it connects directly to
+ * Supabase Postgres with DATABASE_URL — never through Hyperdrive.
  */
 import "dotenv/config";
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, sql } from "drizzle-orm";
 import * as schema from "../src/lib/db/schema";
 import { courses as courseContent } from "../src/content/courses";
@@ -16,7 +19,16 @@ async function main() {
     console.error("DATABASE_URL missing. Copy .env.example to .env and fill it in.");
     process.exit(1);
   }
-  const db = drizzle(neon(url), { schema });
+  const pool = new Pool({ connectionString: url, max: 1 });
+  const db = drizzle(pool, { schema });
+  try {
+    await seed(db);
+  } finally {
+    await pool.end();
+  }
+}
+
+async function seed(db: ReturnType<typeof drizzle<typeof schema>>) {
 
   console.log("Seeding courses…");
   for (const [i, c] of courseContent.entries()) {
@@ -51,7 +63,7 @@ async function main() {
     return;
   }
 
-  console.log("Seeding starter batches (edit these in Neon or the Phase 2 admin)…");
+  console.log("Seeding starter batches (edit these in Supabase or the Karma Console)…");
   const plus = (d: number) => {
     const x = new Date();
     x.setDate(x.getDate() + d);

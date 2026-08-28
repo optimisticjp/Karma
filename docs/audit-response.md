@@ -1,3 +1,11 @@
+> **Superseded in part (Phase 2, this repository's admin foundation).** This
+> document is a record of the audit response as it stood, and is left intact as
+> history. Two items have since changed direction: the database is **Supabase
+> Postgres** (reached through Cloudflare Hyperdrive in the Worker), not Neon;
+> and staff authentication is **Supabase Auth with mandatory TOTP MFA**, not
+> Better Auth. The deferred "Admin/trainer portals, auth" row is now partly
+> delivered. See `docs/admin-architecture.md` for the current architecture.
+
 # Audit response — what changed, what's deferred, and why
 
 Maps the external audit to this codebase. "Fixed" items are implemented and

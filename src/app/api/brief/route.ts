@@ -95,32 +95,37 @@ export async function POST(req: NextRequest) {
 
   try {
     const placeholder = `KDS-BP-${crypto.randomUUID().slice(0, 10)}`;
-    const inserted = await db
-      .insert(schema.serviceEnquiries)
-      .values({
-        reference: placeholder,
-        name: d.name,
-        company: d.company || null,
-        phone: d.phone,
-        email: d.email || null,
-        productType: d.productType || null,
-        technique: d.technique || null,
-        dimensions: d.dimensions || null,
-        quantity: d.quantity || null,
-        colourCount: d.colourCount || null,
-        fileFormat: d.fileFormat || null,
-        deadline: d.deadline || null,
-        details: d.details || null,
-        locale: d.locale
-      })
-      .returning({ id: schema.serviceEnquiries.id });
+    // node-postgres gives us transactions: the placeholder reference is
+    // rewritten atomically, so a brief can never keep a placeholder ref.
+    const { id, reference } = await db.transaction(async (tx) => {
+      const inserted = await tx
+        .insert(schema.serviceEnquiries)
+        .values({
+          reference: placeholder,
+          name: d.name,
+          company: d.company || null,
+          phone: d.phone,
+          email: d.email || null,
+          productType: d.productType || null,
+          technique: d.technique || null,
+          dimensions: d.dimensions || null,
+          quantity: d.quantity || null,
+          colourCount: d.colourCount || null,
+          fileFormat: d.fileFormat || null,
+          deadline: d.deadline || null,
+          details: d.details || null,
+          locale: d.locale
+        })
+        .returning({ id: schema.serviceEnquiries.id });
 
-    const id = inserted[0].id;
-    const reference = `KDS-B-${pad(id)}`;
-    await db
-      .update(schema.serviceEnquiries)
-      .set({ reference })
-      .where(eq(schema.serviceEnquiries.id, id));
+      const newId = inserted[0].id;
+      const ref = `KDS-B-${pad(newId)}`;
+      await tx
+        .update(schema.serviceEnquiries)
+        .set({ reference: ref })
+        .where(eq(schema.serviceEnquiries.id, newId));
+      return { id: newId, reference: ref };
+    });
 
     let filesStored = 0;
     if (files.length > 0 && bucket) {

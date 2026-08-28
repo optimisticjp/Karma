@@ -6,9 +6,9 @@ import { site } from "@/lib/site";
 import { Icon } from "@/components/ui/Icon";
 
 /**
- * Live batch list (async server component). Reads Neon when configured,
- * otherwise renders clearly-tagged sample rows (plan 10.3). Table on
- * desktop, stacked cards on mobile.
+ * Live batch list (async server component). Reads Supabase Postgres when
+ * configured, otherwise renders clearly-tagged sample rows (plan 10.3).
+ * Table on desktop, stacked cards on mobile.
  */
 export async function BatchTable({
   limit,

@@ -1,13 +1,17 @@
 # Operations — free-tier watchpoints & routine care
 
 ## The numbers that matter
+Provider limits change: treat this table as a prompt to check, not as fact.
+**Re-verify every free-tier limit before launch.**
+
 | Service | Free limit | Our usage | Watch when |
 | --- | --- | --- | --- |
 | Workers requests | 100k/day | Small local site: tiny | Viral reel moment: fine; sustained bot floods: add a WAF rule |
-| Worker size | 3 MB gzip | ~1.2 MB now | After adding npm deps → `npx wrangler deploy --dry-run` |
+| Worker size | 3 MB gzip | ~1.7 MB (Supabase + pg included) | After adding npm deps → `npx wrangler deploy --dry-run` |
 | Workers CPU | 10 ms/request | SSR is a few ms; DB wait doesn't count | Heavy server work (PDF gen in Phase 4) → measure, consider queues |
-| Neon storage | 0.5 GB | Text rows: years of headroom | Only if file-like data creeps into Postgres (don't: use R2) |
-| Neon compute | 100 CU-hrs/mo, autosuspend | Scale-to-zero covers it | Cold start after idle: first request slow; health pings soften it |
+| Supabase database | free-tier storage cap | Text rows: years of headroom | Only if file-like data creeps into Postgres (don't: use R2) |
+| Supabase project | pauses when idle on free | Health pings keep it warm | A paused project fails closed, not silently — `/api/health` goes 503 |
+| Cloudflare Hyperdrive | free tier | One connection per request | Only if the Worker starts holding connections open (it must not) |
 | R2 | 10 GB, zero egress | Brief files @ ≤8 MB × 3 | ~400+ briefs with max files → review/archive old briefs |
 | Resend | 100/day, 3k/mo | ~1 per lead + daily digest | A 50-lead day is still fine |
 | GitHub Actions | 2,000 min/mo | CI + 2 crons: minutes | Nothing realistic |
@@ -18,15 +22,22 @@
 - **Weekly:** backup workflow stores CSVs of every table as an artifact
   (90-day retention). Download occasionally and keep one offline copy.
 - **Monthly:** open `/en` and `/gu` on a phone, submit a test application,
-  check Search Console for coverage errors.
+  check Search Console for coverage errors. Also open `/admin/team` and
+  confirm the admin list matches who should actually have access — a
+  deactivated admin frees a seat, so this is also how you find a wasted one.
 
 ## Debugging in production
 ```bash
 npx wrangler tail            # live logs from the deployed worker
 ```
 Form issues: the routes log clearly (`[admission] …`, `[brief] …`,
-`[turnstile] …`, `[email] …`). "Demo mode" warnings mean `DATABASE_URL`
-never reached the worker: re-run `npx wrangler secret put DATABASE_URL`.
+`[turnstile] …`, `[email] …`). "Demo mode" warnings mean the worker could reach
+no database: check the `HYPERDRIVE` binding in `wrangler.jsonc`, or the
+temporary `DATABASE_URL` secret if Hyperdrive is not bound yet.
+
+Console issues log as `[auth] …`, `[team] …`, `[login] …`, `[dashboard] …`.
+None of them ever print a password, token, key or invitation link — if you need
+more detail, add it to the log message, never the payload.
 
 ## Known trade-offs (deliberate, revisit in Phase 5)
 - Home page renders per request (live batches + YouTube). If traffic ever
@@ -37,18 +48,27 @@ never reached the worker: re-run `npx wrangler secret put DATABASE_URL`.
 - Images: real photos aren't in yet, so `next/image` optimization is not
   configured. When the shoot lands, decide: Cloudflare Images vs. pre-sized
   static files (see plan §16 for target sizes).
+- The Worker opens one Postgres connection per request (`max: 1`,
+  `maxUses: 1`) rather than pooling across requests. That is deliberate — an
+  isolate is shared between people — and Hyperdrive does the pooling on its
+  side. Do not "optimise" it into a module-scope pool.
 - No per-IP rate limiting beyond Turnstile + honeypot + min-time. If abuse
   appears: Cloudflare WAF rate-limiting rule (free tier includes one) on
   `/api/*`.
 
 ## Post-audit operational changes
-- `/api/health` now returns **503 in production** when DB, Turnstile or
-  email keys are missing: point UptimeRobot at it and treat non-200 as an
-  incident (that state can lose leads).
+- `/api/health` returns **503 in production** when the database, Supabase
+  Auth, Turnstile or email is unconfigured: point UptimeRobot at it and treat
+  non-200 as an incident (that state can lose leads). It also reports
+  `dbViaHyperdrive` truthfully — `false` means the Worker is still on the
+  temporary direct-URL fallback, which is degraded but working, and does not
+  by itself make the check fail.
 - The homepage is static; upcoming batches come from `/api/batches`
   (cached 5 min at the edge). YouTube is cached 6 hours. A batch edited in
-  Neon appears on the site within ~5 minutes.
+  the database appears on the site within ~5 minutes.
 - The weekly backup workflow **fails loudly** if any table export fails:
-  a red run means the backup is incomplete, act on it.
+  a red run means the backup is incomplete, act on it. It reads Supabase over
+  the direct `DATABASE_URL` (GitHub Actions cannot use Hyperdrive) and now
+  includes `staff_permissions`. The artifacts contain PII.
 - Sample data and demo form responses now exist only in dev/preview builds.
   If production ever shows a "sample" tag, the deploy is misconfigured.

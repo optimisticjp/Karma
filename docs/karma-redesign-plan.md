@@ -1,3 +1,7 @@
+> **Historical.** Kept as a record of the redesign work. For the current
+> architecture see `docs/admin-architecture.md`; for the current visual
+> system see `docs/design-system.md`.
+
 # Karma Design Studio: Complete Website Rebuild Plan
 
 Prepared for the redesign of karmadesignstudio.in

@@ -1,3 +1,10 @@
+> **Superseded in part (Phase 2).** Section 12's hosting/database choices and
+> the auth assumptions in section 10.8 have moved on: the database is Supabase
+> Postgres via Cloudflare Hyperdrive, and staff auth is Supabase Auth with
+> mandatory TOTP MFA. The account model is now explicit — one Owner plus at
+> most five Admins with per-key permissions. Everything else in this plan
+> still stands. Current architecture: `docs/admin-architecture.md`.
+
 > **Design revision v2 (July 2026).** The visual direction in sections 4-7
 > of this plan (zari gold + maroon palette, Mukta Vaani/Rasa type) has been
 > superseded by the "Digital Thread" system: single vermilion accent,

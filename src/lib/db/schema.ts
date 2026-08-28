@@ -1,17 +1,21 @@
 /**
- * Karma Design Studio: database schema (Neon Postgres via Drizzle).
+ * Karma Design Studio: database schema (Supabase Postgres via Drizzle).
  * Implements the data model from the master plan, section 11.
  *
- * Phase 1 uses: applications, service_enquiries, service_files, courses, batches.
- * Phases 2-4 use the rest (already modelled here so migrations stay clean).
+ * Public site uses: applications, service_enquiries, service_files, courses,
+ * batches. Karma Console adds: staff roles + staff_permissions. The remaining
+ * tables are modelled ahead of their modules so migrations stay additive.
  *
  * Rules encoded here:
  *  - attendance is unique per (session, student)
  *  - every sensitive mutation should also write to audit_logs (app-level duty)
  *  - consent timestamps are stored, not booleans alone (DPDP)
+ *  - exactly one active owner, and at most five admin seats: enforced by
+ *    database invariants in drizzle/0002_*.sql, not by UI alone
  */
 import { sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   boolean,
   check,
   index,
@@ -59,7 +63,22 @@ export const attendanceStatusEnum = pgEnum("attendance_status", [
   "excused"
 ]);
 
-export const staffRoleEnum = pgEnum("staff_role", ["admin", "trainer"]);
+/**
+ * `owner` is the single superuser (bypasses the permission table entirely).
+ * `admin` accounts hold explicitly granted permissions and are capped at five.
+ * `trainer` is a staff record without Karma Console access; it predates the
+ * console and is deliberately preserved.
+ *
+ * Appended, never reordered: Postgres enum values are positional.
+ */
+export const staffRoleEnum = pgEnum("staff_role", ["admin", "trainer", "owner"]);
+
+/** Lifecycle of a console login, independent of `staff.active`. */
+export const staffStatusEnum = pgEnum("staff_status", [
+  "invited",
+  "active",
+  "deactivated"
+]);
 
 export const briefStatusEnum = pgEnum("brief_status", [
   "new",
@@ -80,17 +99,78 @@ export const certStatusEnum = pgEnum("cert_status", ["issued", "revoked"]);
 
 /* ---------------------------------- people -------------------------------- */
 
-export const staff = pgTable("staff", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 120 }).notNull(),
-  role: staffRoleEnum("role").notNull().default("trainer"),
-  phone: varchar("phone", { length: 20 }),
-  email: varchar("email", { length: 160 }),
-  // Better Auth user id (Phase 2). Nullable until auth is wired.
-  authUserId: varchar("auth_user_id", { length: 64 }).unique(),
-  active: boolean("active").notNull().default(true),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
-});
+export const staff = pgTable(
+  "staff",
+  {
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 120 }).notNull(),
+    role: staffRoleEnum("role").notNull().default("trainer"),
+    phone: varchar("phone", { length: 20 }),
+    email: varchar("email", { length: 160 }),
+    /**
+     * Supabase Auth user id (a UUID). Kept as varchar rather than converted to
+     * the uuid type: existing rows may hold non-UUID values from before this
+     * migration, and a destructive cast for aesthetics is not worth the risk
+     * (CLAUDE.md: additive migrations). Application code always compares it to
+     * `user.id`, which Supabase returns as a string.
+     */
+    authUserId: varchar("auth_user_id", { length: 64 }).unique(),
+    /** Console login lifecycle. `invited` = invitation sent, not yet accepted. */
+    status: staffStatusEnum("status").notNull().default("active"),
+    /** Master switch. An inactive record is denied by every guard, session or not. */
+    active: boolean("active").notNull().default(true),
+    /** Karma Console UI language for this person. Public site is unaffected. */
+    adminLocale: localeEnum("admin_locale").notNull().default("en"),
+    invitedAt: timestamp("invited_at", { withTimezone: true }),
+    invitedBy: integer("invited_by").references((): AnyPgColumn => staff.id),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    deactivatedAt: timestamp("deactivated_at", { withTimezone: true }),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
+  },
+  (t) => [
+    index("idx_staff_role").on(t.role),
+    /**
+     * One administrative identity per email address. Case-insensitive, and
+     * scoped to console roles so trainer records (which may legitimately share
+     * a family mailbox, or have none) are never blocked.
+     *
+     * Written as `role <> 'trainer'` rather than `role in ('owner','admin')`
+     * for two reasons: an index predicate must be IMMUTABLE (so `role::text`
+     * is rejected), and the migration that adds 'owner' to staff_role cannot
+     * evaluate that new value in the same transaction. Any future console role
+     * is therefore covered automatically; a future NON-console role would need
+     * this predicate revisited.
+     */
+    uniqueIndex("uq_staff_console_email")
+      .on(sql`lower(${t.email})`)
+      .where(sql`${t.email} is not null and ${t.role} <> 'trainer'`)
+  ]
+);
+
+/**
+ * Explicit permission grants. The owner is NOT represented here: the owner
+ * bypasses this table and always holds every permission. Ordinary admins hold
+ * only what has been granted, and every write to this table is owner-only and
+ * audited (CLAUDE.md #7).
+ */
+export const staffPermissions = pgTable(
+  "staff_permissions",
+  {
+    id: serial("id").primaryKey(),
+    staffId: integer("staff_id")
+      .notNull()
+      .references(() => staff.id, { onDelete: "cascade" }),
+    /** Validated against PERMISSIONS in src/lib/auth/permissions.ts. */
+    permission: varchar("permission", { length: 60 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: integer("created_by").references(() => staff.id)
+  },
+  (t) => [
+    uniqueIndex("uq_staff_permission").on(t.staffId, t.permission),
+    index("idx_staff_permissions_staff").on(t.staffId)
+  ]
+);
 
 export const students = pgTable("students", {
   id: serial("id").primaryKey(),
