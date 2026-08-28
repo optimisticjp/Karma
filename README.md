@@ -54,3 +54,5 @@ tests, includes full EN/GU catalog parity) before committing: CI enforces it.
 | `db:generate` / `db:migrate` / `db:seed` / `db:backup` / `db:studio` | Drizzle + Neon |
 | `preview` / `deploy` | OpenNext build + Cloudflare preview / deploy |
 | `cf-typegen` | Generate Cloudflare env types |
+
+<!-- Cloudflare preview pipeline test -->
