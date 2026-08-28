@@ -95,7 +95,10 @@ export default async function TeamPage() {
     "success.invited": t("team.success.invited", { email: "{email}" }),
     "success.permissions": t("team.success.permissions"),
     "success.deactivated": t("team.success.deactivated"),
-    "success.reactivated": t("team.success.reactivated")
+    "success.reactivated": t("team.success.reactivated"),
+    // Succeeded in Karma, but a Supabase-side step could not be confirmed.
+    "warnings.reactivatedAuthPending": t("team.warnings.reactivatedAuthPending"),
+    "warnings.deactivatedAuthPending": t("team.warnings.deactivatedAuthPending")
   };
 
   return (

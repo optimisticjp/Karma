@@ -204,6 +204,7 @@ invitation into a fully working console account.
 | Five admin seats | `validateInvite` → a sentence, not a 500 | same trigger + advisory lock |
 | Owner cannot be deactivated or demoted | Team UI + `setActiveAction` | same trigger |
 | **Owner cannot be DELETED** | the UI never deletes anyone | same trigger, on `BEFORE ... DELETE` |
+| **Owner lifecycle cannot go backwards** | nothing in the UI attempts it | same trigger (see below) |
 | One console identity per email | `validateInvite` | `uq_staff_console_email` partial unique index (case-insensitive) |
 | One staff row per Supabase user | — | `staff_auth_user_id_unique` |
 
@@ -212,6 +213,30 @@ would have left the obvious hole — `delete from staff where role = 'owner'`
 removes the sole superuser while satisfying every other rule on the way out. The
 DELETE branch is handled first and separately because a delete has `OLD` and no
 `NEW`; admin and trainer rows can still be deleted by a supervised operator.
+
+**The owner's `status` is protected too**, because the access layer reads it as
+a security state: `active` is required, `deactivated` is denied. So the trigger
+allows exactly one lifecycle move on an owner row:
+
+| From | To | |
+| --- | --- | --- |
+| `invited` | `invited` | allowed — an ordinary edit that leaves status alone |
+| `invited` | `active` | **allowed** — the owner accepting their own invitation |
+| `invited` | `deactivated` | rejected |
+| `active` | `active` | allowed |
+| `active` | `invited` | rejected — would strand the console with no usable owner |
+| `active` | `deactivated` | rejected — the access layer would read it as denied |
+| `deactivated` | anything | rejected, fail closed |
+
+That last row is deliberate. An owner row can only reach `deactivated` through a
+supervised override or direct manipulation, so finding one means something went
+wrong; the trigger refuses every ordinary write on it, including a well-meaning
+"fix", rather than quietly normalising a state nobody can explain. A human
+resolves it with the trigger disabled.
+
+Ordinary fields — `name`, `admin_locale`, `last_seen_at`, `accepted_at` — are
+untouched by any of this and change freely, on an invited owner as well as an
+active one.
 
 The trigger, not the UI, is what survives a race between two simultaneous
 invitations: it takes `pg_advisory_xact_lock` before counting. The application
@@ -249,7 +274,18 @@ one is the control:
 
 Step 2 is best effort. Its result is inspected and logged as a status only; a
 failure is never fatal to step 1 and is **never reported to the owner as
-something it is not**.
+something it is not**. The two directions fail differently, so Team reports them
+differently:
+
+- **Deactivating** — a failed ban is not a security problem, because Karma
+  already denies the account. The owner sees "account deactivated" with a note
+  that the sign-in provider could not be updated as well.
+- **Reactivating** — a failed *unban* matters operationally: Karma says the
+  admin is back while Supabase may still refuse their sign-in. Reporting a plain
+  "reactivated" there would be untrue, so the owner gets a warning telling them
+  to try again shortly. The Karma record is **not** rolled back for it.
+
+Neither message exposes a Supabase status code or internal detail.
 
 Two things this deliberately does **not** claim:
 
@@ -536,10 +572,34 @@ Needs `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SECRET_KEY`,
 
 - if **this** email is already the owner → exits 0, changes nothing
 - if a **different** owner exists → refuses and exits 1
-- otherwise → invites, inserts `role = owner`, writes one audit row
+- otherwise → invites, inserts `role = owner` + `status = invited`, and writes
+  one audit row, the two in a single transaction
+
+**It never adopts a pre-existing Supabase auth user as Owner.** Owner is the
+highest-privilege identity in the system, so if `inviteUserByEmail()` fails —
+most often because an auth user with that address already exists — the script
+fails closed and tells the operator to go and look:
+
+> A Supabase Auth user already exists for `ow****@example.com`, or the
+> invitation could not be created. Karma will NOT automatically grant Owner
+> access to an existing Auth identity. Open Supabase → Authentication → Users,
+> inspect that account, remove or resolve it if it is unexpected, then run this
+> script again.
+
+It does **not** search the user list for a matching address and link whatever
+it finds. A stale test account, or one an attacker registered with the owner's
+address before bootstrap ran, would otherwise become Owner.
+
+If the Karma transaction fails after Supabase created the user, the same
+compensation as the admin invite path applies: the just-created auth user is
+deleted, but only after confirming no staff row references it. If that cleanup
+also fails, the script prints the recovery procedure and exits non-zero — see
+"orphaned invitation recovery" in §9.
 
 It never sets a password, never prints a secret, never prints the invitation
-link, and never guesses an address. Run it yourself; nothing runs it for you.
+link, and never guesses an address. The owner's own address appears masked, so
+the operator can recognise what they typed. Run it yourself; nothing runs it
+for you.
 
 ---
 

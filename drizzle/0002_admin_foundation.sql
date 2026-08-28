@@ -44,7 +44,9 @@ CREATE UNIQUE INDEX "uq_staff_console_email" ON "staff" USING btree (lower("emai
 --      active = true, which deliberately includes a pending invitation
 --      (status = 'invited'): the seat is reserved the moment the invitation
 --      goes out. Deactivating an admin frees the seat.
---   3. The owner can be neither deactivated nor demoted by an ordinary write.
+--   3. The owner can be neither deactivated, demoted, nor moved backwards
+--      through its lifecycle by an ordinary write. Only the onboarding
+--      transition invited -> active is allowed.
 --   4. The owner row cannot be DELETED. Protecting only UPDATE would leave the
 --      obvious hole: `delete from staff where role = 'owner'` would remove the
 --      sole superuser and satisfy every other rule on the way out.
@@ -72,14 +74,47 @@ BEGIN
     RETURN OLD;
   END IF;
 
-  -- 3. The owner may never be deactivated or demoted through ordinary writes.
+  -- 3. The owner may never be demoted, deactivated, or moved backwards through
+  --    its lifecycle by an ordinary write. `status` is a security state — the
+  --    access layer requires 'active' and treats 'deactivated' as denied — so
+  --    it is protected here exactly like `role` and `active`.
+  --
+  --    The ONE lifecycle transition that must stay open is onboarding:
+  --      invited -> active   (the owner accepting their own invitation)
+  --
+  --    Ordinary fields — name, admin_locale, last_seen_at, accepted_at — are
+  --    untouched by any of this and change freely.
   IF TG_OP = 'UPDATE' AND OLD.role = 'owner' THEN
+    IF NEW.role <> 'owner' THEN
+      RAISE EXCEPTION 'karma_owner_locked: the owner role cannot be changed here'
+        USING ERRCODE = 'check_violation';
+    END IF;
     IF NEW.active = false THEN
       RAISE EXCEPTION 'karma_owner_locked: the owner account cannot be deactivated'
         USING ERRCODE = 'check_violation';
     END IF;
-    IF NEW.role <> 'owner' THEN
-      RAISE EXCEPTION 'karma_owner_locked: the owner role cannot be changed here'
+
+    IF OLD.status = 'invited' THEN
+      -- Accepting the invitation is allowed; anything else is not. In
+      -- particular an invited owner cannot be shelved as 'deactivated'.
+      IF NEW.status NOT IN ('invited', 'active') THEN
+        RAISE EXCEPTION 'karma_owner_locked: the owner lifecycle cannot move from invited to %', NEW.status
+          USING ERRCODE = 'check_violation';
+      END IF;
+    ELSIF OLD.status = 'active' THEN
+      -- Once accepted, the owner stays accepted. No going back to invited
+      -- (which would strand the console with no usable owner) and no
+      -- deactivation (which the access layer would read as denied).
+      IF NEW.status <> 'active' THEN
+        RAISE EXCEPTION 'karma_owner_locked: the owner lifecycle cannot move from active to %', NEW.status
+          USING ERRCODE = 'check_violation';
+      END IF;
+    ELSE
+      -- OLD.status is 'deactivated': a state ordinary writes cannot produce, so
+      -- reaching it means a supervised override or direct manipulation left the
+      -- row inconsistent. Fail closed rather than quietly normalising it — a
+      -- human has to look at how it got there.
+      RAISE EXCEPTION 'karma_owner_locked: owner lifecycle is in an unexpected state (%); resolve it under supervision', OLD.status
         USING ERRCODE = 'check_violation';
     END IF;
   END IF;

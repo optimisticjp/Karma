@@ -95,6 +95,21 @@ password reset that could enumerate addresses. Every account arrives through an
 owner invitation; the single Owner arrives through a CLI bootstrap that refuses
 to create a second one.
 
+**Owner is never adopted from an existing identity.** If the bootstrap script's
+`inviteUserByEmail()` call fails — most often because an auth user already holds
+that address — it fails closed and tells the operator to inspect the account.
+It does not search Supabase for a matching email and link whatever it finds: a
+stale test account, or one registered with the owner's address before bootstrap
+ran, would otherwise become the highest-privilege identity in the system. Only
+the auth user that a successful invitation just created is ever linked.
+
+**The owner's lifecycle is a database invariant.** Because the access layer
+reads `status` as a security state, the trigger allows an owner row exactly one
+transition — `invited → active`, the owner accepting their own invitation. Going
+back to `invited`, moving to `deactivated`, demotion, deactivation and deletion
+are all refused, and an owner row already in an unexplained `deactivated` state
+refuses every ordinary write rather than being silently normalised.
+
 **Sign-in** runs as a Server Action so Karma's own controls apply on top of
 Supabase's: per-IP and per-email rate limiting (the same best-effort helper the
 public forms use), and one generic message — `Email or password is incorrect.` —

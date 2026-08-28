@@ -202,3 +202,100 @@ describe("deactivation uses ban, never a user-id signOut", () => {
     expect(setActive).not.toContain("deleteUser");
   });
 });
+
+/**
+ * The owner invariant now protects `status` as well as `role` and `active`,
+ * because the access layer treats lifecycle as a security state. The SQL is
+ * exercised against a real PostgreSQL during development; these assert the
+ * shape of the rules so none of them can be dropped silently.
+ */
+describe("owner lifecycle is part of the database invariant", () => {
+  const migration = readFileSync("drizzle/0002_admin_foundation.sql", "utf8");
+  const ownerBlock = migration.slice(
+    migration.indexOf("IF TG_OP = 'UPDATE' AND OLD.role = 'owner' THEN"),
+    migration.indexOf("-- 1. Exactly one active owner")
+  );
+
+  it("fires on INSERT, UPDATE and DELETE", () => {
+    expect(migration).toContain("BEFORE INSERT OR UPDATE OR DELETE ON \"staff\"");
+  });
+
+  it("still refuses to delete or demote the owner, or switch it off", () => {
+    expect(migration).toContain("the owner account cannot be deleted");
+    expect(ownerBlock).toContain("the owner role cannot be changed here");
+    expect(ownerBlock).toContain("the owner account cannot be deactivated");
+  });
+
+  it("allows the onboarding transition invited -> active", () => {
+    // If this list ever loses 'active', every owner invitation deadlocks.
+    expect(ownerBlock).toContain("IF OLD.status = 'invited' THEN");
+    expect(ownerBlock).toContain("NEW.status NOT IN ('invited', 'active')");
+  });
+
+  it("pins an accepted owner to active — no going back to invited or deactivated", () => {
+    expect(ownerBlock).toContain("ELSIF OLD.status = 'active' THEN");
+    expect(ownerBlock).toContain("NEW.status <> 'active'");
+  });
+
+  it("fails closed on a corrupt owner lifecycle rather than normalising it", () => {
+    expect(ownerBlock).toContain("unexpected state");
+    expect(ownerBlock).toContain("resolve it under supervision");
+  });
+
+  it("keeps the seat and single-owner counts under an advisory lock", () => {
+    expect(migration).toContain("pg_advisory_xact_lock(hashtext('karma_owner_seat'))");
+    expect(migration).toContain("pg_advisory_xact_lock(hashtext('karma_admin_seats'))");
+  });
+});
+
+/**
+ * Reactivation changes Karma first and Supabase second. If the Supabase step
+ * cannot be confirmed, the owner must not be told "reactivated" — that admin
+ * may still be unable to sign in.
+ */
+describe("reactivation reports the Supabase step truthfully", () => {
+  const teamActions = readFileSync("src/app/admin/(console)/team/actions.ts", "utf8");
+  const setActive = teamActions.slice(
+    teamActions.indexOf("export async function setActiveAction")
+  );
+
+  it("has a warning state distinct from success", () => {
+    expect(teamActions).toContain('"idle" | "error" | "success" | "warning"');
+    expect(teamActions).toContain('"reactivatedAuthPending"');
+    expect(teamActions).toContain('"deactivatedAuthPending"');
+  });
+
+  it("returns the warning only when the ban/unban was not applied", () => {
+    expect(setActive).toContain('authConfirmed = banResult === "applied"');
+    expect(setActive).toContain("if (!authConfirmed)");
+    // lastIndexOf, because setActiveAction also returns ok(...) early when the
+    // account is already in the requested state — that path never calls
+    // Supabase, so it is not the return this ordering is about.
+    const warnIndex = setActive.indexOf('warn(activate ? "reactivatedAuthPending"');
+    const finalOkIndex = setActive.lastIndexOf('return ok(activate ? "reactivated"');
+    expect(warnIndex).toBeGreaterThan(-1);
+    // The warning is returned before the plain success line is reached.
+    expect(warnIndex).toBeLessThan(finalOkIndex);
+  });
+
+  it("does NOT roll the Karma change back when Supabase is unavailable", () => {
+    // The database write is committed before the Supabase call is even made.
+    const txIndex = setActive.indexOf("await db.transaction");
+    const banIndex = setActive.indexOf("setSupabaseUserBanned");
+    expect(txIndex).toBeGreaterThan(-1);
+    expect(txIndex).toBeLessThan(banIndex);
+    expect(setActive).not.toContain("rollback");
+  });
+
+  it("never leaks a Supabase status code into the owner-facing message", () => {
+    // banResult may appear in the server log line, but never inside the warn()
+    // state helper that builds what the owner sees.
+    expect(setActive).toContain("console.warn");
+    // lastIndexOf: the FIRST `if (!authConfirmed)` is the server log line,
+    // which may legitimately carry the status. The last one is the branch that
+    // builds the owner-facing TeamState, and that must carry nothing.
+    const stateWarn = setActive.slice(setActive.lastIndexOf("if (!authConfirmed) {"));
+    expect(stateWarn).not.toContain("banResult");
+    expect(stateWarn).toContain('return warn(activate ? "reactivatedAuthPending"');
+  });
+});

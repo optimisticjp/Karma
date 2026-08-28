@@ -17,18 +17,35 @@ export type TeamLabels = Record<string, string>;
 
 const IDLE: TeamState = { status: "idle", message: null };
 
-/** Renders whatever the last action said, success or failure, in one place. */
+const TONE = {
+  success: "alert-success",
+  warning: "alert-warn",
+  error: "alert-error"
+} as const;
+
+/**
+ * Renders whatever the last action said, in one place: success, a success that
+ * still needs attention, or a failure.
+ */
 function ActionMessage({ state, labels }: { state: TeamState; labels: TeamLabels }) {
   if (state.status === "idle" || !state.message) return <div role="alert" aria-live="polite" />;
-  const text =
+
+  const prefix =
     state.status === "success"
-      ? (labels[`success.${state.message}`] ?? "").replace("{email}", state.email ?? "")
-      : (labels[`errors.${state.message}`] ?? labels["errors.generic"]);
+      ? "success"
+      : state.status === "warning"
+        ? "warnings"
+        : "errors";
+
+  const text =
+    (labels[`${prefix}.${state.message}`] ?? labels["errors.generic"]).replace(
+      "{email}",
+      state.email ?? ""
+    );
+
   return (
     <div role="alert" aria-live="polite">
-      <p className={`alert ${state.status === "success" ? "alert-success" : "alert-error"}`}>
-        {text}
-      </p>
+      <p className={`alert ${TONE[state.status]}`}>{text}</p>
     </div>
   );
 }

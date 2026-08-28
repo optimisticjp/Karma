@@ -658,6 +658,10 @@
         "deactivated": "Account deactivated.",
         "reactivated": "Account reactivated."
       },
+      "warnings": {
+        "reactivatedAuthPending": "Account reactivated in Karma, but sign-in access could not be confirmed yet. Try reactivating again in a few minutes; until it succeeds this admin may not be able to sign in.",
+        "deactivatedAuthPending": "Account deactivated. Karma access is already blocked. The sign-in provider could not be updated as well, so try again later to complete it."
+      },
       "templates": {
         "admissions": "Admissions",
         "academy": "Academy",

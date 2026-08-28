@@ -32,7 +32,14 @@ import { AUDIT_ACTIONS, auditValues } from "@/lib/admin/audit";
  */
 
 export type TeamState = {
-  status: "idle" | "error" | "success";
+  /**
+   * `warning` is success that the owner still needs to know something about:
+   * the Karma record changed as asked, but a Supabase-side step could not be
+   * confirmed. It is deliberately distinct from `success` — reporting a
+   * half-finished reactivation as plain success would leave an admin unable to
+   * sign in with nobody aware of it.
+   */
+  status: "idle" | "error" | "success" | "warning";
   message:
     | null
     | "denied"
@@ -48,7 +55,9 @@ export type TeamState = {
     | "invited"
     | "permissions"
     | "deactivated"
-    | "reactivated";
+    | "reactivated"
+    | "reactivatedAuthPending"
+    | "deactivatedAuthPending";
   /** Only ever an email the owner just typed, for the success line. */
   email?: string;
 };
@@ -58,6 +67,11 @@ const ok = (message: TeamState["message"], email?: string): TeamState => ({
   status: "success",
   message,
   email
+});
+/** Succeeded in Karma, but a Supabase-side step could not be confirmed. */
+const warn = (message: TeamState["message"]): TeamState => ({
+  status: "warning",
+  message
 });
 
 /* ------------------------------- invite ----------------------------------- */
@@ -352,16 +366,25 @@ export async function setActiveAction(
       );
     });
 
-    // Supabase-side suspension is DEFENCE IN DEPTH, applied after the Karma
-    // record has already changed. The immediate kill switch is `staff.active`
-    // plus `staff.status`, which every protected request re-reads server-side:
-    // a deactivated admin is refused on their very next request regardless of
-    // what Supabase does here. A failure below is therefore logged, not fatal,
-    // and it is never reported to the owner as a session revocation — because
-    // it is not one. The auth user is never deleted.
+    // The Supabase-side step runs AFTER the Karma record has already changed,
+    // and the Karma record is never rolled back for it: `staff.active` plus
+    // `staff.status` are the real control, re-read server-side on every
+    // protected request. But the two directions fail differently, so they are
+    // reported differently:
+    //
+    //   deactivating — a failed ban is not a security problem. Karma already
+    //                  denies the account. Worth flagging, nothing more.
+    //   reactivating — a failed UNBAN matters operationally: Karma says the
+    //                  admin is back, while Supabase may still refuse to let
+    //                  them sign in. Saying plain "reactivated" there would be
+    //                  untrue, so the owner gets a warning and a retry.
+    //
+    // Neither case exposes a Supabase status code or message to the owner.
+    let authConfirmed = true;
     if (target.authUserId) {
       const banResult = await setSupabaseUserBanned(target.authUserId, !activate);
-      if (banResult !== "applied") {
+      authConfirmed = banResult === "applied";
+      if (!authConfirmed) {
         console.warn(
           `[team] Supabase ${activate ? "unban" : "ban"} not applied (${banResult}); ` +
             "Karma access control is unaffected and already enforced."
@@ -370,6 +393,9 @@ export async function setActiveAction(
     }
 
     revalidatePath("/admin/team");
+    if (!authConfirmed) {
+      return warn(activate ? "reactivatedAuthPending" : "deactivatedAuthPending");
+    }
     return ok(activate ? "reactivated" : "deactivated");
   } catch (e) {
     return mapDbError(e, "[team] setActive");
