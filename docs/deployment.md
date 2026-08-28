@@ -104,7 +104,13 @@ role would be denied by that. Never work around it with a permissive policy.
 
 ## 6. Deploy
 GitHub is connected to Cloudflare, so pushing to `main` builds and deploys
-automatically; pull requests get a preview build. Cloudflare runs:
+automatically; pull requests get a preview build at
+
+```
+https://<branch-or-commit>-karma-design-studio.essanciaonline.workers.dev
+```
+
+Cloudflare runs:
 
 ```
 build:   npx @opennextjs/cloudflare build

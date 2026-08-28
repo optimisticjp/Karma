@@ -682,10 +682,23 @@ Nothing below can be done from the repository. Work top to bottom.
 8. Same screen → **Redirect URLs**, add:
    - `https://karma-design-studio.essanciaonline.workers.dev/admin/auth/callback`
    - `http://localhost:3000/admin/auth/callback`
-   - Cloudflare preview builds get their own hostname. Add it **after** the
-     first preview deploy exists, once you can read the real URL — the pattern
-     cannot be known from the repository, and a broad wildcard is not worth
-     guessing. Do **not** add `karmadesignstudio.in` yet.
+   - Cloudflare preview builds get their own hostname. The pattern is now known
+     from the first preview deploy of this branch:
+
+     ```
+     https://<branch-or-commit>-karma-design-studio.essanciaonline.workers.dev
+     ```
+
+     so the narrowest allow-list entry that covers previews is
+
+     ```
+     https://*-karma-design-studio.essanciaonline.workers.dev/admin/auth/callback
+     ```
+
+     That wildcard is bounded to this worker on this account subdomain — it is
+     not `https://*/…`. Add it only if you actually need to accept invitations
+     on a preview build; production and localhost above are enough for the
+     normal flow. Do **not** add `karmadesignstudio.in` yet.
 8b. **Authentication → Emails → Templates → "Invite user"**: replace the body
    with the token-hash template in §9. This step is REQUIRED — the stock
    template returns the session in a URL fragment, which a server-side
