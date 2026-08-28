@@ -29,11 +29,12 @@ export function safeNextPath(value: unknown, fallback: string = ADMIN_HOME): str
   const path = value.split("?")[0].split("#")[0];
   if (path !== ADMIN_HOME && !path.startsWith(`${ADMIN_HOME}/`)) return fallback;
 
-  // Never bounce back into an auth screen: that loops.
+  // Never bounce back into an auth or onboarding screen: that loops.
   if (
     path.startsWith("/admin/login") ||
     path.startsWith("/admin/mfa") ||
-    path.startsWith("/admin/auth")
+    path.startsWith("/admin/auth") ||
+    path.startsWith("/admin/welcome")
   ) {
     return fallback;
   }
@@ -53,6 +54,10 @@ export function redirectTargetFor(decision: AccessDecision, from?: string): stri
   switch (decision.reason) {
     case "signin":
       return `/admin/login${next}`;
+    // An account that has not accepted its invitation is sent to finish
+    // onboarding, not to MFA and not to an error page.
+    case "invited":
+      return "/admin/welcome";
     case "mfa-setup":
       return `/admin/mfa/setup${next}`;
     case "mfa-challenge":

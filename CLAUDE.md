@@ -67,10 +67,14 @@ Mota Varachha, Surat. The full strategy lives in
    IDENTITY; the Karma `staff` row decides AUTHORIZATION. Every admin page and
    server action goes through `src/lib/auth/guard.ts`
    (`requireAdmin` / `requireOwner` / `requirePermission` / `authorizeAction`),
-   which checks all six of: verified user → linked staff record → `active` →
-   console role → **AAL2** → permission. Never re-implement a role check
-   inline, never trust `user_metadata`, never treat middleware or a hidden nav
-   link as a control. App tables additionally have RLS on with no policies and
+   which checks all seven of: verified user → linked staff record → `active` →
+   console role → lifecycle `status === "active"` → **AAL2** → permission.
+   `staff.status` is load-bearing, not informational: an `invited` row is
+   `active: true` because it holds a seat, and must reach ONLY `/admin/welcome`
+   (guard: `requireInvitedConsoleUser`), never console data, even at AAL2.
+   Never re-implement a role check inline, never trust `user_metadata`, never
+   treat middleware or a hidden nav link as a control. App tables additionally
+   have RLS on with no policies and
    no grants for `anon`/`authenticated`, so the publishable key cannot read
    data through the Supabase Data API — do NOT add a permissive policy to
    "make something work", and do NOT start using Supabase `.from()`: Drizzle
@@ -82,8 +86,14 @@ Mota Varachha, Surat. The full strategy lives in
    holds every permission implicitly) plus at most five enabled `admin`
    accounts; a pending invitation holds a seat, deactivating frees it. Team
    administration is Owner-only and has NO permission key — never add one. The
-   invariants are enforced by the `karma_staff_invariants` trigger as well as
-   the app; keep both. Accounts are deactivated, never deleted.
+   invariants are enforced by the `karma_staff_invariants` trigger (INSERT,
+   UPDATE *and* DELETE — the owner row cannot even be deleted) as well as the
+   app; keep both. Accounts are deactivated, never deleted. Deactivation means
+   `active=false` + `status='deactivated'` in Karma, plus a best-effort Supabase
+   `ban_duration`; it is NOT a session revocation, so never describe it as one
+   (`auth.admin.signOut()` needs a JWT, not a user id — do not call it with an
+   id). Reactivation restores lifecycle from `accepted_at`, never from
+   `status`.
 11. **Watch the worker size.** Free plan limit is 3 MB gzipped. After adding
     dependencies run `npx wrangler deploy --dry-run` and check the gzip
     number. No charting libraries, no admin component kits, no duplicate

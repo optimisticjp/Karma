@@ -29,6 +29,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { and, eq } from "drizzle-orm";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import * as schema from "../src/lib/db/schema";
+import { inviteRedirectTo } from "../src/lib/supabase/invite-redirect";
 
 const DRY_RUN = process.argv.includes("--dry-run");
 
@@ -109,9 +110,8 @@ async function main() {
       auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
     });
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
     const { data, error } = await supabase.auth.admin.inviteUserByEmail(ownerEmail, {
-      redirectTo: `${siteUrl}/admin/auth/callback?next=${encodeURIComponent("/admin/welcome")}`,
+      redirectTo: inviteRedirectTo(),
       data: { name: ownerName }
     });
 

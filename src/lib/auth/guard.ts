@@ -6,11 +6,13 @@ import { getAssuranceLevel, getVerifiedUser } from "@/lib/supabase/server";
 import { getStaffByAuthUserId, type StaffRecord } from "./staff";
 import {
   evaluateAccess,
+  evaluateOnboardingAccess,
   hasPermission,
   type AccessDecision,
   type AccessFailureReason,
   type AccessRequirement,
-  type AccessSubject
+  type AccessSubject,
+  type OnboardingDecision
 } from "./access";
 import type { Permission } from "./permissions";
 import { redirectTargetFor } from "./redirect";
@@ -69,6 +71,7 @@ const resolveSubject = cache(async (): Promise<ResolvedSubject> => {
             id: staff.id,
             role: staff.role,
             active: staff.active,
+            status: staff.status,
             permissions: staff.permissions
           }
         : null,
@@ -153,4 +156,59 @@ export async function authorizeAction(
 export async function currentCan(permission: Permission): Promise<boolean> {
   const { staff } = await resolveAccess();
   return hasPermission(staff, permission);
+}
+
+/* -------------------------------- onboarding ------------------------------ */
+
+/**
+ * The ONE console guard that runs below AAL2, for invitation acceptance.
+ *
+ * A person cannot enrol an authenticator before they have the password that
+ * gets them a session, so requiring AAL2 at /admin/welcome would deadlock
+ * every invitation. Everything else is still required, and is checked here
+ * rather than assumed:
+ *
+ *   - a verified Supabase user
+ *   - a staff record LINKED to that user by auth_user_id
+ *   - active
+ *   - a console role
+ *   - lifecycle status `invited`
+ *
+ * So an unlinked Supabase user cannot use the onboarding flow, a deactivated
+ * account cannot, and an account that has already accepted is sent onward to
+ * MFA or the console instead of being allowed to set a password again.
+ *
+ * Returns the decision rather than redirecting, because the welcome page and
+ * the welcome server action need to react differently to the same states.
+ */
+export async function resolveOnboarding(): Promise<{
+  decision: OnboardingDecision;
+  staff: StaffRecord | null;
+  userId: string | null;
+}> {
+  const { subject, staff, userId } = await resolveSubject();
+  return { decision: evaluateOnboardingAccess(subject), staff, userId };
+}
+
+export type OnboardingSession = { userId: string; staff: StaffRecord };
+
+/**
+ * Page-level onboarding guard. Redirects anyone who is not a linked, active,
+ * still-invited console user to wherever they actually belong.
+ */
+export async function requireInvitedConsoleUser(): Promise<OnboardingSession> {
+  const { decision, staff, userId } = await resolveOnboarding();
+
+  if (!decision.ok) {
+    if (decision.alreadyAccepted) {
+      // Already accepted: send them through the ordinary decision, which will
+      // land on MFA setup, MFA challenge or the console itself.
+      const { decision: normal } = await resolveAccess();
+      redirect(redirectTargetFor(normal));
+    }
+    redirect(redirectTargetFor({ ok: false, reason: decision.reason }));
+  }
+
+  if (!staff || !userId) redirect("/admin/login");
+  return { userId, staff };
 }

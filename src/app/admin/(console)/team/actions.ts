@@ -4,9 +4,17 @@ import { revalidatePath } from "next/cache";
 import { and, eq, inArray } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { authorizeAction } from "@/lib/auth/guard";
-import { createAdminClient, adminClientConfigured } from "@/lib/supabase/admin";
+import {
+  adminClientConfigured,
+  createAdminClient,
+  deleteSupabaseUser,
+  setSupabaseUserBanned
+} from "@/lib/supabase/admin";
 import { parsePermissions, type Permission } from "@/lib/auth/permissions";
+import { inviteRedirectTo } from "@/lib/supabase/invite-redirect";
 import { validateInvite } from "@/lib/admin/invite";
+import { persistInvitedAdmin } from "@/lib/admin/invite-persistence";
+import { reactivatedStatus } from "@/lib/admin/lifecycle";
 import { AUDIT_ACTIONS, auditValues } from "@/lib/admin/audit";
 
 /**
@@ -102,10 +110,9 @@ export async function inviteAdminAction(
     const supabaseAdmin = createAdminClient();
     if (!supabaseAdmin) return err("inviteFailed");
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
     const { data: invited, error: inviteError } =
       await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-        redirectTo: `${siteUrl}/admin/auth/callback?next=${encodeURIComponent("/admin/welcome")}`,
+        redirectTo: inviteRedirectTo(),
         data: { name }
       });
 
@@ -116,47 +123,86 @@ export async function inviteAdminAction(
       return err("inviteFailed");
     }
 
-    // Staff row + grants + audit in ONE transaction: an invitation that is not
-    // recorded, or recorded without its permissions, is worse than none.
-    await db.transaction(async (tx) => {
-      const inserted = await tx
-        .insert(schema.staff)
-        .values({
-          name,
-          email,
-          role: "admin",
-          status: "invited",
-          active: true,
-          adminLocale: locale,
-          authUserId: invited.user.id,
-          invitedAt: new Date(),
-          invitedBy: auth.session.staff.id
-        })
-        .returning({ id: schema.staff.id });
+    // Supabase has now created an auth user. From here on, a Karma-side failure
+    // would leave that user orphaned — so persistence is wrapped in a
+    // compensating cleanup that removes the user we just created.
+    const newAuthUserId = invited.user.id;
 
-      const staffId = inserted[0].id;
+    const outcome = await persistInvitedAdmin(newAuthUserId, {
+      // Staff row + grants + audit in ONE transaction: an invitation that is
+      // not recorded, or recorded without its permissions, is worse than none.
+      persist: async () => {
+        await db.transaction(async (tx) => {
+          const inserted = await tx
+            .insert(schema.staff)
+            .values({
+              name,
+              email,
+              role: "admin",
+              status: "invited",
+              active: true,
+              adminLocale: locale,
+              authUserId: newAuthUserId,
+              invitedAt: new Date(),
+              invitedBy: auth.session.staff.id
+            })
+            .returning({ id: schema.staff.id });
 
-      if (permissions.length > 0) {
-        await tx.insert(schema.staffPermissions).values(
-          permissions.map((permission) => ({
-            staffId,
-            permission,
-            createdBy: auth.session.staff.id
-          }))
+          const staffId = inserted[0].id;
+
+          if (permissions.length > 0) {
+            await tx.insert(schema.staffPermissions).values(
+              permissions.map((permission) => ({
+                staffId,
+                permission,
+                createdBy: auth.session.staff.id
+              }))
+            );
+          }
+
+          await tx.insert(schema.auditLogs).values(
+            auditValues({
+              actor: String(auth.session.staff.id),
+              action: AUDIT_ACTIONS.adminInvited,
+              entity: "staff",
+              entityId: staffId,
+              newValue: {
+                name,
+                email,
+                role: "admin",
+                template,
+                permissions,
+                adminLocale: locale
+              },
+              reason: "owner invited an admin"
+            })
+          );
+        });
+      },
+      hasStaffForAuthUser: async (id) => {
+        const rows = await db
+          .select({ id: schema.staff.id })
+          .from(schema.staff)
+          .where(eq(schema.staff.authUserId, id))
+          .limit(1);
+        return rows.length > 0;
+      },
+      deleteAuthUser: deleteSupabaseUser
+    });
+
+    if (outcome.status !== "persisted") {
+      if (outcome.status === "orphan-requires-recovery") {
+        // Loud, and free of secrets: no user id, no email, no token, no link.
+        console.error(
+          "[team] RECOVERY REQUIRED: a Supabase auth user was created for an " +
+            "invitation whose Karma record did not commit, and could not be " +
+            "removed automatically. See docs/admin-architecture.md → orphaned " +
+            "invitation recovery."
         );
       }
-
-      await tx.insert(schema.auditLogs).values(
-        auditValues({
-          actor: String(auth.session.staff.id),
-          action: AUDIT_ACTIONS.adminInvited,
-          entity: "staff",
-          entityId: staffId,
-          newValue: { name, email, role: "admin", template, permissions, adminLocale: locale },
-          reason: "owner invited an admin"
-        })
-      );
-    });
+      // A lost seat race surfaces as "all seats in use", not as a 500.
+      return mapDbError(outcome.cause, "[team] invite persistence");
+    }
 
     revalidatePath("/admin/team");
     return ok("invited", email);
@@ -260,7 +306,11 @@ export async function setActiveAction(
         id: schema.staff.id,
         role: schema.staff.role,
         active: schema.staff.active,
-        status: schema.staff.status
+        status: schema.staff.status,
+        // The durable evidence of whether this person ever accepted their
+        // invitation. Reactivation depends on it (see reactivatedStatus).
+        acceptedAt: schema.staff.acceptedAt,
+        authUserId: schema.staff.authUserId
       })
       .from(schema.staff)
       .where(eq(schema.staff.id, staffId))
@@ -272,18 +322,17 @@ export async function setActiveAction(
       return ok(activate ? "reactivated" : "deactivated");
     }
 
+    // `deactivated` overwrites the previous status, so reactivation reads
+    // accepted_at instead: an account that never accepted goes back to
+    // `invited` and has to finish onboarding, not straight into the console.
+    const restoredStatus = reactivatedStatus(target.acceptedAt);
+
     await db.transaction(async (tx) => {
       await tx
         .update(schema.staff)
         .set(
           activate
-            ? {
-                active: true,
-                // A person who never accepted returns to `invited`, not to
-                // `active`: their invitation still has to be completed.
-                status: target.status === "deactivated" ? "active" : target.status,
-                deactivatedAt: null
-              }
+            ? { active: true, status: restoredStatus, deactivatedAt: null }
             : { active: false, status: "deactivated", deactivatedAt: new Date() }
         )
         .where(and(eq(schema.staff.id, staffId), eq(schema.staff.role, "admin")));
@@ -297,41 +346,33 @@ export async function setActiveAction(
           entity: "staff",
           entityId: staffId,
           oldValue: { active: target.active, status: target.status },
-          newValue: { active: activate },
+          newValue: { active: activate, status: activate ? restoredStatus : "deactivated" },
           reason: activate ? "owner reactivated an admin" : "owner deactivated an admin"
         })
       );
     });
 
-    // Best effort session revocation. Karma's own guard already denies this
-    // account on its very next request — `staff.active` is checked server-side
-    // every time — so a Supabase-side failure here degrades nothing.
-    // The Supabase auth user is NEVER deleted: that would destroy the identity
-    // the audit trail refers to.
-    if (!activate) await revokeSupabaseSessions(staffId);
+    // Supabase-side suspension is DEFENCE IN DEPTH, applied after the Karma
+    // record has already changed. The immediate kill switch is `staff.active`
+    // plus `staff.status`, which every protected request re-reads server-side:
+    // a deactivated admin is refused on their very next request regardless of
+    // what Supabase does here. A failure below is therefore logged, not fatal,
+    // and it is never reported to the owner as a session revocation — because
+    // it is not one. The auth user is never deleted.
+    if (target.authUserId) {
+      const banResult = await setSupabaseUserBanned(target.authUserId, !activate);
+      if (banResult !== "applied") {
+        console.warn(
+          `[team] Supabase ${activate ? "unban" : "ban"} not applied (${banResult}); ` +
+            "Karma access control is unaffected and already enforced."
+        );
+      }
+    }
 
     revalidatePath("/admin/team");
     return ok(activate ? "reactivated" : "deactivated");
   } catch (e) {
     return mapDbError(e, "[team] setActive");
-  }
-}
-
-async function revokeSupabaseSessions(staffId: number) {
-  try {
-    const db = getDb();
-    const supabaseAdmin = createAdminClient();
-    if (!db || !supabaseAdmin) return;
-    const rows = await db
-      .select({ authUserId: schema.staff.authUserId })
-      .from(schema.staff)
-      .where(eq(schema.staff.id, staffId))
-      .limit(1);
-    const authUserId = rows[0]?.authUserId;
-    if (!authUserId) return;
-    await supabaseAdmin.auth.admin.signOut(authUserId, "global");
-  } catch (e) {
-    console.error("[team] session revocation unavailable", e);
   }
 }
 

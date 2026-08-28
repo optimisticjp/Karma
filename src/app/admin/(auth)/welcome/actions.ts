@@ -2,25 +2,35 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
-import { getDb, schema } from "@/lib/db";
-import { AUDIT_ACTIONS, writeAudit } from "@/lib/admin/audit";
+import { resolveOnboarding } from "@/lib/auth/guard";
+import { acceptInvitation } from "@/lib/admin/onboarding";
 
 /**
  * Invitation acceptance: the invited person chooses their password.
  *
- * Reachable only with the short-lived session the invite callback established,
- * so there is no "set a password for an arbitrary email" surface here. The
- * password is passed to Supabase and never stored, hashed, logged or audited
+ * Authorization is NOT "whoever holds a session". `resolveOnboarding()`
+ * requires a verified Supabase user linked to a staff row that is active, holds
+ * a console role, and is still `invited`. An unlinked Supabase user, a
+ * deactivated account, and an account that has already accepted are all turned
+ * away here, not just in the page that renders the form.
+ *
+ * The password goes to Supabase and is never stored, hashed, logged or audited
  * by Karma — Supabase Auth owns credentials, we own authorization.
  *
- * After this, the guard still forces MFA enrolment before any console data.
+ * Order matters. The Supabase password update happens first, then the Karma
+ * lifecycle transition. If that transition fails, this does NOT redirect to MFA:
+ * the staff row is the authority, so until it commits the person is still in
+ * onboarding-only state and saying otherwise would be a lie. The password is
+ * not rolled back (there is nothing safe to roll it back to); a retry simply
+ * re-runs both steps, and both are idempotent.
  */
 
-export type WelcomeState = { error: null | "mismatch" | "tooShort" | "expired" | "failed" };
+export type WelcomeState = {
+  error: null | "mismatch" | "tooShort" | "expired" | "denied" | "failed";
+};
 
-const schema_ = z
+const passwordSchema = z
   .object({
     password: z.string().min(12).max(200),
     confirm: z.string().min(1).max(200)
@@ -35,59 +45,32 @@ export async function setPasswordAction(
   const confirm = String(formData.get("confirm") ?? "");
 
   if (password !== confirm) return { error: "mismatch" };
-  if (password.length < 12) return { error: "tooShort" };
-  const parsed = schema_.safeParse({ password, confirm });
+  const parsed = passwordSchema.safeParse({ password, confirm });
   if (!parsed.success) return { error: "tooShort" };
+
+  // Narrow onboarding authorization, re-checked inside the action itself.
+  const { decision, userId } = await resolveOnboarding();
+  if (!decision.ok) {
+    if (decision.alreadyAccepted) {
+      // Onboarding is finished; send them on rather than letting them set a
+      // password a second time from whatever session reached this action.
+      redirect("/admin/mfa/setup");
+    }
+    // "signin" means the invite session is gone or was never established.
+    return { error: decision.reason === "signin" ? "expired" : "denied" };
+  }
+  if (!userId) return { error: "expired" };
 
   const supabase = await createClient();
   if (!supabase) return { error: "failed" };
 
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) return { error: "expired" };
-
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
   if (error) return { error: "failed" };
 
-  await markAccepted(userData.user.id);
+  // The Karma state transition + its audit row, in one transaction. Anything
+  // other than success stops here with a generic, retryable message.
+  const result = await acceptInvitation(userId);
+  if (result === "failed") return { error: "failed" };
+
   redirect("/admin/mfa/setup");
-}
-
-/**
- * Flips the staff row from `invited` to `active` the first time the person
- * completes acceptance, and records it. The seat was already reserved at
- * invitation time, so this changes no counts.
- */
-async function markAccepted(authUserId: string) {
-  const db = getDb();
-  if (!db) return;
-  try {
-    const rows = await db
-      .select({
-        id: schema.staff.id,
-        status: schema.staff.status,
-        role: schema.staff.role
-      })
-      .from(schema.staff)
-      .where(eq(schema.staff.authUserId, authUserId))
-      .limit(1);
-
-    const row = rows[0];
-    if (!row || row.status !== "invited") return;
-
-    await db
-      .update(schema.staff)
-      .set({ status: "active", acceptedAt: new Date() })
-      .where(eq(schema.staff.id, row.id));
-
-    await writeAudit({
-      actor: String(row.id),
-      action: AUDIT_ACTIONS.adminAccepted,
-      entity: "staff",
-      entityId: row.id,
-      oldValue: { status: "invited" },
-      newValue: { status: "active", role: row.role }
-    });
-  } catch (e) {
-    console.error("[welcome] markAccepted failed", e);
-  }
 }

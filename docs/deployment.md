@@ -32,6 +32,12 @@ one covers the accounts.
 7. Configure Supabase Auth (email+password on, public sign-ups OFF, TOTP MFA
    on, Site URL and redirect URLs) — the exact settings are in
    `docs/admin-architecture.md` §17.
+8. **Authentication → Emails → Templates → "Invite user": replace the body with
+   the token-hash template in `docs/admin-architecture.md` §9.** This is not
+   optional. The stock template returns the session in a URL fragment, which a
+   server-side application can never read, so every invitation would dead-end
+   on "this invitation link is no longer valid". Send one test invitation to
+   yourself after changing it.
 
 Free-tier note: a Supabase free project pauses after a period of inactivity.
 The weekly backup workflow and the uptime monitor (step 7) keep it warm.

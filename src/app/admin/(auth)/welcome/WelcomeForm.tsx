@@ -11,6 +11,7 @@ type Labels = {
   mismatch: string;
   tooShort: string;
   expired: string;
+  denied: string;
   failed: string;
 };
 

@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { Pool } from "pg";
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import * as schema from "./schema";
 
 export type Db = NodePgDatabase<typeof schema>;
@@ -29,10 +30,14 @@ export type Db = NodePgDatabase<typeof schema>;
  * promise immediately, which would break every query issued after it. The
  * short idle timeout plus `maxUses: 1` closes sockets without that hazard.
  *
- * `getCloudflareContext` is read from the global the Worker entrypoint sets,
- * rather than by importing the adapter, so `next build`, vitest and the CLI
- * scripts never require Cloudflare or a Hyperdrive binding to exist: they fall
- * back to DATABASE_URL, and to "not configured" when that is absent too.
+ * The binding is read through OpenNext's public `getCloudflareContext()` API,
+ * in SYNC mode. Sync is the right mode here and not a shortcut: it resolves
+ * from the context the Worker entrypoint (and `initOpenNextCloudflareForDev`)
+ * has already put in place, and it throws everywhere else instead of starting
+ * a wrangler/miniflare proxy. That is exactly the behaviour we want, because
+ * it means `next build`, vitest and the CLI scripts never require Cloudflare
+ * or a Hyperdrive binding to exist — they take the DATABASE_URL fallback, and
+ * report "not configured" when that is absent too.
  */
 
 type Resolved = {
@@ -47,13 +52,18 @@ function directUrl(): string | null {
   return url;
 }
 
-/** Reads the Cloudflare request context that OpenNext puts on globalThis. */
+/**
+ * The Hyperdrive connection string for this request, or null when there is no
+ * Cloudflare context (a build, a test, a CLI script) or no binding configured
+ * yet. `getCloudflareContext()` throws in sync mode outside a Worker request,
+ * which is the documented behaviour and the fallback signal we rely on.
+ */
 function hyperdriveConnectionString(): string | null {
   try {
-    const ctx = (globalThis as unknown as Record<symbol, unknown>)[
-      Symbol.for("__cloudflare-context__")
-    ] as { env?: Record<string, unknown> } | undefined;
-    const binding = ctx?.env?.["HYPERDRIVE"] as { connectionString?: string } | undefined;
+    const { env } = getCloudflareContext();
+    const binding = (env as unknown as Record<string, unknown>)["HYPERDRIVE"] as
+      | { connectionString?: string }
+      | undefined;
     return binding?.connectionString ?? null;
   } catch {
     return null;

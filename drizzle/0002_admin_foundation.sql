@@ -37,7 +37,7 @@ CREATE UNIQUE INDEX "uq_staff_console_email" ON "staff" USING btree (lower("emai
 -- take a lock, which an index cannot.
 -- ---------------------------------------------------------------------------
 
--- INVARIANTS, all three of them:
+-- INVARIANTS, all four of them:
 --   1. At most one ACTIVE owner. A deactivated historical owner row stays
 --      permitted, so a supervised ownership handover remains possible later.
 --   2. At most five admin SEATS. A seat is consumed by any admin row with
@@ -45,6 +45,9 @@ CREATE UNIQUE INDEX "uq_staff_console_email" ON "staff" USING btree (lower("emai
 --      (status = 'invited'): the seat is reserved the moment the invitation
 --      goes out. Deactivating an admin frees the seat.
 --   3. The owner can be neither deactivated nor demoted by an ordinary write.
+--   4. The owner row cannot be DELETED. Protecting only UPDATE would leave the
+--      obvious hole: `delete from staff where role = 'owner'` would remove the
+--      sole superuser and satisfy every other rule on the way out.
 --
 -- pg_advisory_xact_lock serialises both counts, so two writes racing each
 -- other cannot both read "one seat left" and both succeed.
@@ -57,6 +60,18 @@ DECLARE
   seats_used integer;
   owners_active integer;
 BEGIN
+  -- 4. DELETE is handled first and separately: it has OLD but no NEW, so every
+  --    NEW.* reference below would raise. Admin and trainer rows may still be
+  --    deleted by a supervised operator — the Karma UI never deletes anyone,
+  --    it deactivates — but the owner row is protected outright.
+  IF TG_OP = 'DELETE' THEN
+    IF OLD.role = 'owner' THEN
+      RAISE EXCEPTION 'karma_owner_locked: the owner account cannot be deleted'
+        USING ERRCODE = 'check_violation';
+    END IF;
+    RETURN OLD;
+  END IF;
+
   -- 3. The owner may never be deactivated or demoted through ordinary writes.
   IF TG_OP = 'UPDATE' AND OLD.role = 'owner' THEN
     IF NEW.active = false THEN
@@ -105,7 +120,7 @@ $$ LANGUAGE plpgsql;--> statement-breakpoint
 DROP TRIGGER IF EXISTS "trg_karma_staff_invariants" ON "staff";--> statement-breakpoint
 
 CREATE TRIGGER "trg_karma_staff_invariants"
-  BEFORE INSERT OR UPDATE ON "staff"
+  BEFORE INSERT OR UPDATE OR DELETE ON "staff"
   FOR EACH ROW EXECUTE FUNCTION "karma_staff_invariants"();--> statement-breakpoint
 
 -- ---------------------------------------------------------------------------

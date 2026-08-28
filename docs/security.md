@@ -48,10 +48,47 @@ and `user_metadata` is never consulted — an editable `role: "owner"` claim mea
 precisely nothing.
 
 **The access decision** (`src/lib/auth/access.ts`, pure and unit-tested) needs
-all six of: verified user → linked staff record → `active` → console role →
-**AAL2** → the required permission. Staff checks run before MFA, so a
-deactivated account is turned away rather than walked through enrolment. A
-deactivated admin holding an old session is rejected on their very next request.
+all seven of: verified user → linked staff record → `active` → console role →
+lifecycle **`status === "active"`** → **AAL2** → the required permission.
+Deactivation is rejected first, so a switched-off account is never walked
+through enrolment or onboarding. A deactivated admin holding an old session is
+rejected on their very next request.
+
+**An invited account is not a console account.** A pending invitation is stored
+`active: true` because it reserves one of the five seats — which makes
+`staff.status` load-bearing, not informational. An `invited` row reaches
+`/admin/welcome` and nothing else, **even at AAL2**. That page is the one path
+that legitimately runs below AAL2 (nobody can enrol an authenticator before they
+have a password), and it has its own narrow guard,
+`requireInvitedConsoleUser()`, which still demands a verified Supabase user, a
+LINKED staff record, `active`, a console role and lifecycle `invited`. An
+unlinked Supabase user cannot onboard; a deactivated account cannot; an account
+that already accepted is sent onward rather than allowed to set a password
+again.
+
+**Acceptance is transactional and gates MFA.** The `invited → active`
+transition, `accepted_at` and the `admin.accepted` audit row commit together or
+not at all. If they fail, the flow stops with a generic retryable error instead
+of continuing to MFA — the staff row is the authority, so until it commits the
+person is still onboarding-only. Retries are idempotent and write no duplicate
+audit row.
+
+**Invitations are a token-hash flow, not PKCE.** `inviteUserByEmail()` does not
+support PKCE — the installed `@supabase/auth-js` states this itself — so
+`/admin/auth/callback` verifies `token_hash` with `type` compared for equality
+against `"invite"`. That type is attacker-controlled URL input and is never cast
+into `EmailOtpType`, so a `recovery`, `signup` or `magiclink` link cannot enter
+admin onboarding through that endpoint. The Supabase **Invite user** email
+template must be set to the token-hash form for this to work at all; the exact
+snippet is in `docs/admin-architecture.md` §9.
+
+**Invitation consistency.** A Supabase auth user is created before the Karma
+staff row can reference it, so a failure in between (a lost seat race, a
+database blip) is compensated: the just-created auth user is deleted, but only
+after confirming no staff row points at it. If the cleanup itself fails, a
+recovery-required event is logged without any secret, id or email, the owner
+sees a generic failure, and the manual procedure is in
+`docs/admin-architecture.md`. No orphan is ever reported as success.
 
 **No public sign-up.** No registration route, no self-service role selection, no
 password reset that could enumerate addresses. Every account arrives through an
@@ -75,7 +112,30 @@ accounts require the owner role at AAL2, checked inside each server action, not
 only in the page. There is deliberately no permission key that unlocks it, so it
 cannot be granted to an admin. One Owner and five admin seats are enforced by a
 database trigger with an advisory lock as well as by the application, so a race
-between two invitations cannot slip past.
+between two invitations cannot slip past. The owner row cannot be deactivated,
+demoted **or deleted**: the trigger fires on `BEFORE INSERT OR UPDATE OR
+DELETE`, so `delete from staff where role = 'owner'` is refused too.
+
+**Deactivation is immediate — and precisely what it says.** Karma sets
+`active = false` and `status = 'deactivated'`; every protected request re-reads
+that row, so the account is refused on its very next request. Supabase is
+*additionally* asked to suspend the user with
+`updateUserById(id, { ban_duration: '876000h' })` (`'none'` lifts it on
+reactivation), and that result is inspected and logged as a status only — a
+failure there is never fatal and is never reported as something it is not.
+
+Two claims are deliberately avoided. This is **not** a session revocation:
+`auth.admin.signOut()` requires a valid logged-in JWT, not a user id, so it
+cannot be driven from a staff row, and Karma does not call it. And disabling the
+Karma account does not by itself invalidate an already-issued Supabase access
+token — what it guarantees is that the token buys nothing, because authorization
+is Karma's decision, made from the database on every request. The auth user is
+never deleted on deactivation; audit rows must keep pointing at a real identity.
+
+**Reactivation cannot silently promote.** Deactivation overwrites `status`, so
+reactivation restores from `accepted_at` instead: an account that never accepted
+returns to `invited` and still owes onboarding; one that accepted returns to
+`active`.
 
 **Supabase Data API lockdown.** The publishable key is public. Migration 0002
 enables RLS with no policies on all eighteen app tables and revokes all grants
@@ -95,13 +155,17 @@ rows never carry a password, TOTP secret, token, key, credential or invitation
 link — a test asserts it.
 
 **Sign-out** is a POST (a GET that destroys a session can be triggered by any
-image tag) and revokes globally, not just this browser's cookie.
+image tag) and uses `scope: "global"`, so it revokes the refresh token rather
+than only clearing this browser's cookie. This one CAN revoke, because it runs
+with the person's own session — unlike admin deactivation, which has no JWT to
+work with.
 
 **Admin pages are `force-dynamic`** and never statically generated, so no
 authenticated content can leak into build output or an edge cache.
 
 ## Security TODO (next phases)
 - MFA recovery: a supervised owner-initiated factor reset, with audit.
+- Audit entries for login success/failure (the schema already supports them).
 - Signed, time-limited downloads for brief files and certificate PDFs via
   authed routes gated on `design.view` / `certificates.view`.
 - Cloudflare WAF rate-limit rules on `/api/*` and `/admin/*`.

@@ -14,7 +14,7 @@ import { evaluateAccess, hasPermission, type AccessSubject } from "@/lib/auth/ac
 
 const subject = (over: Partial<AccessSubject> = {}): AccessSubject => ({
   userId: "user-1",
-  staff: { id: 1, role: "admin", active: true, permissions: [] },
+  staff: { id: 1, role: "admin", active: true, status: "active", permissions: [] },
   currentLevel: "aal2",
   nextLevel: "aal2",
   ...over
@@ -121,7 +121,7 @@ describe("hasPermission", () => {
 describe("permission enforcement through the access guard", () => {
   it("lets an admin through only for granted permissions", () => {
     const s = subject({
-      staff: { id: 2, role: "admin", active: true, permissions: ["applications.view"] }
+      staff: { id: 2, role: "admin", active: true, status: "active", permissions: ["applications.view"] }
     });
     expect(evaluateAccess(s, { permission: "applications.view" })).toEqual({
       ok: true,
@@ -136,13 +136,13 @@ describe("permission enforcement through the access guard", () => {
 
   it("refuses an ordinary admin the Team screen whatever they hold", () => {
     const s = subject({
-      staff: { id: 3, role: "admin", active: true, permissions: [...PERMISSIONS] }
+      staff: { id: 3, role: "admin", active: true, status: "active", permissions: [...PERMISSIONS] }
     });
     expect(evaluateAccess(s, { ownerOnly: true })).toEqual({ ok: false, reason: "role" });
   });
 
   it("lets the owner into the Team screen", () => {
-    const s = subject({ staff: { id: 1, role: "owner", active: true, permissions: [] } });
+    const s = subject({ staff: { id: 1, role: "owner", active: true, status: "active", permissions: [] } });
     expect(evaluateAccess(s, { ownerOnly: true })).toEqual({
       ok: true,
       role: "owner",
@@ -152,7 +152,7 @@ describe("permission enforcement through the access guard", () => {
 
   it("refuses a deactivated admin even with an otherwise perfect session", () => {
     const s = subject({
-      staff: { id: 4, role: "admin", active: false, permissions: ["dashboard.view"] }
+      staff: { id: 4, role: "admin", active: false, status: "deactivated", permissions: ["dashboard.view"] }
     });
     expect(evaluateAccess(s, { permission: "dashboard.view" })).toEqual({
       ok: false,
@@ -161,7 +161,7 @@ describe("permission enforcement through the access guard", () => {
   });
 
   it("refuses a trainer console access", () => {
-    const s = subject({ staff: { id: 5, role: "trainer", active: true, permissions: [] } });
+    const s = subject({ staff: { id: 5, role: "trainer", active: true, status: "active", permissions: [] } });
     expect(evaluateAccess(s)).toEqual({ ok: false, reason: "role" });
   });
 });
