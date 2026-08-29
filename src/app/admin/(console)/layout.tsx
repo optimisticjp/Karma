@@ -39,6 +39,10 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
   const canUseCertificates =
     hasPermission(session.staff, "certificates.view") ||
     hasPermission(session.staff, "certificates.manage");
+  const canUseReports =
+    hasPermission(session.staff, "reports.view") ||
+    hasPermission(session.staff, "audit.view") ||
+    hasPermission(session.staff, "exports.run");
 
   const sections: NavSection[] = [
     {
@@ -86,7 +90,11 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
           available: canUseCertificates
         },
         { href: null, label: t("nav.content"), available: false },
-        { href: null, label: t("nav.reports"), available: false }
+        {
+          href: canUseReports ? "/admin/reports" : null,
+          label: t("nav.reports"),
+          available: canUseReports
+        }
       ]
     },
     {
