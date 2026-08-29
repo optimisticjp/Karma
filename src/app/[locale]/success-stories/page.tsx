@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { PhotoSlot } from "@/components/ui/PhotoSlot";
+import { ManagedPhoto } from "@/components/ui/ManagedPhoto";
 import { SampleTag } from "@/components/ui/SampleTag";
-import { stories } from "@/content/collections";
+import { getPublicStories } from "@/lib/content/public";
 import { pageMeta } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params
@@ -19,10 +21,13 @@ export async function generateMetadata({
 export default async function StoriesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("storiesPage");
-  const th = await getTranslations("home.stories");
-  const tc = await getTranslations("common");
-  const l = await getLocale();
+  const [t, th, tc, l, stories] = await Promise.all([
+    getTranslations("storiesPage"),
+    getTranslations("home.stories"),
+    getTranslations("common"),
+    getLocale(),
+    getPublicStories()
+  ]);
   const gu = l === "gu";
 
   return (
@@ -33,8 +38,8 @@ export default async function StoriesPage({ params }: { params: Promise<{ locale
 
         <div className="u-section-body grid gap-6 lg:gap-8 md:grid-cols-2">
           {stories.map((s, i) => (
-            <figure key={i} className="card grid h-full gap-6 p-6 sm:grid-cols-[120px_1fr] md:p-8">
-              <PhotoSlot label={s.photoLabel} ratio="4/5" className="hidden sm:flex" />
+            <figure key={`${s.nameEn}-${i}`} className="card grid h-full gap-6 p-6 sm:grid-cols-[120px_1fr] md:p-8">
+              <ManagedPhoto src={s.mediaUrl} label={s.photoLabel} ratio="4/5" className="hidden sm:block" />
               <div>
                 <blockquote className="font-display text-h4 leading-snug">“{gu ? s.quoteGu : s.quoteEn}”</blockquote>
                 <figcaption className="mt-4 space-y-1 text-smallmeta text-stone">
