@@ -102,7 +102,7 @@ export async function GET(
   });
 }
 
-export function toCsv(rows: CsvRow[]): string {
+function toCsv(rows: CsvRow[]): string {
   if (rows.length === 0) return "";
   const headers = Object.keys(rows[0]);
   const lines = [headers.map(csvCell).join(",")];
