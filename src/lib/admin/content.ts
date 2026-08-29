@@ -116,17 +116,16 @@ function checked(value: unknown): boolean {
   return value === true || value === "true" || value === "on" || value === "1";
 }
 
+/**
+ * Public media stays same-origin until Karma's public-media upload service is
+ * configured. This preserves the CSP and prevents staff-entered content from
+ * becoming an arbitrary remote-image load.
+ */
 function mediaUrl(value: unknown): string | null {
   const clean = optionalText(value, 500);
   if (clean == null) return null;
   if (!clean) return "";
-  if (clean.startsWith("/")) return clean;
-  try {
-    const url = new URL(clean);
-    return url.protocol === "https:" ? clean : null;
-  } catch {
-    return null;
-  }
+  return clean.startsWith("/") && !clean.startsWith("//") ? clean : null;
 }
 
 /**
