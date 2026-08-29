@@ -1,19 +1,21 @@
-import { useLocale, useTranslations } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Icon } from "@/components/ui/Icon";
-import { faqs } from "@/content/collections";
+import { getPublicFaqs } from "@/lib/content/public";
 
 /**
- * Objection handling at the point of decision. The full FAQ lives on
- * /admissions; these five are the ones that actually stop someone from
- * booking a demo, so they belong on the homepage where the doubt occurs
- * rather than one click away.
+ * Objection handling at the point of decision. Staff-managed published FAQs
+ * lead this list; source FAQs remain the safe fallback until Content Desk has
+ * replacements. No browser-side fetch and no fake loading state.
  */
-export function HomeFaq() {
-  const t = useTranslations("home.faq");
-  const locale = useLocale();
+export async function HomeFaq() {
+  const [t, locale, faqs] = await Promise.all([
+    getTranslations("home.faq"),
+    getLocale(),
+    getPublicFaqs()
+  ]);
   const gu = locale === "gu";
   const shortlist = faqs.slice(0, 5);
 
@@ -35,7 +37,7 @@ export function HomeFaq() {
         <Reveal>
           <div className="space-y-3">
             {shortlist.map((f, i) => (
-              <details key={i} className="card group p-0" open={i === 0}>
+              <details key={`${f.qEn}-${i}`} className="card group p-0" open={i === 0}>
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-6 font-semibold [&::-webkit-details-marker]:hidden">
                   <span>{gu ? f.qGu : f.qEn}</span>
                   <Icon
