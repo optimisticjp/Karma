@@ -32,8 +32,8 @@ const nextConfig: NextConfig = {
   // connect-src carries two third parties:
   //   - challenges.cloudflare.com — Turnstile on the public forms.
   //   - the Supabase project origin — the Karma Console's browser-side auth
-  //     client (@supabase/ssr) calls /auth/v1/user and /auth/v1/factors from
-  //     the page, so without it sign-in and TOTP enrolment are blocked.
+  //     client (@supabase/ssr) calls Supabase Auth endpoints from
+  //     the page, so without it staff sign-in/session refresh is blocked.
   //
   // The project origin is written out in full rather than as *.supabase.co:
   // the wildcard would allow XHR to EVERY Supabase project on the internet,

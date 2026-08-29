@@ -32,7 +32,7 @@ and not a generic admin template.
                              │                   │
                      ┌───────▼────────┐  ┌───────▼────────┐
                      │  Cloudflare    │  │  Supabase Auth │
-                     │  HYPERDRIVE    │  │  password+TOTP │
+                     │  HYPERDRIVE    │  │ email+password │
                      └───────┬────────┘  └────────────────┘
                              │
                      ┌───────▼──────────────────────────────────┐
@@ -120,7 +120,7 @@ Three clients, three jobs:
 
 | Module | Key | Job |
 | --- | --- | --- |
-| `src/lib/supabase/client.ts` | publishable | browser, **auth flows only** (TOTP enrol/verify) |
+| `src/lib/supabase/client.ts` | publishable | browser, **auth flows only** (sign-in/session refresh) |
 | `src/lib/supabase/server.ts` | publishable | SSR cookie session for Server Components, Actions, Route Handlers |
 | `src/lib/supabase/admin.ts` | **secret** | `server-only`; one job, admin invitations. `persistSession: false`, `autoRefreshToken: false` |
 
@@ -176,13 +176,12 @@ the account is in its life. All three are enforced; none is decorative.
 
 | status | Seat | May reach | May NOT reach |
 | --- | --- | --- | --- |
-| `invited` | **yes** — reserved from the moment the invite is sent | `/admin/welcome` (set a password), then MFA enrolment | any console page or server action, **even at AAL2** |
-| `active` | yes | the console, subject to AAL2 and permissions | — |
-| `deactivated` | no — the seat is freed | nothing at all | onboarding, MFA screens, the console |
+| `invited` | **yes** — reserved from the moment the invite is sent | `/admin/welcome` (set a password) | any console page or server action |
+| `active` | yes | the console, subject to permissions | — |
+| `deactivated` | no — the seat is freed | nothing at all | onboarding/auth screens, the console |
 
 The `invited` row is `active: true` on purpose: the seat has to be held. That
-makes `status` load-bearing rather than informational — without it, an invited
-account that reached AAL2 would be indistinguishable from an accepted one. The
+makes `status` load-bearing rather than informational — without it, an invited account would be indistinguishable from an accepted one. The
 access decision therefore checks it (§7), and `/admin/welcome` is the only path
 an `invited` account can take.
 
@@ -266,7 +265,7 @@ one is the control:
 1. **Karma sets `active = false` and `status = 'deactivated'`.** This is the
    real, immediate kill switch. Every protected request re-reads the staff row
    server-side, so the account is refused on its very next request — page,
-   server action, onboarding and MFA screens alike.
+   server action and onboarding/auth screens alike.
 2. **Supabase suspends the auth user** via
    `auth.admin.updateUserById(id, { ban_duration: '876000h' })`, and lifts it
    with `{ ban_duration: 'none' }` on reactivation. This is defence in depth: it
@@ -395,24 +394,11 @@ a form submission reads as success to the caller.
 
 ---
 
-## 8. MFA
+## 8. Password-only sign-in
 
-TOTP is **mandatory for every console session, the Owner included**.
+Karma Console deliberately uses invite-only email + password sign-in. Supabase assurance-level fields remain compatibility metadata in the auth layer, but they do not gate console access. The security controls are the verified Supabase identity, linked/active staff lifecycle, owner/admin role, explicit permission checks, invitation-only account creation, seat limits, database RLS lockdown and audit logging.
 
-| Supabase state | Meaning | Where the guard sends them |
-| --- | --- | --- |
-| `currentLevel: aal1`, `nextLevel: aal1` | no factor enrolled | `/admin/mfa/setup` |
-| `currentLevel: aal1`, `nextLevel: aal2` | factor enrolled, code not entered | `/admin/mfa/challenge` |
-| `currentLevel: aal2` | satisfied | through |
-| unknown / error | treated as unverified | `/admin/mfa/setup` |
-
-Enrolment shows the Supabase QR plus a manual key, once. Karma never stores the
-TOTP secret: there is no column for it and no code path that writes one.
-
-Removing the only authenticator is not offered on the account page. An admin who
-did that would be locked inside a console that requires AAL2, and a self-service
-reset would be a way around mandatory MFA. **MFA recovery is a supervised owner
-procedure — specified for the next phase, not implemented unsafely now.**
+There are no MFA setup/challenge routes and no authenticator recovery workflow.
 
 ---
 
@@ -500,7 +486,7 @@ there before sending a real invitation, and send one test invitation to
 yourself to confirm the link lands on `/admin/welcome` rather than the
 "invitation is no longer valid" screen.
 
-### Acceptance is a transaction, and it gates MFA
+### Acceptance is a transaction
 
 Setting the password is only half of acceptance. The Karma side —
 `status: invited → active`, `accepted_at`, and the `admin.accepted` audit row —
@@ -509,7 +495,7 @@ clause that matches only a row linked to this Supabase user that is still
 `invited`, still `active`, and holds a console role.
 
 If that transaction fails, the flow **stops** with a generic, retryable error.
-It does not continue to MFA, because the staff row is the authority: until the
+It does not continue into the console, because the staff row is the authority: until the
 transition commits the person is still in onboarding-only state, and saying
 otherwise would be a lie. The password is not rolled back — there is nothing
 safe to roll it back to — and a retry simply re-runs both halves, which are
@@ -624,7 +610,7 @@ rather than removed: an audit row must keep pointing at a real staff record.
 
 | Module | State |
 | --- | --- |
-| Login, MFA setup, MFA challenge, invite acceptance | shipped |
+| Login + invite acceptance (password-only) | shipped |
 | Protected shell + navigation | shipped |
 | Today at Karma | shipped (real counts only) |
 | Team (owner-only) | shipped |
@@ -845,7 +831,7 @@ src/lib/admin/onboarding.ts    invited → active, one transaction
 src/lib/admin/lifecycle.ts     reactivation status from accepted_at, pure
 src/lib/admin/dashboard.ts     Today's counts, one round trip
 src/lib/admin/i18n.ts          console translations (EN/GU)
-src/app/admin/(auth)/…         login, MFA, welcome, no-access
+src/app/admin/(auth)/…         login, welcome, no-access
 src/app/admin/(console)/…      shell, Today, Team, account
 src/app/admin/auth/callback    invite / recovery callback
 src/components/admin/…         ConsoleShell, Metric, SignOutLink, LocaleToggle

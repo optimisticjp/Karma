@@ -4,7 +4,7 @@ Paste each block into Claude Code when starting that phase. Do them in order.
 Every prompt assumes CLAUDE.md has been read; its rules override convenience.
 
 > **Phase 2 has shipped.** The platform foundation — Supabase Postgres via
-> Cloudflare Hyperdrive, Supabase Auth with mandatory TOTP MFA, the
+> Cloudflare Hyperdrive, invite-only Supabase email/password Auth, the
 > Owner/Admin permission model, and the Karma Console shell with Today, Team
 > and Account & security — is in the repository. The canonical reference is
 > **`docs/admin-architecture.md`**. The Neon + Better Auth prompt that used to
@@ -116,13 +116,7 @@ languages, with real images in place.
 ## Audit deltas: fold these into Phases 2-4
 
 **Auth security prerequisites — DONE in the Phase 2 foundation**
-Supabase Auth owns credential hashing and MFA factors; login runs as a Server
-Action with per-IP and per-email rate limiting and a single generic error;
-session cookies are managed by `@supabase/ssr`; mandatory TOTP (AAL2) gates
-every console page; every server action re-checks session AND role AND
-assurance level; admin bundles never load from public pages (separate root
-layout); team mutations write `audit_logs`. Still open: audit entries for
-login success/failure, and a supervised MFA recovery procedure.
+Supabase Auth owns credential hashing; login runs as a Server Action with per-IP and per-email rate limiting and one generic error; session cookies are managed by `@supabase/ssr`; Karma Console is password-only; every server action re-checks session, staff lifecycle, role and permission; admin bundles never load from public pages; team mutations write `audit_logs`. Still open: audit entries for login success/failure.
 
 **Carry into the next phases**
 - `consent_versions` table + store the consent text version on each
