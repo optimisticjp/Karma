@@ -1,14 +1,18 @@
-import { useLocale, useTranslations } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { PhotoSlot } from "@/components/ui/PhotoSlot";
+import { ManagedPhoto } from "@/components/ui/ManagedPhoto";
 import { SampleTag } from "@/components/ui/SampleTag";
-import { galleryItems, techniqueChips } from "@/content/collections";
+import { techniqueChips } from "@/content/collections";
+import { getPublicGallery } from "@/lib/content/public";
 
-/** Horizontal scroll-snap strip of student work (plan 9.1 section 6). */
-export function WorkStrip() {
-  const t = useTranslations("home.work");
-  const locale = useLocale();
+/** Published, consent-gated student work replaces the labelled sample strip. */
+export async function WorkStrip() {
+  const [t, locale, galleryItems] = await Promise.all([
+    getTranslations("home.work"),
+    getLocale(),
+    getPublicGallery()
+  ]);
 
   return (
     <section className="section bg-ivory-2">
@@ -28,7 +32,7 @@ export function WorkStrip() {
               <li key={g.titleEn} className="w-64 flex-none snap-start md:w-72">
                 <div className="card card-lift h-full overflow-hidden">
                   <div className="relative">
-                    <PhotoSlot label={g.photoLabel} ratio="4/5" className="card-img media-unveil rounded-none border-0" />
+                    <ManagedPhoto src={g.mediaUrl} label={g.photoLabel} ratio={g.ratio} className="card-img media-unveil rounded-none border-0" />
                     <span className="chip absolute left-3 top-3">
                       {locale === "gu" ? chip?.labelGu : chip?.labelEn}
                     </span>
