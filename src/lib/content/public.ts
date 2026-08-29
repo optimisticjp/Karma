@@ -19,6 +19,7 @@ export type HomepageStat = { labelEn: string; labelGu: string; value: string; sl
 type PublishedRow = {
   slug: string;
   payload: unknown;
+  ownerVerified: boolean;
 };
 
 function record(value: unknown): Record<string, unknown> | null {
@@ -36,17 +37,20 @@ function text(value: Record<string, unknown>, key: string, required = true): str
 }
 
 /**
- * Public reads fail soft only for the Content Desk table. This is deliberate:
- * code can deploy before migration 0003 is applied and the existing verified
- * source content stays online. No other database failure is turned into fake
- * content; it is logged and the same source fallback is used.
+ * Public reads fail soft only for the Content Desk table. Code can deploy
+ * before migration 0003 is applied and the existing source content stays
+ * online. Other database errors are logged and use the same source fallback.
  */
 async function published(kind: "faq" | "gallery" | "testimonial" | "homepage_stat"): Promise<PublishedRow[]> {
   const db = getDb();
   if (!db) return [];
   try {
     return await db
-      .select({ slug: schema.contentItems.slug, payload: schema.contentItems.payload })
+      .select({
+        slug: schema.contentItems.slug,
+        payload: schema.contentItems.payload,
+        ownerVerified: schema.contentItems.ownerVerified
+      })
       .from(schema.contentItems)
       .where(and(eq(schema.contentItems.kind, kind), eq(schema.contentItems.status, "published")))
       .orderBy(asc(schema.contentItems.sortOrder), asc(schema.contentItems.id));
@@ -74,8 +78,6 @@ export async function getPublicFaqs(): Promise<Faq[]> {
   });
   if (managed.length === 0) return sourceFaqs;
 
-  // Managed answers win, but existing verified source FAQs stay available until
-  // staff has deliberately recreated/replaced them in Content Desk.
   const managedQuestions = new Set(managed.map((item) => item.qEn.trim().toLowerCase()));
   return [
     ...managed,
@@ -116,7 +118,6 @@ export async function getPublicStories(): Promise<ManagedStory[]> {
       ...(mediaUrl ? { mediaUrl } : {})
     }];
   });
-  // Once a real consented story exists, sample stories disappear entirely.
   return managed.length > 0 ? managed : sourceStories;
 }
 
@@ -146,12 +147,11 @@ export async function getPublicGallery(): Promise<ManagedGalleryItem[]> {
       mediaUrl
     }];
   });
-  // A real portfolio should never be padded out with labelled fake examples.
   return managed.length > 0 ? managed : sourceGallery;
 }
 
 export async function getHomepageStats(): Promise<HomepageStat[]> {
-  const rows = await published("homepage_stat");
+  const rows = (await published("homepage_stat")).filter((row) => row.ownerVerified);
   return rows.flatMap((row) => {
     const p = record(row.payload);
     if (!p) return [];
