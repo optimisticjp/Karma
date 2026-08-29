@@ -1,6 +1,5 @@
 import { requireAdmin } from "@/lib/auth/guard";
 import { getAdminT } from "@/lib/admin/i18n";
-import { getAssuranceLevel, createClient } from "@/lib/supabase/server";
 import { PERMISSION_GROUPS } from "@/lib/auth/permissions";
 import { hasPermission } from "@/lib/auth/access";
 import { SignOutLink } from "@/components/admin/SignOutLink";
@@ -9,24 +8,13 @@ import { AdminLocaleForm } from "./AdminLocaleForm";
 /**
  * Account & security.
  *
- * Shows what this sign-in is and what it can do. It deliberately shows NO
- * secret material: the TOTP secret is visible once during enrolment and never
- * again, and no token, key or internal Supabase detail appears here.
- *
- * Removing the only authenticator is not offered. An admin who did that would
- * be sitting inside a console that requires AAL2 with no way back to it, and a
- * self-service reset would be a way around mandatory MFA. Recovery is a
- * supervised owner procedure — documented for the next phase rather than
- * implemented unsafely here.
+ * Karma Console currently uses invite-only email + password sign-in. This page
+ * therefore focuses on identity, account lifecycle, language and authorization;
+ * it does not show or manage obsolete authenticator/MFA state.
  */
 export default async function AccountSecurityPage() {
   const session = await requireAdmin("/admin/account/security");
   const t = getAdminT(session.staff.adminLocale);
-  const { currentLevel } = await getAssuranceLevel();
-
-  const supabase = await createClient();
-  const factors = supabase ? await supabase.auth.mfa.listFactors() : null;
-  const enrolled = Boolean(factors?.data?.totp?.some((f) => f.status === "verified"));
 
   const granted = PERMISSION_GROUPS.flatMap((group) =>
     group.permissions
@@ -53,18 +41,7 @@ export default async function AccountSecurityPage() {
               label={t("account.status")}
               value={t(`team.status.${session.staff.active ? session.staff.status : "deactivated"}`)}
             />
-            <Fact
-              label={t("account.mfa")}
-              value={enrolled ? t("account.mfaOn") : t("account.mfaOff")}
-            />
-            <Fact
-              label={t("account.assurance")}
-              value={
-                currentLevel === "aal2" ? t("account.assuranceAal2") : t("account.assuranceAal1")
-              }
-            />
           </dl>
-          <p className="form-note mt-6">{t("account.mfaNote")}</p>
         </div>
       </section>
 
