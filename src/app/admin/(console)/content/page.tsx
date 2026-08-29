@@ -116,7 +116,7 @@ export default async function ContentPage() {
       {!migrationReady ? (
         <div className="alert alert-error mt-8">
           <p className="font-semibold">{copy.migrationPending}</p>
-          <p className="form-note mt-1">Run the repository's next Drizzle migration before staff starts using this module.</p>
+          <p className="form-note mt-1">Run the next repository Drizzle migration before staff starts using this module.</p>
         </div>
       ) : null}
 
