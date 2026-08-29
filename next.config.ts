@@ -2,8 +2,26 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
-// Enables Cloudflare bindings (R2 etc.) inside `next dev`.
-initOpenNextCloudflareForDev();
+// Enables Cloudflare bindings inside `next dev` — and ONLY there.
+//
+// This starts a wrangler/miniflare proxy that emulates every binding declared
+// in wrangler.jsonc. `next build` has no use for it (nothing renders against a
+// live binding at build time), and running it there makes the build depend on
+// emulating each binding locally: with HYPERDRIVE bound, miniflare demands a
+// local Postgres connection string and rejects without one, failing CI and the
+// Cloudflare build.
+//
+// Never fatal either way. Without the proxy, `getCloudflareContext()` throws
+// and src/lib/db/index.ts takes its documented DATABASE_URL fallback, which is
+// the local development path anyway.
+if (process.env.NODE_ENV === "development") {
+  initOpenNextCloudflareForDev().catch((e: unknown) => {
+    console.warn(
+      "[dev] Cloudflare bindings unavailable; falling back to DATABASE_URL.",
+      e instanceof Error ? e.message : e
+    );
+  });
+}
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
