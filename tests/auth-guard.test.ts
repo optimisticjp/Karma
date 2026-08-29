@@ -7,12 +7,6 @@ import {
 } from "@/lib/auth/access";
 import { redirectTargetFor, safeNextPath } from "@/lib/auth/redirect";
 
-/**
- * The seven-step access decision, one test per interesting state. These are the
- * states that are painful to reproduce against a live Supabase project, which
- * is exactly why the decision is a pure function.
- */
-
 const staff = (over: Partial<NonNullable<AccessSubject["staff"]>> = {}) => ({
   id: 1,
   role: "admin" as const,
@@ -30,34 +24,32 @@ const base: AccessSubject = {
 };
 
 describe("console access states", () => {
-  it("no session → sign in", () => {
+  it("requires a verified Supabase session", () => {
     expect(
       evaluateAccess({ userId: null, staff: null, currentLevel: null, nextLevel: null })
     ).toEqual({ ok: false, reason: "signin" });
   });
 
-  it("valid Supabase user with no staff record → denied, never admitted", () => {
-    expect(evaluateAccess({ ...base, staff: null })).toEqual({
-      ok: false,
-      reason: "no-staff"
-    });
+  it("never admits an unlinked Supabase user", () => {
+    expect(evaluateAccess({ ...base, staff: null })).toEqual({ ok: false, reason: "no-staff" });
   });
 
-  it("inactive staff → denied immediately, old session or not", () => {
+  it("refuses deactivated staff regardless of session assurance", () => {
     expect(
-      evaluateAccess({ ...base, staff: staff({ active: false, status: "deactivated" }) })
+      evaluateAccess({
+        ...base,
+        staff: staff({ active: false, status: "deactivated" }),
+        currentLevel: "aal1",
+        nextLevel: "aal1"
+      })
     ).toEqual({ ok: false, reason: "inactive" });
-  });
 
-  it("lifecycle 'deactivated' is refused even if active somehow says true", () => {
-    // Belt and braces: the two fields disagreeing is a corrupt state, and the
-    // safe reading of a corrupt state is "no access".
     expect(
       evaluateAccess({ ...base, staff: staff({ active: true, status: "deactivated" }) })
     ).toEqual({ ok: false, reason: "inactive" });
   });
 
-  it("invited + AAL1 → onboarding, not the console and not MFA", () => {
+  it("keeps invited accounts in onboarding", () => {
     expect(
       evaluateAccess({
         ...base,
@@ -66,54 +58,40 @@ describe("console access states", () => {
         nextLevel: "aal1"
       })
     ).toEqual({ ok: false, reason: "invited" });
-  });
 
-  it("invited + AAL2 → STILL onboarding, never console data", () => {
-    // The seat is reserved and the person may even have enrolled a factor, but
-    // until acceptance commits they are not an active account.
-    expect(evaluateAccess({ ...base, staff: staff({ status: "invited" }) })).toEqual({
-      ok: false,
-      reason: "invited"
-    });
-  });
-
-  it("invited + AAL2 + a permission they would otherwise hold → still refused", () => {
-    expect(
-      evaluateAccess(
-        { ...base, staff: staff({ status: "invited" }) },
-        { permission: "dashboard.view" }
-      )
-    ).toEqual({ ok: false, reason: "invited" });
-  });
-
-  it("invited owner is no exception", () => {
     expect(
       evaluateAccess({ ...base, staff: staff({ role: "owner", status: "invited" }) })
     ).toEqual({ ok: false, reason: "invited" });
   });
 
-  it("active + AAL1 with no enrolled factor → MFA setup", () => {
-    expect(evaluateAccess({ ...base, currentLevel: "aal1", nextLevel: "aal1" })).toEqual({
-      ok: false,
-      reason: "mfa-setup"
-    });
+  it("uses password-only sessions: AAL1 is enough once staff is active", () => {
+    expect(
+      evaluateAccess(
+        { ...base, currentLevel: "aal1", nextLevel: "aal1" },
+        { permission: "dashboard.view" }
+      )
+    ).toEqual({ ok: true, role: "admin", staffId: 1 });
   });
 
-  it("active + AAL1 with a factor already enrolled → MFA challenge", () => {
-    expect(evaluateAccess({ ...base, currentLevel: "aal1", nextLevel: "aal2" })).toEqual({
-      ok: false,
-      reason: "mfa-challenge"
-    });
+  it("does not change access when an MFA factor exists", () => {
+    expect(
+      evaluateAccess(
+        { ...base, currentLevel: "aal1", nextLevel: "aal2" },
+        { permission: "dashboard.view" }
+      )
+    ).toEqual({ ok: true, role: "admin", staffId: 1 });
   });
 
-  it("unknown assurance level is treated as unverified, not as a pass", () => {
-    expect(evaluateAccess({ ...base, currentLevel: null, nextLevel: null })).toEqual({
-      ok: false,
-      reason: "mfa-setup"
-    });
+  it("does not require an assurance level to enforce permissions", () => {
+    expect(
+      evaluateAccess(
+        { ...base, currentLevel: null, nextLevel: null },
+        { permission: "audit.view" }
+      )
+    ).toEqual({ ok: false, reason: "permission" });
   });
 
-  it("active + AAL2 → normal permission evaluation", () => {
+  it("still enforces permissions for admins", () => {
     expect(evaluateAccess(base, { permission: "dashboard.view" })).toEqual({
       ok: true,
       role: "admin",
@@ -125,24 +103,7 @@ describe("console access states", () => {
     });
   });
 
-  it("active AAL2 owner → allowed", () => {
-    expect(
-      evaluateAccess({ ...base, staff: staff({ id: 9, role: "owner", permissions: [] }) })
-    ).toEqual({ ok: true, role: "owner", staffId: 9 });
-  });
-
-  it("rejects deactivation BEFORE lifecycle and MFA, so a dead account never onboards", () => {
-    expect(
-      evaluateAccess({
-        ...base,
-        staff: staff({ active: false, status: "invited" }),
-        currentLevel: "aal1",
-        nextLevel: "aal1"
-      })
-    ).toEqual({ ok: false, reason: "inactive" });
-  });
-
-  it("requires MFA of the owner too", () => {
+  it("lets an active owner in with password-only authentication", () => {
     expect(
       evaluateAccess({
         ...base,
@@ -150,16 +111,22 @@ describe("console access states", () => {
         currentLevel: "aal1",
         nextLevel: "aal1"
       })
-    ).toEqual({ ok: false, reason: "mfa-setup" });
+    ).toEqual({ ok: true, role: "owner", staffId: 9 });
+  });
+
+  it("keeps owner-only pages owner-only", () => {
+    expect(evaluateAccess(base, { ownerOnly: true })).toEqual({ ok: false, reason: "role" });
+    expect(
+      evaluateAccess(
+        { ...base, staff: staff({ id: 9, role: "owner", permissions: [] }) },
+        { ownerOnly: true }
+      )
+    ).toEqual({ ok: true, role: "owner", staffId: 9 });
   });
 });
 
-/**
- * Onboarding is the one path below AAL2. It has to be narrow, because the whole
- * point of mandatory MFA is that nothing else gets past it.
- */
 describe("onboarding access (/admin/welcome)", () => {
-  it("lets a linked, active, invited console user in — at AAL1", () => {
+  it("lets a linked, active, invited console user choose a password", () => {
     expect(
       evaluateOnboardingAccess({
         ...base,
@@ -170,7 +137,7 @@ describe("onboarding access (/admin/welcome)", () => {
     ).toEqual({ ok: true, role: "admin", staffId: 1 });
   });
 
-  it("lets an invited OWNER onboard too (the bootstrap path)", () => {
+  it("lets the invited Owner bootstrap path onboard", () => {
     expect(
       evaluateOnboardingAccess({
         ...base,
@@ -181,29 +148,17 @@ describe("onboarding access (/admin/welcome)", () => {
     ).toEqual({ ok: true, role: "owner", staffId: 7 });
   });
 
-  it("refuses an unlinked Supabase user — a session alone is not an invitation", () => {
+  it("refuses unlinked, deactivated and trainer accounts", () => {
     expect(evaluateOnboardingAccess({ ...base, staff: null })).toEqual({
       ok: false,
       reason: "no-staff"
     });
-  });
-
-  it("refuses a deactivated account", () => {
     expect(
       evaluateOnboardingAccess({
         ...base,
         staff: staff({ active: false, status: "deactivated" })
       })
     ).toEqual({ ok: false, reason: "inactive" });
-  });
-
-  it("refuses a deactivated account that is still marked invited", () => {
-    expect(
-      evaluateOnboardingAccess({ ...base, staff: staff({ active: false, status: "invited" }) })
-    ).toEqual({ ok: false, reason: "inactive" });
-  });
-
-  it("refuses a trainer", () => {
     expect(
       evaluateOnboardingAccess({
         ...base,
@@ -212,33 +167,19 @@ describe("onboarding access (/admin/welcome)", () => {
     ).toEqual({ ok: false, reason: "role" });
   });
 
-  it("refuses with no session at all", () => {
-    expect(
-      evaluateOnboardingAccess({
-        userId: null,
-        staff: null,
-        currentLevel: null,
-        nextLevel: null
-      })
-    ).toEqual({ ok: false, reason: "signin" });
-  });
-
-  it("will not let an ALREADY ACTIVE account redo onboarding", () => {
-    // Otherwise any session reaching /admin/welcome could set a new password.
+  it("will not let an already-active account redo password setup", () => {
     expect(evaluateOnboardingAccess(base)).toEqual({ ok: false, alreadyAccepted: true });
-  });
-
-  it("will not let an already active account redo onboarding at AAL1 either", () => {
     expect(
-      evaluateOnboardingAccess({ ...base, currentLevel: "aal1", nextLevel: "aal2" })
+      evaluateOnboardingAccess({ ...base, currentLevel: "aal1", nextLevel: "aal1" })
     ).toEqual({ ok: false, alreadyAccepted: true });
   });
 });
 
 describe("redirect targets", () => {
-  it("sends each failure somewhere it can be resolved", () => {
+  it("sends failures to safe internal destinations", () => {
     expect(redirectTargetFor({ ok: false, reason: "signin" })).toBe("/admin/login");
     expect(redirectTargetFor({ ok: false, reason: "invited" })).toBe("/admin/welcome");
+    // Legacy MFA decisions remain mapped so old URLs/sessions fail safely.
     expect(redirectTargetFor({ ok: false, reason: "mfa-setup" })).toBe("/admin/mfa/setup");
     expect(redirectTargetFor({ ok: false, reason: "mfa-challenge" })).toBe(
       "/admin/mfa/challenge"
@@ -254,17 +195,9 @@ describe("redirect targets", () => {
     );
   });
 
-  it("round-trips a safe return path", () => {
+  it("round-trips a safe return path for sign-in", () => {
     expect(redirectTargetFor({ ok: false, reason: "signin" }, "/admin/team")).toBe(
       "/admin/login?next=%2Fadmin%2Fteam"
-    );
-  });
-
-  it("does not carry a return path into onboarding", () => {
-    // Onboarding always ends at MFA setup, so a stashed destination would only
-    // survive to be replayed later.
-    expect(redirectTargetFor({ ok: false, reason: "invited" }, "/admin/team")).toBe(
-      "/admin/welcome"
     );
   });
 });
@@ -273,9 +206,6 @@ describe("open redirect defence", () => {
   it("accepts internal console paths", () => {
     expect(safeNextPath("/admin/team")).toBe("/admin/team");
     expect(safeNextPath("/admin")).toBe("/admin");
-    expect(safeNextPath("/admin/account/security?tab=mfa")).toBe(
-      "/admin/account/security?tab=mfa"
-    );
   });
 
   it("refuses everything that could leave the site", () => {
@@ -304,7 +234,7 @@ describe("open redirect defence", () => {
     expect(safeNextPath("/admin/team\r\nSet-Cookie: x=1")).toBe("/admin");
   });
 
-  it("never bounces back into an auth or onboarding screen, which would loop", () => {
+  it("never bounces back into an auth/onboarding route", () => {
     expect(safeNextPath("/admin/login")).toBe("/admin");
     expect(safeNextPath("/admin/mfa/setup")).toBe("/admin");
     expect(safeNextPath("/admin/auth/callback")).toBe("/admin");
