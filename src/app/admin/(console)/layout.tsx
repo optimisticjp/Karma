@@ -19,11 +19,26 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
   const canUseAdmissions =
     hasPermission(session.staff, "applications.view") ||
     hasPermission(session.staff, "applications.manage");
+  const canUseStudents =
+    hasPermission(session.staff, "students.view") ||
+    hasPermission(session.staff, "students.manage");
   const canUseCatalog =
     hasPermission(session.staff, "courses.view") ||
     hasPermission(session.staff, "courses.manage") ||
     hasPermission(session.staff, "batches.view") ||
     hasPermission(session.staff, "batches.manage");
+  const canUseAttendance =
+    hasPermission(session.staff, "attendance.view") ||
+    hasPermission(session.staff, "attendance.manage");
+  const canUseFees =
+    hasPermission(session.staff, "fees.view") ||
+    hasPermission(session.staff, "fees.manage");
+  const canUseDesign =
+    hasPermission(session.staff, "design.view") ||
+    hasPermission(session.staff, "design.manage");
+  const canUseCertificates =
+    hasPermission(session.staff, "certificates.view") ||
+    hasPermission(session.staff, "certificates.manage");
 
   const sections: NavSection[] = [
     {
@@ -35,7 +50,16 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
           label: t("nav.admissions"),
           available: canUseAdmissions
         },
-        { href: null, label: t("nav.students"), available: false }
+        {
+          href: canUseStudents ? "/admin/students" : null,
+          label: t("nav.students"),
+          available: canUseStudents
+        },
+        {
+          href: canUseFees ? "/admin/fees" : null,
+          label: t("permissions.groups.fees"),
+          available: canUseFees
+        }
       ]
     },
     {
@@ -46,9 +70,21 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
           label: t("nav.coursesBatches"),
           available: canUseCatalog
         },
-        { href: null, label: t("nav.attendance"), available: false },
-        { href: null, label: t("nav.designDesk"), available: false },
-        { href: null, label: t("nav.certificates"), available: false },
+        {
+          href: canUseAttendance ? "/admin/attendance" : null,
+          label: t("nav.attendance"),
+          available: canUseAttendance
+        },
+        {
+          href: canUseDesign ? "/admin/design" : null,
+          label: t("nav.designDesk"),
+          available: canUseDesign
+        },
+        {
+          href: canUseCertificates ? "/admin/certificates" : null,
+          label: t("nav.certificates"),
+          available: canUseCertificates
+        },
         { href: null, label: t("nav.content"), available: false },
         { href: null, label: t("nav.reports"), available: false }
       ]
