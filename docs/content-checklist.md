@@ -132,8 +132,10 @@ three new rows; it is idempotent by slug.
 
 - **Durations and module topics per course** (Q1, the open half).
 - **Q9 numbers** — nothing publishable has been verified yet.
-- Whether Flat Embroidery should lead the catalogue rather than Zardosi. It is
-  the pedagogical foundation and the published pathway starts with "foundation
-  at the machine", but Zardosi is what Surat is known for and currently leads.
-  This is a positioning call, not a technical one — and changing it needs the
-  sortOrder caveat above handled deliberately.
+**RESOLVED (owner, 2026-08-29): Zardosi leads.** It is the work Surat is known
+for and the reason most enquiries arrive. Flat Embroidery was moved to second
+so the foundation course is not buried sixth of eight — that position was an
+artefact of appending, not a decision. Both are presentation-only: the order
+now lives in `COURSE_DISPLAY_ORDER`, storage order and the `sortOrder` written
+by the catalogue import are untouched, and three tests hold the line. To
+re-rank the catalogue in future, edit that one list — nothing else.

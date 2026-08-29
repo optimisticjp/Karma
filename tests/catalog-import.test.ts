@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { VERIFIED_CATALOG_ROWS } from "@/lib/admin/catalog-import";
 import { GALLERY_TECHNIQUES } from "@/lib/admin/content";
 import { techniqueChips } from "@/content/collections";
+import { COURSE_DISPLAY_ORDER, courses, coursesByFamily } from "@/content/courses";
 
 const actionSource = readFileSync(
   "src/app/admin/(console)/courses/import/actions.ts",
@@ -64,5 +65,30 @@ describe("gallery technique taxonomy", () => {
       expect(chip.labelEn, `missing English label for "${technique}"`).toBeTruthy();
       expect(chip.labelGu, `missing Gujarati label for "${technique}"`).toBeTruthy();
     }
+  });
+});
+
+describe("course display order", () => {
+  it("covers every course exactly once", () => {
+    expect([...COURSE_DISPLAY_ORDER].sort()).toEqual(courses.map((c) => c.slug).sort());
+    expect(new Set(COURSE_DISPLAY_ORDER).size).toBe(courses.length);
+  });
+
+  it("keeps Zardosi leading and the foundation course right behind it", () => {
+    // Owner decision, 2026-08-29. Presentation only: storage order, and so the
+    // sortOrder the catalogue import writes, is deliberately untouched by this.
+    expect(coursesByFamily[0].slug).toBe("zardosi-machine-embroidery");
+    expect(coursesByFamily[1].slug).toBe("flat-embroidery");
+  });
+
+  it("still groups families in order and leaves storage order alone", () => {
+    expect(coursesByFamily.map((c) => c.family)).toEqual([
+      ...Array(8).fill("machine"),
+      "modern",
+      "modern",
+      "software"
+    ]);
+    expect(courses[0].slug).toBe("zardosi-machine-embroidery");
+    expect(courses[courses.length - 1].slug).toBe("cross-stitch");
   });
 });

@@ -439,15 +439,48 @@ export const courseBySlug = (slug: string) => courses.find((c) => c.slug === slu
  * Display order, grouped by family.
  *
  * The `courses` array above is STORAGE order and must stay stable, because the
- * owner's catalogue import derives `sortOrder` from array position. Anything
- * that shows a flat list to a visitor should use this instead, so newly
- * appended machine courses read next to the other machine courses rather than
- * trailing after emCAD.
+ * owner's catalogue import derives `sortOrder` from array position. Presentation
+ * order is a separate, freely editable decision — which is what this is.
+ *
+ * Owner decision (2026-08-29): **Zardosi leads.** It is the work Surat is known
+ * for and the reason most enquiries arrive. Flat Embroidery follows it, because
+ * it is the foundation the other techniques sit on and the honest answer to
+ * "I have never touched a machine" — appending it left it sixth of eight, which
+ * was an artefact of the storage constraint, not a decision anyone made.
+ *
+ * A slug missing from this list sorts to the end of its family rather than
+ * disappearing; `tests/catalog-import.test.ts` fails if it drifts out of sync.
  */
 export const FAMILY_ORDER = ["machine", "modern", "software"] as const;
+
+export const COURSE_DISPLAY_ORDER: readonly string[] = [
+  "zardosi-machine-embroidery",
+  "flat-embroidery",
+  "four-beads-machine-work",
+  "sequence-work",
+  "coding-cording-machine",
+  "chain-multi-machine",
+  "applique-3d-embroidery",
+  "cross-stitch",
+  "laser-work",
+  "tufting",
+  "emcad-embroidery-design"
+];
+
+const displayRank = (slug: string) => {
+  const index = COURSE_DISPLAY_ORDER.indexOf(slug);
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+};
+
 export const coursesByFamily: Course[] = FAMILY_ORDER.flatMap((family) =>
-  courses.filter((course) => course.family === family)
+  courses
+    .filter((course) => course.family === family)
+    .sort((a, b) => displayRank(a.slug) - displayRank(b.slug))
 );
+
+/** Courses of one family, in display order. */
+export const coursesInFamily = (family: Course["family"]) =>
+  coursesByFamily.filter((course) => course.family === family);
 
 /* ------------------- sample batches (pre-database fallback) ---------------- */
 

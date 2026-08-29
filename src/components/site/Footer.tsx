@@ -1,7 +1,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { site } from "@/lib/site";
-import { courses } from "@/content/courses";
+import { coursesByFamily } from "@/content/courses";
 
 export function Footer() {
   const t = useTranslations("footer");
@@ -30,7 +30,7 @@ export function Footer() {
             <p className="microlabel">{t("learn")}</p>
             <ul className="mt-2 text-smallmeta">
               <li><Link className="stitch-link" href="/courses">{tn("courses")}</Link></li>
-              {courses.slice(0, 4).map((c) => (
+              {coursesByFamily.slice(0, 4).map((c) => (
                 <li key={c.slug}>
                   <Link className="stitch-link" href={`/courses/${c.slug}`}>
                     {locale === "gu" ? c.nameGu : c.nameEn}

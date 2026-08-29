@@ -10,7 +10,7 @@ import { LangBanner } from "@/components/site/LangBanner";
 import { UnveilWatcher } from "@/components/ui/Reveal";
 import { JsonLd } from "@/components/site/JsonLd";
 import { site } from "@/lib/site";
-import { courses } from "@/content/courses";
+import { coursesByFamily } from "@/content/courses";
 import "../globals.css";
 import "../premium.css";
 
@@ -103,7 +103,7 @@ export default async function LocaleLayout({
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: locale === "gu" ? "એમ્બ્રોઇડરી કોર્સ" : "Embroidery courses",
-      itemListElement: courses.map((course) => ({
+      itemListElement: coursesByFamily.map((course) => ({
         "@type": "Course",
         name: course.nameEn,
         description: course.leadEn,
