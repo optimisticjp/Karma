@@ -1,9 +1,34 @@
 import type { AdminLocale } from "@/lib/admin/i18n";
-import type { ApplicationStatus } from "@/lib/admin/admissions";
+import type { ApplicationStatus, ManualEnquirySource } from "@/lib/admin/admissions";
 
 export type AdmissionsCopy = {
   title: string;
   lede: string;
+  addEnquiry: string;
+  addEnquiryHint: string;
+  enquirySource: string;
+  fullName: string;
+  mobile: string;
+  email: string;
+  language: string;
+  gujarati: string;
+  english: string;
+  courseInterest: string;
+  noCourseYet: string;
+  timing: string;
+  timingChoose: string;
+  morning: string;
+  evening: string;
+  area: string;
+  ageBand: string;
+  ageChoose: string;
+  guardianName: string;
+  guardianPhone: string;
+  enquiryNote: string;
+  enquiryNotePlaceholder: string;
+  createEnquiry: string;
+  creating: string;
+  sourceLabels: Record<ManualEnquirySource, string>;
   visible: string;
   newApplications: string;
   followUpsDue: string;
@@ -16,8 +41,6 @@ export type AdmissionsCopy = {
   empty: string;
   duplicate: string;
   course: string;
-  timing: string;
-  area: string;
   experience: string;
   occupation: string;
   goal: string;
@@ -35,124 +58,191 @@ export type AdmissionsCopy = {
   noNotes: string;
   addNote: string;
   notePlaceholder: string;
+  viewOnly: string;
   statuses: Record<ApplicationStatus, string>;
   errors: Record<"denied" | "invalid" | "missing" | "generic", string>;
-  success: Record<"updated" | "noteAdded", string>;
+  success: Record<"updated" | "noteAdded" | "created", string>;
 };
 
 const COPY = {
   en: {
-    title: "Admissions CRM",
-    lede: "Work every admission enquiry from first contact to a clear outcome. Assign ownership, schedule the next follow-up, and keep a durable note trail.",
-    visible: "Visible applications",
-    newApplications: "New",
+    title: "Admissions",
+    lede: "Keep every enquiry in one place — website, walk-in, phone, WhatsApp or referral — and always know who needs a follow-up next.",
+    addEnquiry: "Add enquiry",
+    addEnquiryHint: "Use this at the front desk for walk-ins, calls and WhatsApp enquiries. A website form is not required.",
+    enquirySource: "How did this enquiry come?",
+    fullName: "Name",
+    mobile: "WhatsApp / mobile",
+    email: "Email (optional)",
+    language: "Preferred language",
+    gujarati: "Gujarati",
+    english: "English",
+    courseInterest: "Course interest",
+    noCourseYet: "Not decided yet",
+    timing: "Preferred timing",
+    timingChoose: "Not decided",
+    morning: "Morning",
+    evening: "Evening",
+    area: "Area / locality",
+    ageBand: "Age group",
+    ageChoose: "Not recorded",
+    guardianName: "Guardian name (under 18)",
+    guardianPhone: "Guardian mobile (under 18)",
+    enquiryNote: "What are they looking for?",
+    enquiryNotePlaceholder: "Example: wants machine practice, will visit on Sunday, asked about evening batch",
+    createEnquiry: "Save enquiry",
+    creating: "Saving enquiry…",
+    sourceLabels: {
+      walk_in: "Walk-in / studio visit",
+      phone: "Phone call",
+      whatsapp: "WhatsApp",
+      referral: "Referral",
+      instagram: "Instagram",
+      google: "Google",
+      other: "Other"
+    },
+    visible: "Enquiries shown",
+    newApplications: "New enquiries",
     followUpsDue: "Follow-ups due",
     search: "Search",
-    searchPlaceholder: "Name, reference or WhatsApp",
-    statusFilter: "Status",
-    allStatuses: "All statuses",
-    applyFilters: "Apply filters",
+    searchPlaceholder: "Name, reference or mobile",
+    statusFilter: "Stage",
+    allStatuses: "All stages",
+    applyFilters: "Show",
     clearFilters: "Clear",
-    empty: "No applications match these filters yet.",
-    duplicate: "Repeat phone",
+    empty: "No enquiries match these filters.",
+    duplicate: "Repeat mobile",
     course: "Course interest",
-    timing: "Preferred timing",
-    area: "Area",
     experience: "Experience",
     occupation: "Occupation",
-    goal: "Goal / note from applicant",
-    source: "Heard from",
-    applicant: "Applicant",
-    guardian: "Guardian",
+    goal: "Enquiry note",
+    source: "Source",
+    applicant: "Enquiry",
+    guardian: "Parent / guardian",
     created: "Received",
-    assignedTo: "Assigned to",
-    unassigned: "Unassigned",
+    assignedTo: "Handled by",
+    unassigned: "Not assigned",
     nextFollowUp: "Next follow-up",
-    closureReason: "Closure reason",
-    save: "Save application",
+    closureReason: "Reason if not joining / closed",
+    save: "Save changes",
     saving: "Saving…",
-    notes: "Staff notes",
-    noNotes: "No staff notes yet.",
-    addNote: "Add note",
-    notePlaceholder: "What happened, what was promised, or what needs to happen next",
+    notes: "Follow-up notes",
+    noNotes: "No follow-up notes yet.",
+    addNote: "Add follow-up note",
+    notePlaceholder: "What happened on the call or visit? What should happen next?",
+    viewOnly: "You can view enquiries. Updates require Applications manage permission.",
     statuses: {
       new: "New",
       contacted: "Contacted",
-      demo_scheduled: "Demo scheduled",
-      visit_done: "Visit done",
-      accepted: "Accepted",
-      waitlisted: "Waitlisted",
-      documents_pending: "Documents pending",
-      enrolled: "Enrolled",
-      not_proceeding: "Not proceeding",
+      demo_scheduled: "Demo booked",
+      visit_done: "Visited studio",
+      accepted: "Ready to join",
+      waitlisted: "Waiting for batch",
+      documents_pending: "Details pending",
+      enrolled: "Joined",
+      not_proceeding: "Not joining",
       closed: "Closed"
     },
     errors: {
-      denied: "You do not have permission to make that change.",
-      invalid: "Check the fields and try again.",
-      missing: "That application or assignee no longer exists. Reload and try again.",
-      generic: "That did not work. Try again."
+      denied: "You do not have permission for this action.",
+      invalid: "Please check the details and try again.",
+      missing: "That enquiry, course or staff member could not be found. Reload and try again.",
+      generic: "Could not save this right now. Please try again."
     },
     success: {
-      updated: "Application updated.",
-      noteAdded: "Note added."
+      updated: "Enquiry updated.",
+      noteAdded: "Follow-up note added.",
+      created: "Enquiry added."
     }
   },
   gu: {
-    title: "એડમિશન CRM",
-    lede: "દરેક admission enquiry ને પહેલા contact થી અંતિમ outcome સુધી સંભાળો. જવાબદારી assign કરો, next follow-up ગોઠવો અને staff notes નો સ્પષ્ટ record રાખો.",
-    visible: "દેખાતી અરજીઓ",
-    newApplications: "નવી",
-    followUpsDue: "Follow-up બાકી",
-    search: "શોધો",
-    searchPlaceholder: "નામ, reference અથવા WhatsApp",
-    statusFilter: "Status",
-    allStatuses: "બધા status",
-    applyFilters: "Filter લાગુ કરો",
-    clearFilters: "સાફ કરો",
-    empty: "આ filters માટે કોઈ application નથી.",
-    duplicate: "ફોન ફરી આવ્યો",
-    course: "કોર્સ રસ",
+    title: "Admissions",
+    lede: "Website, walk-in, phone, WhatsApp કે referral — દરેક enquiry એક જ જગ્યાએ રાખો અને હવે કોને follow-up કરવાનું છે એ તરત જુઓ.",
+    addEnquiry: "નવી Enquiry ઉમેરો",
+    addEnquiryHint: "Walk-in, call કે WhatsApp enquiry માટે front desk પરથી અહીં જ entry કરો. Website form આવવું જરૂરી નથી.",
+    enquirySource: "Enquiry ક્યાંથી આવી?",
+    fullName: "નામ",
+    mobile: "WhatsApp / Mobile",
+    email: "Email (optional)",
+    language: "પસંદની ભાષા",
+    gujarati: "ગુજરાતી",
+    english: "English",
+    courseInterest: "કયા Courseમાં રસ છે?",
+    noCourseYet: "હજુ નક્કી નથી",
     timing: "પસંદનો સમય",
-    area: "વિસ્તાર",
-    experience: "અનુભવ",
-    occupation: "વ્યવસાય",
-    goal: "Applicant નો goal / note",
-    source: "ક્યાંથી જાણ્યું",
-    applicant: "Applicant",
-    guardian: "Guardian",
-    created: "મળ્યાની તારીખ",
-    assignedTo: "જવાબદારી",
+    timingChoose: "હજુ નક્કી નથી",
+    morning: "સવાર",
+    evening: "સાંજ",
+    area: "Area / locality",
+    ageBand: "ઉંમર group",
+    ageChoose: "નોંધ્યું નથી",
+    guardianName: "Guardianનું નામ (18થી નાના માટે)",
+    guardianPhone: "Guardian mobile (18થી નાના માટે)",
+    enquiryNote: "શું શીખવું / કરવું છે?",
+    enquiryNotePlaceholder: "ઉદાહરણ: machine practice જોઈએ, Sunday visit કરશે, evening batch વિશે પૂછ્યું",
+    createEnquiry: "Enquiry Save કરો",
+    creating: "Enquiry save થઈ રહી છે…",
+    sourceLabels: {
+      walk_in: "Walk-in / Studio visit",
+      phone: "Phone call",
+      whatsapp: "WhatsApp",
+      referral: "Referral",
+      instagram: "Instagram",
+      google: "Google",
+      other: "Other"
+    },
+    visible: "દેખાતી enquiries",
+    newApplications: "નવી enquiries",
+    followUpsDue: "આજે follow-up",
+    search: "શોધો",
+    searchPlaceholder: "નામ, reference કે mobile",
+    statusFilter: "Stage",
+    allStatuses: "બધા stages",
+    applyFilters: "બતાવો",
+    clearFilters: "સાફ કરો",
+    empty: "આ filter પ્રમાણે કોઈ enquiry નથી.",
+    duplicate: "આ mobile પહેલાં આવ્યો છે",
+    course: "Course interest",
+    experience: "Experience",
+    occupation: "Occupation",
+    goal: "Enquiry note",
+    source: "ક્યાંથી આવી",
+    applicant: "Enquiry",
+    guardian: "Parent / Guardian",
+    created: "મળ્યાનો સમય",
+    assignedTo: "કોણ handle કરે છે",
     unassigned: "કોઈને assign નથી",
     nextFollowUp: "આગળનો follow-up",
-    closureReason: "બંધ કરવાનો કારણ",
-    save: "Application સાચવો",
-    saving: "સાચવી રહ્યું છે…",
-    notes: "Staff notes",
-    noNotes: "હજુ staff note નથી.",
-    addNote: "Note ઉમેરો",
-    notePlaceholder: "શું થયું, શું વચન આપ્યું, અથવા હવે શું કરવાનું છે",
+    closureReason: "Join ન કરે / close કરવાનું કારણ",
+    save: "ફેરફાર Save કરો",
+    saving: "Save થઈ રહ્યું છે…",
+    notes: "Follow-up notes",
+    noNotes: "હજુ follow-up note નથી.",
+    addNote: "Follow-up note ઉમેરો",
+    notePlaceholder: "Call કે visitમાં શું વાત થઈ? હવે આગળ શું કરવાનું છે?",
+    viewOnly: "તમે enquiries જોઈ શકો છો. ફેરફાર માટે Applications manage permission જોઈએ.",
     statuses: {
       new: "નવી",
-      contacted: "Contacted",
-      demo_scheduled: "Demo ગોઠવ્યો",
-      visit_done: "Visit પૂર્ણ",
-      accepted: "Accepted",
-      waitlisted: "Waitlist",
-      documents_pending: "Documents બાકી",
-      enrolled: "Enrolled",
-      not_proceeding: "આગળ નથી વધતા",
+      contacted: "વાત થઈ",
+      demo_scheduled: "Demo booked",
+      visit_done: "Studio visit થઈ",
+      accepted: "Join કરવા તૈયાર",
+      waitlisted: "Batchની રાહમાં",
+      documents_pending: "Details બાકી",
+      enrolled: "Join થઈ ગયું",
+      not_proceeding: "Join નથી કરવું",
       closed: "Closed"
     },
     errors: {
-      denied: "આ ફેરફાર કરવાની પરવાનગી તમારા account પાસે નથી.",
-      invalid: "બધી વિગતો તપાસીને ફરી પ્રયાસ કરો.",
-      missing: "આ application અથવા assignee હવે ઉપલબ્ધ નથી. Reload કરીને ફરી પ્રયાસ કરો.",
-      generic: "ફેરફાર સાચવાયો નથી. ફરી પ્રયાસ કરો."
+      denied: "આ કામ કરવાની permission નથી.",
+      invalid: "માહિતી ચેક કરીને ફરી try કરો.",
+      missing: "આ enquiry, course કે staff member મળ્યો નથી. Reload કરીને ફરી try કરો.",
+      generic: "હમણાં save થઈ શક્યું નથી. ફરી try કરો."
     },
     success: {
-      updated: "Application અપડેટ થઈ.",
-      noteAdded: "Note ઉમેરાયો."
+      updated: "Enquiry update થઈ.",
+      noteAdded: "Follow-up note ઉમેરાયો.",
+      created: "Enquiry ઉમેરાઈ ગઈ."
     }
   }
 } satisfies Record<AdminLocale, AdmissionsCopy>;

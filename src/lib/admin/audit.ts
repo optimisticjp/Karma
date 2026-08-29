@@ -8,13 +8,10 @@ import { getDb, schema } from "@/lib/db";
  * Reuses the existing `audit_logs` table rather than inventing a parallel
  * subsystem: actor, action, entity, old/new values, reason.
  *
- * NEVER pass through here: passwords, TOTP secrets, access or refresh tokens,
- * the Supabase secret key, database passwords, or raw invitation links. The
- * value objects below are built by callers from field names and roles, not
- * from credentials.
+ * NEVER pass through here: passwords, MFA/TOTP secrets, access or refresh
+ * tokens, the Supabase secret key, database passwords, or raw invitation links.
  */
 
-/** Team/account security events. Kept stable because tests pin this set. */
 export const AUDIT_ACTIONS = {
   ownerBootstrapped: "admin.owner.bootstrapped",
   adminInvited: "admin.invited",
@@ -24,7 +21,6 @@ export const AUDIT_ACTIONS = {
   adminReactivated: "admin.reactivated"
 } as const;
 
-/** Course catalogue and live schedule mutations. */
 export const CATALOG_AUDIT_ACTIONS = {
   courseCreated: "catalog.course.created",
   courseUpdated: "catalog.course.updated",
@@ -34,14 +30,58 @@ export const CATALOG_AUDIT_ACTIONS = {
 
 /** Admissions CRM mutations. Note text itself is not duplicated into audit logs. */
 export const ADMISSIONS_AUDIT_ACTIONS = {
+  applicationCreated: "admissions.application.created",
   applicationUpdated: "admissions.application.updated",
   noteAdded: "admissions.note.added"
+} as const;
+
+export const STUDENT_AUDIT_ACTIONS = {
+  studentCreated: "students.student.created",
+  studentUpdated: "students.student.updated",
+  applicationConverted: "students.application.converted",
+  enrollmentCreated: "students.enrollment.created",
+  enrollmentUpdated: "students.enrollment.updated"
+} as const;
+
+export const ATTENDANCE_AUDIT_ACTIONS = {
+  registerSaved: "attendance.register.saved",
+  sessionLocked: "attendance.session.locked",
+  correctionApplied: "attendance.correction.applied"
+} as const;
+
+export const FEE_AUDIT_ACTIONS = {
+  recordCreated: "fees.record.created"
+} as const;
+
+export const CERTIFICATE_AUDIT_ACTIONS = {
+  issued: "certificates.issued",
+  revoked: "certificates.revoked",
+  reissued: "certificates.reissued"
+} as const;
+
+export const DESIGN_AUDIT_ACTIONS = {
+  enquiryCreated: "design.enquiry.created",
+  enquiryUpdated: "design.enquiry.updated",
+  statusChanged: "design.status.changed",
+  fileDownloaded: "design.file.downloaded"
+} as const;
+
+export const CONTENT_AUDIT_ACTIONS = {
+  itemCreated: "content.item.created",
+  itemUpdated: "content.item.updated",
+  itemArchived: "content.item.archived"
 } as const;
 
 export type AuditAction =
   | (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS]
   | (typeof CATALOG_AUDIT_ACTIONS)[keyof typeof CATALOG_AUDIT_ACTIONS]
-  | (typeof ADMISSIONS_AUDIT_ACTIONS)[keyof typeof ADMISSIONS_AUDIT_ACTIONS];
+  | (typeof ADMISSIONS_AUDIT_ACTIONS)[keyof typeof ADMISSIONS_AUDIT_ACTIONS]
+  | (typeof STUDENT_AUDIT_ACTIONS)[keyof typeof STUDENT_AUDIT_ACTIONS]
+  | (typeof ATTENDANCE_AUDIT_ACTIONS)[keyof typeof ATTENDANCE_AUDIT_ACTIONS]
+  | (typeof FEE_AUDIT_ACTIONS)[keyof typeof FEE_AUDIT_ACTIONS]
+  | (typeof CERTIFICATE_AUDIT_ACTIONS)[keyof typeof CERTIFICATE_AUDIT_ACTIONS]
+  | (typeof DESIGN_AUDIT_ACTIONS)[keyof typeof DESIGN_AUDIT_ACTIONS]
+  | (typeof CONTENT_AUDIT_ACTIONS)[keyof typeof CONTENT_AUDIT_ACTIONS];
 
 export type AuditEntry = {
   /** Staff id of the person acting, or "system" for scripted operations. */
@@ -59,8 +99,8 @@ export type AuditEntry = {
  * roll back a completed mutation the operator has already been told about, but
  * it must be loud in the logs.
  *
- * Where atomicity matters more than availability, pass a transaction handle by
- * calling this inside `db.transaction` — see the team and catalogue actions.
+ * Where atomicity matters more than availability, use `auditValues()` inside
+ * the same database transaction as the sensitive mutation.
  */
 export async function writeAudit(entry: AuditEntry): Promise<void> {
   const db = getDb();
@@ -75,7 +115,6 @@ export async function writeAudit(entry: AuditEntry): Promise<void> {
   }
 }
 
-/** Shape of an audit row, shared by the transactional and best-effort paths. */
 export function auditValues(entry: AuditEntry) {
   return {
     actor: entry.actor.slice(0, 120),

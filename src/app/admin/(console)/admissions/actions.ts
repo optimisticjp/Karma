@@ -5,15 +5,25 @@ import { and, eq, or } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { authorizeAction } from "@/lib/auth/guard";
 import { auditValues, ADMISSIONS_AUDIT_ACTIONS } from "@/lib/admin/audit";
+import { pad } from "@/lib/utils";
 import {
   positiveApplicationId,
   validateApplicationNote,
-  validateApplicationUpdate
+  validateApplicationUpdate,
+  validateManualEnquiry
 } from "@/lib/admin/admissions";
 
 export type AdmissionsState = {
   status: "idle" | "error" | "success";
-  message: null | "denied" | "invalid" | "missing" | "generic" | "updated" | "noteAdded";
+  message:
+    | null
+    | "denied"
+    | "invalid"
+    | "missing"
+    | "generic"
+    | "updated"
+    | "noteAdded"
+    | "created";
 };
 
 const err = (message: AdmissionsState["message"]): AdmissionsState => ({ status: "error", message });
@@ -48,6 +58,109 @@ async function validAssignee(db: NonNullable<ReturnType<typeof getDb>>, staffId:
     )
     .limit(1);
   return rows.length === 1;
+}
+
+export async function createManualEnquiryAction(
+  _prev: AdmissionsState,
+  formData: FormData
+): Promise<AdmissionsState> {
+  const auth = await authorizeAction({ permission: "applications.manage" });
+  if (!auth.ok) return err("denied");
+
+  const parsed = validateManualEnquiry({
+    fullName: formData.get("fullName"),
+    whatsapp: formData.get("whatsapp"),
+    email: formData.get("email"),
+    locale: formData.get("locale"),
+    courseSlug: formData.get("courseSlug"),
+    preferredTiming: formData.get("preferredTiming"),
+    area: formData.get("area"),
+    goal: formData.get("goal"),
+    heardFrom: formData.get("heardFrom"),
+    ageBand: formData.get("ageBand"),
+    guardianName: formData.get("guardianName"),
+    guardianPhone: formData.get("guardianPhone"),
+    assignedTo: formData.get("assignedTo"),
+    nextFollowUp: formData.get("nextFollowUp")
+  });
+  if (!parsed.ok) return err("invalid");
+
+  const db = getDb();
+  if (!db) return err("generic");
+
+  try {
+    const d = parsed.value;
+    if (!(await validAssignee(db, d.assignedTo))) return err("missing");
+    if (d.courseSlug) {
+      const course = await db
+        .select({ slug: schema.courses.slug })
+        .from(schema.courses)
+        .where(eq(schema.courses.slug, d.courseSlug))
+        .limit(1);
+      if (!course[0]) return err("missing");
+    }
+
+    const previous = await db
+      .select({ id: schema.applications.id })
+      .from(schema.applications)
+      .where(eq(schema.applications.whatsapp, d.whatsapp))
+      .limit(1);
+
+    const now = new Date();
+    await db.transaction(async (tx) => {
+      const placeholder = `KDS-P-${crypto.randomUUID().slice(0, 12)}`;
+      const inserted = await tx
+        .insert(schema.applications)
+        .values({
+          reference: placeholder,
+          fullName: d.fullName,
+          whatsapp: d.whatsapp,
+          email: d.email,
+          locale: d.locale,
+          courseSlug: d.courseSlug,
+          preferredTiming: d.preferredTiming,
+          area: d.area,
+          goal: d.goal,
+          heardFrom: d.heardFrom,
+          ageBand: d.ageBand,
+          guardianName: d.guardianName,
+          guardianPhone: d.guardianPhone,
+          duplicateOfPhone: previous.length > 0,
+          status: "new",
+          assignedTo: d.assignedTo,
+          nextFollowUp: d.nextFollowUp,
+          createdAt: now,
+          updatedAt: now
+        })
+        .returning({ id: schema.applications.id });
+      const id = inserted[0]?.id;
+      if (!id) throw new Error("manual enquiry insert returned no id");
+      const reference = `KDS-${now.getFullYear()}-${pad(id)}`;
+      await tx.update(schema.applications).set({ reference }).where(eq(schema.applications.id, id));
+      await tx.insert(schema.auditLogs).values(
+        auditValues({
+          actor: String(auth.session.staff.id),
+          action: ADMISSIONS_AUDIT_ACTIONS.applicationCreated,
+          entity: "application",
+          entityId: id,
+          newValue: {
+            reference,
+            source: d.heardFrom,
+            courseSlug: d.courseSlug,
+            assignedTo: d.assignedTo,
+            nextFollowUp: d.nextFollowUp
+          },
+          reason: "front desk enquiry created"
+        })
+      );
+    });
+  } catch (error) {
+    return mapDbError(error, "[admissions] create manual enquiry");
+  }
+
+  revalidatePath("/admin/admissions");
+  revalidatePath("/admin");
+  return ok("created");
 }
 
 export async function updateApplicationAction(

@@ -10,7 +10,7 @@ import {
   isApplicationStatus,
   type ApplicationStatus
 } from "@/lib/admin/admissions";
-import { ApplicationNoteForm, ApplicationUpdateForm } from "./AdmissionForms";
+import { ApplicationNoteForm, ApplicationUpdateForm, ManualEnquiryForm } from "./AdmissionForms";
 
 type PageProps = {
   searchParams: Promise<{ status?: string; q?: string }>;
@@ -85,6 +85,7 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
     db
       .select({ slug: schema.courses.slug, nameEn: schema.courses.nameEn, nameGu: schema.courses.nameGu })
       .from(schema.courses)
+      .where(eq(schema.courses.active, true))
       .orderBy(asc(schema.courses.sortOrder), asc(schema.courses.nameEn))
   ]);
 
@@ -119,11 +120,12 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
   }
 
   const courseNames = new Map(
-    courses.map((course) => [
-      course.slug,
-      session.staff.adminLocale === "gu" ? course.nameGu : course.nameEn
-    ])
+    courses.map((course) => [course.slug, session.staff.adminLocale === "gu" ? course.nameGu : course.nameEn])
   );
+  const courseOptions = courses.map((course) => ({
+    slug: course.slug,
+    name: session.staff.adminLocale === "gu" ? course.nameGu : course.nameEn
+  }));
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
   const newCount = applications.filter((application) => application.status === "new").length;
   const followUpsDue = applications.filter(
@@ -142,6 +144,28 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
         <Metric label={copy.newApplications} value={newCount} />
         <Metric label={copy.followUpsDue} value={followUpsDue} />
       </div>
+
+      {canManage ? (
+        <details className="panel mt-8">
+          <summary className="panel-head cursor-pointer list-none">
+            <div>
+              <h2 className="text-h4">{copy.addEnquiry}</h2>
+              <p className="form-note mt-1">{copy.addEnquiryHint}</p>
+            </div>
+            <span aria-hidden className="text-h4">＋</span>
+          </summary>
+          <div className="panel-body border-t border-rule">
+            <ManualEnquiryForm
+              staff={staff}
+              courses={courseOptions}
+              defaultAssignee={session.staff.id}
+              copy={copy}
+            />
+          </div>
+        </details>
+      ) : (
+        <p className="form-note mt-6">{copy.viewOnly}</p>
+      )}
 
       <form method="get" className="panel panel-body mt-8 grid gap-4 md:grid-cols-[1fr_16rem_auto] md:items-end">
         <Field label={copy.search} htmlFor="admissions-search">
@@ -167,8 +191,6 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
           <Link className="btn btn-secondary" href="/admin/admissions">{copy.clearFilters}</Link>
         </div>
       </form>
-
-      {!canManage ? <p className="form-note mt-6">View only: updates and notes require Applications manage.</p> : null}
 
       <section className="mt-8 grid gap-5" aria-label={copy.title}>
         {applications.length === 0 ? (
@@ -210,18 +232,13 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
                   </dl>
 
                   {application.goal ? (
-                    <div>
-                      <p className="microlabel">{copy.goal}</p>
-                      <p className="mt-2 text-smallmeta whitespace-pre-wrap">{application.goal}</p>
-                    </div>
+                    <div><p className="microlabel">{copy.goal}</p><p className="mt-2 text-smallmeta whitespace-pre-wrap">{application.goal}</p></div>
                   ) : null}
 
                   {application.guardianName || application.guardianPhone ? (
                     <div>
                       <p className="microlabel">{copy.guardian}</p>
-                      <p className="mt-2 text-smallmeta">
-                        {[application.guardianName, application.guardianPhone].filter(Boolean).join(" · ")}
-                      </p>
+                      <p className="mt-2 text-smallmeta">{[application.guardianName, application.guardianPhone].filter(Boolean).join(" · ")}</p>
                     </div>
                   ) : null}
 
@@ -246,9 +263,7 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
                         {applicationNotes.map((note) => (
                           <div key={note.id} className="rounded-[var(--radius-card)] border border-rule p-4">
                             <p className="text-smallmeta whitespace-pre-wrap">{note.note}</p>
-                            <p className="form-note mt-2">
-                              {note.staffName ?? "Staff"} · {formatDateTime(note.createdAt, session.staff.adminLocale)}
-                            </p>
+                            <p className="form-note mt-2">{note.staffName ?? "Staff"} · {formatDateTime(note.createdAt, session.staff.adminLocale)}</p>
                           </div>
                         ))}
                       </div>
@@ -261,19 +276,13 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
           })
         )}
       </section>
-      <p className="form-note mt-6">Showing the latest 200 applications before filters.</p>
+      <p className="form-note mt-6">Showing the latest 200 enquiries before filters.</p>
     </div>
   );
 }
 
 function PageHeading({ title, lede }: { title: string; lede: string }) {
-  return (
-    <div>
-      <h1 className="text-h2">{title}</h1>
-      <span aria-hidden className="rule-stitch is-in" />
-      <p className="u-lede">{lede}</p>
-    </div>
-  );
+  return <div><h1 className="text-h2">{title}</h1><span aria-hidden className="rule-stitch is-in" /><p className="u-lede">{lede}</p></div>;
 }
 
 function Metric({ label, value }: { label: string; value: number }) {
