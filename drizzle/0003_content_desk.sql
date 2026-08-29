@@ -26,4 +26,20 @@ ALTER TABLE "content_items" ADD CONSTRAINT "content_items_owner_verified_by_staf
 ALTER TABLE "content_items" ADD CONSTRAINT "content_items_updated_by_staff_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."staff"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "uq_content_kind_slug" ON "content_items" USING btree ("kind","slug");--> statement-breakpoint
 CREATE INDEX "idx_content_kind_status" ON "content_items" USING btree ("kind","status");--> statement-breakpoint
-CREATE INDEX "idx_content_student" ON "content_items" USING btree ("student_id");
+CREATE INDEX "idx_content_student" ON "content_items" USING btree ("student_id");--> statement-breakpoint
+
+-- Keep the browser's Supabase Data API key unable to read or mutate Content Desk.
+-- The trusted Worker/Hyperdrive connection uses the table-owning Postgres role.
+ALTER TABLE "content_items" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+DO $$
+DECLARE
+  r text;
+BEGIN
+  FOREACH r IN ARRAY ARRAY['anon', 'authenticated'] LOOP
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r) THEN
+      EXECUTE format('REVOKE ALL ON public.content_items FROM %I', r);
+      EXECUTE format('REVOKE ALL ON SEQUENCE public.content_items_id_seq FROM %I', r);
+    END IF;
+  END LOOP;
+END
+$$;
