@@ -30,7 +30,14 @@ export function VisitStudio() {
           <dl className="u-section-body ledger">
             <div className="ledger-row is-labelled">
               <dt className="ledger-title">{tcp("addressLabel")}</dt>
-              <dd className="ledger-note">{gu ? site.addressGu : site.addressEn}</dd>
+              <dd className="ledger-note">
+                {gu ? site.addressGu : site.addressEn}
+                {/* The landmark is what actually gets a first-timer to the
+                    door in Mota Varachha; the PIN code never has. */}
+                <span className="mt-1 block font-semibold text-carbon">
+                  {gu ? site.landmarkGu : site.landmarkEn}
+                </span>
+              </dd>
             </div>
             <div className="ledger-row is-labelled">
               <dt className="ledger-title">{tcp("hoursLabel")}</dt>
@@ -38,12 +45,18 @@ export function VisitStudio() {
             </div>
             <div className="ledger-row is-labelled">
               <dt className="ledger-title">{t("phoneLabel")}</dt>
-              <dd className="ledger-note">
+              <dd className="ledger-note flex flex-wrap gap-x-5">
                 <a
                   href={`tel:+${site.whatsapp}`}
                   className="stitch-link inline-flex min-h-8 items-center font-semibold text-carbon"
                 >
                   {site.phoneDisplay}
+                </a>
+                <a
+                  href={`tel:+${site.landline}`}
+                  className="stitch-link inline-flex min-h-8 items-center font-semibold text-carbon"
+                >
+                  {site.landlineDisplay}
                 </a>
               </dd>
             </div>

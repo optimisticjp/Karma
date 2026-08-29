@@ -46,10 +46,19 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
       primary: true
     },
     {
+      href: `tel:+${site.landline}`,
+      external: false,
+      icon: "phone" as const,
+      label: t("landlineLabel"),
+      value: site.landlineDisplay,
+      note: t("landlineNote"),
+      primary: false
+    },
+    {
       href: `tel:+${site.whatsapp}`,
       external: false,
       icon: "phone" as const,
-      label: tc("call"),
+      label: t("mobileLabel"),
       value: site.phoneDisplay,
       note: t("callNote"),
       primary: false
@@ -134,17 +143,39 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
             <dl className="u-section-body ledger">
               <div className="ledger-row is-labelled">
                 <dt className="ledger-title">{t("addressLabel")}</dt>
-                <dd className="ledger-note">{gu ? site.addressGu : site.addressEn}</dd>
+                <dd className="ledger-note">
+                  {gu ? site.addressGu : site.addressEn}
+                  <span className="mt-1 block font-semibold text-carbon">
+                    {gu ? site.landmarkGu : site.landmarkEn}
+                  </span>
+                </dd>
               </div>
               <div className="ledger-row is-labelled">
                 <dt className="ledger-title">{t("hoursLabel")}</dt>
                 <dd className="ledger-note">{gu ? site.hoursGu : site.hoursEn}</dd>
               </div>
             </dl>
-            <p className="pending-block mt-6 text-smallmeta text-stone">
-              <span className="pending-label">{t("directionsLabel")}</span>
-              {t("directionsNote")}
-            </p>
+            {/* People in Mota Varachha navigate by landmark, not by PIN code.
+                Both landmarks are verified: Dhara Arcade from the studio's own
+                Google pin, Krishna Township Road from its JustDial listing. */}
+            <div className="card mt-6 p-5 md:p-6">
+              {/* The landmark already sits with the address above; repeating it
+                  here would be emphasis by duplication. This card carries the
+                  part the address cannot: which floor, and what to do if you
+                  are outside and still cannot see it. */}
+              <p className="microlabel !text-vermilion-deep">{t("directionsTitle")}</p>
+              <p className="mt-3 text-stone">{t("directionsBody")}</p>
+              <p className="mt-4">
+                <a
+                  href={site.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="stitch-link inline-flex min-h-8 items-center gap-1.5 font-semibold text-vermilion-deep"
+                >
+                  {t("mapCta")} <Icon name="arrow" size={15} className="arrow" />
+                </a>
+              </p>
+            </div>
           </div>
         </div>
       </section>
