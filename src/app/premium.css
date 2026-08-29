@@ -420,9 +420,10 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
   .hero-grid {
     grid-template-columns: minmax(0, 1fr) minmax(21rem, 1fr);
     gap: clamp(3rem, 5vw, 5rem);
-    /* The index panel is always taller than the copy; centring the copy
-       against it is what stops the left column looking top-heavy. */
-    align-items: center;
+    /* Top-aligned. With eleven courses the index panel is far taller than the
+       copy, and centring the copy against it opened a large dead gap above the
+       eyebrow. Both columns starting together reads as one composition. */
+    align-items: start;
   }
 }
 @media (min-width: 1280px) {
@@ -457,6 +458,9 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
 .hero-index-body { padding-inline: clamp(1rem, 2.5vw, 1.5rem); }
 .hero-index-body .ledger { border-top: 0; }
 .hero-index-body .ledger > :last-child { border-bottom: 0; }
+/* Eleven rows at the default row height made the panel taller than the fold.
+   Slightly tighter here only — the ledger keeps its normal rhythm elsewhere. */
+.hero-index-body .ledger-row { padding-block: 0.8125rem; }
 .hero-index-foot {
   padding: 0.5rem clamp(1rem, 2.5vw, 1.5rem);
   border-top: var(--hairline);

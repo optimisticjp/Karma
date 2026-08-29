@@ -2,11 +2,11 @@
   "meta": {
     "home": {
       "title": "Embroidery Classes in Mota Varachha, Surat | Karma Design Studio",
-      "description": "Learn embroidery on real machines at Mahadev Chowk, Mota Varachha: zardosi, 4-beads, sequence, coding, chain, laser, tufting and emCAD design. Free demo class, evening batches till 10:30 pm."
+      "description": "Learn embroidery on real machines at Mahadev Chowk, Mota Varachha: flat, zardosi, 4-beads, sequence, coding, chain, appliqué, 3D, cross stitch, laser, tufting and emCAD design. Free demo class, evening batches till 10:30 pm."
     },
     "courses": {
       "title": "Machine Embroidery Courses in Mota Varachha, Surat | Karma Design Studio",
-      "description": "Live-machine embroidery courses: Zardosi, 4-beads, sequence, coding, chain/multi, laser, tufting and emCAD design. Book a free demo class."
+      "description": "Live-machine embroidery courses in Surat: flat, zardosi, 4-beads, sequence, coding, chain/multi, appliqué and 3D, cross stitch, laser, tufting and emCAD design. Book a free demo class."
     },
     "admissions": {
       "title": "Admissions & Upcoming Batches | Karma Design Studio, Surat",
@@ -18,7 +18,7 @@
     },
     "work": {
       "title": "Student Work Gallery | Karma Design Studio, Surat",
-      "description": "Student embroidery from live batches: zardosi, beads, sequence, laser, tufting and emCAD screen-to-stitch pairs."
+      "description": "Student embroidery from live batches: flat, zardosi, beads, sequence, appliqué, 3D, cross stitch, laser, tufting and emCAD screen-to-stitch pairs."
     },
     "services": {
       "title": "Embroidery Design Services & Job Work in Surat | Karma Design Studio",
@@ -73,7 +73,7 @@
     "hero": {
       "eyebrow": "Skill શીખો, Future બનાવો",
       "h1": "Learn the machines Surat runs on.",
-      "sub": "Karma is an embroidery academy and design lab in Mota Varachha. Eight techniques — zardosi, beads, sequence, coding, chain, laser, tufting and emCAD — taught at the machine, with a trainer next to you.",
+      "sub": "Karma is an embroidery academy and design lab in Mota Varachha. Eleven techniques — from flat and zardosi to appliqué, 3D, laser, tufting and emCAD design — taught at the machine, with a trainer next to you.",
       "secondary": "See upcoming batches",
       "indexTitle": "What you can learn here",
       "indexCta": "Full course details and syllabus",
@@ -237,7 +237,7 @@
   },
   "coursesPage": {
     "eyebrow": "Course catalogue",
-    "title": "Eight techniques, taught on the machines that make them.",
+    "title": "Eleven techniques, taught on the machines that make them.",
     "intro": "Three families: machine embroidery, the modern techniques, and the emCAD design software behind both. Start wherever you are — most students arrive having never touched a machine.",
     "batchesCta": "See upcoming batches",
     "factsTitle": "In every course",
@@ -538,7 +538,7 @@
     "twoSidesTitle": "Two halves, one floor",
     "twoSidesSub": "This is the part most institutes cannot claim: the trainers are not between jobs, they are between orders.",
     "academyTitle": "The academy",
-    "academyBody": "Eight courses across machine embroidery, the modern techniques and emCAD design. Training happens at the machine from the first session, in Gujarati and Hindi, in morning and evening batches.",
+    "academyBody": "Eleven courses across machine embroidery, the modern techniques and emCAD design. Training happens at the machine from the first session, in Gujarati and Hindi, in morning and evening batches.",
     "academyCta": "See the courses",
     "labTitle": "The design lab",
     "labBody": "Design development, digitizing and production embroidery for garment businesses. The same machines, the same people, on live commercial work — which is why the teaching stays current.",

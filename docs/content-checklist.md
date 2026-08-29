@@ -6,7 +6,7 @@ below maps to a ⚠ CONFIRM-WITH-OWNER marker in the code.
 ## A. The 16 owner questions (plan §18, condensed)
 | # | Question | Where the answer goes |
 | --- | --- | --- |
-| Q1 | Final course list correct? Durations per course? Anything missing/retired? | `src/content/courses.ts` (`durationWeeks`, modules) |
+| Q1 | **PARTLY RESOLVED** — course list confirmed at 11 (owner, 2026-08-29). Still open: duration per course, and whether the draft module topics are right. | `src/content/courses.ts` (`durationWeeks`, modules) |
 | ~~Q2~~ | **RESOLVED** — Middle Point confirmed; landmarks captured. See "Verified from the owner's own channels" below. | `src/lib/site.ts`, contact page |
 | Q3 | **PARTLY RESOLVED** — landline +91 261 4521383 confirmed active and now shipped. Still open: is 99043 76340 the right mobile for both calls and WhatsApp? | `src/lib/site.ts` |
 | Q4 | Exact opening hours, day by day | `site.hoursEn/Gu`, LocalBusiness JSON-LD |
@@ -98,10 +98,42 @@ does appear on JustDial, but that is a JustDial aggregate, not a Google one,
 and it could not be verified directly — the owner must confirm the number and
 its source in writing before it is published.
 
+## Owner-confirmed catalogue additions (2026-08-29)
+
+The studio advertises three techniques that were **not** in the catalogue built
+from its YouTube bio. Because they sat alongside proven template filler they
+were held back and put to the owner directly, who confirmed all three are
+taught. They are now shipped:
+
+| Course | Slug | Family |
+| --- | --- | --- |
+| Flat Embroidery | `flat-embroidery` | machine |
+| Appliqué & 3D Embroidery | `applique-3d-embroidery` | machine |
+| Cross Stitch | `cross-stitch` | machine |
+
+The catalogue is now **11 courses**: 8 machine, 2 modern, 1 software.
+
+Two implementation notes for whoever touches this next:
+
+1. **New courses are appended, never inserted.** `VERIFIED_CATALOG_ROWS`
+   derives `sortOrder` from array position and the owner's import upserts with
+   `onConflictDoNothing`, so reordering `src/content/courses.ts` would leave
+   already-imported rows on stale sort positions that collide with new ones.
+   Public surfaces use `coursesByFamily` for display order instead. A test
+   asserts the exact slug order to keep this honest.
+2. **Durations are still null** for all eleven. Q1 is only half answered — the
+   module topics remain the shared `draftModules` template and are still marked
+   as drafts on the course pages.
+
+Re-running the owner's catalogue import in Karma Console will insert only the
+three new rows; it is idempotent by slug.
+
 ## Still open, and worth asking next
 
-The studio publicly advertises three techniques that are **not** in the
-catalogue built from its YouTube bio: **Flat Embroidery**, **Appliqué & 3D**,
-and **Cross Stitch**. They appear in the About copy and in course names, but
-they sit alongside proven template filler, so they have not been added. Ask the
-owner directly: are these taught, and should they join the eight?
+- **Durations and module topics per course** (Q1, the open half).
+- **Q9 numbers** — nothing publishable has been verified yet.
+- Whether Flat Embroidery should lead the catalogue rather than Zardosi. It is
+  the pedagogical foundation and the published pathway starts with "foundation
+  at the machine", but Zardosi is what Surat is known for and currently leads.
+  This is a positioning call, not a technical one — and changing it needs the
+  sortOrder caveat above handled deliberately.

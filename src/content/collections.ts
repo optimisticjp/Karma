@@ -149,6 +149,12 @@ export const techniqueChips: Record<string, { labelEn: string; labelGu: string; 
     beads: { labelEn: "Beads", labelGu: "બીડ્સ", color: "" },
     sequence: { labelEn: "Sequence", labelGu: "સિકવન્સ", color: "" },
     coding: { labelEn: "Coding", labelGu: "કોડિંગ", color: "" },
+    // `chain` was in GALLERY_TECHNIQUES but never here, so any item tagged
+    // chain rendered an empty chip on the public gallery.
+    chain: { labelEn: "Chain / Multi", labelGu: "ચેઇન / મલ્ટી", color: "" },
+    flat: { labelEn: "Flat", labelGu: "ફ્લેટ", color: "" },
+    applique: { labelEn: "Appliqué", labelGu: "એપ્લિક", color: "" },
+    crossstitch: { labelEn: "Cross Stitch", labelGu: "ક્રોસ સ્ટિચ", color: "" },
     laser: { labelEn: "Laser", labelGu: "લેસર", color: "" },
     tufting: { labelEn: "Tufting", labelGu: "ટફ્ટિંગ", color: "" },
     emcad: { labelEn: "emCAD", labelGu: "emCAD", color: "" }

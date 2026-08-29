@@ -106,6 +106,9 @@ const COPY = {
       sequence: "Sequence",
       coding: "Coding / Cording",
       chain: "Chain / Multi",
+      flat: "Flat",
+      applique: "Appliqué",
+      crossstitch: "Cross Stitch",
       laser: "Laser",
       tufting: "Tufting",
       emcad: "emCAD"
@@ -184,6 +187,9 @@ const COPY = {
       sequence: "Sequence",
       coding: "Coding / Cording",
       chain: "Chain / Multi",
+      flat: "ફ્લેટ",
+      applique: "એપ્લિક",
+      crossstitch: "ક્રોસ સ્ટિચ",
       laser: "Laser",
       tufting: "Tufting",
       emcad: "emCAD"

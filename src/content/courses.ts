@@ -1,7 +1,20 @@
 /**
- * Course catalog: the VERIFIED list from the studio's own YouTube bio
+ * Course catalog.
+ *
+ * The first eight are the VERIFIED list from the studio's own YouTube bio
  * (Zardosi, 4-Beads, Coding, Chain, Multi, Sequence, Laser, Tufting + emCAD),
  * NOT the old template's fictional list. See master plan, decision log #1.
+ *
+ * Flat Embroidery, Appliqué & 3D and Cross Stitch were added after the owner
+ * confirmed (2026-08-29) that they are taught. They are advertised on the
+ * studio's own site; that site is otherwise template filler, so they were held
+ * back until the owner said so directly.
+ *
+ * ORDERING: new courses are APPENDED, never inserted. `VERIFIED_CATALOG_ROWS`
+ * derives `sortOrder` from array position, and the owner's import upserts with
+ * `onConflictDoNothing` — so reordering this array would leave already-imported
+ * rows holding stale sort positions and collide with the new ones. Public
+ * surfaces group by family for display instead.
  *
  * ⚠️ CONFIRM-WITH-OWNER (Q1): durations and module topics are drafts.
  * Content here is the Phase 1 source of truth; Phase 2 moves it to the DB
@@ -36,9 +49,9 @@ export const families = {
     nameEn: "Machine Embroidery",
     nameGu: "મશીન એમ્બ્રોઇડરી",
     introEn:
-      "The work Surat is famous for. Zardosi, 4-beads, sequence, coding and chain/multi, learned the only way that works: at the machine, with a trainer beside you.",
+      "The work Surat is famous for. Flat, zardosi, 4-beads, sequence, coding, chain/multi, appliqué, 3D and cross stitch, learned the only way that works: at the machine, with a trainer beside you.",
     introGu:
-      "જે કામ માટે સુરત જાણીતું છે એ જ કામ. ઝરદોશી, 4-બીડ્સ, સિકવન્સ, કોડિંગ અને ચેઇન/મલ્ટી: મશીન પર બેસીને, ટ્રેનર સાથે શીખો. એ જ સાચી રીત છે.",
+      "જે કામ માટે સુરત જાણીતું છે એ જ કામ. ફ્લેટ, ઝરદોશી, 4-બીડ્સ, સિકવન્સ, કોડિંગ, ચેઇન/મલ્ટી, એપ્લિક, 3D અને ક્રોસ સ્ટિચ: મશીન પર બેસીને, ટ્રેનર સાથે શીખો. એ જ સાચી રીત છે.",
     photoLabel: "Zardosi machine close-up, hands guiding fabric"
   },
   modern: {
@@ -336,10 +349,105 @@ export const courses: Course[] = [
     durationWeeks: null,
     photoLabel: "Student at emCAD screen, stitch paths visible",
     modules: draftModules("emCAD design", "emCAD ડિઝાઇન")
+  },
+  {
+    slug: "flat-embroidery",
+    family: "machine",
+    nameEn: "Flat Embroidery",
+    nameGu: "ફ્લેટ એમ્બ્રોઇડરી",
+    leadEn:
+      "The foundation every other technique sits on: clean direct stitching, fine detail and multi-colour work on live machines.",
+    leadGu:
+      "બીજી બધી ટેકનિકનો પાયો: લાઇવ મશીન પર સાફ ડાયરેક્ટ સ્ટિચિંગ, ઝીણી ડિટેલ અને મલ્ટી-કલર કામ.",
+    whoEn:
+      "Complete beginners, and operators who can already run a machine but whose flat work still comes out uneven. If you are not sure which course to pick, this is the one to start with.",
+    whoGu:
+      "સાવ બિગિનર્સ, અને એવા ઓપરેટર્સ જે મશીન ચલાવી તો શકે છે પણ જેમનું ફ્લેટ કામ હજી એકસરખું નથી આવતું. કયો કોર્સ લેવો એ નક્કી ન હોય તો અહીંથી શરૂ કરો.",
+    outcomesEn: [
+      "Stitch clean flat work with even density and no puckering",
+      "Handle fine detail and multi-colour designs without thread breaks",
+      "Set up a job on the machine yourself, start to finish"
+    ],
+    outcomesGu: [
+      "એકસરખી ડેન્સિટી સાથે સાફ ફ્લેટ કામ કરો, કાપડ ખેંચાયા વગર",
+      "દોરો તૂટ્યા વગર ઝીણી ડિટેલ અને મલ્ટી-કલર ડિઝાઇન કરો",
+      "મશીન પર કામ જાતે સેટ કરો, શરૂઆતથી અંત સુધી"
+    ],
+    durationWeeks: null,
+    photoLabel: "Flat embroidery running on the machine, multi-colour design",
+    modules: draftModules("flat embroidery", "ફ્લેટ એમ્બ્રોઇડરી")
+  },
+  {
+    slug: "applique-3d-embroidery",
+    family: "machine",
+    nameEn: "Appliqué & 3D Embroidery",
+    nameGu: "એપ્લિક અને 3D એમ્બ્રોઇડરી",
+    leadEn:
+      "Two ways to lift a design off the cloth: fabric appliqué with a clean satin edge, and 3D foam work that stands up and holds its shape.",
+    leadGu:
+      "ડિઝાઇનને કાપડથી ઉપર ઉઠાવવાની બે રીત: સાફ સાટીન કિનારી સાથે ફેબ્રિક એપ્લિક, અને ફોમ પર 3D કામ જે ઊભું રહે અને આકાર જાળવે.",
+    whoEn:
+      "Students who already run flat work and want the finishes that raise the rate on a piece: boutique panels, jacket backs, lehenga motifs and logo work.",
+    whoGu:
+      "જે સ્ટુડન્ટ્સ ફ્લેટ કામ કરી લે છે અને પીસનો ભાવ વધારે એવી ફિનિશ શીખવા માંગે છે: બુટિક પેનલ, જેકેટ બેક, લહેંગા મોટિફ અને લોગો વર્ક.",
+    outcomesEn: [
+      "Place, tack and cut appliqué with a satin edge that does not fray",
+      "Build 3D foam work with the density and underlay it actually needs",
+      "Judge which designs suit appliqué, which suit foam, and which suit neither"
+    ],
+    outcomesGu: [
+      "એપ્લિક પ્લેસ કરો, ટેક કરો અને એવી સાટીન કિનારી સાથે કાપો જે ઉખડે નહીં",
+      "3D ફોમ કામ માટે જરૂરી ડેન્સિટી અને અંડરલે સાથે કામ કરો",
+      "કઈ ડિઝાઇન એપ્લિક માટે છે, કઈ ફોમ માટે, અને કઈ બેમાંથી એકેય માટે નહીં એ સમજો"
+    ],
+    durationWeeks: null,
+    photoLabel: "Appliqué panel with satin edge beside a 3D foam motif",
+    modules: draftModules("appliqué and 3D", "એપ્લિક અને 3D")
+  },
+  {
+    slug: "cross-stitch",
+    family: "machine",
+    nameEn: "Cross Stitch",
+    nameGu: "ક્રોસ સ્ટિચ",
+    leadEn:
+      "The hand-worked look at machine speed: cross stitch for kurtis, dupattas and suit panels.",
+    leadGu:
+      "હાથના કામ જેવો દેખાવ, મશીનની સ્પીડે: કુર્તી, દુપટ્ટા અને સૂટ પેનલ માટે ક્રોસ સ્ટિચ.",
+    whoEn:
+      "Students aiming at the kurti and dupatta market, and tailors who want to offer a hand-worked finish without hand-work timelines.",
+    whoGu:
+      "કુર્તી અને દુપટ્ટા માર્કેટ માટે તૈયાર થતા સ્ટુડન્ટ્સ, અને એવા ટેલર્સ જે હાથના કામ જેવી ફિનિશ આપવા માંગે છે પણ હાથના કામનો સમય નથી આપી શકતા.",
+    outcomesEn: [
+      "Run cross stitch cleanly on kurti, dupatta and suit panels",
+      "Hold grid alignment and spacing consistent across a full panel",
+      "Match a hand-worked look while keeping production timelines"
+    ],
+    outcomesGu: [
+      "કુર્તી, દુપટ્ટા અને સૂટ પેનલ પર સાફ ક્રોસ સ્ટિચ કરો",
+      "આખી પેનલમાં ગ્રિડ એલાઇનમેન્ટ અને સ્પેસિંગ એકસરખું રાખો",
+      "પ્રોડક્શન ટાઇમલાઇન સાચવીને હાથના કામ જેવો દેખાવ લાવો"
+    ],
+    durationWeeks: null,
+    photoLabel: "Cross stitch panel on a kurti, close-up of the grid",
+    modules: draftModules("cross stitch", "ક્રોસ સ્ટિચ")
   }
 ];
 
 export const courseBySlug = (slug: string) => courses.find((c) => c.slug === slug);
+
+/**
+ * Display order, grouped by family.
+ *
+ * The `courses` array above is STORAGE order and must stay stable, because the
+ * owner's catalogue import derives `sortOrder` from array position. Anything
+ * that shows a flat list to a visitor should use this instead, so newly
+ * appended machine courses read next to the other machine courses rather than
+ * trailing after emCAD.
+ */
+export const FAMILY_ORDER = ["machine", "modern", "software"] as const;
+export const coursesByFamily: Course[] = FAMILY_ORDER.flatMap((family) =>
+  courses.filter((course) => course.family === family)
+);
 
 /* ------------------- sample batches (pre-database fallback) ---------------- */
 
