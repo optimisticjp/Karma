@@ -10,6 +10,7 @@ import { LangBanner } from "@/components/site/LangBanner";
 import { UnveilWatcher } from "@/components/ui/Reveal";
 import { JsonLd } from "@/components/site/JsonLd";
 import { site } from "@/lib/site";
+import { courses } from "@/content/courses";
 import "../globals.css";
 import "../premium.css";
 
@@ -43,24 +44,73 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
   const t = await getTranslations("common");
 
+  /**
+   * Local search is how this audience actually finds a class: "embroidery
+   * class Mota Varachha", "zardosi class Surat". The listing therefore carries
+   * everything Google can match on — both published phone numbers, the
+   * landmark that gets a first-timer to the right door, every social profile
+   * the studio runs, and the real course catalogue as an offer list.
+   *
+   * A training institute is genuinely both a LocalBusiness and an
+   * EducationalOrganization; declaring only the former loses the course
+   * eligibility.
+   */
   const businessLd = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    name: "Karma Design Studio & Classes",
+    "@type": ["LocalBusiness", "EducationalOrganization"],
+    "@id": `${site.url}/#studio`,
+    name: site.legalName,
+    alternateName: site.name,
     description: locale === "gu" ? site.descriptorGu : site.descriptorEn,
     url: site.url,
-    telephone: `+${site.whatsapp}`,
+    telephone: [`+${site.whatsapp}`, `+${site.landline}`],
     email: site.email,
     address: {
       "@type": "PostalAddress",
-      streetAddress: "302, Middle Point, Mahadev Chowk, Mota Varachha",
-      addressLocality: "Surat",
+      streetAddress: `302, Middle Point, Maruti Nandan Society, Mahadev Chowk (${site.landmarkEn})`,
+      addressLocality: "Mota Varachha, Surat",
       addressRegion: "Gujarat",
       postalCode: "394101",
       addressCountry: "IN"
     },
     geo: { "@type": "GeoCoordinates", latitude: site.geo.lat, longitude: site.geo.lng },
-    sameAs: [site.socials.instagram, site.socials.youtube]
+    hasMap: site.mapsUrl,
+    areaServed: { "@type": "City", name: "Surat" },
+    availableLanguage: ["gu", "hi", "en"],
+    // Evening batches until 22:30 are the studio's actual differentiator for
+    // working students, so they belong in the listing rather than only in copy.
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ],
+        closes: "22:30"
+      }
+    ],
+    sameAs: [
+      site.socials.instagram,
+      site.socials.youtube,
+      site.socials.facebook,
+      site.socials.threads
+    ],
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: locale === "gu" ? "એમ્બ્રોઇડરી કોર્સ" : "Embroidery courses",
+      itemListElement: courses.map((course) => ({
+        "@type": "Course",
+        name: course.nameEn,
+        description: course.leadEn,
+        url: `${site.url}/${locale}/courses/${course.slug}`,
+        provider: { "@id": `${site.url}/#studio` }
+      }))
+    }
   };
 
   return (

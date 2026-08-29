@@ -20,6 +20,8 @@ export function Footer() {
             <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-smallmeta font-semibold">
               <a className="stitch-link" href={site.socials.instagram} target="_blank" rel="noopener noreferrer">Instagram</a>
               <a className="stitch-link" href={site.socials.youtube} target="_blank" rel="noopener noreferrer">YouTube</a>
+              <a className="stitch-link" href={site.socials.facebook} target="_blank" rel="noopener noreferrer">Facebook</a>
+              <a className="stitch-link" href={site.socials.threads} target="_blank" rel="noopener noreferrer">Threads</a>
               <a className="stitch-link" href={`https://wa.me/${site.whatsapp}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
             </div>
           </div>
@@ -52,8 +54,14 @@ export function Footer() {
             <p className="microlabel">{t("visit")}</p>
             <address className="mt-2 text-smallmeta not-italic text-stone">
               <p>{locale === "gu" ? site.addressGu : site.addressEn}</p>
+              <p className="font-semibold text-carbon">
+                {locale === "gu" ? site.landmarkGu : site.landmarkEn}
+              </p>
               <p>{locale === "gu" ? site.hoursGu : site.hoursEn}</p>
-              <p><a className="stitch-link font-semibold text-carbon" href={`tel:+${site.whatsapp}`}>{site.phoneDisplay}</a></p>
+              <p className="flex flex-wrap gap-x-4">
+                <a className="stitch-link font-semibold text-carbon" href={`tel:+${site.whatsapp}`}>{site.phoneDisplay}</a>
+                <a className="stitch-link font-semibold text-carbon" href={`tel:+${site.landline}`}>{site.landlineDisplay}</a>
+              </p>
               <p><a className="stitch-link break-all" href={`mailto:${site.email}`}>{site.email}</a></p>
               <p><Link className="stitch-link" href="/services">{t("briefLink")}</Link></p>
             </address>

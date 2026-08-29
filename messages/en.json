@@ -1,11 +1,11 @@
 {
   "meta": {
     "home": {
-      "title": "Embroidery Academy & Design Lab in Surat | Karma Design Studio",
-      "description": "Learn embroidery on real machines in Surat: Zardosi, beads, sequence, coding, laser, tufting and emCAD design. Free demo class, evening batches till 10:30 pm."
+      "title": "Embroidery Classes in Mota Varachha, Surat | Karma Design Studio",
+      "description": "Learn embroidery on real machines at Mahadev Chowk, Mota Varachha: zardosi, 4-beads, sequence, coding, chain, laser, tufting and emCAD design. Free demo class, evening batches till 10:30 pm."
     },
     "courses": {
-      "title": "Machine Embroidery Courses in Surat | Karma Design Studio",
+      "title": "Machine Embroidery Courses in Mota Varachha, Surat | Karma Design Studio",
       "description": "Live-machine embroidery courses: Zardosi, 4-beads, sequence, coding, chain/multi, laser, tufting and emCAD design. Book a free demo class."
     },
     "admissions": {
@@ -25,7 +25,7 @@
       "description": "Design development, emCAD digitizing, sampling, embroidered patches and production job work for garment businesses. Send a design brief."
     },
     "about": {
-      "title": "About the Studio, Machines & Trainers | Karma Design Studio",
+      "title": "About the Studio & Machine Wall | Karma Design Studio, Surat",
       "description": "Surat's embroidery academy and design lab: real machines, working-designer trainers, and training from design screen to finished stitch."
     },
     "stories": {
@@ -34,7 +34,7 @@
     },
     "contact": {
       "title": "Contact & Visit Us | Karma Design Studio, Mota Varachha, Surat",
-      "description": "WhatsApp us, call, or walk in. Open daily with evening batches till 10:30 pm in Mota Varachha, Surat."
+      "description": "WhatsApp us, call the studio, or walk in. 302 Middle Point, Mahadev Chowk, near Dhara Arcade, Mota Varachha. Open daily, evening batches till 10:30 pm."
     },
     "verify": {
       "title": "Verify a Certificate | Karma Design Studio",
@@ -67,8 +67,7 @@
       "dismiss": "Stay in English"
     },
     "waPrefillDemo": "Hi Karma Design Studio! 👑 મને ફ્રી ડેમો ક્લાસ બુક કરવો છે. નામ: ____ | કોર્સ: ____ | ટાઇમ: સવાર/સાંજ",
-    "waPrefillBusiness": "Hi! I need embroidery design / digitizing / job work. Product: ____ | Qty: ____ | Deadline: ____",
-    "descriptor": "Embroidery Academy · Design Lab"
+    "waPrefillBusiness": "Hi! I need embroidery design / digitizing / job work. Product: ____ | Qty: ____ | Deadline: ____"
   },
   "home": {
     "hero": {
@@ -248,7 +247,6 @@
       "Certificate with a verifiable QR code",
       "A free demo class before you commit"
     ],
-    "nextBatch": "Next batch",
     "pathway": {
       "h2": "Where the courses lead",
       "line": "The courses connect. Most students start at one machine technique, add emCAD design, and move into production work or a unit of their own.",
@@ -279,7 +277,6 @@
     "modulesNote": "Draft syllabus: final module topics are confirmed with the studio (see admissions FAQ).",
     "machinesTitle": "Still to come",
     "machinesBody": "Photographs of this course’s machines, named and shot on the studio floor, are published here after the studio shoot.",
-    "machinesPhoto": "This course's machine, photographed on the studio floor",
     "batchesTitle": "Upcoming batches for this course",
     "certTitle": "Certificate requirements",
     "certBody": "The certificate needs your attendance, completed practicals and a finished final project. Every certificate carries a QR code verifiable on this website.",
@@ -293,7 +290,6 @@
     "langLabel": "Language",
     "langValue": "ગુજરાતી + Hindi + English terms",
     "demoCta": "Book a free demo of this course",
-    "stickyCta": "Book free demo",
     "batchesSub": "Seats per batch are limited. If none of these fit, message us — batches for this course open regularly."
   },
   "admissionsPage": {
@@ -578,18 +574,20 @@
     "reachTitle": "How to reach us",
     "reachSub": "Ranked by how fast you will get an answer.",
     "waNote": "Fastest reply, day or evening",
-    "callNote": "Best during studio hours",
+    "callNote": "Same number as WhatsApp",
     "emailLabel": "Email",
     "emailNote": "For business briefs and documents",
     "visitTitle": "Visit us",
     "visitSub": "The demo class is the best first visit — book it and just come.",
     "hoursLabel": "Hours",
     "addressLabel": "Address",
-    "directionsLabel": "Still to come",
-    "directionsNote": "Landmark directions and a photo of the entrance are published here after the studio shoot, so a first-time visitor finds the right door.",
     "mapCta": "Open in Google Maps",
-    "entranceLabel": "Building entrance photo (shoot list)",
-    "demoNote": "The free demo class is the best first visit: book it and just come."
+    "demoNote": "The free demo class is the best first visit: book it and just come.",
+    "landlineLabel": "Call the studio",
+    "landlineNote": "Landline, best during studio hours",
+    "mobileLabel": "Call the mobile",
+    "directionsTitle": "Finding the door",
+    "directionsBody": "Middle Point is on Mahadev Chowk. Come to the third floor — unit 302. If you are close and cannot spot it, send a WhatsApp and someone will come down."
   },
   "verifyPage": {
     "title": "Verify a certificate",
@@ -625,7 +623,6 @@
     "line": "From design screen to finished stitch: live-machine embroidery training and professional design services.",
     "learn": "Learn",
     "students": "Admissions & students",
-    "servicesCol": "Services",
     "visit": "Visit us",
     "legal": "Legal",
     "admissionForm": "Admission form",
