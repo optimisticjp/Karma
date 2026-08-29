@@ -11,6 +11,7 @@ import { UnveilWatcher } from "@/components/ui/Reveal";
 import { JsonLd } from "@/components/site/JsonLd";
 import { site } from "@/lib/site";
 import "../globals.css";
+import "../premium.css";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
