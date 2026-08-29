@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { VerifyForm } from "@/components/site/VerifyForm";
+import { PageIntro } from "@/components/ui/PageIntro";
 import { pageMeta } from "@/lib/seo";
 
 export async function generateMetadata({
@@ -19,14 +20,25 @@ export default async function VerifyPage({ params }: { params: Promise<{ locale:
   const t = await getTranslations("verifyPage");
 
   return (
-    <section className="section-compact">
-      <div className="container-site max-w-2xl">
-        <h1 className="text-h2 font-display">{t("title")}</h1>
-        <p className="mt-4 text-stone">{t("sub")}</p>
-        <div className="mt-8">
-          <VerifyForm />
+    <>
+      <PageIntro
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        lede={t("sub")}
+        aside={
+          <>
+            <p className="microlabel !text-vermilion-deep">{t("asideTitle")}</p>
+            <p className="mt-3">{t("asideBody")}</p>
+          </>
+        }
+      />
+      <section className="section">
+        <div className="container-site">
+          <div className="reading-shell">
+            <VerifyForm />
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

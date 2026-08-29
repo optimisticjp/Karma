@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { BriefForm } from "@/components/forms/BriefForm";
+import { PageIntro } from "@/components/ui/PageIntro";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { StitchDivider } from "@/components/ui/StitchDivider";
+import { Ledger, LedgerRow } from "@/components/ui/Ledger";
+import { Icon } from "@/components/ui/Icon";
 import { services } from "@/content/collections";
-import { site } from "@/lib/site";
+import { waLink } from "@/lib/site";
 import { pageMeta } from "@/lib/seo";
 
 export async function generateMetadata({
@@ -20,78 +22,93 @@ export async function generateMetadata({
 export default async function ServicesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("servicesPage");
-  const tc = await getTranslations("common");
-  const l = await getLocale();
+  const [t, tc, l] = await Promise.all([
+    getTranslations("servicesPage"),
+    getTranslations("common"),
+    getLocale()
+  ]);
   const gu = l === "gu";
-  const howSteps = t.raw("howSteps") as string[];
+  const howSteps = t.raw("howSteps") as Array<{ t: string; d: string }>;
   const guide = t.raw("guide") as string[];
 
   return (
     <>
-      <section className="section-compact">
-        <div className="container-site">
-          <h1 className="text-display max-w-3xl">{t("title")}</h1>
-          <p className="u-lede prose-measure">{t("sub")}</p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <a href="#brief" className="btn btn-primary">{t("form.submit")}</a>
+      <PageIntro
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        lede={t("sub")}
+        actions={
+          <>
+            <a href="#brief" className="btn btn-primary">
+              {t("form.submit")} <Icon name="arrow" size={18} className="arrow" />
+            </a>
             <a
-              href={`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(tc("waPrefillBusiness"))}`}
+              href={waLink(tc("waPrefillBusiness"))}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-secondary"
             >
-              {tc("whatsapp")}
+              <Icon name="whatsapp" size={18} /> {tc("whatsapp")}
             </a>
-          </div>
-        </div>
-      </section>
+          </>
+        }
+        aside={
+          <>
+            <p className="microlabel !text-vermilion-deep">{t("confidentialTitle")}</p>
+            <p className="mt-3">{t("confidential")}</p>
+          </>
+        }
+      />
 
-      <section className="section-compact bg-ivory-2">
+      <section className="section">
         <div className="container-site">
-          <div className="grid gap-6 lg:gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <SectionHeading title={t("whatTitle")} sub={t("whatSub")} />
+          <dl className="u-section-body spec-grid">
             {services.map((s) => (
-              <div key={s.titleEn} className="card p-6 md:p-8">
-                <h2 className="text-h4 font-display">{gu ? s.titleGu : s.titleEn}</h2>
-                <p className="mt-2 text-smallmeta text-stone">{gu ? s.descGu : s.descEn}</p>
+              <div key={s.titleEn}>
+                <dt className="spec-label">{gu ? s.titleGu : s.titleEn}</dt>
+                <dd className="spec-note mt-2">{gu ? s.descGu : s.descEn}</dd>
               </div>
             ))}
-          </div>
+          </dl>
         </div>
       </section>
 
-      <section className="section-compact">
-        <div className="container-site grid gap-12 lg:grid-cols-2">
+      <section className="section bg-ivory-2">
+        <div className="container-site grid gap-10 lg:grid-cols-2 lg:gap-16">
           <div>
-            <SectionHeading title={t("howTitle")} />
-            <ol className="mt-6 space-y-4">
+            <SectionHeading title={t("howTitle")} sub={t("howSub")} />
+            <Ledger as="ol" className="mt-8">
               {howSteps.map((s, i) => (
-                <li key={s} className="flex items-baseline gap-4">
-                  <span className="font-display text-h4 text-vermilion-deep">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="font-semibold">{s}</span>
-                </li>
+                <LedgerRow
+                  key={s.t}
+                  index={String(i + 1).padStart(2, "0")}
+                  title={s.t}
+                  note={s.d}
+                />
               ))}
-            </ol>
+            </Ledger>
           </div>
           <div>
-            <SectionHeading title={t("guideTitle")} />
-            <ul className="mt-6 space-y-3">
+            <SectionHeading title={t("guideTitle")} sub={t("guideSub")} />
+            <ul className="mt-8 space-y-3.5">
               {guide.map((g) => (
                 <li key={g} className="flex gap-3">
-                  <span aria-hidden="true" className="text-vermilion-deep">–</span>
+                  <Icon
+                    name="check"
+                    size={17}
+                    strokeWidth={2}
+                    className="mt-1 shrink-0 text-vermilion-deep"
+                  />
                   <span className="text-stone">{g}</span>
                 </li>
               ))}
             </ul>
-            <p className="mt-6 rounded-lg bg-ivory-2 p-4 text-smallmeta font-semibold text-stone">
-              🔒 {t("confidential")}
-            </p>
           </div>
         </div>
       </section>
 
-      <StitchDivider />
-      <section className="section-compact" id="brief">
+      <section className="section" id="brief">
         <div className="container-site max-w-3xl">
           <BriefForm />
         </div>

@@ -129,3 +129,100 @@ nothing feels major.
    layout), which observes elements directly, re-scans on DOM changes, and
    force-reveals after 1.2s. **A failed animation must never cost a photo:**
    never rely on an ancestor to trigger this class.
+
+---
+
+# The Machine Floor Ledger (2026 product pass)
+
+The system above stands. This pass answers one problem it could not: **the
+studio has no photography yet**, and the site was leading with empty photo
+frames — three in the hero, eight on the courses index, one per trainer card,
+one per story. Rival institutes in Surat fill that gap with stock images of
+smiling women at sewing machines. We do the opposite: make the *substance* the
+visual. The eight real techniques, the real batch schedule, the real syllabus,
+the real machine wall — set like a workshop's own wall chart.
+
+Everything here lives in `src/app/premium.css` and degrades *upward*: when the
+studio shoot lands, photography replaces swatches without touching the layout.
+
+## New primitives
+
+### `.ledger` / `.ledger-row` — the signature composition
+Hairline-separated rows carrying an index, a title, and the fact a visitor
+needs to decide. Use it for catalogues, sequences and syllabi.
+
+```
+<Ledger><LedgerLink index="01" title="Zardosi" meta="Machine Embroidery" /></Ledger>
+```
+
+It exists because the site kept answering every new question with another grid
+of identical cards. A row list is denser, scans faster, works at 320px with no
+cropping, and is honest about what we do and do not know. Variants:
+`a.ledger-row` (whole row is the target, thread marks it), `.is-labelled`
+(label/value, so the markup can stay a valid `<dl>`).
+
+**Keep cards** only where an image genuinely leads.
+
+### `.spec-grid` — hairline cells for equivalent facts
+The machine wall, what a fee covers, how teaching works. One shared border
+instead of N floating boxes: quieter, denser, never reads as a dashboard.
+Columns step 2 → 3 → 4; the trailing-rule `:nth-child` blocks must be kept in
+step with the column count (custom properties do not work in `:nth-child`).
+
+### `.on-carbon` — dark bands as a real surface
+Re-points the palette tokens, so cards, rules, chips, eyebrows and secondary
+buttons nested inside invert correctly. Dark is *punctuation*: exactly two per
+page (the audience switch, and the close). A third turns punctuation into
+decoration.
+
+### `<TechniquePlate>` — drawn material swatches
+Satin rows for machine work, loops and cut edges for the modern techniques,
+path nodes for emCAD. **Deliberately no `viewBox`**: with one, the tile scales
+with the container and a 9px satin pitch renders as 60px candy stripes.
+Without one, user units are CSS pixels and the tile stays at thread scale.
+This is texture, never illustration — it must never compete with adjacent type.
+
+### `.pending-block` — content the owner still owes
+Owner-supplied copy (the founding story, trainer names) must look *deliberately
+reserved*, not accidentally broken. One consistent treatment beats an emoji in
+a dashed box.
+
+## Rules this pass added
+
+1. **Font size and leading travel together.** Setting only `font-size` from a
+   `--text-*` token drops the paired `--text-*--line-height`, and the heading
+   silently falls back to the body's 1.625. Every class here that sets a
+   display size also sets its line-height and letter-spacing.
+2. **Unlayered CSS outranks `@layer base`.** Any heading styled in
+   `premium.css` must restate the Gujarati overrides (`line-height: 1.3`,
+   `letter-spacing: 0`) or it inherits Latin tracking. Never letterspace
+   Gujarati.
+3. **`--container-pad` is the one gutter value.** Anything that breaks the
+   gutter (scrollers, tables) derives from it via `.bleed-row`. A hardcoded
+   `-mx-5` against an 18px gutter leaked 2px of horizontal overflow.
+4. **Sample content does not ship to visitors.** Source fallbacks carry
+   `sample: true`; their quote fields are editorial instructions. Public
+   components filter on `!sample` and render an honest "not published yet"
+   state instead. Content Desk publishing one real row switches the section on.
+5. **Section rhythm is fluid**, not three breakpoint steps. Endpoints still
+   land on the spec values; every width between is composed rather than
+   jumping. Tablet stopped being "desktop, early".
+6. **24px minimum tap target**, with the WCAG inline-link exception. Footer
+   links get `padding-block`, not a bigger font.
+
+## Homepage composition
+
+Five chapters, each a pair of sections sharing a surface, with the schedule
+directly under the catalogue where the decision happens:
+
+| Chapter | Sections | Surface |
+| --- | --- | --- |
+| The offer | Hero (index + fact rail) | ivory + grid |
+| What, and when | Course families · Batches | ivory-2 |
+| How the work works | Screen→stitch · Method | ivory, signature tier |
+| Proof | Work · Stories · Teaching · Channel | mixed |
+| Decide | Fees · FAQ | ivory-2 |
+| Close | Business door · Visit · CTA | carbon / ivory / carbon |
+
+Chapters that continue a surface carry a hairline (`border-t border-line`)
+instead of a colour change.

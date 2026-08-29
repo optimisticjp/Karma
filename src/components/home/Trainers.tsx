@@ -1,21 +1,35 @@
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { PhotoSlot } from "@/components/ui/PhotoSlot";
-import { SampleTag } from "@/components/ui/SampleTag";
 import { Icon } from "@/components/ui/Icon";
 import { trainers } from "@/content/collections";
 
 /**
- * "Who will actually teach me" is a top-three question for any school, and
- * the one template sites answer with a stock photo and the words "expert
- * faculty". Real names, real specialities, real portraits. Until the owner
- * confirms them (checklist Q7) each card carries a sample tag: honest
- * placeholders beat invented staff.
+ * "Who will actually teach me" is a top-three question for any school, and the
+ * one template sites answer with a stock photo and the words "expert faculty".
+ *
+ * This section used to answer it with three cards whose headings read
+ * "Sample: lead trainer name" over empty photo frames — the most damaging
+ * moment on the page, because a visitor cannot tell a placeholder from a
+ * broken site. Named profiles now appear only once real ones exist. Until
+ * then we answer the question with what is actually true and verified about
+ * how teaching works here, which is the part a prospective student is really
+ * asking about anyway.
  */
 export function Trainers() {
   const t = useTranslations("home.trainers");
+  const locale = useLocale();
+  const gu = locale === "gu";
+  const confirmed = trainers.filter((tr) => !tr.sample);
+
+  const practice: Array<[string, string]> = [
+    [t("p1Label"), t("p1Value")],
+    [t("p2Label"), t("p2Value")],
+    [t("p3Label"), t("p3Value")],
+    [t("p4Label"), t("p4Value")]
+  ];
 
   return (
     <section className="section">
@@ -30,29 +44,48 @@ export function Trainers() {
           </Link>
         </div>
 
-        <ul className="u-section-body grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
-          {trainers.map((tr, i) => (
-            <Reveal as="li" key={tr.nameEn} delay={i * 80}>
-              <article className="card card-lift h-full overflow-hidden">
-                <PhotoSlot
-                  label={tr.photoLabel}
-                  ratio="4/5"
-                  className="card-img media-unveil rounded-none border-0"
-                />
-                <div className="p-6 md:p-8">
-                  <h3 className="text-h4 card-title font-display">{tr.nameEn}</h3>
-                  <p className="microlabel mt-2 !text-vermilion-deep">{tr.roleEn}</p>
-                  <p className="mt-3 text-smallmeta text-stone">{tr.focusEn}</p>
-                  {tr.sample ? (
-                    <p className="mt-4">
-                      <SampleTag />
+        <Reveal className="u-section-body">
+          <dl className="spec-grid">
+            {practice.map(([label, value]) => (
+              <div key={label}>
+                <dt className="spec-label">{label}</dt>
+                <dd className="spec-value">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </Reveal>
+
+        {confirmed.length > 0 ? (
+          <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+            {confirmed.map((tr, i) => (
+              <Reveal as="li" key={tr.nameEn} delay={i * 80}>
+                <article className="card card-lift h-full overflow-hidden">
+                  <PhotoSlot
+                    label={tr.photoLabel}
+                    ratio="4/5"
+                    className="card-img media-unveil rounded-none border-0"
+                  />
+                  <div className="p-6 md:p-8">
+                    <h3 className="text-h4 card-title font-display">
+                      {gu ? tr.nameGu : tr.nameEn}
+                    </h3>
+                    <p className="microlabel mt-2 !text-vermilion-deep">
+                      {gu ? tr.roleGu : tr.roleEn}
                     </p>
-                  ) : null}
-                </div>
-              </article>
-            </Reveal>
-          ))}
-        </ul>
+                    <p className="mt-3 text-smallmeta text-stone">
+                      {gu ? tr.focusGu : tr.focusEn}
+                    </p>
+                  </div>
+                </article>
+              </Reveal>
+            ))}
+          </ul>
+        ) : (
+          <p className="pending-block mt-8 max-w-2xl text-smallmeta text-stone">
+            <span className="pending-label">{t("pendingLabel")}</span>
+            {t("pendingNote")}
+          </p>
+        )}
       </div>
     </section>
   );

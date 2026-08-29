@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ManagedPhoto } from "@/components/ui/ManagedPhoto";
-import { SampleTag } from "@/components/ui/SampleTag";
+import { PageIntro } from "@/components/ui/PageIntro";
+import { Icon } from "@/components/ui/Icon";
 import { getPublicStories } from "@/lib/content/public";
 import { pageMeta } from "@/lib/seo";
 
@@ -21,7 +22,7 @@ export async function generateMetadata({
 export default async function StoriesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, th, tc, l, stories] = await Promise.all([
+  const [t, th, tc, l, all] = await Promise.all([
     getTranslations("storiesPage"),
     getTranslations("home.stories"),
     getTranslations("common"),
@@ -29,38 +30,67 @@ export default async function StoriesPage({ params }: { params: Promise<{ locale
     getPublicStories()
   ]);
   const gu = l === "gu";
+  // Managed rows are always sample:false; source fallbacks carry editorial
+  // instructions in their quote fields and must never reach a visitor.
+  const stories = all.filter((s) => !s.sample);
 
   return (
-    <section className="section-compact">
-      <div className="container-site">
-        <h1 className="text-display max-w-3xl">{t("title")}</h1>
-        <p className="u-lede prose-measure">{t("sub")}</p>
+    <>
+      <PageIntro
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        lede={t("sub")}
+        actions={
+          <Link href="/admission" className="btn btn-primary">
+            {tc("bookDemo")} <Icon name="arrow" size={18} className="arrow" />
+          </Link>
+        }
+        aside={
+          <>
+            <p className="microlabel !text-vermilion-deep">{t("consentTitle")}</p>
+            <p className="mt-3">{t("consentBody")}</p>
+          </>
+        }
+      />
 
-        <div className="u-section-body grid gap-6 lg:gap-8 md:grid-cols-2">
-          {stories.map((s, i) => (
-            <figure key={`${s.nameEn}-${i}`} className="card grid h-full gap-6 p-6 sm:grid-cols-[120px_1fr] md:p-8">
-              <ManagedPhoto src={s.mediaUrl} label={s.photoLabel} ratio="4/5" className="hidden sm:block" />
-              <div>
-                <blockquote className="font-display text-h4 leading-snug">“{gu ? s.quoteGu : s.quoteEn}”</blockquote>
-                <figcaption className="mt-4 space-y-1 text-smallmeta text-stone">
-                  <p className="font-bold text-carbon">{gu ? s.nameGu : s.nameEn}</p>
-                  <p>{gu ? s.courseGu : s.courseEn}</p>
-                  <p>
-                    {th("before")}: {gu ? s.beforeGu : s.beforeEn}
-                    <span aria-hidden="true" className="mx-2 text-vermilion-deep">→</span>
-                    <span className="font-semibold text-carbon">{th("after")}: {gu ? s.afterGu : s.afterEn}</span>
-                  </p>
-                </figcaption>
-                {s.sample ? <p className="mt-3"><SampleTag /></p> : null}
-              </div>
-            </figure>
-          ))}
+      <section className="section">
+        <div className="container-site">
+          {stories.length === 0 ? (
+            <p className="pending-block max-w-2xl text-smallmeta text-stone">
+              <span className="pending-label">{th("pendingLabel")}</span>
+              {th("pendingNote")}
+            </p>
+          ) : null}
+          <div className="grid gap-6 lg:gap-8 md:grid-cols-2">
+            {stories.map((s, i) => (
+              <figure
+                key={`${s.nameEn}-${i}`}
+                className="card grid h-full gap-6 p-6 sm:grid-cols-[120px_1fr] md:p-8"
+              >
+                <ManagedPhoto src={s.mediaUrl} label={s.photoLabel} ratio="4/5" className="hidden sm:block" />
+                <div>
+                  <blockquote className="font-display text-h4 leading-snug">
+                    “{gu ? s.quoteGu : s.quoteEn}”
+                  </blockquote>
+                  <figcaption className="mt-4 space-y-1 text-smallmeta text-stone">
+                    <p className="font-bold text-carbon">{gu ? s.nameGu : s.nameEn}</p>
+                    <p>{gu ? s.courseGu : s.courseEn}</p>
+                    <p>
+                      {th("before")}: {gu ? s.beforeGu : s.beforeEn}
+                      <span aria-hidden="true" className="mx-2 text-vermilion-deep">
+                        →
+                      </span>
+                      <span className="font-semibold text-carbon">
+                        {th("after")}: {gu ? s.afterGu : s.afterEn}
+                      </span>
+                    </p>
+                  </figcaption>
+                </div>
+              </figure>
+            ))}
+          </div>
         </div>
-
-        <div className="mt-12 text-center">
-          <Link href="/admission" className="btn btn-primary">{tc("bookDemo")}</Link>
-        </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

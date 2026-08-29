@@ -11,6 +11,7 @@ import { Link } from "@/i18n/navigation";
 export function BriefForm() {
   const t = useTranslations("servicesPage");
   const te = useTranslations("admissionForm.errors");
+  const tf = useTranslations("footer");
   const locale = useLocale();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -125,7 +126,7 @@ export function BriefForm() {
       {error ? <p role="alert" className="field-error">{error}</p> : null}
       <p className="text-xs text-stone">
         {t("form.privacyNote")}{" "}
-        <Link href="/privacy" className="stitch-link font-semibold">Privacy</Link>
+        <Link href="/privacy" className="stitch-link font-semibold">{tf("privacy")}</Link>
       </p>
       <button type="submit" disabled={busy} className="btn btn-primary w-full md:w-auto">
         {busy ? t("form.submitting") : t("form.submit")}

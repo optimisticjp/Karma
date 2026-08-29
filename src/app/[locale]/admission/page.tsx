@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AdmissionForm, type AdmissionContext } from "@/components/forms/AdmissionForm";
 import { courses } from "@/content/courses";
+import { PageIntro } from "@/components/ui/PageIntro";
+import { Icon } from "@/components/ui/Icon";
 import { pageMeta } from "@/lib/seo";
 
 export async function generateMetadata({
@@ -40,15 +42,40 @@ export default async function AdmissionFormPage({
     src: typeof sp.src === "string" ? sp.src.slice(0, 40) : undefined
   };
 
+  const reassurance = t.raw("reassurance") as string[];
+
   return (
-    <section className="section-compact">
-      <div className="container-site max-w-3xl">
-        <h1 className="text-h2 font-display">{t("title")}</h1>
-        <p className="u-lede">{t("sub")}</p>
-        <div className="mt-8">
-          <AdmissionForm courses={options} context={context} />
+    <>
+      <PageIntro
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        lede={t("sub")}
+        aside={
+          <>
+            <p className="microlabel !text-vermilion-deep">{t("reassuranceTitle")}</p>
+            <ul className="mt-4 space-y-2.5">
+              {reassurance.map((r) => (
+                <li key={r} className="flex gap-2.5">
+                  <Icon
+                    name="check"
+                    size={16}
+                    strokeWidth={2}
+                    className="mt-1 shrink-0 text-vermilion-deep"
+                  />
+                  <span>{r}</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        }
+      />
+      <section className="section">
+        <div className="container-site">
+          <div className="reading-shell">
+            <AdmissionForm courses={options} context={context} />
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

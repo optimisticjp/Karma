@@ -1,57 +1,89 @@
 import { useLocale, useTranslations } from "next-intl";
-import { PhotoSlot } from "@/components/ui/PhotoSlot";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { Ledger, LedgerRow } from "@/components/ui/Ledger";
 import { Icon } from "@/components/ui/Icon";
-import { site } from "@/lib/site";
+import { site, waLink } from "@/lib/site";
 
-/** The physical-institute proof block: address, hours, map, one tap to talk. */
+/**
+ * The physical-institute proof block. For this audience, "there is a real
+ * floor you can walk onto" outranks anything the copy can claim, so the
+ * address, the hours and one tap to talk carry the section.
+ *
+ * The old right-hand column was an empty entrance-photo frame. It now answers
+ * the question that actually stops people from coming — what happens if I
+ * just turn up — which needs no photograph and no promise we cannot keep.
+ */
 export function VisitStudio() {
   const t = useTranslations("home.visit");
   const tc = useTranslations("common");
   const tcp = useTranslations("contactPage");
   const locale = useLocale();
   const gu = locale === "gu";
+  const steps = t.raw("firstSteps") as Array<{ t: string; d: string }>;
 
   return (
-    <section className="section-major bg-ivory-2">
-      <div className="container-site grid items-center gap-10 lg:grid-cols-2">
+    <section className="section-major">
+      <div className="container-site grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-16">
         <div>
-          <SectionHeading title={t("h2")} sub={t("sub")} />
-          <dl className="mt-6 space-y-4 text-stone">
-            <div className="flex gap-3">
-              <Icon name="pin" size={20} className="mt-1 text-vermilion-deep" />
-              <div>
-                <dt className="microlabel">{tcp("addressLabel")}</dt>
-                <dd className="mt-0.5">{gu ? site.addressGu : site.addressEn}</dd>
-              </div>
+          <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} />
+
+          <dl className="u-section-body ledger">
+            <div className="ledger-row is-labelled">
+              <dt className="ledger-title">{tcp("addressLabel")}</dt>
+              <dd className="ledger-note">{gu ? site.addressGu : site.addressEn}</dd>
             </div>
-            <div className="flex gap-3">
-              <Icon name="hoop" size={20} className="mt-1 text-vermilion-deep" />
-              <div>
-                <dt className="microlabel">{tcp("hoursLabel")}</dt>
-                <dd className="mt-0.5">{gu ? site.hoursGu : site.hoursEn}</dd>
-              </div>
+            <div className="ledger-row is-labelled">
+              <dt className="ledger-title">{tcp("hoursLabel")}</dt>
+              <dd className="ledger-note">{gu ? site.hoursGu : site.hoursEn}</dd>
+            </div>
+            <div className="ledger-row is-labelled">
+              <dt className="ledger-title">{t("phoneLabel")}</dt>
+              <dd className="ledger-note">
+                <a
+                  href={`tel:+${site.whatsapp}`}
+                  className="stitch-link inline-flex min-h-8 items-center font-semibold text-carbon"
+                >
+                  {site.phoneDisplay}
+                </a>
+              </dd>
             </div>
           </dl>
-          <div className="mt-7 flex flex-wrap gap-3">
+
+          <div className="u-actions flex flex-wrap gap-3">
             <a
-              href={`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(tc("waPrefillDemo"))}`}
+              href={waLink(tc("waPrefillDemo"))}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-primary"
             >
               <Icon name="whatsapp" size={18} /> {tc("whatsapp")}
             </a>
-            <a href={site.mapsUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
-              {tcp("mapCta")}
-            </a>
-            <a href={`tel:+${site.whatsapp}`} className="btn btn-ghost">
-              <Icon name="phone" size={18} /> {site.phoneDisplay}
+            <a
+              href={site.mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-secondary"
+            >
+              <Icon name="pin" size={18} /> {tcp("mapCta")}
             </a>
           </div>
-          <p className="mt-4 text-smallmeta text-stone">{tcp("demoNote")}</p>
         </div>
-        <PhotoSlot label={tcp("entranceLabel")} ratio="16/9" className="rounded-none" />
+
+        <div className="feature-surface p-6 md:p-8">
+          <h3 className="text-h4 font-display">{t("firstTitle")}</h3>
+          <span aria-hidden="true" className="rule-stitch" />
+          <Ledger as="ol" className="mt-6">
+            {steps.map((s, i) => (
+              <LedgerRow
+                key={s.t}
+                index={String(i + 1).padStart(2, "0")}
+                title={s.t}
+                note={s.d}
+              />
+            ))}
+          </Ledger>
+          <p className="mt-6 text-smallmeta text-stone">{tcp("demoNote")}</p>
+        </div>
       </div>
     </section>
   );

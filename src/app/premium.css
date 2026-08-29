@@ -1,20 +1,29 @@
 /*
- * Karma product refinement 2026.
+ * Karma product layer — "The Machine Floor Ledger" (2026).
  *
- * This layer evolves "The Digital Thread" without replacing its identity:
- * editorial typography, one vermilion accent, real-work-first composition,
- * quieter geometry, stronger responsive rhythm, and a denser staff console.
- * Keep this file small and systemic. Page-specific hacks belong in components.
+ * Direction, in one paragraph: Karma has no photography yet, and every rival
+ * institute in Surat papers over that gap with stock images of smiling women
+ * at sewing machines. The premium move is the opposite one — make the
+ * *substance* the visual. The eight real techniques, the real batch schedule
+ * with real seat counts, the real syllabus, the real machine wall. Set like a
+ * workshop's own wall chart: hairlines, tabular numerals, one vermilion
+ * thread. Nothing here needs a photograph to look intentional, and everything
+ * here gets better when the photographs arrive.
+ *
+ * This layer evolves "The Digital Thread" — it does not replace it. Keep the
+ * file systemic. Page-specific hacks belong in components.
  */
 
 :root {
   --radius-control: 0.5rem;
   --radius-panel: 0.625rem;
   --radius-feature: 1.125rem;
-  --space-page-top: clamp(4rem, 7vw, 7rem);
-  --space-page-bottom: clamp(3.5rem, 6vw, 6rem);
-  --measure-heading: 16ch;
+  --space-page-top: clamp(3.5rem, 2.6rem + 3.6vw, 6rem);
+  --space-page-bottom: clamp(3rem, 2.3rem + 2.9vw, 5rem);
+  --measure-heading: 17ch;
   --measure-copy: 58ch;
+  /* One hairline value, used everywhere a rule separates rather than frames. */
+  --hairline: 1px solid var(--color-line);
 }
 
 /* -------------------------- shared product geometry ----------------------- */
@@ -29,7 +38,7 @@
 
 /* Deliberately reserve the softer radius for an actual feature moment. */
 .feature-surface {
-  border: 1px solid var(--color-line);
+  border: var(--hairline);
   border-radius: var(--radius-feature);
   background: var(--color-card);
   overflow: clip;
@@ -42,12 +51,203 @@
 .btn-primary:active,
 .btn-secondary:active { transform: translateY(1px); }
 
+/* ============================ dark bands =================================
+ * `.on-carbon` is a real surface, not a one-off CTA background: it re-points
+ * the palette tokens so cards, rules, chips, eyebrows and secondary buttons
+ * nested inside it all invert correctly. Dark sections are the punctuation
+ * that keeps a long page from reading as one continuous scroll.
+ * ========================================================================= */
+
+.on-carbon {
+  --color-ivory: #191a17;
+  --color-ivory-2: #212320;
+  --color-card: #212320;
+  --color-line: #3c3e39;
+  --color-carbon: #f4efe4;
+  --color-stone: #a8a49a;
+  --color-vermilion-deep: #e2765f; /* AA on carbon; the deep tone is not */
+  background: #191a17;
+  color: #f4efe4;
+}
+.on-carbon :where(h1, h2, h3, h4) { color: #f4efe4; }
+.on-carbon .btn-primary { background: var(--color-vermilion); color: #fffdf8; }
+.on-carbon .btn-primary:hover { background: #d5583f; }
+.on-carbon .btn-secondary { border-color: #6b6d66; color: #f4efe4; }
+.on-carbon .btn-secondary:hover { border-color: var(--color-vermilion); color: #fff; }
+.on-carbon .btn-ghost { color: #f4efe4; }
+.on-carbon :focus-visible { outline-color: #e2765f; }
+
+/* ============================ the ledger row =============================
+ * The signature composition of this site. A hairline-separated row with a
+ * quiet index column, a title, and decision facts on the right. It scales
+ * from the hero's technique index to a syllabus to an admissions sequence,
+ * and it is the reason the site does not need a fifth grid of identical
+ * cards to say a fifth thing.
+ * ========================================================================= */
+
+.ledger {
+  border-top: var(--hairline);
+}
+.ledger > * {
+  border-bottom: var(--hairline);
+}
+
+.ledger-row {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.25rem 0.875rem;
+  padding-block: 0.9375rem;
+  position: relative;
+}
+.ledger-row > .ledger-meta { grid-column: 2; }
+
+@media (min-width: 640px) {
+  .ledger-row {
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    /* Row gap and column gap are not the same problem: 1.5rem between a title
+       and its own note reads as two separate items. */
+    gap: 0.375rem 1.5rem;
+    padding-block: 1.0625rem;
+  }
+  .ledger-row > .ledger-meta { grid-column: auto; text-align: right; }
+}
+
+.ledger-index {
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-vermilion-deep);
+  letter-spacing: 0.04em;
+}
+:lang(gu) .ledger-index { font-family: var(--font-body); letter-spacing: 0; }
+
+.ledger-title {
+  min-width: 0;
+  font-weight: 650;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--color-carbon);
+}
+.ledger-meta {
+  min-width: 0;
+  font-size: var(--text-smallmeta);
+  color: var(--color-stone);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ledger-note {
+  grid-column: 2 / -1;
+  margin-top: 0.125rem;
+  font-size: var(--text-smallmeta);
+  line-height: 1.5;
+  color: var(--color-stone);
+}
+
+/* Label/value variant: a description list rather than an indexed catalogue.
+   The label takes the leading column, so no index element is needed and the
+   markup can stay a valid <dl>. */
+.ledger-row.is-labelled { grid-template-columns: minmax(0, 1fr); }
+.ledger-row.is-labelled > .ledger-note { grid-column: 1 / -1; }
+@media (min-width: 640px) {
+  .ledger-row.is-labelled { grid-template-columns: 9rem minmax(0, 1fr); gap: 1.5rem; }
+  .ledger-row.is-labelled > .ledger-note { grid-column: 2; margin-top: 0; }
+}
+
+/* Interactive rows: the whole row is the target, the thread marks it. */
+a.ledger-row {
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 160ms var(--ease-out-soft);
+}
+a.ledger-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -1px;
+  bottom: -1px;
+  width: 2px;
+  background-image: repeating-linear-gradient(
+    180deg, var(--color-vermilion) 0 6px, transparent 6px 10px
+  );
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 220ms var(--ease-out-soft);
+}
+@media (hover: hover) {
+  a.ledger-row:hover { background: rgb(197 72 50 / 0.035); }
+}
+a.ledger-row:hover::before,
+a.ledger-row:focus-visible::before { transform: scaleY(1); }
+a.ledger-row:focus-visible { outline-offset: -2px; }
+a.ledger-row .ledger-title { transition: color 160ms var(--ease-out-soft); }
+a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
+
+/* ============================ the spec grid ==============================
+ * Hairline cells for things that genuinely are a set of equivalent facts —
+ * the machine wall, what a fee covers, technique coverage. One shared border
+ * instead of N floating boxes: quieter, denser, and it never looks like a
+ * dashboard.
+ * ========================================================================= */
+
+.spec-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--spec-cols, 2), minmax(0, 1fr));
+  border: var(--hairline);
+  background: var(--color-card);
+}
+.spec-grid > * {
+  padding: clamp(0.875rem, 2.2vw, 1.375rem);
+  border-right: var(--hairline);
+  border-bottom: var(--hairline);
+  min-width: 0;
+}
+/* nth-child cannot read a custom property, so the trailing rule is cleared
+   per column count. Keep these three blocks in step with the grid above. */
+.spec-grid > :nth-child(2n) { border-right: 0; }
+@media (min-width: 640px) {
+  .spec-grid { --spec-cols: 3; }
+  .spec-grid > :nth-child(2n) { border-right: var(--hairline); }
+  .spec-grid > :nth-child(3n) { border-right: 0; }
+}
+@media (min-width: 1024px) {
+  .spec-grid { --spec-cols: 4; }
+  .spec-grid > :nth-child(3n) { border-right: var(--hairline); }
+  .spec-grid > :nth-child(4n) { border-right: 0; }
+}
+
+.spec-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-vermilion-deep);
+}
+:lang(gu) .spec-label { letter-spacing: 0; text-transform: none; font-size: 0.8125rem; }
+.spec-value {
+  display: block;
+  margin-top: 0.375rem;
+  font-weight: 650;
+  line-height: 1.35;
+  color: var(--color-carbon);
+}
+.spec-note {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: var(--text-smallmeta);
+  line-height: 1.5;
+  color: var(--color-stone);
+}
+
 /* ------------------------------ page intros ------------------------------- */
 
 .page-intro {
   position: relative;
   overflow: hidden;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: var(--hairline);
   padding-block: var(--space-page-top) var(--space-page-bottom);
 }
 .page-intro::after {
@@ -68,9 +268,15 @@
   align-items: end;
 }
 .page-intro-copy { min-width: 0; }
+/* Font size and its leading travel together. Setting only `font-size` from a
+   token drops the paired `--text-*--line-height`, and the heading silently
+   falls back to the body's 1.625 — which is what made every display heading
+   on this site read airy and unset. */
 .page-intro-title {
   max-width: var(--measure-heading);
-  font-size: var(--text-display);
+  font-size: var(--text-h1);
+  line-height: var(--text-h1--line-height);
+  letter-spacing: var(--text-h1--letter-spacing);
 }
 .page-intro-lede {
   margin-top: 1.25rem;
@@ -79,42 +285,80 @@
   line-height: var(--text-lead--line-height);
   color: var(--color-stone);
 }
-.page-intro-actions {
-  margin-top: 2rem;
+.page-intro-actions,
+.action-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
 }
+.page-intro-actions { margin-top: 2rem; }
+/* Below 480 the two actions go full width rather than sitting at two
+   different ragged widths. */
+@media (max-width: 479px) {
+  .page-intro-actions > *,
+  .action-row > * { flex: 1 1 100%; }
+}
 .page-intro-aside {
   align-self: stretch;
-  border-left: 1px solid var(--color-line);
-  padding-left: 1.5rem;
+  min-width: 0;
+  border-top: var(--hairline);
+  padding-top: 1.5rem;
   color: var(--color-stone);
+  font-size: var(--text-smallmeta);
+  line-height: 1.6;
 }
 .page-intro-aside > :first-child { margin-top: 0; }
-.page-intro-aside strong { color: var(--color-carbon); }
+.page-intro-aside strong { color: var(--color-carbon); font-weight: 650; }
 
-@media (min-width: 768px) {
-  .page-intro-grid { grid-template-columns: minmax(0, 1fr) 17rem; gap: 3rem; }
-  .page-intro-aside { padding-left: 2rem; }
+@media (min-width: 900px) {
+  .page-intro-grid { grid-template-columns: minmax(0, 1fr) 16rem; gap: 3.5rem; }
+  .page-intro-aside {
+    border-top: 0;
+    padding-top: 0;
+    border-left: var(--hairline);
+    padding-left: 2rem;
+  }
 }
 @media (min-width: 1180px) {
-  .page-intro-grid { grid-template-columns: minmax(0, 8fr) minmax(17rem, 4fr); gap: 5rem; }
+  .page-intro-grid { grid-template-columns: minmax(0, 8fr) minmax(16rem, 4fr); gap: 5rem; }
 }
 
-/* A compact number/label row for decision-making facts, not vanity stats. */
+/* A compact number/label row for decision-making facts, not vanity stats.
+   One column on a small phone, two from 420, four once there is a real
+   canvas — so it can close a hero edge-to-edge instead of huddling in one
+   column with dead space beside it. */
 .fact-rail {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  border-block: 1px solid var(--color-line);
+  grid-template-columns: minmax(0, 1fr);
+  border-block: var(--hairline);
 }
 .fact-rail > * {
-  padding: 1rem 0;
-  border-bottom: 1px solid var(--color-line);
+  min-width: 0;
+  padding-block: 0.875rem;
+  border-bottom: var(--hairline);
 }
-.fact-rail > :nth-child(odd) { padding-right: 1rem; border-right: 1px solid var(--color-line); }
-.fact-rail > :nth-child(even) { padding-left: 1rem; }
-.fact-rail > :nth-last-child(-n + 2) { border-bottom: 0; }
+.fact-rail > :last-child { border-bottom: 0; }
+
+@media (min-width: 420px) {
+  .fact-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fact-rail > * { padding-right: 1.25rem; border-right: var(--hairline); }
+  .fact-rail > :nth-child(2n) { padding-right: 0; border-right: 0; }
+  .fact-rail > :nth-last-child(-n + 2) { border-bottom: 0; }
+}
+
+@media (min-width: 900px) {
+  .fact-rail { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .fact-rail > * {
+    padding-block: 1.125rem;
+    padding-right: 1.5rem;
+    border-right: var(--hairline);
+    border-bottom: 0;
+  }
+  .fact-rail > :nth-child(2n) { padding-right: 1.5rem; border-right: var(--hairline); }
+  .fact-rail > :nth-child(4n),
+  .fact-rail > :last-child { padding-right: 0; border-right: 0; }
+}
+
 .fact-label {
   display: block;
   font-size: 0.75rem;
@@ -125,13 +369,14 @@
   display: block;
   margin-top: 0.25rem;
   font-weight: 700;
+  line-height: 1.35;
   color: var(--color-carbon);
 }
 
 /* Editorial lists are often more useful than another set of identical cards. */
-.editorial-list { border-top: 1px solid var(--color-line); }
+.editorial-list { border-top: var(--hairline); }
 .editorial-list > * {
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: var(--hairline);
   padding-block: 1.25rem;
 }
 .editorial-row {
@@ -149,31 +394,261 @@
 }
 .reading-shell :where(p, li) { max-width: 72ch; }
 
+/* ============================== the hero =================================
+ * Two columns that do different jobs: the left states the offer, the right
+ * *is* the catalogue. A first-time visitor can pick their technique from the
+ * first viewport without scrolling, which is the single highest-value thing
+ * this page can do for them — and it is honest, specific and un-copyable in
+ * a way an empty photo frame never was.
+ * ========================================================================= */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-bottom: var(--hairline);
+  /* Its own rhythm rather than section-major: a full major top pad pushed the
+     headline 215px down the page and bought nothing. Generous below, brisk
+     above, so the offer is in the first screen on every device. */
+  padding-block: clamp(2.75rem, 1.9rem + 3.8vw, 5rem) clamp(4rem, 3rem + 4.6vw, 7rem);
+}
+.hero-grid {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 4rem);
+  align-items: start;
+}
+@media (min-width: 960px) {
+  .hero-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(21rem, 1fr);
+    gap: clamp(3rem, 5vw, 5rem);
+    /* The index panel is always taller than the copy; centring the copy
+       against it is what stops the left column looking top-heavy. */
+    align-items: center;
+  }
+}
+@media (min-width: 1280px) {
+  .hero-grid { grid-template-columns: minmax(0, 1.02fr) minmax(24rem, 0.98fr); }
+}
+/* Deliberately one step below display-xl: at 76px this headline ran to three
+   lines and left the index panel stranded halfway up the column. */
+.hero-title {
+  margin-top: var(--space-eyebrow-to-h);
+  font-size: var(--text-display);
+  line-height: var(--text-display--line-height);
+  letter-spacing: var(--text-display--letter-spacing);
+  max-width: 16ch;
+}
+
+/* The index panel: a framed ledger that reads as the studio's own wall list. */
+.hero-index {
+  border: var(--hairline);
+  background: var(--color-card);
+  border-radius: var(--radius-panel);
+  overflow: clip;
+}
+.hero-index-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem clamp(1rem, 2.5vw, 1.5rem);
+  border-bottom: var(--hairline);
+  background: var(--color-ivory-2);
+}
+.hero-index-body { padding-inline: clamp(1rem, 2.5vw, 1.5rem); }
+.hero-index-body .ledger { border-top: 0; }
+.hero-index-body .ledger > :last-child { border-bottom: 0; }
+.hero-index-foot {
+  padding: 0.5rem clamp(1rem, 2.5vw, 1.5rem);
+  border-top: var(--hairline);
+  background: var(--color-ivory-2);
+  font-size: var(--text-smallmeta);
+}
+.hero-index-foot a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+}
+
+/* ======================= screen → stitch diagram =========================
+ * The signature interaction, drawn rather than photographed. Three real
+ * layers of the same motif: the vector outline as it exists in emCAD, the
+ * stitch path the machine follows, and the filled result. It works today,
+ * with no shoot, and it explains the workflow better than a photo would.
+ * ========================================================================= */
+
+.stage-figure {
+  position: relative;
+  border: var(--hairline);
+  border-radius: var(--radius-panel);
+  background: var(--color-card);
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+}
+@media (max-width: 520px) { .stage-figure { aspect-ratio: 4 / 3; } }
+.stage-layer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.stage-caption {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 3;
+  border: var(--hairline);
+  background: var(--color-card);
+  border-radius: var(--radius-control);
+  padding: 0.3125rem 0.6875rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-carbon);
+}
+.stage-handle {
+  position: absolute;
+  inset-block: 0;
+  z-index: 4;
+  width: 2px;
+  background: var(--color-vermilion);
+  pointer-events: none;
+}
+.stage-handle::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2rem;
+  height: 2rem;
+  translate: -50% -50%;
+  border-radius: 999px;
+  border: 2px solid var(--color-vermilion);
+  background: var(--color-card);
+}
+
+/* Native range, restyled just enough to stop reading as a browser default. */
+.stage-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2.75rem;
+  background: transparent;
+  cursor: ew-resize;
+}
+.stage-range::-webkit-slider-runnable-track {
+  height: 2px;
+  background-image: repeating-linear-gradient(
+    90deg, var(--color-line) 0 6px, transparent 6px 10px
+  );
+}
+.stage-range::-moz-range-track {
+  height: 2px;
+  background-image: repeating-linear-gradient(
+    90deg, var(--color-line) 0 6px, transparent 6px 10px
+  );
+}
+.stage-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: -0.6875rem;
+  border-radius: 999px;
+  background: var(--color-vermilion);
+  border: 3px solid var(--color-card);
+  box-shadow: 0 0 0 1px var(--color-line);
+}
+.stage-range::-moz-range-thumb {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--color-vermilion);
+  border: 3px solid var(--color-card);
+  box-shadow: 0 0 0 1px var(--color-line);
+}
+
+/* Segmented stage picker — a control, not three loose pills. */
+.stage-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: var(--hairline);
+  border-radius: var(--radius-control);
+  overflow: hidden;
+  background: var(--color-card);
+}
+.stage-tab {
+  min-height: 2.75rem;
+  padding: 0.5rem 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-stone);
+  border-right: var(--hairline);
+  background: transparent;
+  transition: background-color 160ms var(--ease-out-soft), color 160ms var(--ease-out-soft);
+}
+.stage-tab:last-child { border-right: 0; }
+.stage-tab[aria-pressed="true"] { background: var(--color-carbon); color: var(--color-ivory); }
+@media (hover: hover) {
+  .stage-tab:not([aria-pressed="true"]):hover { background: var(--color-ivory-2); color: var(--color-carbon); }
+}
+
+/* Gujarati keeps its own leading and zero tracking. The @layer base rule that
+   normally guarantees this is outranked by this unlayered stylesheet, so any
+   heading styled here has to restate it. */
+:lang(gu) .hero-title,
+:lang(gu) .page-intro-title,
+:lang(gu) .console-page-title {
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+/* ---------------------- pending-content placeholder ----------------------
+ * Content the owner still has to supply must look deliberately reserved, not
+ * accidentally broken. One consistent treatment across the site beats an
+ * emoji in a dashed box. */
+.pending-block {
+  border-left: 2px solid var(--color-vermilion);
+  background: var(--color-ivory-2);
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
+  padding: 1.125rem 1.25rem;
+}
+.pending-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-vermilion-deep);
+  margin-bottom: 0.5rem;
+}
+:lang(gu) .pending-label { letter-spacing: 0; text-transform: none; font-size: 0.8125rem; }
+
 /* -------------------------- marketing responsiveness ---------------------- */
 
 @media (max-width: 639px) {
   .container-site,
-  .container-wide { padding-inline: 1.125rem; }
+  .container-wide { --container-pad: 1.125rem; }
 
   .btn { min-height: 3.125rem; padding-inline: 1.125rem; }
-  .page-intro-actions > .btn,
-  .page-intro-actions > a.btn { flex: 1 1 11rem; }
 
   /* A table can scroll, but it should advertise that fact instead of looking
      accidentally clipped. */
   .table-wrap {
-    margin-inline: -1.125rem;
-    padding-inline: 1.125rem;
+    margin-inline: calc(-1 * var(--container-pad, 1.125rem));
+    padding-inline: var(--container-pad, 1.125rem);
     scrollbar-width: thin;
     overscroll-behavior-x: contain;
   }
 }
 
+/* Very narrow phones (320px): the segmented control needs the room back. */
+@media (max-width: 359px) {
+  .stage-tab { font-size: 0.75rem; padding-inline: 0.25rem; }
+}
+
 @media (min-width: 768px) and (max-width: 1100px) {
   /* Tablets get an authored middle layout rather than desktop squeezed down. */
   .container-site { padding-inline: 2.5rem; }
-  .section-major { padding-block: 6rem; }
-  .section { padding-block: 5rem; }
 }
 
 /* ------------------------------- site chrome ------------------------------ */
@@ -189,6 +664,12 @@
 }
 .site-brand-mark { max-width: 15rem; }
 .site-footer { position: relative; }
+/* WCAG 2.5.8: a 14px footer link is a 19px tap target. Padding, not a bigger
+   font, is what fixes that without turning the footer into a menu. */
+.site-footer a:not(.btn) {
+  display: inline-block;
+  padding-block: 0.3125rem;
+}
 .site-footer::before {
   content: "";
   position: absolute;
@@ -215,7 +696,7 @@
   gap: 1rem;
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: var(--hairline);
 }
 .console-page-title {
   max-width: 20ch;
@@ -238,23 +719,23 @@
 .console-metrics {
   display: grid;
   gap: 0;
-  border: 1px solid var(--color-line);
+  border: var(--hairline);
   background: var(--color-card);
 }
 .console-metrics > * {
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: var(--hairline);
   padding: 1.125rem 1.25rem;
 }
 .console-metrics > :last-child { border-bottom: 0; }
 @media (min-width: 640px) {
   .console-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .console-metrics > * { border-right: 1px solid var(--color-line); }
+  .console-metrics > * { border-right: var(--hairline); }
   .console-metrics > :nth-child(2n) { border-right: 0; }
 }
 @media (min-width: 1100px) {
   .console-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .console-metrics > * { border-bottom: 0; }
-  .console-metrics > :nth-child(2n) { border-right: 1px solid var(--color-line); }
+  .console-metrics > :nth-child(2n) { border-right: var(--hairline); }
   .console-metrics > :last-child { border-right: 0; }
 }
 
@@ -299,4 +780,7 @@
   .btn-primary:active,
   .btn-secondary:active { transform: none; }
   .site-header { transition: none; }
+  a.ledger-row::before,
+  a.ledger-row .ledger-title,
+  .stage-tab { transition: none; }
 }

@@ -16,7 +16,7 @@ export function HowItWorks() {
   }));
 
   return (
-    <section className="section">
+    <section className="section border-t border-line">
       <div className="container-site">
         <SectionHeading title={t("h2")} sub={t("line")} />
         <div className="relative u-section-body">

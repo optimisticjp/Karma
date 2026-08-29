@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { site } from "@/lib/site";
 import { pageMeta } from "@/lib/seo";
+import { PageIntro } from "@/components/ui/PageIntro";
 
 export async function generateMetadata({
   params
@@ -102,23 +103,39 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
       ];
 
   return (
-    <section className="section-compact">
-      <div className="container-site max-w-3xl">
-        <h1 className="text-h2 font-display">{gu ? "પ્રાઇવસી પોલિસી" : "Privacy Policy"}</h1>
-        <p className="mt-3 rounded-lg border border-dashed border-vermilion bg-ivory-2 p-3 text-smallmeta font-semibold text-stone">
-          ⚠ {gu
-            ? "ડ્રાફ્ટ: લોન્ચ પહેલાં માલિક અને લીગલ રિવ્યૂ જરૂરી (DPDP Act 2023)."
-            : "Draft: owner + legal review required before launch (DPDP Act 2023)."}
-        </p>
-        {sections.map((s) => (
-          <div key={s.h} className="mt-8">
-            <h2 className="text-h4 font-display">{s.h}</h2>
-            {s.p.map((p) => (
-              <p key={p} className="u-lede">{p}</p>
-            ))}
-          </div>
-        ))}
-      </div>
-    </section>
+    <>
+      <PageIntro
+        eyebrow={gu ? "કાનૂની" : "Legal"}
+        title={gu ? "પ્રાઇવસી પોલિસી" : "Privacy Policy"}
+        lede={
+          gu
+            ? "અમે કઈ વિગત લઈએ છીએ, શા માટે લઈએ છીએ, કેટલો સમય રાખીએ છીએ, અને તમે એ કઢાવી કઈ રીતે શકો."
+            : "What we collect, why we collect it, how long we keep it, and how you get it removed."
+        }
+        aside={
+          <p className="pending-block">
+            <span className="pending-label">{gu ? "ડ્રાફ્ટ" : "Draft"}</span>
+            {gu
+              ? "લોન્ચ પહેલાં માલિક અને લીગલ રિવ્યૂ જરૂરી (DPDP Act 2023)."
+              : "Owner and legal review required before launch (DPDP Act 2023)."}
+          </p>
+        }
+      />
+      <section className="section">
+        <div className="container-site reading-shell">
+          {sections.map((s, i) => (
+            <div key={s.h} className={i === 0 ? "" : "mt-12"}>
+              <h2 className="text-h3 font-display">{s.h}</h2>
+              <span aria-hidden="true" className="rule-stitch" />
+              {s.p.map((p) => (
+                <p key={p} className="mt-4 text-stone">
+                  {p}
+                </p>
+              ))}
+            </div>
+          ))}
+        </div>
+      </section>
+    </>
   );
 }

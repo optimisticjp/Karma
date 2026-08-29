@@ -2,85 +2,80 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { PhotoSlot } from "@/components/ui/PhotoSlot";
+import { TechniquePlate } from "@/components/ui/TechniquePlate";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { courses, families } from "@/content/courses";
+import { cn } from "@/lib/utils";
 
-const familyIcon: Record<string, IconName> = { modern: "layers", software: "nodes" };
+const familyIcon: Record<keyof typeof families, IconName> = {
+  machine: "machine",
+  modern: "layers",
+  software: "nodes"
+};
 
 /**
- * One large feature (machine work: the heart of the studio) with two
- * supporting cards (spec: avoid three identical cards).
+ * The three families, and what each one is for.
+ *
+ * This section used to repeat all eight course names as chips — which the hero
+ * index above it already does, better. Repeating a list is not emphasis, it is
+ * noise, so this now answers the question the hero cannot: what distinguishes
+ * these three groups, and which one is yours. Machine work gets the double
+ * column because it is what most students come for and what Surat is known
+ * for; the other two are peers, not afterthoughts.
  */
 export function CourseFamilies() {
   const t = useTranslations("home.families");
   const locale = useLocale();
   const gu = locale === "gu";
-
-  const chipLinks = (key: keyof typeof families) =>
-    courses
-      .filter((c) => c.family === key)
-      .map((c) => (
-        <li key={c.slug}>
-          <Link
-            href={`/courses/${c.slug}`}
-            className="inline-block rounded-full border border-line bg-ivory px-3 py-1 text-xs font-semibold text-stone transition-colors hover:border-vermilion hover:text-carbon"
-          >
-            {gu ? c.nameGu : c.nameEn}
-          </Link>
-        </li>
-      ));
-
-  const small = (key: "modern" | "software", delay: number) => {
-    const f = families[key];
-    return (
-      <Reveal delay={delay}>
-        <div className="card card-lift flex h-full flex-col p-6 md:p-8">
-          <Icon name={familyIcon[key]} size={26} className="text-vermilion-deep" />
-          <h3 className="text-h4 mt-4 font-display">{gu ? f.nameGu : f.nameEn}</h3>
-          <p className="mt-2 text-smallmeta text-stone">{gu ? f.introGu : f.introEn}</p>
-          <ul className="mt-4 flex flex-wrap gap-2">{chipLinks(key)}</ul>
-        </div>
-      </Reveal>
-    );
-  };
-
-  const machine = families.machine;
+  const keys = Object.keys(families) as Array<keyof typeof families>;
 
   return (
     <section className="section bg-ivory-2">
       <div className="container-site">
-        <SectionHeading title={t("h2")} sub={t("sub")} />
-        <div className="u-section-body grid gap-6 lg:gap-8 lg:grid-cols-12">
-          <Reveal className="lg:col-span-7">
-            <div className="card card-lift grid h-full overflow-hidden lg:grid-cols-[3fr_2fr]">
-              <PhotoSlot
-                label={machine.photoLabel}
-                ratio="4/3"
-                className="card-img media-unveil h-full rounded-none border-0"
-              />
-              <div className="flex flex-col p-6 md:p-8">
-                <p className="eyebrow">01</p>
-                <h3 className="text-h3 mt-3"><span className="card-title">{gu ? machine.nameGu : machine.nameEn}</span></h3>
-                <p className="mt-3 text-smallmeta text-stone">
-                  {gu ? machine.introGu : machine.introEn}
-                </p>
-                <ul className="mt-4 flex flex-wrap gap-2">{chipLinks("machine")}</ul>
-                <p className="mt-auto pt-6">
-                  <Link
-                    href="/courses"
-                    className="stitch-link inline-flex items-center gap-1.5 font-semibold text-vermilion-deep"
-                  >
-                    {t("see")} <Icon name="arrow" size={16} className="arrow" />
-                  </Link>
-                </p>
-              </div>
-            </div>
-          </Reveal>
-          <div className="flex flex-col gap-6 lg:col-span-5">
-            {small("modern", 80)}
-            {small("software", 160)}
-          </div>
+        <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} />
+
+        <div className="u-section-body grid items-stretch gap-6 lg:grid-cols-4 lg:gap-8">
+          {keys.map((key, i) => {
+            const f = families[key];
+            const count = courses.filter((c) => c.family === key).length;
+            const lead = key === "machine";
+
+            return (
+              <Reveal
+                key={key}
+                delay={i * 80}
+                className={cn(lead && "lg:col-span-2", "min-w-0")}
+              >
+                <article className="card card-lift flex h-full flex-col overflow-hidden">
+                  <div className={cn("border-b border-line", lead ? "h-24 md:h-32" : "h-20")}>
+                    <TechniquePlate variant={key} seed={i} className="card-img" />
+                  </div>
+                  <div className="flex flex-1 flex-col p-6 md:p-7">
+                    <div className="flex items-center justify-between gap-4">
+                      <Icon name={familyIcon[key]} size={24} className="text-vermilion-deep" />
+                      <span className="microlabel tabular">
+                        {t("count", { count })}
+                      </span>
+                    </div>
+                    <h3 className={cn("mt-4 font-display", lead ? "text-h3" : "text-h4")}>
+                      <span className="card-title">{gu ? f.nameGu : f.nameEn}</span>
+                    </h3>
+                    <p className="mt-3 text-smallmeta text-stone">
+                      {gu ? f.introGu : f.introEn}
+                    </p>
+                    <p className="mt-auto pt-6">
+                      <Link
+                        href="/courses"
+                        className="stitch-link inline-flex min-h-8 items-center gap-1.5 font-semibold text-vermilion-deep"
+                      >
+                        {t("see")} <Icon name="arrow" size={16} className="arrow" />
+                      </Link>
+                    </p>
+                  </div>
+                </article>
+              </Reveal>
+            );
+          })}
         </div>
       </div>
     </section>

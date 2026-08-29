@@ -85,13 +85,16 @@ export function Header() {
       <div className="container-site flex h-full items-center justify-between gap-5">
         <Link
           href="/"
-          className="site-brand-mark flex min-w-0 flex-col leading-none"
+          className="site-brand-mark flex min-w-0 items-center leading-none"
           aria-label="Karma Design Studio: home"
         >
+          {/* One line only. The descriptor used to sit under the name and
+              wrapped out of the header at every width below 1440. The hero
+              and the footer both say it properly; the header's job is
+              navigation. */}
           <span className="truncate font-display text-xl font-semibold tracking-tight text-carbon md:text-2xl">
             Karma Design Studio
           </span>
-          <span className="microlabel mt-1 hidden md:block">{tc("descriptor")}</span>
         </Link>
 
         <nav className="hidden items-center gap-5 xl:gap-7 lg:flex" aria-label="Primary">
@@ -99,7 +102,7 @@ export function Header() {
             <Link
               key={item.key}
               href={item.href}
-              className="stitch-link whitespace-nowrap text-[0.92rem] font-semibold text-stone hover:text-carbon"
+              className="stitch-link inline-flex min-h-8 items-center whitespace-nowrap text-[0.92rem] font-semibold text-stone hover:text-carbon"
               aria-current={pathname.startsWith(item.href) ? "page" : undefined}
             >
               {t(item.key)}
@@ -130,10 +133,15 @@ export function Header() {
 
       {open ? (
         <>
+          {/* Offsets must track the header's own height, or the scrim starts
+              16px too high on tablets (where the header is 80px, not 64px). */}
           <div
             aria-hidden="true"
             onClick={close}
-            className="fixed inset-0 top-16 z-40 bg-carbon/45 lg:hidden"
+            className={cn(
+              "fixed inset-x-0 bottom-0 z-40 bg-carbon/45 lg:hidden",
+              condensed ? "top-16" : "top-16 md:top-20"
+            )}
           />
           <div
             ref={panelRef}
@@ -141,7 +149,10 @@ export function Header() {
             role="dialog"
             aria-modal="true"
             aria-label={tc("openMenu")}
-            className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-line bg-ivory lg:hidden"
+            className={cn(
+              "absolute inset-x-0 top-full z-50 overflow-y-auto overscroll-contain border-t border-line bg-ivory lg:hidden",
+              condensed ? "max-h-[calc(100dvh-4rem)]" : "max-h-[calc(100dvh-4rem)] md:max-h-[calc(100dvh-5rem)]"
+            )}
           >
             <nav className="container-site flex flex-col py-4" aria-label="Mobile">
               {NAV.map((item, index) => (

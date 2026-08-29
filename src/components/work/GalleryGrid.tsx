@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { ManagedPhoto } from "@/components/ui/ManagedPhoto";
-import { SampleTag } from "@/components/ui/SampleTag";
 import { techniqueChips } from "@/content/collections";
 import type { ManagedGalleryItem } from "@/lib/content/public";
 import { cn } from "@/lib/utils";
@@ -38,10 +37,19 @@ export function GalleryGrid({ items }: { items: ManagedGalleryItem[] }) {
     </button>
   );
 
+  if (items.length === 0) {
+    return (
+      <p className="pending-block max-w-2xl text-smallmeta text-stone">
+        <span className="pending-label">{t("pendingLabel")}</span>
+        {t("pendingNote")}
+      </p>
+    );
+  }
+
   return (
     <div>
       <div
-        className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0"
+        className="bleed-row flex gap-2 overflow-x-auto pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0"
         role="group"
         aria-label={t("sub")}
       >
@@ -74,7 +82,6 @@ export function GalleryGrid({ items }: { items: ManagedGalleryItem[] }) {
                         {t("pairTag")}
                       </span>
                     ) : null}
-                    {g.sample ? <SampleTag /> : null}
                   </div>
                 </div>
               </li>

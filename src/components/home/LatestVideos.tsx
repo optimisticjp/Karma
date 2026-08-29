@@ -13,7 +13,7 @@ export async function LatestVideos() {
   const videos = await getLatestVideos(3);
 
   return (
-    <section className="section-compact">
+    <section className="section-compact border-t border-line">
       <div className="container-site">
         <SectionHeading title={t("h2")} sub={t("sub")} />
         <div className="mt-8">
