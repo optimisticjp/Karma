@@ -41,7 +41,7 @@ and not a generic admin template.
                      └──────────────────────────────────────────┘
 
   Private files (B2B briefs, certificates, encrypted DB backups) → Cloudflare R2.
-  NOT Supabase Storage. Transactional email → Resend.
+  NOT Supabase Storage. Auth/invitation email → Supabase custom SMTP.
 ```
 
 **Supabase Auth proves identity. The Karma `staff` row decides authorization.**
@@ -353,18 +353,9 @@ Seven conditions, evaluated in a fixed order by `evaluateAccess`
 3. `staff.active === true` (and not lifecycle `deactivated`)
 4. a console role (owner or admin)
 5. **lifecycle `status === "active"`** — an `invited` account is still onboarding
-6. **MFA — the session is at AAL2**
-7. the permission the operation requires
+6. the permission the operation requires
 
-All seven matter. A valid Supabase user without a staff row gets nothing. A
-deactivated admin holding an old session is rejected on their very next request,
-because `staff.active` is read server-side every time. An `invited` account is
-sent to `/admin/welcome` and reaches no console data **even at AAL2**.
-
-Deactivation is rejected at step 3, as early as the model allows: a switched-off
-account must not reach a console page, an MFA screen, **or** the invitation
-acceptance flow. Nor is a dead account walked through enrolling an authenticator
-it will never use.
+All six matter. A valid Supabase user without a staff row gets nothing. A deactivated admin holding an old session is rejected on their next request because `staff.active` is read server-side every time. An invited account is sent to `/admin/welcome` and reaches no console data.
 
 Guards, all in `src/lib/auth/guard.ts` — nothing re-implements a role check
 inline:
@@ -377,14 +368,7 @@ inline:
 | `authorizeAction(req)` | server actions — returns a typed failure, never redirects |
 | `requireInvitedConsoleUser()` / `resolveOnboarding()` | `/admin/welcome` only |
 
-`requireInvitedConsoleUser()` is the **one** guard that runs below AAL2, because
-a person cannot enrol an authenticator before they have the password that gets
-them a session — requiring AAL2 there would deadlock every invitation. It is
-narrow by construction and still demands a verified Supabase user, a **linked**
-staff record, `active`, a console role, and lifecycle `invited`. So an unlinked
-Supabase user cannot use onboarding, a deactivated account cannot, and an
-account that has already accepted is sent onward instead of being allowed to set
-a password a second time.
+`requireInvitedConsoleUser()` is the narrow onboarding guard. It demands a verified Supabase user, a **linked** staff record, `active`, a console role and lifecycle `invited`. An unlinked/deactivated account cannot use onboarding, and an already accepted account is sent onward rather than being allowed to set a password a second time.
 
 A server action must not redirect on an authorization failure: a redirect inside
 a form submission reads as success to the caller.
@@ -407,7 +391,7 @@ There are no MFA setup/challenge routes and no authenticator recovery workflow.
 ```
 Owner → /admin/team → Invite admin
    ↓ name, email, template, optional custom permissions, console language
-authorizeAction({ ownerOnly: true })      owner + active + AAL2
+authorizeAction({ ownerOnly: true })      owner + active
 validateInvite(...)                       email, name, keys, duplicates, seats
 supabase.auth.admin.inviteUserByEmail()   SUPABASE_SECRET_KEY, one call
    ↓ ONE transaction  (compensated if it fails — see below)
@@ -416,8 +400,7 @@ staff row (status 'invited') + staff_permissions rows + audit_logs row
 /admin/auth/callback   token_hash + type=invite  →  verifyOtp
 /admin/welcome         requireInvitedConsoleUser(); sets a password (12+ chars)
    ↓ ONE transaction   status invited → active, accepted_at, audit row
-/admin/mfa/setup       enrols an authenticator   ← forced, no way past
-Karma Console                                     ← only at AAL2, only when active
+/admin                         Karma Console ← password-authenticated, active, permission-checked
 ```
 
 Karma stores no invitation token, logs no invitation URL, and never echoes

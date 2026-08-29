@@ -49,12 +49,7 @@ precisely nothing.
 
 **An invited account is not a console account.** A pending invitation is stored `active: true` because it reserves one of the five seats. An `invited` row reaches `/admin/welcome` and nothing else. `requireInvitedConsoleUser()` still demands a verified Supabase user, linked staff record, active account, console role and lifecycle `invited`. An unlinked or deactivated account cannot onboard, and an already accepted account cannot set its password again.
 
-**Acceptance is transactional and gates MFA.** The `invited → active`
-transition, `accepted_at` and the `admin.accepted` audit row commit together or
-not at all. If they fail, the flow stops with a generic retryable error instead
-of continuing to MFA — the staff row is the authority, so until it commits the
-person is still onboarding-only. Retries are idempotent and write no duplicate
-audit row.
+**Acceptance is transactional.** The `invited → active` transition, `accepted_at` and the `admin.accepted` audit row commit together or not at all. If they fail, onboarding stops with a generic retryable error; retries are idempotent and write no duplicate audit row.
 
 **Invitations are a token-hash flow, not PKCE.** `inviteUserByEmail()` does not
 support PKCE — the installed `@supabase/auth-js` states this itself — so
