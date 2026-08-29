@@ -15,6 +15,13 @@
       "when": 1785862843929,
       "tag": "0001_tricky_malcolm_colcord",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787938810463,
+      "tag": "0002_admin_foundation",
+      "breakpoints": true
     }
   ]
 }

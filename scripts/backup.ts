@@ -1,14 +1,23 @@
 /**
  * Exports every table to CSV in ./backups (plan 12.3: weekly via GitHub
- * Actions, artifacts kept 90 days; the run also wakes Neon on free tier).
+ * Actions, artifacts kept 90 days).
  * Usage: npm run db:backup
+ *
+ * Runs OUTSIDE the Cloudflare request runtime, so it connects directly to
+ * Supabase Postgres with DATABASE_URL — never through Hyperdrive. Exports
+ * contain PII: treat the artifacts accordingly (docs/security.md).
+ *
+ * Roadmap (docs/admin-architecture.md): pg_dump → compress → encrypt →
+ * private R2 bucket, with daily/monthly retention. CSV artifacts are the
+ * interim mechanism, not the destination.
  */
 import "dotenv/config";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { neon } from "@neondatabase/serverless";
+import { Pool } from "pg";
 
 const TABLES = [
   "staff",
+  "staff_permissions",
   "students",
   "guardians",
   "courses",
@@ -46,14 +55,15 @@ async function main() {
     console.error("DATABASE_URL missing.");
     process.exit(1);
   }
-  const sql = neon(url);
+  const pool = new Pool({ connectionString: url, max: 1 });
   const stamp = new Date().toISOString().slice(0, 10);
   mkdirSync("backups", { recursive: true });
   const failures: string[] = [];
 
   for (const table of TABLES) {
     try {
-      const rows = (await sql.query(`select * from "${table}"`)) as Record<string, unknown>[];
+      const res = await pool.query(`select * from "${table}"`);
+      const rows = res.rows as Record<string, unknown>[];
       writeFileSync(`backups/${stamp}-${table}.csv`, toCsv(rows));
       console.log(`  ✓ ${table}: ${rows.length} rows`);
     } catch (e) {
@@ -61,6 +71,7 @@ async function main() {
       console.error(`  ✖ ${table}: FAILED (${(e as Error).message})`);
     }
   }
+  await pool.end();
   if (failures.length > 0) {
     console.error(`Backup INCOMPLETE. Failed tables: ${failures.join(", ")}`);
     process.exit(1); // audit: a partial backup must fail the workflow

@@ -1,36 +1,67 @@
-# Phase prompts for Claude Code (2 → 5)
+# Phase prompts for Claude Code
 
 Paste each block into Claude Code when starting that phase. Do them in order.
 Every prompt assumes CLAUDE.md has been read; its rules override convenience.
 
----
-## Phase 2 — Admin panel + authentication
-
-Read CLAUDE.md and docs/karma-master-plan-final.md §10 first.
-
-Build the staff admin under /admin (locale-free is fine):
-1. Auth: Better Auth with the Drizzle adapter on our existing Neon db
-   (src/lib/db). Email+password, invite-only (no public signup): an
-   INITIAL_ADMIN_EMAIL env bootstraps the first admin. Roles: admin, trainer
-   (staff table already has role + auth_user_id). Middleware protects
-   /admin/*; every server action ALSO re-checks session + role.
-2. Applications inbox: list with status filter (application_status enum),
-   search by name/phone, detail view with timeline, notes
-   (application_notes), status changes, next_follow_up date, assigned_to.
-   Duplicate-phone rows show a badge. Every status change writes audit_logs.
-3. Batches CRUD (label, course, days, times, start date, seats, trainer,
-   status). Public BatchTable keeps working unchanged.
-4. Courses editor: edit DB course names/durations/modules; then switch
-   PUBLIC course pages to read from DB with src/content/courses.ts as
-   fallback only when the DB is empty.
-5. Keep the worker under 3 MB gzip (wrangler deploy --dry-run to check).
-Acceptance: a trainer can log in on a phone and move an application from
-new → demo_scheduled with a note in under 30 seconds.
+> **Phase 2 has shipped.** The platform foundation — Supabase Postgres via
+> Cloudflare Hyperdrive, Supabase Auth with mandatory TOTP MFA, the
+> Owner/Admin permission model, and the Karma Console shell with Today, Team
+> and Account & security — is in the repository. The canonical reference is
+> **`docs/admin-architecture.md`**. The Neon + Better Auth prompt that used to
+> stand here is superseded and has been removed so no future session rebuilds
+> the wrong architecture.
+>
+> Every prompt below now assumes: guards come from `src/lib/auth/guard.ts`,
+> permissions come from `src/lib/auth/permissions.ts`, sensitive mutations
+> write `audit_logs`, and console copy lives under the `admin` namespace in
+> both message catalogs.
 
 ---
-## Phase 3 — Attendance
+## Phase 3 — Admissions CRM
 
-Read CLAUDE.md §7 (audit) and plan §10.3.
+Read CLAUDE.md, docs/admin-architecture.md and plan §10.1-10.3 first.
+
+Build /admin/admissions, gated on `applications.view` /
+`applications.manage` via `requirePermission` — never an inline role check:
+1. Inbox: list with status filter (the `application_status` enum), search by
+   name/phone, sort by next follow-up. Duplicate-phone rows show a badge
+   (`duplicate_of_phone` is already stored).
+2. Applicant detail: timeline, notes (`application_notes`), status changes,
+   `next_follow_up`, `assigned_to`, and a one-tap WhatsApp link built from
+   the existing `waLink` prefills.
+3. Overdue rule: a new application with no staff action within one working
+   day is flagged, and the flag drives the Today dashboard's "needs
+   attention" count (which already reads live).
+4. Convert an accepted application into a student + enrollment
+   (`admission_no` KDS-YYYY-NNNN), in one transaction.
+5. Every status change and assignment writes `audit_logs`.
+Acceptance: an admin can move an application from new → demo_scheduled with a
+note, on a phone, in under 30 seconds — and a second admin without
+`applications.manage` cannot, even by POSTing the server action directly.
+
+---
+## Phase 4 — Students, courses, batches
+
+Read plan §10 and docs/admin-architecture.md §6.
+
+1. Student 360 gated on `students.view` / `students.manage`: admission number,
+   personal details, guardian, course, batch, enrollment history, notes.
+2. Courses editor gated on `courses.manage`: bilingual name, modules,
+   duration, active/archive. Then switch PUBLIC course pages to read from the
+   database, with `src/content/courses.ts` as the fallback only when the
+   database is empty. Archived courses must disappear from the public site.
+3. Batches manager gated on `batches.manage`: label, course, days, times,
+   start/end date, seats, assigned trainer, language, status. The public
+   BatchTable keeps working unchanged throughout.
+4. Keep the worker under 3 MB gzip (`npx wrangler deploy --dry-run`).
+Acceptance: the owner can correct a batch time on a phone and see it on
+`/gu/admissions` within the cache window, with no invented rows anywhere.
+
+---
+## Phase 5 — Attendance
+
+Read CLAUDE.md §7 (audit) and plan §10.3. Gate on `attendance.view` /
+`attendance.manage`.
 
 1. /admin/attendance: pick batch → today's session auto-creates
    (attendance_sessions unique batch+date) → roster from active enrollments
@@ -47,7 +78,7 @@ Acceptance: marking a 10-student batch takes under 60 seconds; a locked
 session cannot be silently edited.
 
 ---
-## Phase 4 — Certificates + brief pipeline
+## Phase 6 — Certificates + Design Desk
 
 Read plan §10.2 and §10.4. R2 stays private (CLAUDE.md §9).
 
@@ -66,7 +97,7 @@ Acceptance: issuing a certificate end-to-end (check → PDF → QR verifies on
 the public page) takes under 2 minutes.
 
 ---
-## Phase 5 — Polish & scale
+## Phase 7 — Content, fees, reports, polish
 
 1. Analytics: GA4 events from plan §17 (demo_click, admission_submit,
    wa_click with source, brief_submit, lang_switch, batch_view).
@@ -84,16 +115,16 @@ languages, with real images in place.
 ---
 ## Audit deltas: fold these into Phases 2-4
 
-**Auth security prerequisites (Phase 2 gate: ALL before any /admin route ships)**
-Argon2id (or Better Auth default scrypt) hashing; strict rate limiting on
-login; generic error messages; httpOnly+Secure+SameSite session cookies with
-absolute + idle timeouts; server-side session invalidation on password
-change; audit log entries for login success/failure and privilege changes;
-every server action re-checks session AND role; no admin bundle references
-leak into public pages; confirm Better Auth runs within the OpenNext worker
-budget (`npx wrangler deploy --dry-run` before merging).
+**Auth security prerequisites — DONE in the Phase 2 foundation**
+Supabase Auth owns credential hashing and MFA factors; login runs as a Server
+Action with per-IP and per-email rate limiting and a single generic error;
+session cookies are managed by `@supabase/ssr`; mandatory TOTP (AAL2) gates
+every console page; every server action re-checks session AND role AND
+assurance level; admin bundles never load from public pages (separate root
+layout); team mutations write `audit_logs`. Still open: audit entries for
+login success/failure, and a supervised MFA recovery procedure.
 
-**Phase 2 additions**
+**Carry into the next phases**
 - `consent_versions` table + store the consent text version on each
   application (DPDP: prove what was agreed).
 - `notification_outbox` table: routes write intents; a cron drains it, so a
@@ -102,15 +133,20 @@ budget (`npx wrangler deploy --dry-run` before merging).
 - Soft-delete policy decision (deleted_at) for students/applications before
   any destructive admin action exists.
 - Supervised destructive migration: drop deprecated `students.pin` and
-  `applications.message` once the admin is live.
+  `applications.message` once the console is in daily use.
+- Ownership transfer as a reviewed procedure (disable the
+  `karma_staff_invariants` trigger inside one transaction, swap, re-enable,
+  audit by hand). Never a UI control.
+- Encrypted `pg_dump` → private R2 backups with 30-daily / 12-monthly
+  retention, replacing the CSV artifacts.
 - Course archival: `courses.active=false` flow + public pages must filter.
 
-**Phase 3 additions**
+**Attendance-phase additions**
 - Sessions restricted to the batch's date window (start_date..end_date; the
   `end_date` column now exists); trainers can mark only their own batches;
   timezone-pin all date logic to Asia/Kolkata.
 
-**Phase 4 additions**
+**Certificates/Design-Desk additions**
 - Certificate PDFs render server-side: measure worker CPU; if pdf-lib + QR
   push past limits, move generation to a GitHub Action worker path.
 - Brief downloads: authed, streamed, audit-logged; never a public URL.

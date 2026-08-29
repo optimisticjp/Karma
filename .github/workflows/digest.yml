@@ -11,4 +11,4 @@ jobs:
       - name: Trigger digest endpoint
         run: |
           curl -fsS -X POST -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            "${{ vars.SITE_URL || 'https://karmadesignstudio.in' }}/api/cron/digest"
+            "${{ vars.SITE_URL || 'https://karma-design-studio.essanciaonline.workers.dev' }}/api/cron/digest"

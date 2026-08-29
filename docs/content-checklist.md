@@ -15,7 +15,7 @@ below maps to a ⚠ CONFIRM-WITH-OWNER marker in the code.
 | Q7 | Trainer names, photos, specialties + consent to appear | About page trainers section |
 | Q8 | Six real student outcomes with names, consent, before/after and a quote | `src/content/collections.ts` `stories` (remove `sample: true`) |
 | Q9 | Verify public claims: 500+ students? Google rating 4.8 or 4.9? Years running? | hero proof row, About numbers |
-| Q10 | Batch reality: current live batches, seats per batch, morning/evening times | seed data / Neon `batches` |
+| Q10 | Batch reality: current live batches, seats per batch, morning/evening times | seed data / Supabase `batches` |
 | Q11 | Certificate: exact issuing name, signatory, past numbering to migrate? | Phase 4 certificate template |
 | Q12 | Fee policy language: is "fees shared at demo/WhatsApp" the right promise? Any registration fee? | admissions copy |
 | Q13 | B2B: confirm service list, typical minimums, file formats accepted | services page, `services` content |
@@ -45,6 +45,6 @@ this list, so a shot drops straight into place.
 | --- | --- | --- |
 | 2 sample stories | `src/content/collections.ts` | 6 real stories, `sample: false` |
 | 6 gallery placeholders | same file | real photos + real captions |
-| Batch fallback rows | disappear automatically once Neon has real batches | — |
+| Batch fallback rows | disappear automatically once the database has real batches | — |
 | About story/trainers callouts | `messages/*` aboutPage | interview + profiles in |
 | Privacy/terms drafts | `[locale]/privacy`, `terms` | owner + legal review |

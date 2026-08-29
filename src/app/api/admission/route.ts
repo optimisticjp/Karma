@@ -16,8 +16,8 @@ const waMsg = (ref: string) =>
  * Admission endpoint, production-hardened per audit:
  * fail-closed on missing deps, per-phone DB throttle, idempotency,
  * escaped notification HTML, applicant confirmation email.
- * Note: neon-http has no transactions; the placeholder→reference update is
- * a known two-step (a failed update leaves a findable placeholder ref, logged).
+ * The node-postgres driver supports transactions, so the placeholder→reference
+ * rewrite is atomic: a row can never be left holding a placeholder reference.
  */
 export async function POST(req: NextRequest) {
   const requestId = newRequestId();
@@ -103,36 +103,42 @@ export async function POST(req: NextRequest) {
 
     const now = new Date();
     const placeholder = `KDS-P-${crypto.randomUUID().slice(0, 12)}`;
-    const inserted = await db
-      .insert(schema.applications)
-      .values({
-        reference: placeholder,
-        idempotencyKey: d.idempotencyKey ?? null,
-        fullName: d.fullName,
-        whatsapp: d.whatsapp,
-        email: d.email || null,
-        locale: d.locale,
-        courseSlug: d.courseSlug,
-        preferredTiming: d.preferredTiming,
-        experience: d.experience,
-        occupation: d.occupation,
-        area: d.area,
-        goal: d.goal || null,
-        heardFrom: d.heardFrom || null,
-        ageBand: d.ageBand,
-        guardianName: d.ageBand === "under18" ? d.guardianName || null : null,
-        guardianPhone: d.ageBand === "under18" ? d.guardianPhone || null : null,
-        privacyConsentAt: now,
-        commsConsentAt: now,
-        utmSource: d.utmSource || null,
-        utmCampaign: d.utmCampaign || null,
-        duplicateOfPhone: dup.length > 0
-      })
-      .returning({ id: schema.applications.id });
+    const { reference } = await db.transaction(async (tx) => {
+      const inserted = await tx
+        .insert(schema.applications)
+        .values({
+          reference: placeholder,
+          idempotencyKey: d.idempotencyKey ?? null,
+          fullName: d.fullName,
+          whatsapp: d.whatsapp,
+          email: d.email || null,
+          locale: d.locale,
+          courseSlug: d.courseSlug,
+          preferredTiming: d.preferredTiming,
+          experience: d.experience,
+          occupation: d.occupation,
+          area: d.area,
+          goal: d.goal || null,
+          heardFrom: d.heardFrom || null,
+          ageBand: d.ageBand,
+          guardianName: d.ageBand === "under18" ? d.guardianName || null : null,
+          guardianPhone: d.ageBand === "under18" ? d.guardianPhone || null : null,
+          privacyConsentAt: now,
+          commsConsentAt: now,
+          utmSource: d.utmSource || null,
+          utmCampaign: d.utmCampaign || null,
+          duplicateOfPhone: dup.length > 0
+        })
+        .returning({ id: schema.applications.id });
 
-    const id = inserted[0].id;
-    const reference = `KDS-${now.getFullYear()}-${pad(id)}`;
-    await db.update(schema.applications).set({ reference }).where(eq(schema.applications.id, id));
+      const id = inserted[0].id;
+      const ref = `KDS-${now.getFullYear()}-${pad(id)}`;
+      await tx
+        .update(schema.applications)
+        .set({ reference: ref })
+        .where(eq(schema.applications.id, id));
+      return { reference: ref };
+    });
 
     const row = (label: string, value: string) =>
       `<tr><td><b>${label}</b></td><td>${escapeHtml(value)}</td></tr>`;

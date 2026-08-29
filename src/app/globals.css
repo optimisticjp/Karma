@@ -470,6 +470,129 @@
   }
 }
 
+/* ------------------------------ Karma Console ------------------------------
+ * Admin primitives. Same tokens, same borders-over-shadows discipline, same
+ * single vermilion accent — denser, because this is a working desk, not a
+ * marketing page. Status colours appear here only as statuses.
+ * ------------------------------------------------------------------------- */
+
+@layer components {
+  /* Dense, quiet surface for console panels. */
+  .panel {
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    border-radius: 0.875rem;
+  }
+  .panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .panel-body { padding: 1.25rem; }
+
+  /* Console nav: quiet until it is the current page. */
+  .navlink {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.625rem;
+    font-size: var(--text-smallmeta);
+    font-weight: 600;
+    color: var(--color-stone);
+    border-left: 2px solid transparent;
+    transition: background-color 150ms var(--ease-out-soft), color 150ms var(--ease-out-soft);
+  }
+  .navlink:hover { background: var(--color-ivory-2); color: var(--color-carbon); }
+  .navlink[aria-current="page"] {
+    background: var(--color-ivory-2);
+    color: var(--color-carbon);
+    border-left-color: var(--color-vermilion);
+  }
+  .navlink[aria-disabled="true"] { opacity: 0.45; cursor: default; }
+  .navlink[aria-disabled="true"]:hover { background: transparent; color: var(--color-stone); }
+
+  /* A number that means something operational, not a vanity chart. */
+  .metric {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 2.25rem;
+    line-height: 1.1;
+    font-weight: 520;
+    font-variant-numeric: tabular-nums;
+  }
+  .metric-strong { color: var(--color-vermilion); }
+
+  /* Console tables: readable at a glance, scrollable on a phone. */
+  .table-wrap { overflow-x: auto; }
+  .table-admin { width: 100%; border-collapse: collapse; font-size: var(--text-smallmeta); }
+  .table-admin th {
+    text-align: left;
+    font-weight: 700;
+    color: var(--color-stone);
+    padding: 0.625rem 0.75rem;
+    border-bottom: 1px solid var(--color-line);
+    white-space: nowrap;
+  }
+  .table-admin td {
+    padding: 0.875rem 0.75rem;
+    border-bottom: 1px solid var(--color-line);
+    vertical-align: top;
+  }
+  .table-admin tr:last-child td { border-bottom: 0; }
+
+  /* Status pills. Green/amber/red mean STATUS and nothing else (spec §palette). */
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-line);
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .status::before {
+    content: "";
+    width: 0.4375rem;
+    height: 0.4375rem;
+    border-radius: 999px;
+    background: currentColor;
+  }
+  .status-active { color: var(--color-success); }
+  .status-pending { color: var(--color-warn); }
+  .status-off { color: var(--color-stone); }
+
+  /* Empty states are a feature here: never a blank box, never invented rows. */
+  .empty-state {
+    border: 1px dashed var(--color-line);
+    border-radius: 0.875rem;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    color: var(--color-stone);
+    font-size: var(--text-smallmeta);
+  }
+
+  .form-note { font-size: var(--text-smallmeta); color: var(--color-stone); }
+  .alert {
+    border: 1px solid var(--color-line);
+    border-left: 3px solid var(--color-vermilion);
+    border-radius: 0.625rem;
+    padding: 0.75rem 1rem;
+    font-size: var(--text-smallmeta);
+  }
+  .alert-error { border-left-color: var(--color-error); color: var(--color-error); }
+  .alert-success { border-left-color: var(--color-success); color: var(--color-success); }
+  /* Succeeded, but something still needs the operator's attention. Amber is a
+     status colour and this is a status — not decoration. */
+  .alert-warn { border-left-color: var(--color-warn); color: var(--color-warn); }
+}
+
 /* --------------------------- motion preferences --------------------------- */
 
 @media (prefers-reduced-motion: reduce) {

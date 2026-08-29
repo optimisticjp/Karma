@@ -8,13 +8,18 @@ is fast.
    ship public site; build admin (Phase 2) immediately after; student portal
    only when attendance data exists (Phase 3+).*
 2. **Batch truth.** Who maintains real batch data, how often? *Recommend: one
-   owner/manager updates Neon weekly until the admin ships; then admin-only.*
+   owner/manager updates the database weekly until the Courses & Batches
+   module ships; then Karma Console only.*
 3. **Claims.** Confirm 500+ students and the Google rating with evidence, or
    leave them off. `verifiedFacts` in `src/lib/site.ts` flips them on.
 4. **Fees.** Stay conversation-only, or publish ranges? *Recommend: keep
    conversation-only (current copy), publish ranges only if walk-ins ask
    constantly.*
-5. **Roles.** Who gets admin vs trainer? Names + numbers before auth exists.
+5. **Roles.** Who gets an admin account, and which permission template?
+   Karma Console allows the Owner plus **five** admins, so this is now a real
+   allocation decision, not a preference: names, emails and a template each
+   (Admissions / Academy / Design Lab / Operations / Content). Trainer records
+   exist without console access until a trainer module ships.
 6. **Attendance policy.** Confirm 75%, the correction window (24h drafted),
    and who approves corrections.
 7. **Certificates.** Issuing name, signatory, numbering format, migration of
