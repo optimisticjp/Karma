@@ -2,7 +2,12 @@ import { cache } from "react";
 import { Pool } from "pg";
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import * as schema from "./schema";
+import * as coreSchema from "./schema";
+import * as contentSchema from "./content-schema";
+
+/** One schema object for every Drizzle query. Split files keep the mature core
+ * schema stable while still letting drizzle-kit and the runtime see Content Desk. */
+export const schema = { ...coreSchema, ...contentSchema };
 
 export type Db = NodePgDatabase<typeof schema>;
 
@@ -125,5 +130,3 @@ export function dbConfigured(): boolean {
 export function dbViaHyperdrive(): boolean {
   return resolveConnection()?.viaHyperdrive ?? false;
 }
-
-export { schema };
