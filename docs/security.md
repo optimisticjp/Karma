@@ -195,8 +195,13 @@ authenticated content can leak into build output or an edge cache.
   binding blocks submissions that include files (`files_unavailable`).
   The UI keeps a WhatsApp path in every failure state, so a misconfigured
   deploy inconveniences, but never silently swallows, a lead.
-- **Headers:** CSP (self + Turnstile + i.ytimg.com images), HSTS, nosniff,
-  DENY framing, strict referrer, minimal permissions policy (next.config.ts).
+- **Headers:** CSP (self + Turnstile + i.ytimg.com images + the Supabase
+  project origin on `connect-src`, so the console's browser auth client can
+  reach `/auth/v1/*`), HSTS, nosniff, DENY framing, strict referrer, minimal
+  permissions policy (next.config.ts). Third-party hosts are allow-listed as
+  exact origins — never `*.supabase.co`, which would open XHR to every
+  Supabase project. Changing the Supabase project means updating the CSP;
+  `tests/csp.test.ts` pins the directive.
 - **Rate limiting layers:** (1) best-effort in-memory per-IP per isolate,
   (2) DB-backed 3 submissions per phone per 10 minutes, (3) REQUIRED at
   deploy: Cloudflare WAF rate rule on `/api/*` (e.g. 20 req/min per IP);
