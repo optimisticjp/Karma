@@ -16,9 +16,9 @@ const NAV = [
 ] as const;
 
 /**
- * Sticky header (80px, condenses on scroll). The mobile menu is a real
- * dialog now (audit): backdrop, Escape, focus trap, focus restore,
- * aria-controls, body scroll lock.
+ * Public navigation: quiet editorial chrome around the work, with one clear
+ * conversion action. Mobile uses a real dialog with Escape, focus containment,
+ * focus restoration and body-scroll locking.
  */
 export function Header() {
   const t = useTranslations("nav");
@@ -78,24 +78,28 @@ export function Header() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 border-b border-line bg-ivory/95 backdrop-blur transition-[height] duration-200",
-        condensed ? "h-16" : "h-16 md:h-20"
+        "site-header sticky top-0 z-50 border-b border-line bg-ivory/96 backdrop-blur-[10px]",
+        condensed ? "is-condensed h-16" : "h-16 md:h-20"
       )}
     >
-      <div className="container-site flex h-full items-center justify-between gap-4">
-        <Link href="/" className="flex flex-col leading-none" aria-label="Karma Design Studio: home">
-          <span className="font-display text-xl font-semibold tracking-tight text-carbon md:text-2xl">
+      <div className="container-site flex h-full items-center justify-between gap-5">
+        <Link
+          href="/"
+          className="site-brand-mark flex min-w-0 flex-col leading-none"
+          aria-label="Karma Design Studio: home"
+        >
+          <span className="truncate font-display text-xl font-semibold tracking-tight text-carbon md:text-2xl">
             Karma Design Studio
           </span>
           <span className="microlabel mt-1 hidden md:block">{tc("descriptor")}</span>
         </Link>
 
-        <nav className="hidden items-center gap-6 lg:flex" aria-label="Primary">
+        <nav className="hidden items-center gap-5 xl:gap-7 lg:flex" aria-label="Primary">
           {NAV.map((item) => (
             <Link
               key={item.key}
               href={item.href}
-              className="stitch-link text-[0.95rem] font-medium text-stone hover:text-carbon"
+              className="stitch-link whitespace-nowrap text-[0.92rem] font-semibold text-stone hover:text-carbon"
               aria-current={pathname.startsWith(item.href) ? "page" : undefined}
             >
               {t(item.key)}
@@ -103,21 +107,21 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2.5">
           <LanguageToggle className="hidden sm:flex" />
-          <Link href="/admission" className="btn btn-primary hidden !py-2.5 text-sm md:inline-flex">
+          <Link href="/admission" className="btn btn-primary hidden !min-h-11 !px-4 text-sm md:inline-flex">
             {t("cta")}
           </Link>
           <button
             ref={buttonRef}
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="btn btn-ghost !px-2 lg:hidden"
+            className="btn btn-ghost !min-h-11 !px-2 lg:hidden"
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? tc("closeMenu") : tc("openMenu")}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
               {open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
             </svg>
           </button>
@@ -129,30 +133,34 @@ export function Header() {
           <div
             aria-hidden="true"
             onClick={close}
-            className="fixed inset-0 top-16 z-40 bg-carbon/40 lg:hidden"
+            className="fixed inset-0 top-16 z-40 bg-carbon/45 lg:hidden"
           />
           <div
             ref={panelRef}
             id="mobile-menu"
             role="dialog"
             aria-modal="true"
-            aria-label={t("courses") + " …"}
-            className="absolute inset-x-0 top-full z-50 border-t border-line bg-ivory shadow-lg lg:hidden"
+            aria-label={tc("openMenu")}
+            className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-line bg-ivory lg:hidden"
           >
-            <nav className="container-site flex flex-col py-3" aria-label="Mobile">
-              {NAV.map((item) => (
+            <nav className="container-site flex flex-col py-4" aria-label="Mobile">
+              {NAV.map((item, index) => (
                 <Link
                   key={item.key}
                   href={item.href}
-                  className="border-b border-line/60 py-3 text-lg font-medium"
+                  className="group grid grid-cols-[2rem_1fr_auto] items-center gap-3 border-b border-line/70 py-3.5 text-lg font-semibold"
                   aria-current={pathname.startsWith(item.href) ? "page" : undefined}
                 >
-                  {t(item.key)}
+                  <span className="font-display text-sm text-vermilion-deep" aria-hidden="true">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span>{t(item.key)}</span>
+                  <span aria-hidden="true" className="text-stone transition-transform group-hover:translate-x-1">→</span>
                 </Link>
               ))}
-              <div className="flex items-center justify-between gap-3 py-4">
+              <div className="grid gap-3 py-5 sm:grid-cols-[auto_1fr] sm:items-center">
                 <LanguageToggle />
-                <Link href="/admission" className="btn btn-primary flex-1 text-sm">
+                <Link href="/admission" className="btn btn-primary w-full text-sm">
                   {t("cta")}
                 </Link>
               </div>
