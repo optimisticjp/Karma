@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "../globals.css";
+import "../premium.css";
 
 /**
  * Root layout for the Karma Console.
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-ivory text-carbon">{children}</body>
+      <body className="console-root bg-ivory text-carbon">{children}</body>
     </html>
   );
 }

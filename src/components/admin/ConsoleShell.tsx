@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 export type NavEntry = {
   href: string | null;
@@ -14,11 +14,9 @@ export type NavEntry = {
 export type NavSection = { title: string; entries: NavEntry[] };
 
 /**
- * The Karma Console frame: a persistent rail on desktop, a drawer on a phone.
- *
- * Navigation reflects what the signed-in person can reach — but NAVIGATION IS
- * NOT SECURITY. Every destination re-checks the database itself; hiding a link
- * is courtesy, not a control.
+ * Karma Console frame: a persistent working rail on desktop and a proper
+ * modal-style drawer on phones. Navigation remains a UX affordance only;
+ * every destination still re-checks authorization server-side.
  */
 export function ConsoleShell({
   sections,
@@ -50,20 +48,47 @@ export function ConsoleShell({
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const drawerId = useId();
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
-  // Any navigation closes the drawer; Escape does too.
   useEffect(() => setOpen(false), [pathname]);
+
   useEffect(() => {
     if (!open) return;
+    document.documentElement.style.overflow = "hidden";
+    const drawer = drawerRef.current;
+    const focusables = drawer?.querySelectorAll<HTMLElement>("a, button");
+    focusables?.[0]?.focus();
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setOpen(false);
+        triggerRef.current?.focus();
+        return;
+      }
+      if (e.key === "Tab" && focusables && focusables.length > 0) {
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
+
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.documentElement.style.overflow = "";
+    };
   }, [open]);
 
   const nav = (
-    <nav aria-label={brand} className="grid gap-6">
+    <nav aria-label={brand} className="grid gap-7">
       {sections.map((section) => (
         <div key={section.title}>
           <p className="microlabel px-3">{section.title}</p>
@@ -81,11 +106,11 @@ export function ConsoleShell({
                       className="navlink"
                       aria-current={active ? "page" : undefined}
                     >
-                      {entry.label}
+                      <span className="min-w-0 truncate">{entry.label}</span>
                     </Link>
                   ) : (
                     <span className="navlink" aria-disabled="true">
-                      {entry.label}
+                      <span className="min-w-0 truncate">{entry.label}</span>
                       <span className="sr-only"> — {comingLaterLabel}</span>
                     </span>
                   )}
@@ -99,19 +124,18 @@ export function ConsoleShell({
   );
 
   return (
-    <div className="min-h-screen lg:grid lg:grid-cols-[16rem_1fr]">
-      {/* ------------------------------ desktop rail ----------------------- */}
-      <aside className="hidden border-r border-line bg-card lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto">
-        <div className="border-b border-line p-5">
-          <p className="text-h4">{brand}</p>
-          <p className="form-note mt-1">{studio}</p>
-          <span aria-hidden className="stitch-line mt-3 block w-10" />
+    <div className="min-h-screen lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
+      <aside className="console-rail hidden border-r border-line lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto">
+        <div className="console-rail-brand border-b border-line">
+          <p className="font-display text-h4 font-semibold leading-tight">{brand}</p>
+          <p className="form-note mt-1.5">{studio}</p>
+          <span aria-hidden className="stitch-line mt-4 block w-12" />
         </div>
-        <div className="flex-1 p-3">{nav}</div>
-        <div className="border-t border-line p-5">
-          <p className="text-smallmeta font-semibold">{personName}</p>
-          <p className="form-note">{roleLabel}</p>
-          <div className="mt-3 flex items-center justify-between gap-3">
+        <div className="flex-1 px-3 py-5">{nav}</div>
+        <div className="border-t border-line bg-card/55 p-5">
+          <p className="text-smallmeta font-bold text-carbon">{personName}</p>
+          <p className="form-note mt-0.5">{roleLabel}</p>
+          <div className="mt-4 flex items-center justify-between gap-3">
             <Link href={accountHref} className="stitch-link text-smallmeta font-semibold">
               {accountLabel}
             </Link>
@@ -120,16 +144,16 @@ export function ConsoleShell({
         </div>
       </aside>
 
-      {/* ------------------------------ mobile bar ------------------------- */}
-      <div className="flex flex-col">
-        <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-line bg-card px-5 py-3 lg:hidden">
-          <div>
-            <p className="text-h4 leading-none">{brand}</p>
-            <p className="form-note mt-1">{personName}</p>
+      <div className="min-w-0 flex flex-col">
+        <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between gap-3 border-b border-line bg-card/96 px-4 py-2.5 backdrop-blur md:px-6 lg:hidden">
+          <div className="min-w-0">
+            <p className="truncate font-display text-xl font-semibold leading-tight">{brand}</p>
+            <p className="form-note mt-0.5 truncate">{personName} · {roleLabel}</p>
           </div>
           <button
+            ref={triggerRef}
             type="button"
-            className="btn btn-secondary"
+            className="btn btn-secondary !min-h-11 !px-3"
             aria-expanded={open}
             aria-controls={drawerId}
             onClick={() => setOpen((v) => !v)}
@@ -139,21 +163,33 @@ export function ConsoleShell({
         </header>
 
         {open ? (
-          <div
-            id={drawerId}
-            className="border-b border-line bg-card p-3 lg:hidden"
-          >
-            {nav}
-            <div className="mt-4 flex items-center justify-between gap-3 border-t border-line px-3 pt-4">
-              <Link href={accountHref} className="stitch-link text-smallmeta font-semibold">
-                {accountLabel}
-              </Link>
-              {signOut}
+          <>
+            <button
+              type="button"
+              aria-label={closeMenuLabel}
+              className="fixed inset-0 top-16 z-30 bg-carbon/35 lg:hidden"
+              onClick={() => setOpen(false)}
+            />
+            <div
+              ref={drawerRef}
+              id={drawerId}
+              role="dialog"
+              aria-modal="true"
+              aria-label={brand}
+              className="fixed inset-x-0 top-16 z-40 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-line bg-card px-3 py-5 lg:hidden"
+            >
+              {nav}
+              <div className="mt-6 flex items-center justify-between gap-3 border-t border-line px-3 pt-5">
+                <Link href={accountHref} className="stitch-link text-smallmeta font-semibold">
+                  {accountLabel}
+                </Link>
+                {signOut}
+              </div>
             </div>
-          </div>
+          </>
         ) : null}
 
-        <main id="main" className="flex-1 px-5 py-8 md:px-8 lg:px-10 lg:py-10">
+        <main id="main" className="console-main flex-1 px-4 py-7 sm:px-6 md:px-8 lg:px-10 lg:py-10 xl:px-12">
           {children}
         </main>
       </div>
