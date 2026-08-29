@@ -2,19 +2,25 @@ import { ConsoleShell, type NavSection } from "@/components/admin/ConsoleShell";
 import { SignOutLink } from "@/components/admin/SignOutLink";
 import { getAdminT } from "@/lib/admin/i18n";
 import { requireAdmin } from "@/lib/auth/guard";
+import { hasPermission } from "@/lib/auth/access";
 
 /**
  * The protected console.
  *
  * `requireAdmin()` runs here, which means no page below this layout renders for
- * anyone without a verified Supabase user, a linked and ACTIVE staff record, a
- * console role, and an AAL2 session. Each page still guards itself as well —
- * a layout guard is a floor, not a substitute, because a layout can be skipped
- * on a client-side navigation that only re-renders a leaf.
+ * anyone without a verified Supabase user, a linked and ACTIVE staff record,
+ * and a console role. Each page still guards its own capability as well — a
+ * layout guard is a floor, not a substitute for per-route authorization.
  */
 export default async function ConsoleLayout({ children }: { children: React.ReactNode }) {
   const session = await requireAdmin();
   const t = getAdminT(session.staff.adminLocale);
+
+  const canUseCatalog =
+    hasPermission(session.staff, "courses.view") ||
+    hasPermission(session.staff, "courses.manage") ||
+    hasPermission(session.staff, "batches.view") ||
+    hasPermission(session.staff, "batches.manage");
 
   const sections: NavSection[] = [
     {
@@ -31,7 +37,11 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
     {
       title: t("nav.sections.studio"),
       entries: [
-        { href: null, label: t("nav.coursesBatches"), available: false },
+        {
+          href: canUseCatalog ? "/admin/courses" : null,
+          label: t("nav.coursesBatches"),
+          available: canUseCatalog
+        },
         { href: null, label: t("nav.attendance"), available: false },
         { href: null, label: t("nav.designDesk"), available: false },
         { href: null, label: t("nav.certificates"), available: false },
