@@ -212,8 +212,10 @@ export async function updateContentAction(
 
     const data: ContentInput = {
       ...parsed.value,
+      // Any Admin edit invalidates previous Owner verification. The Owner must
+      // review the final value again before a homepage proof can be published.
       ownerVerified:
-        auth.session.role === "owner" ? parsed.value.ownerVerified : existing.ownerVerified
+        auth.session.role === "owner" ? parsed.value.ownerVerified : false
     };
     const problem = await publicationProblem(db, data, auth.session.role);
     if (problem) return fail(problem);
