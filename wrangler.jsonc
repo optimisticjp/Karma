@@ -12,21 +12,26 @@
   "observability": { "enabled": true },
 
   // ---------------------------------------------------------------------
-  // Hyperdrive → Supabase Postgres (the Worker's route to the database).
+  // Hyperdrive → Supabase Postgres: the deployed Worker's route to the
+  // database. Points at the `karma-supabase` Hyperdrive configuration.
   //
-  // NOT ENABLED YET: a Hyperdrive configuration id must be created against the
-  // real Supabase connection string first, and a placeholder id here would
-  // break every deploy. Until the owner supplies it, the Worker falls back to
-  // the DATABASE_URL runtime secret — see docs/admin-architecture.md
-  // (§ Hyperdrive) for the exact commands.
+  // The binding name must stay exactly HYPERDRIVE: src/lib/db/index.ts reads
+  // `env.HYPERDRIVE.connectionString` through OpenNext's
+  // `getCloudflareContext()`.
   //
-  //   npx wrangler hyperdrive create karma-supabase \
-  //     --connection-string="postgresql://USER:PASSWORD@HOST:5432/postgres"
+  // The id below is a Cloudflare configuration identifier, NOT a credential —
+  // it is safe in git. The database host, user and password live inside the
+  // Hyperdrive configuration on Cloudflare and must never be committed here.
   //
-  // then paste the returned id below and uncomment:
-  // "hyperdrive": [
-  //   { "binding": "HYPERDRIVE", "id": "PASTE_THE_ID_FROM_CLOUDFLARE" }
-  // ],
+  // A direct DATABASE_URL still exists, but only for work that runs OUTSIDE
+  // the Worker: migrations, seeds, backups and the owner bootstrap. The
+  // deployed runtime uses this binding.
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "9a02683f278543ac85f05e6b4087435a"
+    }
+  ],
 
   // R2 bucket for confidential B2B design files (create it first:
   //   npx wrangler r2 bucket create karma-brief-files
@@ -36,9 +41,10 @@
   //   { "binding": "BRIEF_FILES", "bucket_name": "karma-brief-files" }
   // ],
 
-  // Non-secret runtime vars. Secrets (SUPABASE_SECRET_KEY, DATABASE_URL while
-  // Hyperdrive is pending, RESEND_API_KEY, TURNSTILE_SECRET_KEY, CRON_SECRET)
-  // are set with `npx wrangler secret put`. NEVER put a secret in this block.
+  // Non-secret runtime vars. Secrets (SUPABASE_SECRET_KEY, RESEND_API_KEY,
+  // TURNSTILE_SECRET_KEY, CRON_SECRET) are set with `npx wrangler secret put`.
+  // NEVER put a secret in this block. The database credentials are not here at
+  // all: they live inside the Hyperdrive configuration above.
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://karma-design-studio.essanciaonline.workers.dev",
     "STUDIO_EMAIL": "karmadesignclasses@gmail.com",
