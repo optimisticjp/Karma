@@ -32,9 +32,16 @@ export const CATALOG_AUDIT_ACTIONS = {
   batchUpdated: "catalog.batch.updated"
 } as const;
 
+/** Admissions CRM mutations. Note text itself is not duplicated into audit logs. */
+export const ADMISSIONS_AUDIT_ACTIONS = {
+  applicationUpdated: "admissions.application.updated",
+  noteAdded: "admissions.note.added"
+} as const;
+
 export type AuditAction =
   | (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS]
-  | (typeof CATALOG_AUDIT_ACTIONS)[keyof typeof CATALOG_AUDIT_ACTIONS];
+  | (typeof CATALOG_AUDIT_ACTIONS)[keyof typeof CATALOG_AUDIT_ACTIONS]
+  | (typeof ADMISSIONS_AUDIT_ACTIONS)[keyof typeof ADMISSIONS_AUDIT_ACTIONS];
 
 export type AuditEntry = {
   /** Staff id of the person acting, or "system" for scripted operations. */
