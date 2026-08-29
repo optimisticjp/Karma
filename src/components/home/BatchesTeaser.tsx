@@ -52,7 +52,7 @@ export function BatchesTeaser() {
   };
 
   return (
-    <section className="section" id="upcoming-batches">
+    <section className="section border-t border-line bg-ivory-2" id="upcoming-batches">
       <div className="container-site">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <SectionHeading title={t("h2")} sub={t("sub")} />

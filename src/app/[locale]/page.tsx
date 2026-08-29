@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Hero } from "@/components/home/Hero";
-import { PathChooser } from "@/components/home/PathChooser";
 import { HomepageStats } from "@/components/home/HomepageStats";
 import { CourseFamilies } from "@/components/home/CourseFamilies";
 import { ScreenToStitch } from "@/components/home/ScreenToStitch";
@@ -16,7 +15,6 @@ import { HomeFaq } from "@/components/home/HomeFaq";
 import { BusinessBand } from "@/components/home/BusinessBand";
 import { VisitStudio } from "@/components/home/VisitStudio";
 import { CtaBand } from "@/components/home/CtaBand";
-import { StitchDivider } from "@/components/ui/StitchDivider";
 import { routing } from "@/i18n/routing";
 import { pageMeta } from "@/lib/seo";
 
@@ -38,6 +36,26 @@ export async function generateMetadata({
   return pageMeta({ locale, path: "", title: t("title"), description: t("description") });
 }
 
+/**
+ * Homepage composition.
+ *
+ * The page used to run sixteen sections at one uniform density, in an order
+ * that put the two things a prospective student most needs — the schedule and
+ * the fee answer — at positions eleven and twelve. It now reads as five
+ * chapters, each a pair of sections sharing a surface, with the schedule
+ * directly under the catalogue where the decision actually happens:
+ *
+ *   1. The offer          Hero
+ *   2. What, and when     Courses · Batches            (ivory-2)
+ *   3. How the work works Screen→stitch · Method       (ivory, signature tier)
+ *   4. Proof              Student work · Stories · Teaching · Studio channel
+ *   5. Decide             Fees · FAQ                   (ivory-2)
+ *   6. Close              Business door (dark) · Visit · CTA (dark)
+ *
+ * Two dark bands punctuate the run, at the audience switch and at the close.
+ * Section surfaces live on the components themselves; chapters that continue
+ * a surface carry a hairline instead of a colour change.
+ */
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -45,21 +63,19 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <>
       <Hero />
-      <PathChooser />
-      <HomepageStats />
 
       <CourseFamilies />
+      <BatchesTeaser />
+
       <ScreenToStitch />
       <HowItWorks />
 
-      <StitchDivider />
-
-      <Trainers />
+      <HomepageStats />
       <WorkStrip />
       <Stories />
+      <Trainers />
       <LatestVideos />
 
-      <BatchesTeaser />
       <Investment />
       <HomeFaq />
 

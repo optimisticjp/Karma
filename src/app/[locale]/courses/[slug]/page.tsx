@@ -5,9 +5,10 @@ import { Link } from "@/i18n/navigation";
 import { BatchTable } from "@/components/course/BatchTable";
 import { CourseCard } from "@/components/course/CourseCard";
 import { ModuleAccordion } from "@/components/course/ModuleAccordion";
-import { PhotoSlot } from "@/components/ui/PhotoSlot";
+import { FaqList } from "@/components/site/FaqList";
+import { PageIntro } from "@/components/ui/PageIntro";
+import { TechniquePlate } from "@/components/ui/TechniquePlate";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { StitchDivider } from "@/components/ui/StitchDivider";
 import { StickyActionBar } from "@/components/site/StickyActionBar";
 import { JsonLd } from "@/components/site/JsonLd";
 import { courseBySlug, courses, families } from "@/content/courses";
@@ -46,13 +47,16 @@ export default async function CourseDetailPage({
   const course = courseBySlug(slug);
   if (!course) notFound();
 
-  const t = await getTranslations("courseDetail");
-  const tc = await getTranslations("common");
-  const l = await getLocale();
+  const [t, tc, l] = await Promise.all([
+    getTranslations("courseDetail"),
+    getTranslations("common"),
+    getLocale()
+  ]);
   const gu = l === "gu";
   const fam = families[course.family];
   const related = courses.filter((c) => c.family === course.family && c.slug !== course.slug);
   const name = gu ? course.nameGu : course.nameEn;
+  const position = courses.findIndex((c) => c.slug === course.slug);
 
   const crumbs = {
     "@context": "https://schema.org",
@@ -79,65 +83,73 @@ export default async function CourseDetailPage({
 
   const waCourse = `Hi Karma Design Studio! 👑 મને "${name}" કોર્સનો ફ્રી ડેમો બુક કરવો છે. નામ: ____ | ટાઇમ: સવાર/સાંજ`;
 
+  const facts: Array<[string, string]> = [
+    [
+      t("durationLabel"),
+      course.durationWeeks ? t("weeks", { count: course.durationWeeks }) : t("confirmDuration")
+    ],
+    [t("levelLabel"), t("levelValue")],
+    [t("langLabel"), t("langValue")]
+  ];
+
   return (
     <>
       <JsonLd data={courseLd} />
       <JsonLd data={crumbs} />
 
-      <section className="section-compact">
-        <div className="container-site grid items-start gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-          <div>
-            <p className="eyebrow">{gu ? fam.nameGu : fam.nameEn}</p>
-            <h1 className="text-display mt-4">{name}</h1>
-            <p className="u-lede">{gu ? course.leadGu : course.leadEn}</p>
-
-            <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-smallmeta">
-              <div>
-                <dt className="font-bold text-stone">{t("durationLabel")}</dt>
-                <dd className="font-semibold">
-                  {course.durationWeeks
-                    ? t("weeks", { count: course.durationWeeks })
-                    : t("confirmDuration")}
-                </dd>
-              </div>
-              <div>
-                <dt className="font-bold text-stone">{t("levelLabel")}</dt>
-                <dd className="font-semibold">{t("levelValue")}</dd>
-              </div>
-              <div>
-                <dt className="font-bold text-stone">{t("langLabel")}</dt>
-                <dd className="font-semibold">{t("langValue")}</dd>
-              </div>
-            </dl>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href={{ pathname: "/admission", query: { course: course.slug, src: "course" } }} className="btn btn-primary">{t("demoCta")} <Icon name="arrow" size={18} className="arrow" /></Link>
-              <a
-                href={`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(waCourse)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-secondary"
-              >
-                {tc("whatsapp")}
-              </a>
+      <PageIntro
+        eyebrow={gu ? fam.nameGu : fam.nameEn}
+        title={name}
+        lede={gu ? course.leadGu : course.leadEn}
+        actions={
+          <>
+            <Link
+              href={{ pathname: "/admission", query: { course: course.slug, src: "course" } }}
+              className="btn btn-primary"
+            >
+              {t("demoCta")} <Icon name="arrow" size={18} className="arrow" />
+            </Link>
+            <a
+              href={`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(waCourse)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-secondary"
+            >
+              <Icon name="whatsapp" size={18} /> {tc("whatsapp")}
+            </a>
+          </>
+        }
+        aside={
+          <>
+            <div className="mb-5 aspect-[3/2] overflow-hidden rounded border border-line">
+              <TechniquePlate variant={course.family} seed={position} />
             </div>
-          </div>
-          <PhotoSlot label={course.photoLabel} ratio="4/5" className="lg:ml-auto lg:w-full lg:max-w-md" />
-        </div>
-      </section>
+            <dl className="ledger !border-t-0">
+              {facts.map(([label, value]) => (
+                <div key={label} className="ledger-row is-labelled">
+                  <dt className="ledger-title !text-smallmeta">{label}</dt>
+                  <dd className="ledger-note !mt-0 font-semibold !text-carbon">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </>
+        }
+      />
 
-      <section className="section-compact bg-ivory-2">
-        <div className="container-site grid gap-10 lg:grid-cols-2">
+      <section className="section">
+        <div className="container-site grid gap-10 lg:grid-cols-2 lg:gap-16">
           <div>
             <h2 className="text-h3 font-display">{t("whoTitle")}</h2>
-            <p className="prose-measure mt-4 text-stone">{gu ? course.whoGu : course.whoEn}</p>
+            <span aria-hidden="true" className="rule-stitch" />
+            <p className="prose-measure mt-5 text-stone">{gu ? course.whoGu : course.whoEn}</p>
           </div>
           <div>
             <h2 className="text-h3 font-display">{t("outcomesTitle")}</h2>
-            <ul className="mt-4 space-y-3">
+            <span aria-hidden="true" className="rule-stitch" />
+            <ul className="mt-5 space-y-3">
               {(gu ? course.outcomesGu : course.outcomesEn).map((o) => (
                 <li key={o} className="flex gap-3">
-                  <Icon name="check" size={18} className="mt-1.5 text-success" strokeWidth={2} />
+                  <Icon name="check" size={18} className="mt-1.5 shrink-0 text-success" strokeWidth={2} />
                   <span>{o}</span>
                 </li>
               ))}
@@ -146,72 +158,58 @@ export default async function CourseDetailPage({
         </div>
       </section>
 
-      <section className="section-compact">
-        <div className="container-site">
-          <SectionHeading title={t("modulesTitle")} sub={t("modulesNote")} />
-          <div className="u-section-body max-w-3xl">
+      <section className="section bg-ivory-2">
+        <div className="container-site grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+          <div>
+            <SectionHeading title={t("modulesTitle")} sub={t("modulesNote")} />
+            <p className="pending-block mt-8 text-smallmeta text-stone">
+              <span className="pending-label">{t("machinesTitle")}</span>
+              {t("machinesBody")}
+            </p>
+          </div>
+          <div className="u-section-body lg:mt-0">
             <ModuleAccordion modules={course.modules} />
           </div>
         </div>
       </section>
 
-      <section className="section-compact bg-ivory-2">
-        <div className="container-site grid items-center gap-8 md:grid-cols-2">
-          <div>
-            <h2 className="text-h3 font-display">{t("machinesTitle")}</h2>
-            <p className="prose-measure mt-4 text-stone">{t("machinesBody")}</p>
-          </div>
-          <PhotoSlot label={t("machinesPhoto")} ratio="16/9" />
-        </div>
-      </section>
-
-      <section className="section-compact">
+      <section className="section" id="batches">
         <div className="container-site">
-          <SectionHeading title={t("batchesTitle")} />
-          <div className="mt-8">
+          <SectionHeading title={t("batchesTitle")} sub={t("batchesSub")} />
+          <div className="u-section-body">
             <BatchTable courseSlug={course.slug} limit={6} />
           </div>
         </div>
       </section>
 
-      <section className="section-compact bg-ivory-2">
-        <div className="container-site">
-          <h2 className="text-h3 font-display">{t("certTitle")}</h2>
-          <p className="prose-measure mt-4 text-stone">{t("certBody")}</p>
-        </div>
-      </section>
-
-      <section className="section-compact">
-        <div className="container-site">
-          <h2 className="text-h3 font-display">{t("faqTitle")}</h2>
-          <div className="mt-6 max-w-3xl space-y-3">
-            {faqs.slice(0, 3).map((f, i) => (
-              <details key={i} className="card group p-0">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-semibold [&::-webkit-details-marker]:hidden">
-                  <span>{gu ? f.qGu : f.qEn}</span>
-                  <Icon name="plus" size={18} className="text-vermilion-deep transition-transform duration-200 group-open:rotate-45" />
-                </summary>
-                <p className="border-t border-line px-5 pb-5 pt-4 text-stone">{gu ? f.aGu : f.aEn}</p>
-              </details>
-            ))}
+      <section className="section border-t border-line bg-ivory-2">
+        <div className="container-site grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+          <div>
+            <SectionHeading title={t("faqTitle")} />
+            <div className="card mt-8 p-5 md:p-6">
+              <p className="microlabel !text-vermilion-deep">{t("certTitle")}</p>
+              <p className="mt-3 text-smallmeta text-stone">{t("certBody")}</p>
+            </div>
           </div>
+          <FaqList items={faqs.slice(0, 4)} />
         </div>
       </section>
 
       {related.length > 0 ? (
-        <>
-          <StitchDivider />
-          <section className="section-compact">
-            <div className="container-site">
-              <SectionHeading title={t("relatedTitle")} />
-              <div className="u-section-body grid gap-6 lg:gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                {related.map((c) => (
-                  <CourseCard key={c.slug} course={c} />
-                ))}
-              </div>
+        <section className="section">
+          <div className="container-site">
+            <SectionHeading title={t("relatedTitle")} />
+            <div className="u-section-body grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+              {related.map((c) => (
+                <CourseCard
+                  key={c.slug}
+                  course={c}
+                  index={courses.findIndex((x) => x.slug === c.slug)}
+                />
+              ))}
             </div>
-          </section>
-        </>
+          </div>
+        </section>
       ) : null}
 
       <StickyActionBar waText={waCourse} courseSlug={course.slug} />

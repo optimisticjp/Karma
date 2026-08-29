@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { BatchTable } from "@/components/course/BatchTable";
+import { FaqList } from "@/components/site/FaqList";
+import { PageIntro } from "@/components/ui/PageIntro";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { StitchDivider } from "@/components/ui/StitchDivider";
+import { Ledger, LedgerRow } from "@/components/ui/Ledger";
 import { StickyActionBar } from "@/components/site/StickyActionBar";
 import { JsonLd } from "@/components/site/JsonLd";
 import { Icon } from "@/components/ui/Icon";
 import { getPublicFaqs } from "@/lib/content/public";
+import { site, waLink } from "@/lib/site";
 import { pageMeta } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -25,12 +28,14 @@ export async function generateMetadata({
 export default async function AdmissionsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, faqs] = await Promise.all([
+  const [t, tc, faqs, l] = await Promise.all([
     getTranslations("admissionsPage"),
-    getPublicFaqs()
+    getTranslations("common"),
+    getPublicFaqs(),
+    getLocale()
   ]);
-  const gu = locale === "gu";
-  const steps = t.raw("steps") as string[];
+  const gu = l === "gu";
+  const steps = t.raw("steps") as Array<{ t: string; d: string }>;
   const handbook = t.raw("handbook") as string[];
 
   const faqLd = {
@@ -47,84 +52,130 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ loc
     <>
       <JsonLd data={faqLd} />
 
-      <section className="section-compact">
-        <div className="container-site">
-          <h1 className="text-display max-w-3xl">{t("title")}</h1>
-          <p className="u-lede prose-measure">{t("sub")}</p>
-        </div>
-      </section>
+      <PageIntro
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        lede={t("sub")}
+        actions={
+          <>
+            <Link href="/admission" className="btn btn-primary">
+              {t("formCta")} <Icon name="arrow" size={18} className="arrow" />
+            </Link>
+            <a
+              href={waLink(tc("waPrefillDemo"))}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-secondary"
+            >
+              <Icon name="whatsapp" size={18} /> {tc("whatsapp")}
+            </a>
+          </>
+        }
+        aside={
+          <>
+            <p className="microlabel !text-vermilion-deep">{t("asideTitle")}</p>
+            <p className="mt-3">{t("asideBody")}</p>
+            <p className="mt-4">
+              <strong>{gu ? site.hoursGu : site.hoursEn}</strong>
+            </p>
+          </>
+        }
+      />
 
-      <section className="section-compact bg-ivory-2">
-        <div className="container-site">
-          <ol className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+      {/* The five steps, as a sequence rather than five loose numerals. */}
+      <section className="section">
+        <div className="container-site grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+          <SectionHeading title={t("stepsTitle")} sub={t("stepsSub")} />
+          <Ledger as="ol">
             {steps.map((s, i) => (
-              <li key={s}>
-                <p className="numeral" aria-hidden="true">{String(i + 1).padStart(2, "0")}</p>
-                <p className="mt-2 font-semibold">{s}</p>
-              </li>
+              <LedgerRow
+                key={s.t}
+                index={String(i + 1).padStart(2, "0")}
+                title={s.t}
+                note={s.d}
+              />
             ))}
-          </ol>
+          </Ledger>
         </div>
       </section>
 
-      <section className="section-compact">
-        <div className="container-site grid gap-6 lg:gap-8 md:grid-cols-2">
-          <div className="card p-6 md:p-8">
-            <h2 className="text-h4 font-display">{t("feesTitle")}</h2>
-            <p className="u-lede">{t("feesBody")}</p>
-          </div>
-          <div className="card p-6 md:p-8">
-            <h2 className="text-h4 font-display">{t("eligTitle")}</h2>
-            <p className="u-lede">{t("eligBody")}</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="section-compact" id="batches">
+      <section className="section bg-ivory-2" id="batches">
         <div className="container-site">
-          <SectionHeading title={t("batchesTitle")} />
-          <div className="mt-8">
+          <SectionHeading title={t("batchesTitle")} sub={t("batchesSub")} />
+          <div className="u-section-body">
             <BatchTable limit={12} />
           </div>
         </div>
       </section>
 
-      <section className="section-compact bg-ivory-2">
+      <section className="section">
         <div className="container-site">
-          <SectionHeading title={t("handbookTitle")} />
-          <ul className="u-section-body grid gap-4 md:grid-cols-2">
-            {handbook.map((h) => (
-              <li key={h} className="flex gap-3">
-                <Icon name="scissors" size={18} className="mt-1 text-vermilion-deep" />
-                <span className="text-stone">{h}</span>
-              </li>
+          <SectionHeading title={t("beforeTitle")} sub={t("beforeSub")} />
+          <dl className="u-section-body spec-grid">
+            <div>
+              <dt className="spec-label">{t("feesTitle")}</dt>
+              <dd className="spec-note mt-2">{t("feesBody")}</dd>
+            </div>
+            <div>
+              <dt className="spec-label">{t("eligTitle")}</dt>
+              <dd className="spec-note mt-2">{t("eligBody")}</dd>
+            </div>
+            <div>
+              <dt className="spec-label">{t("langTitle")}</dt>
+              <dd className="spec-note mt-2">{t("langBody")}</dd>
+            </div>
+            <div>
+              <dt className="spec-label">{t("bringTitle")}</dt>
+              <dd className="spec-note mt-2">{t("bringBody")}</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section className="section border-t border-line bg-ivory-2">
+        <div className="container-site grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+          <SectionHeading title={t("handbookTitle")} sub={t("handbookSub")} />
+          <ul className="ledger">
+            {handbook.map((h, i) => (
+              <LedgerRow
+                as="li"
+                key={h}
+                index={String(i + 1).padStart(2, "0")}
+                title={h}
+              />
             ))}
           </ul>
         </div>
       </section>
 
-      <section className="section-compact">
-        <div className="container-site">
-          <SectionHeading title={t("faqTitle")} />
-          <div className="u-section-body max-w-3xl space-y-3">
-            {faqs.map((f, i) => (
-              <details key={`${f.qEn}-${i}`} className="card group p-0" open={i === 0}>
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-semibold [&::-webkit-details-marker]:hidden">
-                  <span>{gu ? f.qGu : f.qEn}</span>
-                  <span aria-hidden="true" className="text-vermilion-deep transition-transform duration-200 group-open:rotate-45">＋</span>
-                </summary>
-                <p className="border-t border-line px-5 pb-5 pt-4 text-stone">{gu ? f.aGu : f.aEn}</p>
-              </details>
-            ))}
+      <section className="section">
+        <div className="container-site grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+          <div>
+            <SectionHeading title={t("faqTitle")} sub={t("faqSub")} />
+            <p className="u-actions">
+              <a
+                href={waLink(tc("waPrefillDemo"))}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-secondary"
+              >
+                <Icon name="whatsapp" size={18} /> {t("faqCta")}
+              </a>
+            </p>
           </div>
+          <FaqList items={faqs} />
         </div>
       </section>
 
-      <StitchDivider />
-      <section className="section-compact">
-        <div className="container-site text-center">
-          <Link href="/admission" className="btn btn-primary">{t("formCta")} <Icon name="arrow" size={18} className="arrow" /></Link>
-          <p className="mt-3 text-smallmeta text-stone">{t("formNote")}</p>
+      <section className="on-carbon section-compact">
+        <div className="container-site flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+          <div>
+            <h2 className="text-h3">{t("closeTitle")}</h2>
+            <p className="mt-2 text-smallmeta text-stone">{t("formNote")}</p>
+          </div>
+          <Link href="/admission" className="btn btn-primary">
+            {t("formCta")} <Icon name="arrow" size={18} className="arrow" />
+          </Link>
         </div>
       </section>
 

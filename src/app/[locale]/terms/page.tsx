@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { pageMeta } from "@/lib/seo";
+import { PageIntro } from "@/components/ui/PageIntro";
+import { LedgerRow } from "@/components/ui/Ledger";
 
 export async function generateMetadata({
   params
@@ -42,21 +44,38 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
       ];
 
   return (
-    <section className="section-compact">
-      <div className="container-site max-w-3xl">
-        <h1 className="text-h2 font-display">{gu ? "શરતો" : "Terms"}</h1>
-        <p className="mt-3 rounded-lg border border-dashed border-vermilion bg-ivory-2 p-3 text-smallmeta font-semibold text-stone">
-          ⚠ {gu ? "ડ્રાફ્ટ: લોન્ચ પહેલાં માલિક રિવ્યૂ જરૂરી." : "Draft: owner review required before launch."}
-        </p>
-        <ul className="mt-8 space-y-4">
-          {items.map((i) => (
-            <li key={i} className="flex gap-3 text-stone">
-              <span aria-hidden="true" className="text-vermilion-deep">–</span>
-              <span>{i}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
+    <>
+      <PageIntro
+        eyebrow={gu ? "કાનૂની" : "Legal"}
+        title={gu ? "શરતો" : "Terms"}
+        lede={
+          gu
+            ? "ટ્રેનિંગ અને બિઝનેસ સર્વિસ માટેની મુખ્ય શરતો, સાદી ભાષામાં."
+            : "The key terms for training and business services, in plain language."
+        }
+        aside={
+          <p className="pending-block">
+            <span className="pending-label">{gu ? "ડ્રાફ્ટ" : "Draft"}</span>
+            {gu
+              ? "લોન્ચ પહેલાં માલિકનો રિવ્યૂ જરૂરી."
+              : "Owner review required before launch."}
+          </p>
+        }
+      />
+      <section className="section">
+        <div className="container-site">
+          <ul className="reading-shell ledger">
+            {items.map((item, i) => (
+              <LedgerRow
+                as="li"
+                key={item}
+                index={String(i + 1).padStart(2, "0")}
+                title={item}
+              />
+            ))}
+          </ul>
+        </div>
+      </section>
+    </>
   );
 }

@@ -26,7 +26,7 @@ export function Footer() {
 
           <nav className="lg:col-span-2" aria-label={t("learn")}>
             <p className="microlabel">{t("learn")}</p>
-            <ul className="mt-4 space-y-2.5 text-smallmeta">
+            <ul className="mt-2 text-smallmeta">
               <li><Link className="stitch-link" href="/courses">{tn("courses")}</Link></li>
               {courses.slice(0, 4).map((c) => (
                 <li key={c.slug}>
@@ -40,7 +40,7 @@ export function Footer() {
 
           <nav className="lg:col-span-2" aria-label={t("students")}>
             <p className="microlabel">{t("students")}</p>
-            <ul className="mt-4 space-y-2.5 text-smallmeta">
+            <ul className="mt-2 text-smallmeta">
               <li><Link className="stitch-link" href="/admissions">{tn("admissions")}</Link></li>
               <li><Link className="stitch-link" href="/admission">{t("admissionForm")}</Link></li>
               <li><Link className="stitch-link" href="/admissions#batches">{t("batches")}</Link></li>
@@ -50,7 +50,7 @@ export function Footer() {
 
           <div className="lg:col-span-3">
             <p className="microlabel">{t("visit")}</p>
-            <address className="mt-4 space-y-2.5 text-smallmeta not-italic text-stone">
+            <address className="mt-2 text-smallmeta not-italic text-stone">
               <p>{locale === "gu" ? site.addressGu : site.addressEn}</p>
               <p>{locale === "gu" ? site.hoursGu : site.hoursEn}</p>
               <p><a className="stitch-link font-semibold text-carbon" href={`tel:+${site.whatsapp}`}>{site.phoneDisplay}</a></p>
@@ -60,7 +60,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-4 border-t border-line pt-6 text-xs text-stone md:flex-row md:items-center md:justify-between">
+        <div className="mt-12 flex flex-col gap-x-4 gap-y-2 border-t border-line pt-6 text-smallmeta text-stone md:flex-row md:items-center md:justify-between">
           <p>{t("rights", { year })}</p>
           <div className="flex flex-wrap gap-x-4 gap-y-2">
             <Link className="stitch-link" href="/privacy">{t("privacy")}</Link>

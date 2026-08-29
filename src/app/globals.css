@@ -66,7 +66,7 @@
   --space-eyebrow-to-h: 1rem;    /* 16 */
   --space-h-to-lede: 1.25rem;    /* 20 */
   --space-lede-to-action: 2rem;  /* 32 */
-  --space-heading-to-content: 3rem;  /* 48 mobile */
+  --space-heading-to-content: clamp(2.5rem, 1.9rem + 1.9vw, 4rem);
 
   --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -127,40 +127,38 @@
 
 @layer components {
   /* Grid: 1280 content, 1440 wide media, 64px outer margins on large */
-  .container-site {
+  /* One padding value, published as a custom property so anything that needs
+     to break the gutter (scrollers, tables) can derive from it instead of
+     hardcoding a number that later drifts and leaks 2px of overflow. */
+  .container-site, .container-wide {
+    --container-pad: 1.25rem;
     margin-inline: auto;
     width: 100%;
-    max-width: 80rem;
-    padding-inline: 1.25rem;
+    padding-inline: var(--container-pad);
   }
-  .container-wide {
-    margin-inline: auto;
-    width: 100%;
-    max-width: 90rem;
-    padding-inline: 1.25rem;
-  }
+  .container-site { max-width: 80rem; }
+  .container-wide { max-width: 90rem; }
   @media (min-width: 768px) {
-    .container-site, .container-wide { padding-inline: 2rem; }
+    .container-site, .container-wide { --container-pad: 2rem; }
   }
   @media (min-width: 1280px) {
-    .container-site, .container-wide { padding-inline: 4rem; }
+    .container-site, .container-wide { --container-pad: 4rem; }
+  }
+
+  /* Full-bleed scroller inside a padded container. */
+  .bleed-row {
+    margin-inline: calc(-1 * var(--container-pad, 1.25rem));
+    padding-inline: var(--container-pad, 1.25rem);
   }
   .prose-measure { max-width: 68ch; }
 
-  /* Section rhythm: major 80/104/144 · standard 64/88/112 · compact 48/64/80 */
-  .section-major   { padding-block: 5rem; }
-  .section         { padding-block: 4rem; }
-  .section-compact { padding-block: 3rem; }
-  @media (min-width: 768px) {
-    .section-major   { padding-block: 6.5rem; }
-    .section         { padding-block: 5.5rem; }
-    .section-compact { padding-block: 4rem; }
-  }
-  @media (min-width: 1024px) {
-    .section-major   { padding-block: 9rem; }
-    .section         { padding-block: 7rem; }
-    .section-compact { padding-block: 5rem; }
-  }
+  /* Section rhythm as one fluid system rather than three breakpoint steps.
+     Endpoints still land on the spec values (major 80→144, standard 64→112,
+     compact 48→80) but every width in between is now composed instead of
+     jumping. Tablet stops being "desktop, early". */
+  .section-major   { padding-block: clamp(5rem, 3.2rem + 5.6vw, 9rem); }
+  .section         { padding-block: clamp(4rem, 2.7rem + 4.1vw, 7rem); }
+  .section-compact { padding-block: clamp(3rem, 2.3rem + 2.2vw, 5rem); }
 
   /* Eyebrow: 12px caps for Latin; weight + colour only for Gujarati */
   .eyebrow {
@@ -335,7 +333,6 @@
   .u-actions { margin-top: var(--space-lede-to-action); }
   /* Section heading block -> the content it introduces. */
   .u-section-body { margin-top: var(--space-heading-to-content); }
-  @media (min-width: 1024px) { .u-section-body { margin-top: 4rem; } }
 
   /* ============ INTERACTION 1: section rule draws on scroll ============
      Every section heading gets the brand thread drawing beneath it.
