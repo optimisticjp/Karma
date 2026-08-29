@@ -6,7 +6,7 @@ import { PageIntro } from "@/components/ui/PageIntro";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Ledger, LedgerRow } from "@/components/ui/Ledger";
 import { Icon } from "@/components/ui/Icon";
-import { courses, families } from "@/content/courses";
+import { coursesInFamily, families } from "@/content/courses";
 import { pageMeta } from "@/lib/seo";
 
 export async function generateMetadata({
@@ -67,7 +67,7 @@ export default async function CoursesPage({ params }: { params: Promise<{ locale
 
       {keys.map((key, idx) => {
         const f = families[key];
-        const list = courses.filter((c) => c.family === key);
+        const list = coursesInFamily(key);
         return (
           <section key={key} className={idx % 2 === 1 ? "section bg-ivory-2" : "section"}>
             <div className="container-site">

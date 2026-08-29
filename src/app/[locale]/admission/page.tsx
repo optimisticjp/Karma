@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AdmissionForm, type AdmissionContext } from "@/components/forms/AdmissionForm";
-import { courses } from "@/content/courses";
+import { coursesByFamily } from "@/content/courses";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { Icon } from "@/components/ui/Icon";
 import { pageMeta } from "@/lib/seo";
@@ -29,7 +29,7 @@ export default async function AdmissionFormPage({
   setRequestLocale(locale);
   const t = await getTranslations("admissionForm");
 
-  const options = courses.map((c) => ({
+  const options = coursesByFamily.map((c) => ({
     slug: c.slug,
     nameEn: c.nameEn,
     nameGu: c.nameGu,

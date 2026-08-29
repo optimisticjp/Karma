@@ -11,7 +11,7 @@ import { TechniquePlate } from "@/components/ui/TechniquePlate";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { StickyActionBar } from "@/components/site/StickyActionBar";
 import { JsonLd } from "@/components/site/JsonLd";
-import { courseBySlug, courses, families } from "@/content/courses";
+import { courseBySlug, coursesByFamily, coursesInFamily, families } from "@/content/courses";
 import { faqs } from "@/content/collections";
 import { site } from "@/lib/site";
 import { Icon } from "@/components/ui/Icon";
@@ -54,9 +54,9 @@ export default async function CourseDetailPage({
   ]);
   const gu = l === "gu";
   const fam = families[course.family];
-  const related = courses.filter((c) => c.family === course.family && c.slug !== course.slug);
+  const related = coursesInFamily(course.family).filter((c) => c.slug !== course.slug);
   const name = gu ? course.nameGu : course.nameEn;
-  const position = courses.findIndex((c) => c.slug === course.slug);
+  const position = coursesByFamily.findIndex((c) => c.slug === course.slug);
 
   const crumbs = {
     "@context": "https://schema.org",
@@ -204,7 +204,7 @@ export default async function CourseDetailPage({
                 <CourseCard
                   key={c.slug}
                   course={c}
-                  index={courses.findIndex((x) => x.slug === c.slug)}
+                  index={coursesByFamily.findIndex((x) => x.slug === c.slug)}
                 />
               ))}
             </div>
