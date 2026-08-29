@@ -5,7 +5,7 @@ import { PageIntro } from "@/components/ui/PageIntro";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { TechniquePlate } from "@/components/ui/TechniquePlate";
 import { Icon } from "@/components/ui/Icon";
-import { courses, families } from "@/content/courses";
+import { courses, coursesByFamily, families } from "@/content/courses";
 import { site, verifiedFacts } from "@/lib/site";
 import { pageMeta } from "@/lib/seo";
 
@@ -108,7 +108,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         <div className="container-site">
           <SectionHeading title={t("machinesTitle")} sub={t("machinesBody")} />
           <ul className="u-section-body spec-grid">
-            {courses.map((c, i) => (
+            {coursesByFamily.map((c, i) => (
               <li key={c.slug}>
                 <div className="mb-3 aspect-[3/2] overflow-hidden rounded border border-line">
                   <TechniquePlate variant={c.family} seed={i} />

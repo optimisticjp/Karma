@@ -10,6 +10,9 @@ export const GALLERY_TECHNIQUES = [
   "sequence",
   "coding",
   "chain",
+  "flat",
+  "applique",
+  "crossstitch",
   "laser",
   "tufting",
   "emcad"

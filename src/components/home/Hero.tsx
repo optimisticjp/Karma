@@ -3,7 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { Reveal } from "@/components/ui/Reveal";
 import { Icon } from "@/components/ui/Icon";
 import { Ledger, LedgerLink } from "@/components/ui/Ledger";
-import { courses, families } from "@/content/courses";
+import { courses, coursesByFamily, families } from "@/content/courses";
 
 /**
  * Hero.
@@ -63,7 +63,7 @@ export function Hero() {
             </div>
             <div className="hero-index-body">
               <Ledger>
-                {courses.map((c, i) => (
+                {coursesByFamily.map((c, i) => (
                   <LedgerLink
                     key={c.slug}
                     href={`/courses/${c.slug}`}
