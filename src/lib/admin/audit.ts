@@ -14,6 +14,7 @@ import { getDb, schema } from "@/lib/db";
  * from credentials.
  */
 
+/** Team/account security events. Kept stable because tests pin this set. */
 export const AUDIT_ACTIONS = {
   ownerBootstrapped: "admin.owner.bootstrapped",
   adminInvited: "admin.invited",
@@ -23,7 +24,17 @@ export const AUDIT_ACTIONS = {
   adminReactivated: "admin.reactivated"
 } as const;
 
-export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
+/** Course catalogue and live schedule mutations. */
+export const CATALOG_AUDIT_ACTIONS = {
+  courseCreated: "catalog.course.created",
+  courseUpdated: "catalog.course.updated",
+  batchCreated: "catalog.batch.created",
+  batchUpdated: "catalog.batch.updated"
+} as const;
+
+export type AuditAction =
+  | (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS]
+  | (typeof CATALOG_AUDIT_ACTIONS)[keyof typeof CATALOG_AUDIT_ACTIONS];
 
 export type AuditEntry = {
   /** Staff id of the person acting, or "system" for scripted operations. */
@@ -42,7 +53,7 @@ export type AuditEntry = {
  * it must be loud in the logs.
  *
  * Where atomicity matters more than availability, pass a transaction handle by
- * calling this inside `db.transaction` — see `inviteAdmin`.
+ * calling this inside `db.transaction` — see the team and catalogue actions.
  */
 export async function writeAudit(entry: AuditEntry): Promise<void> {
   const db = getDb();
