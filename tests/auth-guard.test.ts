@@ -179,11 +179,10 @@ describe("redirect targets", () => {
   it("sends failures to safe internal destinations", () => {
     expect(redirectTargetFor({ ok: false, reason: "signin" })).toBe("/admin/login");
     expect(redirectTargetFor({ ok: false, reason: "invited" })).toBe("/admin/welcome");
-    // Legacy MFA decisions remain mapped so old URLs/sessions fail safely.
-    expect(redirectTargetFor({ ok: false, reason: "mfa-setup" })).toBe("/admin/mfa/setup");
-    expect(redirectTargetFor({ ok: false, reason: "mfa-challenge" })).toBe(
-      "/admin/mfa/challenge"
-    );
+    // Compatibility-only MFA decisions can still exist in old callers, but
+    // password-only Karma has no MFA routes and sends them to the console home.
+    expect(redirectTargetFor({ ok: false, reason: "mfa-setup" })).toBe("/admin");
+    expect(redirectTargetFor({ ok: false, reason: "mfa-challenge" })).toBe("/admin");
     expect(redirectTargetFor({ ok: false, reason: "no-staff" })).toBe(
       "/admin/no-access?reason=no-staff"
     );
