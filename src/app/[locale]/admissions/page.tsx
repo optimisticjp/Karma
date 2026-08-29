@@ -6,8 +6,8 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { StitchDivider } from "@/components/ui/StitchDivider";
 import { StickyActionBar } from "@/components/site/StickyActionBar";
 import { JsonLd } from "@/components/site/JsonLd";
-import { faqs } from "@/content/collections";
 import { Icon } from "@/components/ui/Icon";
+import { getPublicFaqs } from "@/lib/content/public";
 import { pageMeta } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +25,10 @@ export async function generateMetadata({
 export default async function AdmissionsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("admissionsPage");
+  const [t, faqs] = await Promise.all([
+    getTranslations("admissionsPage"),
+    getPublicFaqs()
+  ]);
   const gu = locale === "gu";
   const steps = t.raw("steps") as string[];
   const handbook = t.raw("handbook") as string[];
@@ -105,7 +108,7 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ loc
           <SectionHeading title={t("faqTitle")} />
           <div className="u-section-body max-w-3xl space-y-3">
             {faqs.map((f, i) => (
-              <details key={i} className="card group p-0" open={i === 0}>
+              <details key={`${f.qEn}-${i}`} className="card group p-0" open={i === 0}>
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-semibold [&::-webkit-details-marker]:hidden">
                   <span>{gu ? f.qGu : f.qEn}</span>
                   <span aria-hidden="true" className="text-vermilion-deep transition-transform duration-200 group-open:rotate-45">＋</span>
