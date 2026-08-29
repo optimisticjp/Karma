@@ -22,6 +22,7 @@ export function safeNextPath(value: unknown, fallback: string = ADMIN_HOME): str
 
   if (
     path.startsWith("/admin/login") ||
+    path.startsWith("/admin/mfa") ||
     path.startsWith("/admin/auth") ||
     path.startsWith("/admin/welcome")
   ) return fallback;
