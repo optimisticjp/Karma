@@ -16,6 +16,9 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
   const session = await requireAdmin();
   const t = getAdminT(session.staff.adminLocale);
 
+  const canUseAdmissions =
+    hasPermission(session.staff, "applications.view") ||
+    hasPermission(session.staff, "applications.manage");
   const canUseCatalog =
     hasPermission(session.staff, "courses.view") ||
     hasPermission(session.staff, "courses.manage") ||
@@ -27,10 +30,11 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
       title: t("nav.sections.operations"),
       entries: [
         { href: "/admin", label: t("nav.today"), available: true },
-        // Modules below ship in later phases. They are listed so the shape of
-        // the console is honest, and marked plainly unavailable rather than
-        // opening a screen of invented rows.
-        { href: null, label: t("nav.admissions"), available: false },
+        {
+          href: canUseAdmissions ? "/admin/admissions" : null,
+          label: t("nav.admissions"),
+          available: canUseAdmissions
+        },
         { href: null, label: t("nav.students"), available: false }
       ]
     },
