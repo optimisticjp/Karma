@@ -26,6 +26,18 @@ if (process.env.NODE_ENV === "development") {
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
+  // Security headers. The CSP is deliberately tight: every host below is an
+  // exact origin, never a wildcard.
+  //
+  // connect-src carries two third parties:
+  //   - challenges.cloudflare.com — Turnstile on the public forms.
+  //   - the Supabase project origin — the Karma Console's browser-side auth
+  //     client (@supabase/ssr) calls /auth/v1/user and /auth/v1/factors from
+  //     the page, so without it sign-in and TOTP enrolment are blocked.
+  //
+  // The project origin is written out in full rather than as *.supabase.co:
+  // the wildcard would allow XHR to EVERY Supabase project on the internet,
+  // which is an exfiltration path, and this project has exactly one.
   async headers() {
     return [
       {
@@ -36,7 +48,7 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
           { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
-          { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.ytimg.com; font-src 'self'; connect-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" }
+          { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.ytimg.com; font-src 'self'; connect-src 'self' https://challenges.cloudflare.com https://zauklynwqdjlgqdpwczy.supabase.co; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" }
         ]
       }
     ];
