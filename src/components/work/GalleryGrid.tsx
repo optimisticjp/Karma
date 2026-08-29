@@ -2,17 +2,18 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { PhotoSlot } from "@/components/ui/PhotoSlot";
+import { ManagedPhoto } from "@/components/ui/ManagedPhoto";
 import { SampleTag } from "@/components/ui/SampleTag";
-import { techniqueChips, type GalleryItem } from "@/content/collections";
+import { techniqueChips } from "@/content/collections";
+import type { ManagedGalleryItem } from "@/lib/content/public";
 import { cn } from "@/lib/utils";
 
 /**
- * Editorial masonry (spec): varied proportions, small technique labels,
- * no heavy overlays. Filters stay as chips; on mobile they scroll
- * horizontally. (Future: bottom-sheet filters, per spec's mobile note.)
+ * Editorial masonry with technique filters. Published Content Desk items carry
+ * a real same-origin media path; source fallback items deliberately retain the
+ * explicit PhotoSlot/SampleTag treatment through ManagedPhoto.
  */
-export function GalleryGrid({ items }: { items: GalleryItem[] }) {
+export function GalleryGrid({ items }: { items: ManagedGalleryItem[] }) {
   const t = useTranslations("workPage");
   const locale = useLocale();
   const [active, setActive] = useState<string>("all");
@@ -59,7 +60,7 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
             return (
               <li key={g.titleEn} className="card card-lift overflow-hidden">
                 <div className="relative">
-                  <PhotoSlot label={g.photoLabel} ratio={g.ratio} className="card-img media-unveil rounded-none border-0" />
+                  <ManagedPhoto src={g.mediaUrl} label={g.photoLabel} ratio={g.ratio} className="card-img media-unveil rounded-none border-0" />
                   <span className="chip absolute left-3 top-3">
                     {locale === "gu" ? chip?.labelGu : chip?.labelEn}
                   </span>

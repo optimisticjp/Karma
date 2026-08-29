@@ -34,9 +34,7 @@
   are only reachable through server code.
 - Cron endpoint requires `Bearer CRON_SECRET`.
 - HTML in notification emails escapes user-provided free text.
-- Staff auth is Supabase Auth with **mandatory TOTP MFA**, invitation-only
-  accounts and app-layer authorization on every console page and server
-  action. Details below.
+- Staff auth is Supabase Auth with **invite-only email/password sign-in** and app-layer authorization on every console page and server action. Details below.
 
 ## Karma Console security (shipped)
 
@@ -47,31 +45,11 @@ decides authorization. A valid Supabase user with no staff record gets nothing,
 and `user_metadata` is never consulted — an editable `role: "owner"` claim means
 precisely nothing.
 
-**The access decision** (`src/lib/auth/access.ts`, pure and unit-tested) needs
-all seven of: verified user → linked staff record → `active` → console role →
-lifecycle **`status === "active"`** → **AAL2** → the required permission.
-Deactivation is rejected first, so a switched-off account is never walked
-through enrolment or onboarding. A deactivated admin holding an old session is
-rejected on their very next request.
+**The access decision** (`src/lib/auth/access.ts`, pure and unit-tested) requires: verified user → linked staff record → `active` → console role → lifecycle **`status === "active"`** → the required permission. Karma Console is password-only; assurance level is not an access gate. A deactivated admin holding an old session is rejected on their very next request.
 
-**An invited account is not a console account.** A pending invitation is stored
-`active: true` because it reserves one of the five seats — which makes
-`staff.status` load-bearing, not informational. An `invited` row reaches
-`/admin/welcome` and nothing else, **even at AAL2**. That page is the one path
-that legitimately runs below AAL2 (nobody can enrol an authenticator before they
-have a password), and it has its own narrow guard,
-`requireInvitedConsoleUser()`, which still demands a verified Supabase user, a
-LINKED staff record, `active`, a console role and lifecycle `invited`. An
-unlinked Supabase user cannot onboard; a deactivated account cannot; an account
-that already accepted is sent onward rather than allowed to set a password
-again.
+**An invited account is not a console account.** A pending invitation is stored `active: true` because it reserves one of the five seats. An `invited` row reaches `/admin/welcome` and nothing else. `requireInvitedConsoleUser()` still demands a verified Supabase user, linked staff record, active account, console role and lifecycle `invited`. An unlinked or deactivated account cannot onboard, and an already accepted account cannot set its password again.
 
-**Acceptance is transactional and gates MFA.** The `invited → active`
-transition, `accepted_at` and the `admin.accepted` audit row commit together or
-not at all. If they fail, the flow stops with a generic retryable error instead
-of continuing to MFA — the staff row is the authority, so until it commits the
-person is still onboarding-only. Retries are idempotent and write no duplicate
-audit row.
+**Acceptance is transactional.** The `invited → active` transition, `accepted_at` and the `admin.accepted` audit row commit together or not at all. If they fail, onboarding stops with a generic retryable error; retries are idempotent and write no duplicate audit row.
 
 **Invitations are a token-hash flow, not PKCE.** `inviteUserByEmail()` does not
 support PKCE — the installed `@supabase/auth-js` states this itself — so
@@ -117,13 +95,10 @@ whatever went wrong. It never reveals whether an address exists, whether an
 account is deactivated, or whether it is the Owner. Passwords and tokens are
 never logged.
 
-**MFA is mandatory** for every console session including the Owner's. The TOTP
-secret is shown once during enrolment and never stored by Karma: there is no
-column for it. Removing the only authenticator is not offered — recovery is a
-supervised owner procedure, specified rather than implemented unsafely.
+**Password-only sign-in is the product policy.** Supabase Auth verifies the password; Karma's staff lifecycle, role and explicit permissions remain the authorization controls. There is no authenticator enrollment/challenge or MFA recovery flow in Karma Console.
 
 **Owner-only team administration.** Inviting, deactivating and re-permissioning
-accounts require the owner role at AAL2, checked inside each server action, not
+accounts require the owner role, checked inside each server action, not
 only in the page. There is deliberately no permission key that unlocks it, so it
 cannot be granted to an admin. One Owner and five admin seats are enforced by a
 database trigger with an advisory lock as well as by the application, so a race
@@ -166,7 +141,7 @@ backslashes, no encoded slashes, no control characters, and never an auth screen
 **Secret handling.** `SUPABASE_SECRET_KEY` is read only by a `server-only`
 module, never exported, logged, serialised into a response, or prefixed with
 `NEXT_PUBLIC_`. Its client disables session persistence and auto-refresh. Audit
-rows never carry a password, TOTP secret, token, key, credential or invitation
+rows never carry a password, token, key, credential or invitation
 link — a test asserts it.
 
 **Sign-out** is a POST (a GET that destroys a session can be triggered by any
@@ -179,7 +154,6 @@ work with.
 authenticated content can leak into build output or an edge cache.
 
 ## Security TODO (next phases)
-- MFA recovery: a supervised owner-initiated factor reset, with audit.
 - Audit entries for login success/failure (the schema already supports them).
 - Signed, time-limited downloads for brief files and certificate PDFs via
   authed routes gated on `design.view` / `certificates.view`.

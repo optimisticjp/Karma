@@ -112,7 +112,7 @@ export async function requireSession(
   return { userId, email, staff, role: decision.role };
 }
 
-/** Any console account (owner or admin), MFA satisfied. */
+/** Any active console account (owner or admin), password-authenticated. */
 export function requireAdmin(from?: string) {
   return requireSession({}, from);
 }
@@ -161,12 +161,8 @@ export async function currentCan(permission: Permission): Promise<boolean> {
 /* -------------------------------- onboarding ------------------------------ */
 
 /**
- * The ONE console guard that runs below AAL2, for invitation acceptance.
- *
- * A person cannot enrol an authenticator before they have the password that
- * gets them a session, so requiring AAL2 at /admin/welcome would deadlock
- * every invitation. Everything else is still required, and is checked here
- * rather than assumed:
+ * The narrow onboarding guard for invitation acceptance. Everything needed
+ * before an invited account may set its password is checked here:
  *
  *   - a verified Supabase user
  *   - a staff record LINKED to that user by auth_user_id
@@ -174,9 +170,9 @@ export async function currentCan(permission: Permission): Promise<boolean> {
  *   - a console role
  *   - lifecycle status `invited`
  *
- * So an unlinked Supabase user cannot use the onboarding flow, a deactivated
- * account cannot, and an account that has already accepted is sent onward to
- * MFA or the console instead of being allowed to set a password again.
+ * So an unlinked Supabase user cannot use onboarding, a deactivated account
+ * cannot, and an account that already accepted is sent to the console instead
+ * of being allowed to set a password again.
  *
  * Returns the decision rather than redirecting, because the welcome page and
  * the welcome server action need to react differently to the same states.
@@ -202,7 +198,7 @@ export async function requireInvitedConsoleUser(): Promise<OnboardingSession> {
   if (!decision.ok) {
     if (decision.alreadyAccepted) {
       // Already accepted: send them through the ordinary decision, which will
-      // land on MFA setup, MFA challenge or the console itself.
+      // land on the ordinary console/access destination.
       const { decision: normal } = await resolveAccess();
       redirect(redirectTargetFor(normal));
     }

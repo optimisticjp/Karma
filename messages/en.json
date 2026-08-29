@@ -536,23 +536,9 @@
       "backToSite": "Back to the website",
       "languageLabel": "Console language"
     },
-    "mfa": {
-      "setupTitle": "Set up your authenticator",
-      "setupLede": "Karma Console requires a six-digit code from an authenticator app on every sign-in. Scan the code below with Google Authenticator, Authy or your password manager.",
-      "manualLabel": "Can't scan? Enter this key by hand",
-      "codeLabel": "Six-digit code",
-      "verify": "Verify and continue",
-      "verifying": "Verifying…",
-      "challengeTitle": "Enter your code",
-      "challengeLede": "Open your authenticator app and type the current six-digit code for Karma Console.",
-      "invalidCode": "That code did not match. Check the current code and try again.",
-      "enrollFailed": "The authenticator could not be set up. Refresh and try again.",
-      "secretWarning": "This key is shown once, during setup. It is never shown again.",
-      "signOutInstead": "Sign out instead"
-    },
     "welcome": {
       "title": "Set your password",
-      "lede": "Your invitation is confirmed. Choose a password, then set up your authenticator app.",
+      "lede": "Your invitation is confirmed. Choose a password to finish setting up your Karma Console account.",
       "password": "New password",
       "confirm": "Confirm password",
       "submit": "Save and continue",
@@ -591,8 +577,7 @@
       "newBriefsHint": "Not yet reviewed",
       "allClear": "Nothing needs attention right now.",
       "noActivity": "No recorded activity yet.",
-      "notConfigured": "The database is not connected on this deployment, so there are no figures to show. Nothing here is invented: see the setup checklist in docs/admin-architecture.md.",
-      "moduleLater": "This module arrives in a later phase. The figures above are read live from the database."
+      "notConfigured": "The database is not connected on this deployment, so there are no figures to show. Nothing here is invented: see the setup checklist in docs/admin-architecture.md."
     },
     "team": {
       "title": "Team",
@@ -711,24 +696,17 @@
     },
     "account": {
       "title": "Account & security",
-      "lede": "What this sign-in can do, and how it is protected.",
+      "lede": "Your sign-in, console language and access.",
       "name": "Name",
       "email": "Email",
       "role": "Role",
       "status": "Account status",
-      "mfa": "Two-factor authentication",
-      "mfaOn": "Authenticator app enrolled",
-      "mfaOff": "Not enrolled",
-      "assurance": "This session",
-      "assuranceAal2": "Verified with your authenticator",
-      "assuranceAal1": "Password only",
       "language": "Console language",
       "languageSaved": "Console language updated.",
       "save": "Save",
       "permissions": "What you can do",
       "ownerAll": "As the owner you hold every permission, including team administration.",
-      "signOut": "Sign out",
-      "mfaNote": "Removing your only authenticator would leave this account without the second factor the console requires, so it cannot be done here. If you lose your device, ask the owner: recovery is a supervised procedure."
+      "signOut": "Sign out"
     }
   }
 }

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { GalleryGrid } from "@/components/work/GalleryGrid";
-import { galleryItems } from "@/content/collections";
+import { getPublicGallery } from "@/lib/content/public";
 import { pageMeta } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params
@@ -17,7 +19,10 @@ export async function generateMetadata({
 export default async function StudentWorkPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("workPage");
+  const [t, items] = await Promise.all([
+    getTranslations("workPage"),
+    getPublicGallery()
+  ]);
 
   return (
     <section className="section-compact">
@@ -25,7 +30,7 @@ export default async function StudentWorkPage({ params }: { params: Promise<{ lo
         <h1 className="text-display max-w-3xl">{t("title")}</h1>
         <p className="u-lede prose-measure">{t("sub")}</p>
         <div className="mt-10">
-          <GalleryGrid items={[...galleryItems]} />
+          <GalleryGrid items={items} />
         </div>
       </div>
     </section>

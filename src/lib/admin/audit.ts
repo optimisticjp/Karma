@@ -69,6 +69,7 @@ export const DESIGN_AUDIT_ACTIONS = {
 export const CONTENT_AUDIT_ACTIONS = {
   itemCreated: "content.item.created",
   itemUpdated: "content.item.updated",
+  itemPublished: "content.item.published",
   itemArchived: "content.item.archived"
 } as const;
 

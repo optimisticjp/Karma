@@ -1,17 +1,20 @@
-import { useLocale, useTranslations } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { PhotoSlot } from "@/components/ui/PhotoSlot";
+import { ManagedPhoto } from "@/components/ui/ManagedPhoto";
 import { SampleTag } from "@/components/ui/SampleTag";
 import { Icon } from "@/components/ui/Icon";
-import { stories } from "@/content/collections";
+import { getPublicStories } from "@/lib/content/public";
 
-/** Editorial case studies, not quotation cards (spec): portrait, background,
-    course, outcome, short quote. */
-export function Stories() {
-  const t = useTranslations("home.stories");
-  const locale = useLocale();
+/** Real consented Content Desk stories replace the source sample set as soon
+ * as the first one is published. */
+export async function Stories() {
+  const [t, locale, stories] = await Promise.all([
+    getTranslations("home.stories"),
+    getLocale(),
+    getPublicStories()
+  ]);
   const gu = locale === "gu";
 
   return (
@@ -28,9 +31,9 @@ export function Stories() {
         </div>
         <div className="u-section-body grid gap-6 lg:gap-8 md:grid-cols-2">
           {stories.map((s, i) => (
-            <Reveal key={i} delay={i * 80}>
+            <Reveal key={`${s.nameEn}-${i}`} delay={i * 80}>
               <figure className="card grid h-full gap-6 p-6 sm:grid-cols-[120px_1fr] md:p-8">
-                <PhotoSlot label={s.photoLabel} ratio="4/5" className="hidden sm:flex" />
+                <ManagedPhoto src={s.mediaUrl} label={s.photoLabel} ratio="4/5" className="hidden sm:block" />
                 <div>
                   <blockquote className="font-display text-h4 leading-snug">
                     “{gu ? s.quoteGu : s.quoteEn}”
