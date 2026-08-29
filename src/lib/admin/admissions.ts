@@ -1,3 +1,5 @@
+import { cleanIndianMobile, isIndianMobile } from "@/lib/phone";
+
 export const APPLICATION_STATUSES = [
   "new",
   "contacted",
@@ -13,7 +15,19 @@ export const APPLICATION_STATUSES = [
 
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
+export const MANUAL_ENQUIRY_SOURCES = [
+  "walk_in",
+  "phone",
+  "whatsapp",
+  "referral",
+  "instagram",
+  "google",
+  "other"
+] as const;
+export type ManualEnquirySource = (typeof MANUAL_ENQUIRY_SOURCES)[number];
+
 const STATUS_SET: ReadonlySet<string> = new Set(APPLICATION_STATUSES);
+const SOURCE_SET: ReadonlySet<string> = new Set(MANUAL_ENQUIRY_SOURCES);
 
 export function isApplicationStatus(value: unknown): value is ApplicationStatus {
   return typeof value === "string" && STATUS_SET.has(value);
@@ -37,6 +51,14 @@ function optionalDate(value: unknown): string | null | undefined {
   if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
   const parsed = new Date(`${value}T00:00:00Z`);
   return Number.isNaN(parsed.getTime()) ? undefined : value;
+}
+
+function cleanText(value: unknown, max: number): string {
+  return typeof value === "string" ? value.trim().slice(0, max) : "";
+}
+
+function optionalText(value: unknown, max: number): string | null {
+  return cleanText(value, max) || null;
 }
 
 export function validateApplicationUpdate(input: {
@@ -65,6 +87,69 @@ export function validateApplicationUpdate(input: {
   return {
     ok: true,
     value: { status: input.status, assignedTo, nextFollowUp, closureReason }
+  };
+}
+
+export type ManualEnquiryInput = {
+  fullName: string;
+  whatsapp: string;
+  email: string | null;
+  locale: "en" | "gu";
+  courseSlug: string | null;
+  preferredTiming: string | null;
+  area: string | null;
+  goal: string | null;
+  heardFrom: ManualEnquirySource;
+  ageBand: string | null;
+  guardianName: string | null;
+  guardianPhone: string | null;
+  assignedTo: number | null;
+  nextFollowUp: string | null;
+};
+
+export function validateManualEnquiry(input: Record<string, unknown>):
+  | { ok: true; value: ManualEnquiryInput }
+  | { ok: false } {
+  const fullName = cleanText(input.fullName, 160);
+  const whatsapp = cleanIndianMobile(cleanText(input.whatsapp, 30));
+  const email = optionalText(input.email, 160)?.toLowerCase() ?? null;
+  const courseSlug = optionalText(input.courseSlug, 80);
+  const preferredTiming = optionalText(input.preferredTiming, 20);
+  const area = optionalText(input.area, 160);
+  const goal = optionalText(input.goal, 2000);
+  const ageBand = optionalText(input.ageBand, 20);
+  const guardianName = optionalText(input.guardianName, 160);
+  const rawGuardianPhone = optionalText(input.guardianPhone, 30);
+  const guardianPhone = rawGuardianPhone ? cleanIndianMobile(rawGuardianPhone) : null;
+  const assignedTo = optionalPositiveId(input.assignedTo);
+  const nextFollowUp = optionalDate(input.nextFollowUp);
+  const heardFrom = input.heardFrom;
+
+  if (fullName.length < 2 || !isIndianMobile(whatsapp)) return { ok: false };
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false };
+  if (assignedTo === undefined || nextFollowUp === undefined) return { ok: false };
+  if (typeof heardFrom !== "string" || !SOURCE_SET.has(heardFrom)) return { ok: false };
+  if (guardianPhone && !isIndianMobile(guardianPhone)) return { ok: false };
+  if (ageBand === "under18" && (!guardianName || !guardianPhone)) return { ok: false };
+
+  return {
+    ok: true,
+    value: {
+      fullName,
+      whatsapp,
+      email,
+      locale: input.locale === "en" ? "en" : "gu",
+      courseSlug,
+      preferredTiming,
+      area,
+      goal,
+      heardFrom: heardFrom as ManualEnquirySource,
+      ageBand,
+      guardianName: ageBand === "under18" ? guardianName : null,
+      guardianPhone: ageBand === "under18" ? guardianPhone : null,
+      assignedTo,
+      nextFollowUp
+    }
   };
 }
 
