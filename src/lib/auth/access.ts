@@ -2,7 +2,7 @@
  * The access decision, as a pure function.
  *
  * Supabase Auth proves IDENTITY. The Karma `staff` row decides AUTHORIZATION.
- * Seven things must all hold before an admin request may touch console data,
+ * Six things must all hold before an admin request may touch console data,
  * and they are evaluated here in a fixed order so that every route, server
  * action and test agrees on the answer:
  *
@@ -11,20 +11,11 @@
  *   3. staff.active === true
  *   4. a console role (owner or admin; trainer has no console access yet)
  *   5. lifecycle status === "active"  (an `invited` account is still onboarding)
- *   6. MFA — the session is at AAL2
- *   7. the permission the operation requires
+ *   6. the permission the operation requires
  *
- * Step 5 matters as much as the rest. An invited account is `active: true`
- * because a pending invitation reserves one of the five admin seats — but it
- * has not accepted, has not set a password of its own choosing, and must not
- * reach ordinary console data even if it somehow reaches AAL2. It belongs in
- * the onboarding flow, which `evaluateOnboardingAccess` below governs.
- *
- * Keeping this pure is deliberate: the interesting states (inactive admin
- * holding an old session, invited account at AAL2, AAL1 with a factor already
- * enrolled, valid Supabase user with no staff row) are exactly the ones that
- * are painful to reproduce against a live Supabase project, and they are all
- * covered by unit tests.
+ * Karma Console uses password-only sign-in. Supabase assurance-level fields are
+ * still carried on the subject for compatibility with existing sessions and
+ * legacy MFA routes, but they do not gate console access.
  */
 import type { Permission } from "./permissions";
 
@@ -59,13 +50,9 @@ export type AccessSubject = {
      */
     permissions: readonly Permission[];
   } | null;
-  /** Supabase assurance level for the CURRENT session. */
+  /** Supabase assurance level for the current session; not an access gate. */
   currentLevel: "aal1" | "aal2" | null;
-  /**
-   * The level the session COULD reach. `aal2` here with `currentLevel: aal1`
-   * is Supabase's way of saying "this user already has a verified factor",
-   * which is what separates "go enrol" from "go enter your code".
-   */
+  /** Supabase assurance level the session could reach; not an access gate. */
   nextLevel: "aal1" | "aal2" | null;
 };
 
@@ -86,8 +73,8 @@ export type AccessDecision =
        * `inactive`      → staff record switched off, or lifecycle deactivated
        * `role`          → staff record exists but has no console access
        * `invited`       → invitation not yet accepted; send to /admin/welcome
-       * `mfa-setup`     → accepted account, no factor enrolled yet
-       * `mfa-challenge` → accepted account, factor enrolled, code not entered
+       * `mfa-setup` / `mfa-challenge` are retained only for legacy redirect
+       * compatibility; password-only access no longer emits them
        * `permission`    → console user without the required permission
        */
       reason:
@@ -124,13 +111,7 @@ export function hasPermission(
 
 type ConsoleStaff = NonNullable<AccessSubject["staff"]> & { role: ConsoleRole };
 
-/**
- * Steps 1-4, shared by ordinary console access and by onboarding.
- *
- * Deactivation is rejected here, as early as the model allows: a switched-off
- * account must not reach a console page, an MFA screen, or the invitation
- * acceptance flow.
- */
+/** Steps 1-4, shared by ordinary console access and onboarding. */
 function checkIdentityAndRole(
   subject: AccessSubject
 ): { ok: true; staff: ConsoleStaff } | { ok: false; reason: AccessFailureReason } {
@@ -153,8 +134,8 @@ function checkIdentityAndRole(
 }
 
 /**
- * Ordinary Karma Console access. Everything below `/admin` that is not the
- * login, onboarding or MFA flow goes through this.
+ * Ordinary Karma Console access. Password-authenticated sessions are enough;
+ * staff lifecycle, role and permissions remain authoritative.
  */
 export function evaluateAccess(
   subject: AccessSubject,
@@ -164,19 +145,11 @@ export function evaluateAccess(
   if (!pre.ok) return pre;
   const staff = pre.staff;
 
-  // 5. lifecycle. An invited account is still onboarding; it does not reach
-  //    console data even at AAL2, and it is sent to finish acceptance instead.
+  // 5. lifecycle. An invited account is still onboarding and cannot reach
+  //    ordinary console data until password setup/acceptance has completed.
   if (staff.status !== "active") return { ok: false, reason: "invited" };
 
-  // 6. MFA is mandatory for every console session, owner included.
-  if (subject.currentLevel !== "aal2") {
-    return {
-      ok: false,
-      reason: subject.nextLevel === "aal2" ? "mfa-challenge" : "mfa-setup"
-    };
-  }
-
-  // 7. the operation itself
+  // 6. the operation itself
   if (requirement.ownerOnly && staff.role !== "owner") {
     return { ok: false, reason: "role" };
   }
@@ -188,18 +161,9 @@ export function evaluateAccess(
 }
 
 /**
- * Invitation acceptance ("/admin/welcome"), as a deliberately narrow decision.
- *
- * This is the ONE console path that legitimately runs below AAL2: a person
- * cannot enrol an authenticator before they have set the password that gets
- * them a session, so requiring AAL2 here would deadlock every invitation.
- * Everything else is still required — a verified Supabase user, a LINKED staff
- * record, active, a console role, and lifecycle `invited`.
- *
- * `ok: false` with reason `"invited"` cannot occur here; instead an account
- * that has already accepted is reported through `alreadyAccepted`, so the
- * caller can send it onward to MFA or the console rather than letting anyone
- * re-run onboarding.
+ * Invitation acceptance (`/admin/welcome`) is deliberately narrow: only a
+ * verified Supabase user linked to an active invited Owner/Admin staff record
+ * may use it. After acceptance the account signs in with password only.
  */
 export type OnboardingDecision =
   | { ok: true; role: ConsoleRole; staffId: number }

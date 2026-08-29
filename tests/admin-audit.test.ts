@@ -90,7 +90,6 @@ describe("team mutations are guarded and audited", () => {
     it(`${name} starts with an owner-only authorization check`, () => {
       const body = bodies.find((b) => b.name === name)?.body ?? "";
       expect(body).toContain("authorizeAction({ ownerOnly: true })");
-      // The check must come before any database work in the function.
       expect(body.indexOf("authorizeAction")).toBeLessThan(
         body.indexOf("getDb()") === -1 ? Infinity : body.indexOf("getDb()")
       );
@@ -120,36 +119,31 @@ describe("team mutations are guarded and audited", () => {
 /**
  * Structural guards for the onboarding lifecycle. `acceptInvitation` and the
  * welcome action are database-bound, so these assert the properties that make
- * them safe rather than re-implementing a database in a unit test. Each one
- * encodes a rule that would be a security regression to lose quietly.
+ * them safe rather than re-implementing a database in a unit test.
  */
-describe("invitation acceptance is transactional and gates MFA", () => {
+describe("invitation acceptance is transactional and gates console entry", () => {
   const onboarding = readFileSync("src/lib/admin/onboarding.ts", "utf8");
   const action = readFileSync("src/app/admin/(auth)/welcome/actions.ts", "utf8");
 
   it("performs the status change and its audit row in ONE transaction", () => {
     expect(onboarding).toContain("db.transaction");
     const tx = onboarding.slice(onboarding.indexOf("db.transaction"));
-    // Both writes live inside the transaction body.
     expect(tx).toContain("update(schema.staff)");
     expect(tx).toContain("insert(schema.auditLogs)");
     expect(tx).toContain("AUDIT_ACTIONS.adminAccepted");
   });
 
   it("only ever transitions a row that is still invited, active and console", () => {
-    // The WHERE clause is the real guard: a deactivated account, a trainer row
-    // or an already-accepted account must update nothing.
     expect(onboarding).toContain("eq(schema.staff.status, \"invited\")");
     expect(onboarding).toContain("eq(schema.staff.active, true)");
     expect(onboarding).toContain('inArray(schema.staff.role, ["owner", "admin"])');
   });
 
-  it("checks the acceptance result BEFORE redirecting to MFA", () => {
+  it("checks the acceptance result BEFORE redirecting to the console", () => {
     const guardIndex = action.indexOf('result === "failed"');
-    const redirectIndex = action.lastIndexOf('redirect("/admin/mfa/setup")');
+    const redirectIndex = action.lastIndexOf('redirect("/admin")');
     expect(guardIndex).toBeGreaterThan(-1);
     expect(redirectIndex).toBeGreaterThan(-1);
-    // A failed transition must stop the flow, not be walked past.
     expect(guardIndex).toBeLessThan(redirectIndex);
   });
 
@@ -157,7 +151,6 @@ describe("invitation acceptance is transactional and gates MFA", () => {
     expect(action).toContain("resolveOnboarding()");
     const authIndex = action.indexOf("resolveOnboarding()");
     const updateIndex = action.indexOf("auth.updateUser");
-    // Authorization happens before the password is touched.
     expect(authIndex).toBeLessThan(updateIndex);
   });
 
@@ -167,10 +160,6 @@ describe("invitation acceptance is transactional and gates MFA", () => {
   });
 });
 
-/**
- * Deactivation must not claim a Supabase session revocation, because it does
- * not perform one: `auth.admin.signOut()` needs a live JWT, not a user id.
- */
 describe("deactivation uses ban, never a user-id signOut", () => {
   const teamActions = readFileSync("src/app/admin/(console)/team/actions.ts", "utf8");
   const adminClient = readFileSync("src/lib/supabase/admin.ts", "utf8");
@@ -203,12 +192,6 @@ describe("deactivation uses ban, never a user-id signOut", () => {
   });
 });
 
-/**
- * The owner invariant now protects `status` as well as `role` and `active`,
- * because the access layer treats lifecycle as a security state. The SQL is
- * exercised against a real PostgreSQL during development; these assert the
- * shape of the rules so none of them can be dropped silently.
- */
 describe("owner lifecycle is part of the database invariant", () => {
   const migration = readFileSync("drizzle/0002_admin_foundation.sql", "utf8");
   const ownerBlock = migration.slice(
@@ -227,7 +210,6 @@ describe("owner lifecycle is part of the database invariant", () => {
   });
 
   it("allows the onboarding transition invited -> active", () => {
-    // If this list ever loses 'active', every owner invitation deadlocks.
     expect(ownerBlock).toContain("IF OLD.status = 'invited' THEN");
     expect(ownerBlock).toContain("NEW.status NOT IN ('invited', 'active')");
   });
@@ -248,11 +230,6 @@ describe("owner lifecycle is part of the database invariant", () => {
   });
 });
 
-/**
- * Reactivation changes Karma first and Supabase second. If the Supabase step
- * cannot be confirmed, the owner must not be told "reactivated" — that admin
- * may still be unable to sign in.
- */
 describe("reactivation reports the Supabase step truthfully", () => {
   const teamActions = readFileSync("src/app/admin/(console)/team/actions.ts", "utf8");
   const setActive = teamActions.slice(
@@ -268,18 +245,13 @@ describe("reactivation reports the Supabase step truthfully", () => {
   it("returns the warning only when the ban/unban was not applied", () => {
     expect(setActive).toContain('authConfirmed = banResult === "applied"');
     expect(setActive).toContain("if (!authConfirmed)");
-    // lastIndexOf, because setActiveAction also returns ok(...) early when the
-    // account is already in the requested state — that path never calls
-    // Supabase, so it is not the return this ordering is about.
     const warnIndex = setActive.indexOf('warn(activate ? "reactivatedAuthPending"');
     const finalOkIndex = setActive.lastIndexOf('return ok(activate ? "reactivated"');
     expect(warnIndex).toBeGreaterThan(-1);
-    // The warning is returned before the plain success line is reached.
     expect(warnIndex).toBeLessThan(finalOkIndex);
   });
 
   it("does NOT roll the Karma change back when Supabase is unavailable", () => {
-    // The database write is committed before the Supabase call is even made.
     const txIndex = setActive.indexOf("await db.transaction");
     const banIndex = setActive.indexOf("setSupabaseUserBanned");
     expect(txIndex).toBeGreaterThan(-1);
@@ -288,12 +260,7 @@ describe("reactivation reports the Supabase step truthfully", () => {
   });
 
   it("never leaks a Supabase status code into the owner-facing message", () => {
-    // banResult may appear in the server log line, but never inside the warn()
-    // state helper that builds what the owner sees.
     expect(setActive).toContain("console.warn");
-    // lastIndexOf: the FIRST `if (!authConfirmed)` is the server log line,
-    // which may legitimately carry the status. The last one is the branch that
-    // builds the owner-facing TeamState, and that must carry nothing.
     const stateWarn = setActive.slice(setActive.lastIndexOf("if (!authConfirmed) {"));
     expect(stateWarn).not.toContain("banResult");
     expect(stateWarn).toContain('return warn(activate ? "reactivatedAuthPending"');

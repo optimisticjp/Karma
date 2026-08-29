@@ -19,11 +19,9 @@ import { acceptInvitation } from "@/lib/admin/onboarding";
  * by Karma — Supabase Auth owns credentials, we own authorization.
  *
  * Order matters. The Supabase password update happens first, then the Karma
- * lifecycle transition. If that transition fails, this does NOT redirect to MFA:
- * the staff row is the authority, so until it commits the person is still in
- * onboarding-only state and saying otherwise would be a lie. The password is
- * not rolled back (there is nothing safe to roll it back to); a retry simply
- * re-runs both steps, and both are idempotent.
+ * lifecycle transition. If that transition fails, the staff row remains the
+ * authority and the person stays in onboarding-only state. The password is not
+ * rolled back; a retry simply re-runs both idempotent steps.
  */
 
 export type WelcomeState = {
@@ -52,9 +50,8 @@ export async function setPasswordAction(
   const { decision, userId } = await resolveOnboarding();
   if (!decision.ok) {
     if (decision.alreadyAccepted) {
-      // Onboarding is finished; send them on rather than letting them set a
-      // password a second time from whatever session reached this action.
-      redirect("/admin/mfa/setup");
+      // Password setup already finished; do not allow it to run twice.
+      redirect("/admin");
     }
     // "signin" means the invite session is gone or was never established.
     return { error: decision.reason === "signin" ? "expired" : "denied" };
@@ -72,5 +69,6 @@ export async function setPasswordAction(
   const result = await acceptInvitation(userId);
   if (result === "failed") return { error: "failed" };
 
-  redirect("/admin/mfa/setup");
+  // Password-only console: onboarding is complete, so enter the console.
+  redirect("/admin");
 }
