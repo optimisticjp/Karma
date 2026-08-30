@@ -453,6 +453,17 @@ offers no date picker — the studio keeps no per-date capacity, so the four
 times are preferences a visitor names, not inventory. The contact page's email
 row now uses an ordinary envelope rather than a thread spool.
 
+**Machine Notes (Phase 7).** `<NoteSpec>` is the archive notation —
+`MACHINE NOTE / 06`, the technique, a stitched rule, and an ISSUE row marked
+with a registration point. It runs at full strength on `/notes` and a note
+page and **nowhere else**; a test fails if it appears on the homepage, the
+course surfaces, `/about` or `/contact`, because notation everywhere stops
+meaning "this is a record". `MachineNote` gained `issueEn`/`issueGu`: a two-
+or three-word label of the fault, drawn from the note's own body, capped at
+three words by test, with a separate test banning any measurement (RPM, SPM,
+GSM, mm, %) from the notation. The body stays in Manrope / Noto Sans Gujarati;
+mono is for the notation around a note, never the prose inside it.
+
 **The 32-photograph manifest.** `src/content/photo-manifest.ts` is the typed
 list of every shot on the owner's final brief, with each slot's intrinsic
 dimensions. `<ManifestPhoto id="…">` reserves the photograph's exact aspect
@@ -1619,10 +1630,14 @@ A technical content system at `/notes`, turning the studio's practical
 Gujarati-led social teaching into searchable site authority. **Eight notes**
 (`src/content/notes.ts`):
 
-`read-a-failed-stitch-out` · `emcad-or-wilcom` · `needle-and-thread-matching` ·
+`read-a-failed-stitch-out` · `why-one-software` · `needle-and-thread-matching` ·
 `sample-to-machine-ready-file` · `what-to-learn-first` ·
 `sequence-out-of-registration` · `density-is-not-always-better` ·
 `choosing-stitch-direction`
+
+(This list said `emcad-or-wilcom` until 2026-08-30. That slug has not existed
+since the note was rewritten around the institute's own rule — Karma teaches
+EMCAD DAHAO only — and the doc was simply stale. The code is the record.)
 
 Plus four `machineCases` in `src/content/collections.ts`.
 
@@ -1634,6 +1649,12 @@ the owner to confirm. They carry no sample flag, and they may appear in
 
 Each note links into the course that teaches it (the `note_course_click` event).
 **Avoid heavy social iframe embeds**; the point is content the site owns.
+
+Every note also carries `issueEn`/`issueGu` (added 2026-08-30): the fault it is
+about, in two or three words, drawn from the note's own body. It drives the
+ISSUE row in `<NoteSpec>` so a reader scanning the archive for today's problem
+does not have to read eight answers. It is a label, not a new claim — and a
+test caps it at three words and bans any measurement from the notation.
 
 ---
 
@@ -1727,7 +1748,7 @@ modules are importable in a test runner while the guard stays real in the app.
 `jsx: "preserve"` for Next.js — without the override a test importing a `.tsx`
 component sees raw JSX and fails to parse.
 
-**38 test files, 537 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
+**39 test files, 550 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
 which is the point — the policy survives a refactor:
 
 | Test | Guards |
@@ -1735,6 +1756,7 @@ which is the point — the policy survives a refactor:
 | `i18n-parity` | EN/GU catalogue keys mirror exactly |
 | `machine-lab-system` | the design system v4 foundation: 32-photo manifest, icon family, eleven technique signatures, stitch semantics, motion levels, Gujarati overrides, reduced motion, no new dependency |
 | `machine-lab-shell` | the hero states EMCAD/machine/Surat/demo without photography; one course's facts never become the site's; one continuous thread and one Level-4 moment; the rail never autoplays, loops or needs a drag; bands never re-point the palette; the mobile bar keeps exactly two actions |
+| `machine-lab-notes` | the archive notation stays on the notes surfaces only; every note has a short bilingual issue label with no measurement in it; the index is still not a blog; the trade knowledge, course links and no-named-person rule are unchanged |
 | `machine-lab-admission` | every public-form defence still present; no typed value in any analytics call; progressbar semantics kept; the review step does not animate; demo figures render from the verified record and offer nothing bookable; universal actions keep universal icons |
 | `machine-lab-proof` | one shared material wall with exactly one registration mark; reserved slots and the editable gallery stay separate; the BEFORE→LEARNED→NOW arc and its stitch geometry; portraits mapped by slug and never captioned with a person; no job-placement, salary or earnings claim in any story's data |
 | `machine-lab-courses` | one index component for both surfaces; every course has a signature and only its own photograph; exactly one course carries confirmed duration/fee facts; no two course pages share a produces line, fault list, output list, practice or machine description |

@@ -53,6 +53,16 @@ export type MachineNote = {
   /** The machine or software specific that a general answer would miss. */
   detailEn: string;
   detailGu: string;
+  /**
+   * The fault this note is about, in two or three words.
+   *
+   * A label, not a new claim: every one is drawn from the note's own body. It
+   * exists so the archive index and the note header can carry an ISSUE row —
+   * a reader scanning eight notes for the fault they are hitting today should
+   * not have to read eight answers to find it.
+   */
+  issueEn: string;
+  issueGu: string;
   /** A fault and its fix. Never a named person, client or outcome. */
   exampleEn: string;
   exampleGu: string;
@@ -90,6 +100,8 @@ export const machineNotes: MachineNote[] = [
     ],
     detailEn: "Keep the failed sample. Mark the faults on it with a pen before you change anything, then change one thing and run it again. Two changes at once and you have learned nothing about either.",
     detailGu: "ખરાબ સેમ્પલ સાચવી રાખો. કંઈ પણ બદલતાં પહેલાં એના પર પેનથી ભૂલો માર્ક કરો, પછી એક જ વસ્તુ બદલીને ફરી ચલાવો. એકસાથે બે ફેરફાર કરો તો બેમાંથી એકે વિશે કશું શીખ્યા નહીં કહેવાય.",
+    issueEn: "Diagnosis",
+    issueGu: "નિદાન",
     exampleEn: "A filled motif came off with the ground rippled around it. The ripple followed the fill outline exactly, so it was not tension — there was no underlay holding the cloth. One edge-walk underlay and a firmer stabiliser, and the next run was flat.",
     exampleGu: "એક ભરેલું મોટિફ નીકળ્યું ત્યારે એની આસપાસ કાપડ લહેરાયેલું હતું. લહેર બરાબર ફિલની આઉટલાઇન પ્રમાણે હતી, એટલે એ ટેન્શન નહોતું — કાપડને પકડી રાખતું અન્ડરલે જ નહોતું. એક એજ-વોક અન્ડરલે અને વધુ મજબૂત સ્ટેબિલાઇઝર, અને પછીનો રન સપાટ આવ્યો."
   },
@@ -121,6 +133,8 @@ export const machineNotes: MachineNote[] = [
     ],
     detailEn: "Karma teaches on EMCAD DAHAO because that is what the studio digitises its own production files on. A student sits at the same tools the floor runs, and can stitch out what they just built without leaving the room. The course does not run classes in any other digitising package.",
     detailGu: "Karma EMCAD DAHAO પર શીખવે છે, કારણ કે સ્ટુડિયો પોતાની પ્રોડક્શન ફાઇલ એના પર જ ડિજિટાઇઝ કરે છે. સ્ટુડન્ટ એ જ ટૂલ પર બેસે છે જે ફ્લોર પર ચાલે છે, અને હમણાં બનાવેલી ડિઝાઇન રૂમ છોડ્યા વગર સ્ટિચ કરી શકે છે. કોર્સ બીજા કોઈ ડિજિટાઇઝિંગ સોફ્ટવેરના ક્લાસ ચલાવતો નથી.",
+    issueEn: "Software choice",
+    issueGu: "સોફ્ટવેર પસંદગી",
     exampleEn: "An operator of four years learned EMCAD DAHAO and found the hardest part was not the software at all — it was accepting that the files he had been compensating for at the machine were fixable upstream.",
     exampleGu: "ચાર વર્ષના અનુભવવાળા એક ઓપરેટરે EMCAD DAHAO શીખ્યું, અને એને સૌથી અઘરું સોફ્ટવેર નહીં પણ આ સ્વીકારવાનું લાગ્યું: જે ફાઇલોની ભરપાઈ એ મશીન પર કરતો હતો, એ ઉપરથી જ સુધારી શકાતી હતી."
   },
@@ -151,6 +165,8 @@ export const machineNotes: MachineNote[] = [
     ],
     detailEn: "Change the needle before you believe it is fine. A needle that has run a long job is blunt in a way you cannot see, and a blunt point is the cheapest fault on this list to rule out.",
     detailGu: "નીડલ બરાબર છે એવું માની લેતાં પહેલાં બદલી જુઓ. લાંબો જોબ ચલાવેલી નીડલ એવી રીતે બુઠ્ઠી થાય છે જે દેખાતી નથી, અને આ યાદીમાં બુઠ્ઠો પોઇન્ટ સૌથી સસ્તી રીતે નકારી શકાય એવી ભૂલ છે.",
+    issueEn: "Thread breaks",
+    issueGu: "થ્રેડ બ્રેક",
     exampleEn: "Metallic thread shredding every few minutes on a heavy bridal ground turned out to be a needle eye one size too small, plus two corners in the path sharper than a metallic will turn. Both fixed, the run finished without a break.",
     exampleGu: "હેવી બ્રાઇડલ ગ્રાઉન્ડ પર દર થોડી મિનિટે છોલાતો મેટાલિક થ્રેડ — કારણ નીકળ્યું એક સાઇઝ નાની આંખ, અને પાથમાં બે ખૂણા જે મેટાલિક વળી શકે એના કરતાં તીક્ષ્ણ હતા. બંને સુધાર્યા પછી રન એક પણ વાર તૂટ્યા વગર પૂરો થયો."
   },
@@ -181,6 +197,8 @@ export const machineNotes: MachineNote[] = [
     ],
     detailEn: "Rebuild at the size it will actually be stitched. Scaling a finished file up or down changes density and pull, so a file that ran perfectly at 4 inches is a new problem at 8.",
     detailGu: "જે સાઇઝમાં ખરેખર સીવવાનું છે એ જ સાઇઝમાં ફરી બનાવો. તૈયાર ફાઇલને મોટી-નાની કરવાથી ડેન્સિટી અને પુલ બદલાય છે — 4 ઇંચ પર બરાબર ચાલેલી ફાઇલ 8 ઇંચ પર નવો પ્રોબ્લેમ છે.",
+    issueEn: "Digitising",
+    issueGu: "ડિજિટાઇઝિંગ",
     exampleEn: "A bridal panel came in as a photograph and a fabric swatch with no file. Read back from the physical piece it turned out to be three stitch types, not the one the photo suggested — which is why the first traced attempt looked flat.",
     exampleGu: "એક બ્રાઇડલ પેનલ ફોટો અને કાપડના નમૂના સાથે આવી, ફાઇલ વગર. ફિઝિકલ પીસ પરથી વાંચતાં ખબર પડી કે એમાં ત્રણ સ્ટિચ ટાઇપ છે, ફોટો પરથી લાગતું હતું એમ એક નહીં — એટલે જ પહેલો ટ્રેસ કરેલો પ્રયાસ સપાટ લાગતો હતો."
   },
@@ -211,6 +229,8 @@ export const machineNotes: MachineNote[] = [
     ],
     detailEn: "The fastest way to learn all three is to run one design badly on purpose: no underlay, then too much density, then the fill turned ninety degrees. Three ruined samples teach more than three finished ones.",
     detailGu: "ત્રણેય શીખવાની સૌથી ઝડપી રીત એ છે કે એક ડિઝાઇન જાણી જોઈને ખરાબ ચલાવો: પહેલાં અન્ડરલે વગર, પછી વધુ પડતી ડેન્સિટી સાથે, પછી ફિલ નેવું ડિગ્રી ફેરવીને. ત્રણ બગડેલા સેમ્પલ ત્રણ સારા સેમ્પલ કરતાં વધારે શીખવે છે.",
+    issueEn: "Learning order",
+    issueGu: "શીખવાનો ક્રમ",
     exampleEn: "A design student who could draw well found her first stitch-out flat and lifeless. The drawing was fine; every fill ran in the same direction, so the whole piece caught the light as one dull sheet.",
     exampleGu: "સરસ દોરી શકતી એક ડિઝાઇન સ્ટુડન્ટને પોતાનો પહેલો સ્ટિચ-આઉટ સપાટ અને નિર્જીવ લાગ્યો. ડ્રોઇંગ બરાબર હતું; પણ દરેક ફિલ એક જ દિશામાં ચાલતું હતું, એટલે આખો પીસ એક ફિક્કી ચાદરની જેમ પ્રકાશ ઝીલતો હતો."
   },
@@ -241,6 +261,8 @@ export const machineNotes: MachineNote[] = [
     ],
     detailEn: "Test on the full length, not on a 10cm swatch. A swatch cannot show you an error that only becomes visible after twenty repeats, which is exactly the error that ruins a dupatta.",
     detailGu: "10 સેમીના નમૂના પર નહીં, આખી લંબાઈ પર ટેસ્ટ કરો. વીસ રિપીટ પછી જ દેખાય એવી ભૂલ નમૂનો બતાવી શકતો નથી — અને દુપટ્ટો બગાડતી ભૂલ બરાબર એ જ હોય છે.",
+    issueEn: "Registration",
+    issueGu: "રજિસ્ટ્રેશન",
     exampleEn: "A repeat border drifted visibly across a dupatta length. The travel order let the hoop shift before the design returned to the border line. Re-sequenced so the border completes in one direction, with one extra hold point in the frame, and both ends matched.",
     exampleGu: "દુપટ્ટાની લંબાઈમાં રિપીટ બોર્ડર દેખીતી રીતે ખસી ગઈ. ડિઝાઇન બોર્ડર લાઇન પર પાછી આવે એ પહેલાં ટ્રાવેલ ઓર્ડરે હૂપને ખસવા દીધું. બોર્ડર એક જ દિશામાં પૂરી થાય એ રીતે ફરી ગોઠવ્યું, ફ્રેમમાં એક વધારાનો હોલ્ડ પોઇન્ટ મૂક્યો, અને બંને છેડા સરખા આવ્યા."
   },
@@ -271,6 +293,8 @@ export const machineNotes: MachineNote[] = [
     ],
     detailEn: "Density and cost are the same conversation. Stitch count drives machine time, and machine time is what a job is quoted on — so a design that runs 20% denser than it needs is 20% less profitable on every piece, forever.",
     detailGu: "ડેન્સિટી અને ખર્ચ એક જ વાત છે. સ્ટિચ કાઉન્ટ પરથી મશીન ટાઇમ નક્કી થાય છે, અને જોબનો ભાવ મશીન ટાઇમ પરથી અપાય છે — એટલે જરૂર કરતાં 20% વધારે ગાઢ ડિઝાઇન દરેક પીસ પર, હંમેશ માટે, 20% ઓછો નફો આપે છે.",
+    issueEn: "Density",
+    issueGu: "ડેન્સિટી",
     exampleEn: "A file with satin gapping on its widest columns was 'fixed' by raising density across the whole design. The gaps closed, the fabric stiffened, the run slowed, and the actual answer was to split two columns.",
     exampleGu: "સૌથી પહોળા કોલમમાં સાટિન ગેપ પડતું હતું, અને આખી ડિઝાઇનની ડેન્સિટી વધારીને એને 'સુધારી' દેવાયું. ગેપ બંધ થયા, કાપડ કડક થયું, રન ધીમો પડ્યો — અને સાચો જવાબ ફક્ત બે કોલમ વિભાજિત કરવાનો હતો."
   },
@@ -301,6 +325,8 @@ export const machineNotes: MachineNote[] = [
     ],
     detailEn: "Appliqué and 3D work make this obvious fastest, because a raised area with the wrong direction reads as a mistake rather than as depth. Beginners usually under-vary direction, never over-vary it.",
     detailGu: "એપ્લિક અને 3D કામમાં આ સૌથી ઝડપથી સમજાય છે, કારણ કે ખોટી દિશાવાળો ઊપસેલો ભાગ ઊંડાણને બદલે ભૂલ જેવો દેખાય છે. બિગિનર્સ સામાન્ય રીતે દિશા ઓછી બદલે છે, વધારે ક્યારેય નહીં.",
+    issueEn: "Stitch direction",
+    issueGu: "સ્ટિચ ડિરેક્શન",
     exampleEn: "A motif with three overlapping petals looked like one blob until the middle petal was turned thirty degrees. Nothing else changed — no outline, no colour, no density.",
     exampleGu: "ત્રણ એકબીજા પર ચઢેલી પાંખડીવાળું મોટિફ એક ગઠ્ઠા જેવું લાગતું હતું, જ્યાં સુધી વચલી પાંખડી ત્રીસ ડિગ્રી ફેરવી નહીં. બીજું કશું બદલ્યું નહીં — આઉટલાઇન નહીં, રંગ નહીં, ડેન્સિટી નહીં."
   }
