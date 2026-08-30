@@ -452,7 +452,7 @@ Update this table after every completed/merged phase.
 | 4 | Proof ecosystem: work, stories, reviews, trainers | ✅ Complete + merged | PR #15 — `build` + Cloudflare Workers Builds green |
 | 5 | Mobile conversion / call / directions / demo | ✅ Complete + merged | PR #16 — `build` + Cloudflare Workers Builds green |
 | 6 | Studio / B2B commercial embroidery | ✅ Complete + merged | PR #17 — `build` + Cloudflare Workers Builds green |
-| 7 | Machine Notes / social-to-search content | 🚧 In progress | branch `phase-7/machine-notes` |
+| 7 | Machine Notes / social-to-search content | ✅ Complete + merged | PR #18 — `build` + Cloudflare Workers Builds green |
 | 8 | Local SEO / structured data / measurement | ⏳ Pending | |
 | 9 | Accessibility / performance / responsive hardening | ⏳ Pending | |
 | 10 | Final whole-site creative polish | ⏳ Pending | |
