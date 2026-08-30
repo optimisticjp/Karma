@@ -129,7 +129,10 @@ export function ManualEnquiryForm({
         <div />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
+        <Field label={copy.fatherName} htmlFor="manual-enquiry-father-name">
+          <input id="manual-enquiry-father-name" name="fatherName" className="input" maxLength={160} />
+        </Field>
         <Field label={copy.guardianName} htmlFor="manual-enquiry-guardian-name">
           <input id="manual-enquiry-guardian-name" name="guardianName" className="input" maxLength={160} />
         </Field>
@@ -137,6 +140,17 @@ export function ManualEnquiryForm({
           <input id="manual-enquiry-guardian-phone" name="guardianPhone" className="input" inputMode="tel" maxLength={20} />
         </Field>
       </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Field label={copy.referenceName} htmlFor="manual-enquiry-reference-name">
+          <input id="manual-enquiry-reference-name" name="referenceName" className="input" maxLength={160} />
+        </Field>
+        <Field label={copy.referencePhone} htmlFor="manual-enquiry-reference-phone">
+          <input id="manual-enquiry-reference-phone" name="referencePhone" className="input" inputMode="tel" maxLength={20} />
+        </Field>
+        <div />
+      </div>
+      <p className="form-note">{copy.guardianEnquiryHint}</p>
 
       <Field label={copy.enquiryNote} htmlFor="manual-enquiry-note">
         <textarea id="manual-enquiry-note" name="goal" className="input min-h-28" maxLength={2000} placeholder={copy.enquiryNotePlaceholder} />

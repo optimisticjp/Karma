@@ -5,12 +5,21 @@ import { desc, eq } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { authorizeAction } from "@/lib/auth/guard";
 import { auditValues, FEE_AUDIT_ACTIONS } from "@/lib/admin/audit";
-import { validateFeeRecord } from "@/lib/admin/fees";
+import { validateAgreementUpdate, validateFeeRecord } from "@/lib/admin/fees";
 import { pad } from "@/lib/utils";
 
 export type FeeState = {
   status: "idle" | "success" | "error";
-  message: null | "saved" | "denied" | "invalid" | "missing" | "overpaid" | "generic";
+  message:
+    | null
+    | "saved"
+    | "agreementSaved"
+    | "denied"
+    | "invalid"
+    | "missing"
+    | "overpaid"
+    | "belowReceived"
+    | "generic";
 };
 
 const ok = (message: FeeState["message"]): FeeState => ({ status: "success", message });
@@ -74,4 +83,77 @@ export async function addFeeRecordAction(_prev: FeeState, formData: FormData): P
   revalidatePath("/admin/students");
   revalidatePath("/admin");
   return ok("saved");
+}
+
+/**
+ * Changes what an EXISTING student agreed to pay.
+ *
+ * The agreement is a snapshot taken when they joined, precisely so that editing
+ * a course's fee cannot reprice them. This is the one supported way to move it,
+ * and it is deliberately awkward: a mandatory reason, a full before/after audit
+ * row, and a refusal to set a total below what has already been received.
+ */
+export async function updateAgreementAction(
+  _prev: FeeState,
+  formData: FormData
+): Promise<FeeState> {
+  const auth = await authorizeAction({ permission: "fees.manage" });
+  if (!auth.ok) return fail("denied");
+  const parsed = validateAgreementUpdate(Object.fromEntries(formData.entries()));
+  if (!parsed.ok) return fail("invalid");
+  const db = getDb();
+  if (!db) return fail("generic");
+
+  try {
+    const d = parsed.value;
+    const before = await db
+      .select({
+        id: schema.enrollments.id,
+        agreedFeeTotal: schema.enrollments.agreedFeeTotal,
+        agreedAdmissionAmount: schema.enrollments.agreedAdmissionAmount,
+        agreedBalanceDueOn: schema.enrollments.agreedBalanceDueOn,
+        agreedCourseName: schema.enrollments.agreedCourseName
+      })
+      .from(schema.enrollments)
+      .where(eq(schema.enrollments.id, d.enrollmentId))
+      .limit(1);
+    if (!before[0]) return fail("missing");
+
+    /* Lowering the agreed total below money already banked would make the
+       ledger say the studio owes a refund it has not agreed to. */
+    const paid = await db
+      .select({ received: schema.feeRecords.received })
+      .from(schema.feeRecords)
+      .where(eq(schema.feeRecords.enrollmentId, d.enrollmentId));
+    const received = paid.reduce((sum, row) => sum + row.received, 0);
+    if (d.agreedFeeTotal != null && d.agreedFeeTotal < received) return fail("belowReceived");
+
+    const next = {
+      agreedFeeTotal: d.agreedFeeTotal,
+      agreedAdmissionAmount: d.agreedAdmissionAmount,
+      agreedBalanceDueOn: d.agreedBalanceDueOn
+    };
+
+    await db.transaction(async (tx) => {
+      await tx.update(schema.enrollments).set(next).where(eq(schema.enrollments.id, d.enrollmentId));
+      await tx.insert(schema.auditLogs).values(
+        auditValues({
+          actor: String(auth.session.staff.id),
+          action: FEE_AUDIT_ACTIONS.agreementUpdated,
+          entity: "enrollment",
+          entityId: d.enrollmentId,
+          oldValue: before[0],
+          newValue: next,
+          reason: d.reason
+        })
+      );
+    });
+  } catch (error) {
+    console.error("[fees] agreement update failed", error instanceof Error ? error.message : "unknown");
+    return fail("generic");
+  }
+
+  revalidatePath("/admin/fees");
+  revalidatePath("/admin/students");
+  return ok("agreementSaved");
 }

@@ -44,6 +44,9 @@ export default async function StudentsPage({ searchParams }: Props) {
       isMinor: schema.students.isMinor,
       photoConsent: schema.students.photoConsent,
       notes: schema.students.notes,
+      fatherName: schema.students.fatherName,
+      referenceName: schema.students.referenceName,
+      referencePhone: schema.students.referencePhone,
       createdAt: schema.students.createdAt
     }).from(schema.students).orderBy(desc(schema.students.createdAt)).limit(300),
     db.select({
@@ -144,6 +147,9 @@ export default async function StudentsPage({ searchParams }: Props) {
     isMinor: selected.isMinor,
     photoConsent: selected.photoConsent,
     notes: selected.notes,
+    fatherName: selected.fatherName,
+    referenceName: selected.referenceName,
+    referencePhone: selected.referencePhone,
     guardianName: guardian?.name ?? null,
     guardianPhone: guardian?.phone ?? null,
     guardianRelation: guardian?.relation ?? null

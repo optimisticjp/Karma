@@ -8,6 +8,8 @@ import { site, waLink } from "@/lib/site";
 import { pad } from "@/lib/utils";
 import { apiError, escapeHtml, getIp, newRequestId, rateLimit } from "@/lib/api";
 import { demoModeAllowed, isProduction } from "@/lib/env";
+import { demoSlotFor, getCourseConfig, scheduleOptionFor } from "@/lib/course/config";
+import { isKnownTermsVersion } from "@/content/admission-terms";
 
 const waMsg = (ref: string) =>
   `Hi! My admission reference is ${ref}. Please confirm my seat. / મારો એડમિશન રેફરન્સ ${ref} છે, સીટ કન્ફર્મ કરશો.`;
@@ -53,6 +55,28 @@ export async function POST(req: NextRequest) {
   }
   const ts = await verifyTurnstile(d.turnstileToken, ip);
   if (!ts.ok) return apiError("turnstile", 403, requestId);
+
+  /**
+   * The admission norms the applicant accepted must be a version this build
+   * knows about. A submission quoting an unknown version would record consent
+   * to text nobody can produce afterwards, which is worse than no consent.
+   */
+  if (!isKnownTermsVersion(d.termsVersion)) return apiError("validation", 400, requestId);
+
+  /**
+   * Slot keys are validated against THIS COURSE'S OWN options, resolved through
+   * the same function the admission page used to render them. Accepting an
+   * arbitrary key would have the studio receive a request for a batch time it
+   * does not run.
+   */
+  const config = await getCourseConfig(d.courseSlug);
+  if (!config) return apiError("validation", 400, requestId);
+  if (config.termsVersion !== d.termsVersion) return apiError("validation", 400, requestId);
+
+  const schedule = scheduleOptionFor(config, d.preferredSchedule);
+  if (d.preferredSchedule && !schedule) return apiError("validation", 400, requestId);
+  const demo = demoSlotFor(config, d.demoSlot);
+  if (d.demoSlot && !demo) return apiError("validation", 400, requestId);
 
   const db = getDb();
   if (!db) {
@@ -115,14 +139,23 @@ export async function POST(req: NextRequest) {
           locale: d.locale,
           courseSlug: d.courseSlug,
           preferredTiming: d.preferredTiming,
+          preferredSchedule: schedule?.key ?? null,
+          demoSlot: demo?.key ?? null,
           experience: d.experience,
           occupation: d.occupation,
           area: d.area,
           goal: d.goal || null,
           heardFrom: d.heardFrom || null,
           ageBand: d.ageBand,
+          fatherName: d.fatherName || null,
+          /* Guardian NAME is still only asked of under-18 applicants; the
+             guardian PHONE is required of everyone (owner decision). */
           guardianName: d.ageBand === "under18" ? d.guardianName || null : null,
-          guardianPhone: d.ageBand === "under18" ? d.guardianPhone || null : null,
+          guardianPhone: d.guardianPhone,
+          referenceName: d.referenceName || null,
+          referencePhone: d.referencePhone ? d.referencePhone.replace(/[^\d]/g, "").replace(/^91(?=\d{10}$)/, "") : null,
+          termsVersion: d.termsVersion,
+          termsAcceptedAt: now,
           privacyConsentAt: now,
           commsConsentAt: now,
           utmSource: d.utmSource || null,
@@ -152,9 +185,13 @@ export async function POST(req: NextRequest) {
           ${row("Name", d.fullName)}
           <tr><td><b>WhatsApp</b></td><td><a href="https://wa.me/91${escapeHtml(d.whatsapp)}">${escapeHtml(d.whatsapp)}</a></td></tr>
           ${row("Course", d.courseSlug)}
-          ${row("Timing", d.preferredTiming)}
+          ${row("Timing", schedule ? `${schedule.startTime}-${schedule.endTime}` : d.preferredTiming)}
+          ${demo ? row("Demo preferred", `${demo.startTime}-${demo.endTime}`) : ""}
           ${row("Age band", d.ageBand)}
-          ${d.ageBand === "under18" ? row("Guardian", `${d.guardianName} (${d.guardianPhone})`) : ""}
+          <tr><td><b>Parent / guardian</b></td><td><a href="https://wa.me/91${escapeHtml(d.guardianPhone)}">${escapeHtml(d.guardianPhone)}</a>${d.guardianName ? ` — ${escapeHtml(d.guardianName)}` : ""}</td></tr>
+          ${d.fatherName ? row("Father", d.fatherName) : ""}
+          ${d.referenceName || d.referencePhone ? row("Reference", `${d.referenceName ?? ""} ${d.referencePhone ?? ""}`.trim()) : ""}
+          ${row("Admission norms", `accepted, version ${d.termsVersion}`)}
           ${row("Occupation", d.occupation)}
           ${row("Experience", d.experience)}
           ${row("Area", d.area)}

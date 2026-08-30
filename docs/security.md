@@ -2,15 +2,35 @@
 
 ## Data we hold (Phase 1)
 - Admission applications: name, WhatsApp, optional email, course/timing
-  choices, age band, occupation, experience, area, optional note, guardian
-  name+phone for minors, consent timestamps, UTM tags.
+  choices, the chosen timetable and free-demo slot, age band, occupation,
+  experience, area, optional note, **a parent/guardian mobile for every
+  applicant**, a guardian name for minors, an optional father's name, an
+  optional reference name and mobile, consent timestamps, the accepted
+  admission-norms version and its acceptance time, UTM tags.
 - Design briefs: contact + project details, files in private R2.
 
 ## DPDP Act 2023 alignment (review with counsel before launch)
 - **Consent:** two explicit checkboxes on the form; timestamps stored
   (`privacy_consent_at`, `comms_consent_at`), not booleans alone.
-- **Minors:** under-18 requires guardian name + phone at submission; the
+- **Minors:** under-18 requires a guardian name in addition to the phone; the
   guardian fields are enforced server-side (zod superRefine), not just UI.
+- **A third-party contact on every application (2026-08-30).** The owner now
+  requires a parent/guardian mobile from every applicant, not only minors. Two
+  DPDP consequences follow, and neither is decorative. First, the site is
+  collecting a number belonging to **someone who is not filling in the form**:
+  `/privacy` must say plainly that an applicant supplies a parent or guardian's
+  number and what it is used for, and a data request about that number has to be
+  answerable. Second, it widens what the weekly backup artifact contains —
+  `docs/operations.md` already flags those artifacts as PII-bearing. **Review
+  both with counsel before launch**, alongside the retention period.
+- **Consent is versioned.** Acceptance of the institute's admission norms is
+  stored as a version number plus a timestamp, and a submission quoting a
+  version this build does not know is rejected. Consent to text that cannot be
+  reproduced afterwards is not consent. Published versions are immutable
+  (`src/content/admission-terms.ts`); a rule change is a new version. This is
+  the "consent text versioning" item that was previously listed as a known TODO
+  — for admission norms. The privacy and communications consents are still a
+  bare timestamp with no version attached.
 - **Purpose limitation:** data is used to respond to the enquiry. No ads, no
   resale; stated plainly in `/privacy`.
 - **Data requests:** footer "Data request" mailto; commit to a response SLA

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AdmissionForm, type AdmissionContext } from "@/components/forms/AdmissionForm";
-import { coursesByFamily } from "@/content/courses";
+import { AdmissionNorms } from "@/components/site/AdmissionNorms";
+import { getPublicCourseConfigs } from "@/lib/course/config";
+import { CURRENT_TERMS_VERSION } from "@/content/admission-terms";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { Icon } from "@/components/ui/Icon";
 import { pageMeta } from "@/lib/seo";
@@ -16,7 +18,15 @@ export async function generateMetadata({
   return pageMeta({ locale, path: "/admission", title: t("title"), description: t("description") });
 }
 
-/** Context-preserving entry (audit fix): course/batch CTAs land preselected. */
+/**
+ * Context-preserving entry (audit fix): course/batch CTAs land preselected.
+ *
+ * Dynamic because the timetable and free-demo slots come from the database —
+ * the same reason the course detail page is. A staff edit to a course's batch
+ * times reaches this form on the next request rather than at the next deploy.
+ */
+export const dynamic = "force-dynamic";
+
 export default async function AdmissionFormPage({
   params,
   searchParams
@@ -27,13 +37,24 @@ export default async function AdmissionFormPage({
   const { locale } = await params;
   const sp = await searchParams;
   setRequestLocale(locale);
-  const t = await getTranslations("admissionForm");
+  const [t, tn] = await Promise.all([
+    getTranslations("admissionForm"),
+    getTranslations("admissionForm.norms")
+  ]);
 
-  const options = coursesByFamily.map((c) => ({
+  /**
+   * The catalogue WITH each course's timetable and free-demo slots, resolved
+   * through the same function the admission API validates against — so the
+   * form can never offer a slot the server would reject, and the server can
+   * never reject a slot the form offered.
+   */
+  const configs = await getPublicCourseConfigs();
+  const options = configs.map((c) => ({
     slug: c.slug,
     nameEn: c.nameEn,
     nameGu: c.nameGu,
-    family: c.family
+    scheduleOptions: c.operations.scheduleOptions,
+    demoSlots: c.operations.demo?.slots ?? []
   }));
 
   const context: AdmissionContext = {
@@ -72,10 +93,24 @@ export default async function AdmissionFormPage({
       <section className="section">
         <div className="container-site">
           <div className="reading-shell">
-            <AdmissionForm courses={options} context={context} />
+            <AdmissionForm
+              courses={options}
+              context={context}
+              termsVersion={CURRENT_TERMS_VERSION}
+              normsHref="#admission-norms"
+            />
           </div>
         </div>
       </section>
+
+      <AdmissionNorms
+        version={CURRENT_TERMS_VERSION}
+        locale={locale === "gu" ? "gu" : "en"}
+        title={tn("title")}
+        intro={tn("intro")}
+        languageNote={tn("languageNote")}
+        declarationLabel={tn("declarationLabel")}
+      />
     </>
   );
 }

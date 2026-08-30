@@ -68,8 +68,11 @@ describe("admissions CRM validation", () => {
         goal: "Wants to learn for home business",
         heardFrom: "walk_in",
         ageBand: "26-40",
+        fatherName: null,
         guardianName: null,
         guardianPhone: null,
+        referenceName: null,
+        referencePhone: null,
         assignedTo: 1,
         nextFollowUp: "2026-09-01"
       }

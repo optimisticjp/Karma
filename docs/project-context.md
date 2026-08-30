@@ -1066,7 +1066,21 @@ The Admissions CRM is the console's front door. The public
 - a minimum fill-time check,
 - Turnstile server verification when activated (fail-closed in production),
 - strict zod schemas and Indian mobile normalisation (`src/lib/phone.ts`),
-- guardian name + phone enforced **server-side** for under-18 applicants,
+- **a parent/guardian mobile required of EVERY applicant** (owner decision,
+  2026-08-30), enforced server-side, normalised the same way as the student's
+  own and rejected when it is merely the student's number again; the guardian
+  *name* is still asked only of under-18 applicants,
+- an optional **reference** name and mobile, and an optional father's name,
+- **acceptance of the versioned admission norms**, stored as
+  `terms_version` + `terms_accepted_at` — a submission quoting a version this
+  build does not know is rejected, because consent to text nobody can produce
+  afterwards is worse than no consent,
+- a **timetable slot** and a **free-demo slot** chosen from the course's own
+  options, validated in the route against the same resolver
+  (`src/lib/course/config.ts`) the page used to render them — so the form can
+  never offer a slot the server rejects, and the studio never receives a request
+  for a batch time it does not run. The legacy `preferred_timing`
+  (morning/evening) is **derived** from the chosen slot rather than asked twice,
 - two explicit consent checkboxes stored as **timestamps**
   (`privacy_consent_at`, `comms_consent_at`), not booleans,
 - a client-generated idempotency key, so a retry returns the existing reference
@@ -1077,9 +1091,36 @@ The Admissions CRM is the console's front door. The public
   with `role="alert"`, focus moved to the first invalid field, live-region step
   announcements.
 
+**The free-demo slots are preferences, not inventory.** Karma keeps no per-date
+demo capacity. The form says so, and no seat count, booking language or
+confirmation is offered anywhere near them.
+
+The full admission norms render on `/admission` as a server component in a
+native `<details>`, not as props into the client form: fifteen clauses in two
+languages is several kilobytes for a checkbox to reference, and the Worker has a
+size budget. The checkbox links to them.
+
 In the console: enquiry → follow-up notes → status transitions → direct
 admission. **Staff can create an admission by hand** for a walk-in or a phone
 call; the website form is never a prerequisite.
+
+### Where the guardian rule bites, and where it deliberately does not
+
+| Surface | Guardian mobile |
+| --- | --- |
+| Public `/admission` form | **Required** |
+| Console **direct admission** (`validateDirectAdmission`) | **Required** |
+| Console **student edit** (`validateStudentInput` alone) | Optional |
+| Console **manual enquiry** | Optional, but kept whenever staff have it |
+
+The asymmetry is deliberate and tested. The rule bites where the commitment is
+made. The edit form also has to correct records admitted before the rule
+existed, and a validator that refuses to save an old record is a validator that
+stops staff fixing a typo. The manual enquiry is a member of staff writing down
+a call that is happening right now; refusing to save the lead because the caller
+has not given a second number yet would lose the lead, which is the opposite of
+what the rule is for. (It *does* now keep a guardian number at any age — the old
+code discarded one unless the caller was under 18.)
 
 ---
 
@@ -1106,6 +1147,41 @@ questions (§39, Q6/Q15).
 
 An **offline** fee ledger. Fees are discussed in person or on WhatsApp and
 recorded afterwards.
+
+### The agreement is a snapshot; the status is derived
+
+Two rules, and they solve two different failures.
+
+**The agreement lives on the enrolment**, copied from the course at the moment
+of joining (`agreed_fee_total`, `agreed_admission_amount`,
+`agreed_balance_due_on`, `agreed_duration_months`, `agreed_course_name`,
+`terms_version`, `terms_accepted_at`) and never recalculated from the course
+again. Raising a course to ₹40,000 next year must not silently increase what
+every current student owes; the first anyone would know is a parent at the front
+desk holding a receipt that no longer adds up. Changing an existing student's
+agreement is a separate, deliberate act — `updateAgreementAction`, `fees.manage`,
+a **mandatory reason**, a full before/after audit row, and a refusal to set a
+total below money already received.
+
+**The status is never stored.** `summariseFees()` (`src/lib/admin/fee-status.ts`)
+derives it, purely and testably:
+
+```
+net      = agreed total − discount
+received = Σ fee_records.received
+balance  = max(0, net − received)
+status   = unpaid | partial | paid
+```
+
+A `status` column would be a second source of truth for a number already in the
+ledger, and the two would disagree the first time a receipt was corrected.
+Nobody can mark a student "paid" without the money being recorded. The summary
+also reports whether the **admission amount** has been met and whether the
+balance is **overdue** against `Asia/Kolkata` today.
+
+An enrolment created before the snapshot existed falls back to its ledger
+entry's own `courseFee`, so a historical record keeps showing the number it was
+entered with rather than jumping to today's course fee.
 
 **There is no payment gateway and there will not be one** unless the owner
 explicitly changes this. No checkout, no payment links, no UPI payment requests,
@@ -1345,8 +1421,11 @@ Full detail: `docs/security.md`. The shape of it:
 Known security TODOs (not regressions — recorded, not yet done): audit entries
 for login success/failure; signed time-limited downloads for brief files and
 certificate PDFs; WAF rules on `/api/*` and `/admin/*`; a documented ownership-
-transfer procedure; encrypted `pg_dump` backups to a private R2 bucket; consent
-text versioning and a notification outbox.
+transfer procedure; encrypted `pg_dump` backups to a private R2 bucket; and a
+notification outbox. **Consent-text versioning is now half done**: the admission
+norms are versioned and an application records the version it accepted, while
+the privacy and communications consents are still a bare timestamp with no
+version attached.
 
 ---
 
@@ -1992,30 +2071,36 @@ most expensive thing a future session can do here.
     ₹25,000 / ₹10,000, four timings, a two-day free demo. Do not apply them to
     another course, and do not restate the duration in weeks.
 19. **A published admission-terms version is immutable.** A rule change is a new
-    version, never an edit to the old one.
+    version, never an edit to the old one. An admission records the version it
+    accepted and the time it accepted it.
 20. **The enrolment agreement is a snapshot, not a view of the course.** Editing
-    a course never reprices an existing student.
-21. **Team administration is owner-only with no permission key.**
-22. **Operational records are archived by default.** ⚠ The owner replaced the
+    a course never reprices an existing student. Fee **status** is derived from
+    the ledger and is never stored — do not add a `status` column to
+    `fee_records` or `enrollments`.
+21. **A parent/guardian mobile is required on the public admission form and on a
+    console direct admission**, and is deliberately optional on the student edit
+    form and the manual enquiry. Read §22 before "fixing" the asymmetry.
+22. **Team administration is owner-only with no permission key.**
+23. **Operational records are archived by default.** ⚠ The owner replaced the
     older *blanket* "never hard-deleted" rule on 2026-08-30: permanent deletion
     now exists, Owner-only, behind a dependency preflight, a typed confirmation
     and an audit tombstone written before the row disappears. Archive remains
     the ordinary path; deletion is the deliberate exception. Audit history and
     the single Owner identity stay undeletable. See
     `docs/admin-architecture.md`.
-23. **`/admin` stays outside the `[locale]` segment**; public URLs stay
+24. **`/admin` stays outside the `[locale]` segment**; public URLs stay
     always-prefixed with no browser-language auto-redirect.
-24. **The design system is Screen to Stitch (v3)** — not a generic system, and
+25. **The design system is Screen to Stitch (v3)** — not a generic system, and
     not the one belonging to the vendored skill template.
-25. **`premium.css` stays unlayered**, and design token *names* stay frozen —
+26. **`premium.css` stays unlayered**, and design token *names* stay frozen —
     `globals.css` is shared with Karma Console.
-26. **`staff_role` enum values stay in order**, `uq_staff_console_email` keeps
+27. **`staff_role` enum values stay in order**, `uq_staff_console_email` keeps
     its `role <> 'trainer'` predicate, and `staff.auth_user_id` stays
     `varchar(64)`.
-27. **`writeAudit()` keeps never throwing**, and the `karma_staff_invariants`
+28. **`writeAudit()` keeps never throwing**, and the `karma_staff_invariants`
     trigger is never dropped to make a migration easier — the trigger is the
     guarantee; the application checks are only the message.
-28. **The mobile bar stays two actions, not navigation**, and its 1280px
+29. **The mobile bar stays two actions, not navigation**, and its 1280px
     breakpoint stays paired with the header's.
 
 ---
