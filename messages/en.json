@@ -750,6 +750,27 @@
       "Machine or file format you need, if known"
     ],
     "confidential": "Design files are stored privately and are never made public. Ownership of commissioned design transfers to you on delivery and payment.",
+    "chain": {
+      "eyebrow": "How the studio works",
+      "h2": "Reference to machine-ready, in that order",
+      "sub": "Whatever you bring — a photograph, a physical sample, an old file that no longer runs — it goes through the same five stages. Nothing is quoted before we have seen it, and nothing ships before a sample has been stitched.",
+      "railLabel": "Studio production stages",
+      "s1Label": "Reference",
+      "s1Caption": "What you already have.",
+      "s1Detail": "A photograph, a swatch, a garment, an old file — or just a description. The first job is to work out what the piece actually is: technique, scale, ground, and what the cloth will allow. Send whatever you have; missing pieces are questions, not blockers.",
+      "s2Label": "Digitising",
+      "s2Caption": "The file built from scratch.",
+      "s2Detail": "The design is rebuilt as stitch types, underlay, density, direction and travel order — not traced. A file built from a picture runs like a picture. This is where a design either becomes production-ready or inherits every fault the reference had.",
+      "s3Label": "Sample",
+      "s3Caption": "Stitched before anything runs.",
+      "s3Detail": "You see a stitched sample, on cloth, before the full run begins. On screen a design is an opinion; off the machine it is a fact, and that is the only version worth approving.",
+      "s4Label": "Correction",
+      "s4Caption": "The file changes, not the machine.",
+      "s4Detail": "Puckering, gaps, registration, thread breaks: each one is traced to the decision that caused it and fixed upstream in the file. Slowing the head down to hide a fault ships the fault anyway, on every run after this one.",
+      "s5Label": "Machine-ready",
+      "s5Caption": "Yours, in the format your machine takes.",
+      "s5Detail": "Files, or finished production embroidery, whichever you came for. Tell us what your machine reads and what your deadline is — we will not guess either, and we do not publish a turnaround we have not agreed with you."
+    },
     "formTitle": "Tell us what you're making",
     "form": {
       "name": "Your name",

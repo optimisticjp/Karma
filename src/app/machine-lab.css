@@ -1771,3 +1771,37 @@
   border-bottom: var(--hairline);
   padding-bottom: 1.125rem;
 }
+
+/* ------------------------------------------------------------------ *
+ * 25. The B2B chain
+ *
+ * A rail stage with no photograph carries a canonical stitch mark
+ * instead. The owner's 32-shot list covers the school, not the studio's
+ * commercial pipeline, so inventing five B2B photo slots would put five
+ * frames on the page that nobody has been briefed to shoot.
+ * ------------------------------------------------------------------ */
+
+.rail-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 5.5rem;
+  border: var(--hairline);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--color-card) 45%, transparent);
+  opacity: 1;
+}
+.rail-stage.is-active .rail-mark {
+  border-color: var(--color-vermilion);
+}
+
+/* The capability grid holds a technique signature rather than a shared family
+   swatch, so a buyer sees what the stitch does and not which of three buckets
+   it sits in. */
+.capability-plate {
+  margin-bottom: 0.75rem;
+  border: var(--hairline);
+  border-radius: 0.5rem;
+  background: var(--color-card);
+  padding: 0.5rem 0.625rem;
+}

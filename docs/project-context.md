@@ -464,6 +464,16 @@ three words by test, with a separate test banning any measurement (RPM, SPM,
 GSM, mm, %) from the notation. The body stays in Manrope / Noto Sans Gujarati;
 mono is for the notation around a note, never the prose inside it.
 
+**B2B Studio (Phase 8).** `<StudioRail>` renders REFERENCE → DIGITISING →
+SAMPLE → CORRECTION → MACHINE-READY on the same `<ProductionRail>` as the
+homepage — the reuse the component's stages-as-a-prop design was for. Those
+stages carry **canonical stitch marks, not photo slots**: the 32-shot list
+covers the school, not the commercial pipeline, so `RailStage.photoId` is
+optional and a mark stands where no photograph is briefed. The page still
+publishes **no turnaround, no file format and no price** — none is confirmed —
+and tests scan both catalogues for delivery windows, file extensions and `₹`.
+No file upload; private file delivery still waits on R2.
+
 **The 32-photograph manifest.** `src/content/photo-manifest.ts` is the typed
 list of every shot on the owner's final brief, with each slot's intrinsic
 dimensions. `<ManifestPhoto id="…">` reserves the photograph's exact aspect
@@ -1748,7 +1758,7 @@ modules are importable in a test runner while the guard stays real in the app.
 `jsx: "preserve"` for Next.js — without the override a test importing a `.tsx`
 component sees raw JSX and fails to parse.
 
-**39 test files, 550 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
+**40 test files, 563 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
 which is the point — the policy survives a refactor:
 
 | Test | Guards |
@@ -1756,6 +1766,7 @@ which is the point — the policy survives a refactor:
 | `i18n-parity` | EN/GU catalogue keys mirror exactly |
 | `machine-lab-system` | the design system v4 foundation: 32-photo manifest, icon family, eleven technique signatures, stitch semantics, motion levels, Gujarati overrides, reduced motion, no new dependency |
 | `machine-lab-shell` | the hero states EMCAD/machine/Surat/demo without photography; one course's facts never become the site's; one continuous thread and one Level-4 moment; the rail never autoplays, loops or needs a drag; bands never re-point the palette; the mobile bar keeps exactly two actions |
+| `machine-lab-studio` | the five-stage chain in order, reusing the homepage rail; drawn marks rather than borrowed photo slots, each used for the thing it means; no turnaround, file format, price, payment provider or upload control |
 | `machine-lab-notes` | the archive notation stays on the notes surfaces only; every note has a short bilingual issue label with no measurement in it; the index is still not a blog; the trade knowledge, course links and no-named-person rule are unchanged |
 | `machine-lab-admission` | every public-form defence still present; no typed value in any analytics call; progressbar semantics kept; the review step does not animate; demo figures render from the verified record and offer nothing bookable; universal actions keep universal icons |
 | `machine-lab-proof` | one shared material wall with exactly one registration mark; reserved slots and the editable gallery stay separate; the BEFORE→LEARNED→NOW arc and its stitch geometry; portraits mapped by slug and never captioned with a person; no job-placement, salary or earnings claim in any story's data |
