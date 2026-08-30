@@ -103,6 +103,7 @@ Cloudflare production deployment currently uses the dashboard command `OPEN_NEXT
 - Navigation and Today at Karma are role/permission-aware. A hidden link is UX only; server guards remain authoritative.
 - **Archive is the ordinary path; permanent deletion is the deliberate exception.** The whole policy is one table — `src/lib/admin/record-actions.ts` — and every module reads it rather than inventing its own. Deletion is **Owner-only** even for an admin holding the module's manage permission, is preceded by a dependency preflight on its own page, needs a typed confirmation and a written reason, and writes its audit tombstone **before** the row disappears. Audit history, attendance evidence, enrolments and staff accounts are never deletable at all. Do not add `onDelete: cascade` to reach past a dependency block.
 - Dates that mean "today" to staff are pinned to `Asia/Kolkata`.
+- **Karma runs on paper too.** Nine A4 sheets (admission form filled and blank, receipt, statement, student record, roster, register, design brief, certificate). Black and white, headings repeat across pages, signature blocks never split, Gujarati never uppercased. See `docs/project-context.md` §29a.
 
 ## Using the installed skills
 `.claude/skills/` holds 322 vendored skills from a shared library. Use them **selectively**: understand the task, decide whether a skill materially helps, invoke only those. Do not activate skills to look thorough, and do not edit an imported skill definition — the next sync overwrites it. Where a skill's generic advice collides with anything above, **the rules above win**. Full guidance, caveats and the sync procedure: `docs/claude-skills.md`.
@@ -122,6 +123,7 @@ Then: **feature branch → PR → CI + Cloudflare preview green → merge.** Do 
 ## Where things live
 - Public pages: `src/app/[locale]/…`
 - Karma Console: `src/app/admin/…` (outside `[locale]`; authenticated pages are dynamic)
+- A4 print sheets: `src/app/admin/(print)/…` — their own route group and stylesheet, no console shell. Every sheet re-checks the permission its data needs; never print an operational screen instead.
 - API: `src/app/api/...`
 - Message copy: `messages/{en,gu}.json`
 - Structured/source fallback content: `src/content/*.ts`

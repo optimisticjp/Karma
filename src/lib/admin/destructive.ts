@@ -31,6 +31,12 @@ type Db = NonNullable<ReturnType<typeof getDb>>;
 /**
  * What would be affected, and what stands in the way.
  *
+ * EVERY entity the policy marks deletable must have a branch here. Without one
+ * the switch falls through to `null`, the action reports "missing", and a
+ * record the policy says is deletable simply refuses — a silent gap rather
+ * than a visible error. `tests/record-actions.test.ts` asserts the two lists
+ * match, because this is exactly the kind of omission a new entity introduces.
+ *
  * Deliberately NOT a cascade. `courses.batches` and `batches.enrollments` are
  * declared `ON DELETE CASCADE` in the schema, so deleting a course really would
  * take every batch, enrolment, attendance record, fee row and certificate under
@@ -206,6 +212,36 @@ export async function preflight(
         .limit(1);
       if (!rows[0]) return null;
       identifier = rows[0].receiptNo ?? `#${rows[0].id}`;
+      break;
+    }
+    case "guardian": {
+      const rows = await db
+        .select({ name: schema.guardians.name, phone: schema.guardians.phone })
+        .from(schema.guardians)
+        .where(eq(schema.guardians.id, id))
+        .limit(1);
+      if (!rows[0]) return null;
+      identifier = rows[0].name;
+      break;
+    }
+    case "application_note": {
+      const rows = await db
+        .select({ id: schema.applicationNotes.id, applicationId: schema.applicationNotes.applicationId })
+        .from(schema.applicationNotes)
+        .where(eq(schema.applicationNotes.id, id))
+        .limit(1);
+      if (!rows[0]) return null;
+      identifier = `#${rows[0].id}`;
+      break;
+    }
+    case "content_item": {
+      const rows = await db
+        .select({ kind: schema.contentItems.kind, slug: schema.contentItems.slug })
+        .from(schema.contentItems)
+        .where(eq(schema.contentItems.id, id))
+        .limit(1);
+      if (!rows[0]) return null;
+      identifier = `${rows[0].kind}/${rows[0].slug}`;
       break;
     }
     case "service_enquiry": {

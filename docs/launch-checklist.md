@@ -44,16 +44,20 @@ every `@id` in `src/lib/schema.ts` derive from `site.url`. So the cutover is:
 **Do not hand-edit URLs anywhere.** If a URL is hardcoded somewhere, that is
 the bug — fix the source rather than the symptom.
 
-**Two places currently break that rule and must be fixed as part of the
-cutover** (found in the 2026-08-30 documentation audit, deliberately not
-changed then):
+~~**Two places currently break that rule and must be fixed as part of the
+cutover**~~ — **both were fixed on 2026-08-30**, so the cutover no longer has to
+carry them:
 
-- `src/app/admin/(console)/certificates/print/[certNo]/page.tsx` hard-codes
-  `https://karma-design-studio.essanciaonline.workers.dev/en/verify/…` for the
-  certificate verification URL instead of deriving it from `site.url`. Every
-  certificate printed after the cutover would carry a `workers.dev` link.
-- `public/llms.txt` hard-codes `karmadesignstudio.in` URLs, so it already
-  disagrees with every other canonical while the site runs on `workers.dev`.
+- The certificate sheet hard-coded
+  `https://karma-design-studio.essanciaonline.workers.dev/en/verify/…`, so every
+  certificate printed after the cutover would have carried a `workers.dev` link
+  on paper, where it cannot be corrected later. It moved to
+  `src/app/admin/(print)/print/certificate/[certNo]/page.tsx` with the A4 print
+  system and now derives from `site.url`; `tests/print-sheets.test.ts` fails if
+  a host is hard-coded there again.
+- `public/llms.txt` hard-coded `karmadesignstudio.in` and listed eight of eleven
+  courses. It is now generated at `src/app/llms.txt/route.ts` from `site.url`
+  and the catalogue.
 
 Fix the source in both — do not paper over either with a redirect.
 
