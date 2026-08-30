@@ -614,6 +614,57 @@ rather than removed: an audit row must keep pointing at a real staff record.
 polish, not construction — see `docs/project-context.md` §§22-29 for what each
 one does and what it still defers.
 
+### Record actions: add · edit · archive · restore · delete (2026-08-30)
+
+The owner replaced the blanket "archive, never hard-delete" rule. One table —
+`src/lib/admin/record-actions.ts` — says which of the five verbs each kind of
+record gets, which permission opens it, who may delete it, how hard the
+confirmation is, and what blocks it. Every module reads that table; none
+invents its own rule, which is the failure this file exists to prevent.
+
+| Record | Add | Edit | Archive / restore | Delete | Blocked by |
+| --- | :-: | :-: | :-: | :-: | --- |
+| Course | ✓ | ✓ | ✓ | Owner · type the slug | batches |
+| Batch | ✓ | ✓ | ✓ | Owner · type the label | enrolments |
+| Student | ✓ | ✓ | ✓ | Owner · type the admission no. | enrolments |
+| Enquiry | ✓ | ✓ | ✓ | Owner · type DELETE | — |
+| Follow-up note | ✓ | — | — | Owner · type DELETE | — |
+| Guardian | ✓ | ✓ | — | Owner · type DELETE | — |
+| Enrolment | ✓ | ✓ | — | **never** | — |
+| Attendance session | ✓ | ✓ | — | Owner · type DELETE, and **not if locked** | — |
+| Attendance mark | — | ✓ | — | **never** | — |
+| Attendance correction | — | — | — | **never** | — |
+| Fee entry | ✓ | — | — | Owner · type DELETE | — |
+| Certificate | ✓ | ✓ | — | Owner · type the cert no., and **revoke it first** | — |
+| Design brief | ✓ | ✓ | — | Owner · type DELETE | — |
+| Content item | ✓ | ✓ | ✓ | Owner · type DELETE | — |
+| Account | ✓ | ✓ | ✓ (deactivate) | **never** | — |
+| Permission grant | ✓ | — | — | **never** | — |
+| Audit entry | — | — | — | **never** | — |
+
+**Deletion is Owner-only**, even for an admin holding every manage permission
+there is: destroying history is not a delegated capability.
+
+**Dependencies block; they do not cascade.** `courses → batches` and
+`batches → enrolments` are `ON DELETE CASCADE` in the schema, so deleting a
+course really would take everything under it. The blocks are what prevent that.
+Never add a cascade to route around one.
+
+**The flow:** authorize → preflight → typed confirmation + written reason →
+**tombstone** → delete, with the last two in one transaction. The audit row is
+written *before* the row disappears, so a failure between them cannot leave a
+deletion with no record of who did it.
+
+Deletion lives on its own page (`/admin/records/[entity]/[id]/delete`,
+`requireOwner`, re-checked as `ownerOnly` in the action) because the operator
+must see the dependency counts before confirming, and a count is a query that
+must not run for every row of every list.
+
+The tombstone keeps a short set of non-secret identifying fields per entity —
+never the whole row, and never a credential (`CLAUDE.md`). An audit table full
+of phone numbers is a second place personal data lives with none of the
+retention thinking the first one gets.
+
 ### Admissions and students: the formal admission record (2026-08-30)
 
 The console record now matches the institute's own printed admission form:
@@ -712,6 +763,27 @@ only as statuses. Admin primitives live in `globals.css`: `.panel`, `.navlink`,
 No charts, no donuts, no gradients, no glassmorphism, no decorative cards, no
 stock photography, no large component framework — the Worker budget and the
 studio's taste point the same way.
+
+**The dense pass (2026-08-30).** The console is used standing up, on a phone,
+between a machine and a counter, and it was built as a page of generous cards
+that showed about three facts per screen at 390px. The operating model it now
+borrows is the merchant app a shop owner actually uses: compact rows, many facts
+visible at once, one status per row, and a record's actions next to that record.
+That is the UX principle — **none of the visual language is borrowed**. Same
+tokens, same one vermilion accent, borders over shadows, status colours used
+only as statuses, and no component kit added to the bundle (the record menu is a
+native `<details>`; the Worker is 1.93 MB gzip against a 3 MB limit).
+
+New primitives in `premium.css`: `.data-list` / `.data-row` (with `__title`,
+`__meta`, `__actions`), `.chip`, `.kv-grid` / `.kv-label` / `.kv-value`,
+`.toolbar` (sticky search and filters), `.tap`, `.rec-menu` (dropdown on a
+laptop, bottom sheet on a phone, from one element), and `.danger-zone`.
+
+**Density and touch size are not in tension**, and the resolution is the thing
+to keep: rows are visually tight (a two-line row is ~64px) while every control
+inside one keeps a ≥44px hit area, using padding that overflows the row instead
+of a taller row. Bottom sheets and the last row of a list respect
+`env(safe-area-inset-bottom)`. `tests/console-density.test.ts` pins both.
 
 Console copy lives in `messages/{en,gu}.json` under `admin`, so the EN/GU parity
 test covers it exactly as it covers the public site. Server components translate

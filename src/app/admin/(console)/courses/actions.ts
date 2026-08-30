@@ -6,6 +6,7 @@ import { getDb, schema } from "@/lib/db";
 import { authorizeAction } from "@/lib/auth/guard";
 import { CATALOG_AUDIT_ACTIONS, auditValues } from "@/lib/admin/audit";
 import { validateBatchInput, validateCourseInput } from "@/lib/admin/course-validation";
+import { parseOperationsForm } from "@/lib/admin/course-operations";
 
 export type CatalogState = {
   status: "idle" | "error" | "success";
@@ -24,6 +25,47 @@ export type CatalogState = {
 
 const err = (message: CatalogState["message"]): CatalogState => ({ status: "error", message });
 const ok = (message: CatalogState["message"]): CatalogState => ({ status: "success", message });
+
+/**
+ * The course fields the console owns, read once so create and update cannot
+ * drift apart — the single most likely way an editable field silently stops
+ * being saved on one of the two paths.
+ */
+function courseFields(formData: FormData) {
+  return {
+    slug: formData.get("slug"),
+    nameEn: formData.get("nameEn"),
+    nameGu: formData.get("nameGu"),
+    family: formData.get("family"),
+    durationWeeks: formData.get("durationWeeks"),
+    durationMonths: formData.get("durationMonths"),
+    software: formData.get("software"),
+    feeTotal: formData.get("feeTotal"),
+    feeAdmission: formData.get("feeAdmission"),
+    feeBalanceDueDays: formData.get("feeBalanceDueDays"),
+    termsVersion: formData.get("termsVersion"),
+    publicVisible: formData.get("publicVisible"),
+    sortOrder: formData.get("sortOrder"),
+    active: formData.get("active")
+  };
+}
+
+/** The bounded lists: timetable rows, demo policy, curriculum, practical. */
+function operationsFields(formData: FormData) {
+  return parseOperationsForm({
+    scheduleStart: formData.getAll("scheduleStart"),
+    scheduleEnd: formData.getAll("scheduleEnd"),
+    demoDays: formData.get("demoDays"),
+    demoHours: formData.get("demoHours"),
+    demoFree: formData.get("demoFree"),
+    demoStart: formData.getAll("demoStart"),
+    demoEnd: formData.getAll("demoEnd"),
+    curriculumEn: formData.get("curriculumEn"),
+    curriculumGu: formData.get("curriculumGu"),
+    practicalEn: formData.get("practicalEn"),
+    practicalGu: formData.get("practicalGu")
+  });
+}
 
 function positiveId(value: FormDataEntryValue | null): number | null {
   const parsed = Number(value);
@@ -85,16 +127,10 @@ export async function createCourseAction(
   const auth = await authorizeAction({ permission: "courses.manage" });
   if (!auth.ok) return err("denied");
 
-  const parsed = validateCourseInput({
-    slug: formData.get("slug"),
-    nameEn: formData.get("nameEn"),
-    nameGu: formData.get("nameGu"),
-    family: formData.get("family"),
-    durationWeeks: formData.get("durationWeeks"),
-    sortOrder: formData.get("sortOrder"),
-    active: formData.get("active")
-  });
+  const parsed = validateCourseInput(courseFields(formData));
   if (!parsed.ok) return err("invalid");
+  const operations = operationsFields(formData);
+  if (!operations) return err("invalid");
 
   const db = getDb();
   if (!db) return err("generic");
@@ -103,7 +139,7 @@ export async function createCourseAction(
     await db.transaction(async (tx) => {
       const inserted = await tx
         .insert(schema.courses)
-        .values(parsed.value)
+        .values({ ...parsed.value, operations })
         .returning({ id: schema.courses.id });
       const courseId = inserted[0]?.id;
       if (!courseId) throw new Error("course insert returned no id");
@@ -137,16 +173,10 @@ export async function updateCourseAction(
   const courseId = positiveId(formData.get("courseId"));
   if (!courseId) return err("invalid");
 
-  const parsed = validateCourseInput({
-    slug: formData.get("slug"),
-    nameEn: formData.get("nameEn"),
-    nameGu: formData.get("nameGu"),
-    family: formData.get("family"),
-    durationWeeks: formData.get("durationWeeks"),
-    sortOrder: formData.get("sortOrder"),
-    active: formData.get("active")
-  });
+  const parsed = validateCourseInput(courseFields(formData));
   if (!parsed.ok) return err("invalid");
+  const operations = operationsFields(formData);
+  if (!operations) return err("invalid");
 
   const db = getDb();
   if (!db) return err("generic");
@@ -159,6 +189,13 @@ export async function updateCourseAction(
         nameGu: schema.courses.nameGu,
         family: schema.courses.family,
         durationWeeks: schema.courses.durationWeeks,
+        durationMonths: schema.courses.durationMonths,
+        software: schema.courses.software,
+        feeTotal: schema.courses.feeTotal,
+        feeAdmission: schema.courses.feeAdmission,
+        feeBalanceDueDays: schema.courses.feeBalanceDueDays,
+        termsVersion: schema.courses.termsVersion,
+        publicVisible: schema.courses.publicVisible,
         sortOrder: schema.courses.sortOrder,
         active: schema.courses.active
       })
@@ -168,7 +205,10 @@ export async function updateCourseAction(
     if (!before[0]) return err("missing");
 
     await db.transaction(async (tx) => {
-      await tx.update(schema.courses).set(parsed.value).where(eq(schema.courses.id, courseId));
+      await tx
+        .update(schema.courses)
+        .set({ ...parsed.value, operations })
+        .where(eq(schema.courses.id, courseId));
       await tx.insert(schema.auditLogs).values(
         auditValues({
           actor: String(auth.session.staff.id),

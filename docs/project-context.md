@@ -420,6 +420,71 @@ Two product rules that shape every module:
 Dates that mean "today" to staff are pinned to **`Asia/Kolkata`**, not to the
 Worker's UTC clock.
 
+### 9a. What may be done to a record (2026-08-30)
+
+The owner replaced the blanket "archive, never hard-delete" rule. Five verbs —
+**add · edit · archive · restore · delete** — and one table decides which of
+them each kind of record gets: `src/lib/admin/record-actions.ts`. Every module
+reads it; none invents its own rule. `tests/record-actions.test.ts` pins it.
+
+Three principles:
+
+1. **Archive is ordinary; deletion is the exception.** Archiving is reversible
+   and loses nothing. Deletion is for a record that should never have existed —
+   a duplicate, a test row, a mistaken entry — not for tidying up.
+2. **Deletion is Owner-only**, even for an admin holding every manage
+   permission there is. Destroying history is not a delegated capability, and
+   the test that asserts this for an admin-with-everything is the most important
+   one in that file.
+3. **Some things are never deletable.** `audit_logs` is the evidence that a
+   deletion happened, so a system that could delete it would have no evidence at
+   the moment it mattered most. `attendance_corrections` and
+   `attendance_records` are the record that a locked register was changed.
+   `enrollments` carry the fee agreement a student signed. Staff accounts are
+   deactivated — audit rows must keep pointing at a real identity, and the
+   `karma_staff_invariants` trigger refuses a DELETE of the owner row whatever
+   the application believes.
+
+**Dependencies block, they do not cascade.** `courses → batches` and
+`batches → enrollments` are declared `ON DELETE CASCADE` in the schema, so
+deleting a course really *would* take every batch, enrolment, attendance record,
+fee row and certificate under it. `RECORD_POLICY[...].blockedBy` is what stops
+that from ever being one click: the operator is shown the counts and has to deal
+with them deliberately. **Never add a cascade to route around a block.**
+
+Two records refuse deletion outright for reasons of their own:
+
+| Record | Refusal |
+| --- | --- |
+| A **locked** attendance session | Locking is the moment a register became a record. Use a correction. |
+| An **un-revoked** certificate | Its verification URL may be with an employer. A 404 reads as a forgery; a revoked certificate reads as what it is. Revoke first. |
+
+**The flow, and the order matters:** authorize → preflight → confirm →
+**write the tombstone** → delete, with the last two in one transaction. Writing
+the audit row afterwards would mean a failure between them left a deletion with
+no record of who did it or what was destroyed.
+
+Deletion goes through its own page — `/admin/records/[entity]/[id]/delete`,
+`requireOwner` at the page and `ownerOnly` again in the action — because the
+operator has to see what depends on the record before confirming, and a
+dependency count is a query that must not run for every row of a list. The
+confirmation is **typed**: the record's own identifier for anything expensive
+(an admission number, a course slug, a certificate number), the word DELETE for
+a row with no dependent history. Typing `KDS-2026-0142` requires having read
+which student this is; typing DELETE only requires wanting to get past a dialog.
+
+**The tombstone is deliberately short.** A handful of non-secret identifying
+fields per entity — never the whole row. An audit table full of phone numbers is
+a second place personal data lives, with none of the retention thinking the
+first one gets. Never a password, token, key or credential of any kind.
+
+**An archived record is out of every operational picker** — the admission batch
+picker, the attendance batch picker, the enquiry course picker and the public
+`/api/batches` feed — and still findable behind an "include archived" toggle on
+its own list. Hiding it permanently would make an archived record
+indistinguishable from a deleted one, which is the distinction the whole model
+is trying to teach.
+
 ---
 
 ## 10. Authentication and staff access

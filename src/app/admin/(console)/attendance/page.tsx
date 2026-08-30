@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
 import { hasPermission } from "@/lib/auth/access";
@@ -31,7 +31,16 @@ export default async function AttendancePage({ searchParams }: Props) {
     courseNameGu: schema.courses.nameGu
   }).from(schema.batches)
     .innerJoin(schema.courses, eq(schema.batches.courseId, schema.courses.id))
-    .where(eq(schema.courses.active, true))
+    /* An archived course or batch is out of every operational picker.
+       Archiving means "not in play", and a register cannot be opened for
+       something that is not being taught. */
+    .where(
+      and(
+        eq(schema.courses.active, true),
+        isNull(schema.courses.archivedAt),
+        isNull(schema.batches.archivedAt)
+      )
+    )
     .orderBy(asc(schema.courses.sortOrder), asc(schema.batches.startDate), asc(schema.batches.startTime));
 
   const requestedBatch = positiveAttendanceId(params.batch);

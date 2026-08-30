@@ -75,6 +75,23 @@ export const CONTENT_AUDIT_ACTIONS = {
   itemArchived: "content.item.archived"
 } as const;
 
+/**
+ * Lifecycle actions that apply to any operational record.
+ *
+ * `deleted` is the tombstone: it is written INSIDE the deleting transaction and
+ * BEFORE the row is removed, so a failure between the two cannot leave a
+ * deletion with no record of who did it or what was destroyed. Its old value
+ * carries a short set of non-secret identifying fields — never a credential of
+ * any kind, and never a full copy of the row, because an audit table full of
+ * personal data is a second place that data lives with none of the retention
+ * thinking the first one gets.
+ */
+export const RECORD_AUDIT_ACTIONS = {
+  archived: "record.archived",
+  restored: "record.restored",
+  deleted: "record.deleted"
+} as const;
+
 export type AuditAction =
   | (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS]
   | (typeof CATALOG_AUDIT_ACTIONS)[keyof typeof CATALOG_AUDIT_ACTIONS]
@@ -84,7 +101,8 @@ export type AuditAction =
   | (typeof FEE_AUDIT_ACTIONS)[keyof typeof FEE_AUDIT_ACTIONS]
   | (typeof CERTIFICATE_AUDIT_ACTIONS)[keyof typeof CERTIFICATE_AUDIT_ACTIONS]
   | (typeof DESIGN_AUDIT_ACTIONS)[keyof typeof DESIGN_AUDIT_ACTIONS]
-  | (typeof CONTENT_AUDIT_ACTIONS)[keyof typeof CONTENT_AUDIT_ACTIONS];
+  | (typeof CONTENT_AUDIT_ACTIONS)[keyof typeof CONTENT_AUDIT_ACTIONS]
+  | (typeof RECORD_AUDIT_ACTIONS)[keyof typeof RECORD_AUDIT_ACTIONS];
 
 export type AuditEntry = {
   /** Staff id of the person acting, or "system" for scripted operations. */

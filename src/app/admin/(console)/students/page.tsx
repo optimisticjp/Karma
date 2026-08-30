@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, or } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
 import { hasPermission } from "@/lib/auth/access";
 import { studentsCopy } from "@/lib/admin/students-copy";
 import { isEnrollmentStatus, positiveId, type EnrollmentStatus } from "@/lib/admin/students";
+import { recordsCopy } from "@/lib/admin/records-copy";
+import { canPerform } from "@/lib/admin/record-actions";
+import { RecordMenu } from "@/components/admin/RecordMenu";
 import {
   AddEnrollmentForm,
   ConvertEnquiryForm,
@@ -16,7 +19,7 @@ import {
   type StudentEditValue
 } from "./StudentForms";
 
-type Props = { searchParams: Promise<{ q?: string; student?: string }> };
+type Props = { searchParams: Promise<{ q?: string; student?: string; archived?: string }> };
 
 export default async function StudentsPage({ searchParams }: Props) {
   const session = await requireAdmin("/admin/students");
@@ -24,12 +27,25 @@ export default async function StudentsPage({ searchParams }: Props) {
   const canManage = hasPermission(session.staff, "students.manage");
   if (!canView) redirect("/admin/no-access?reason=permission");
   const copy = studentsCopy(session.staff.adminLocale);
+  const records = recordsCopy(session.staff.adminLocale);
+  const subject = {
+    role: session.role,
+    has: (permission: Parameters<typeof hasPermission>[1]) => hasPermission(session.staff, permission)
+  };
+  const studentCan = {
+    archive: canPerform(subject, "student", "archive"),
+    restore: canPerform(subject, "student", "restore"),
+    delete: canPerform(subject, "student", "delete")
+  };
   const db = getDb();
   if (!db) return <div className="max-w-[76rem]"><Heading title={copy.title} lede={copy.lede} /><p className="alert alert-error mt-8">Database unavailable.</p></div>;
 
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q.trim().toLowerCase().slice(0, 120) : "";
   const requestedStudent = positiveId(params.student);
+  /* Archived students stay findable — an archived record and a deleted one
+     must never look the same — but they are out of the list by default. */
+  const showArchived = params.archived === "1";
 
   const [studentRows, batchRows, enquiryRows] = await Promise.all([
     db.select({
@@ -44,11 +60,16 @@ export default async function StudentsPage({ searchParams }: Props) {
       isMinor: schema.students.isMinor,
       photoConsent: schema.students.photoConsent,
       notes: schema.students.notes,
+      archivedAt: schema.students.archivedAt,
       fatherName: schema.students.fatherName,
       referenceName: schema.students.referenceName,
       referencePhone: schema.students.referencePhone,
       createdAt: schema.students.createdAt
-    }).from(schema.students).orderBy(desc(schema.students.createdAt)).limit(300),
+    })
+      .from(schema.students)
+      .where(showArchived ? undefined : isNull(schema.students.archivedAt))
+      .orderBy(desc(schema.students.createdAt))
+      .limit(300),
     db.select({
       id: schema.batches.id,
       label: schema.batches.label,
@@ -59,7 +80,15 @@ export default async function StudentsPage({ searchParams }: Props) {
       courseNameGu: schema.courses.nameGu
     }).from(schema.batches)
       .innerJoin(schema.courses, eq(schema.batches.courseId, schema.courses.id))
-      .where(and(eq(schema.courses.active, true), or(eq(schema.batches.status, "open"), eq(schema.batches.status, "started"))))
+      /* Archived courses and batches never appear in an admission picker. */
+      .where(
+        and(
+          eq(schema.courses.active, true),
+          isNull(schema.courses.archivedAt),
+          isNull(schema.batches.archivedAt),
+          or(eq(schema.batches.status, "open"), eq(schema.batches.status, "started"))
+        )
+      )
       .orderBy(asc(schema.courses.sortOrder), asc(schema.batches.startDate), asc(schema.batches.startTime)),
     db.select({ id: schema.applications.id, reference: schema.applications.reference, fullName: schema.applications.fullName, courseSlug: schema.applications.courseSlug })
       .from(schema.applications)
@@ -179,13 +208,30 @@ export default async function StudentsPage({ searchParams }: Props) {
             <form method="get" className="grid gap-2">
               <label className="label" htmlFor="student-search">{copy.search}</label>
               <input id="student-search" name="q" className="input" defaultValue={params.q ?? ""} placeholder={copy.searchPlaceholder} />
+              <label className="choice-chip text-smallmeta w-fit">
+                <input type="checkbox" name="archived" value="1" className="size-4 accent-vermilion" defaultChecked={showArchived} />
+                {records.showArchived}
+              </label>
               <button className="btn btn-secondary" type="submit">{copy.search}</button>
             </form>
-            <div className="grid max-h-[58vh] gap-2 overflow-y-auto pr-1">
+            {/* A dense list: ~64px a student instead of ~92px, so a phone shows
+                nine at a time instead of five, and each row still carries the
+                admission number and the number to call. */}
+            <div className="data-list max-h-[58vh] overflow-y-auto">
               {students.length === 0 ? <p className="empty-state">{copy.empty}</p> : students.map((student) => (
-                <Link key={student.id} href={`/admin/students?student=${student.id}${q ? `&q=${encodeURIComponent(q)}` : ""}`} className={`rounded-[var(--radius-card)] border p-3 ${selectedId === student.id ? "border-vermilion bg-vermilion/5" : "border-rule hover:border-vermilion"}`}>
-                  <p className="font-semibold">{student.fullName}</p>
-                  <p className="form-note mt-1">{student.admissionNo} · {student.phone}</p>
+                <Link
+                  key={student.id}
+                  href={`/admin/students?student=${student.id}${q ? `&q=${encodeURIComponent(q)}` : ""}${showArchived ? "&archived=1" : ""}`}
+                  className={`data-row ${student.archivedAt ? "is-archived" : ""} ${selectedId === student.id ? "bg-vermilion/5" : ""}`}
+                >
+                  <span className="data-row__title">{student.fullName}</span>
+                  {student.archivedAt ? (
+                    <span className="data-row__actions"><span className="chip status-off">{records.archived}</span></span>
+                  ) : null}
+                  <span className="data-row__meta">
+                    <span>{student.admissionNo}</span>
+                    <span>{student.phone}</span>
+                  </span>
                 </Link>
               ))}
             </div>
@@ -198,7 +244,25 @@ export default async function StudentsPage({ searchParams }: Props) {
               <section className="panel">
                 <div className="panel-head flex-wrap gap-4">
                   <div><p className="microlabel">{selected.admissionNo}</p><h2 className="text-h3 mt-1">{selected.fullName}</h2><p className="form-note mt-1"><a href={`https://wa.me/91${selected.whatsapp ?? selected.phone}`}>WhatsApp {selected.whatsapp ?? selected.phone}</a>{selected.email ? ` · ${selected.email}` : ""}</p></div>
-                  <span className="status status-active">{enrollments.some((e) => e.status === "active") ? copy.statuses.active : copy.all}</span>
+                  <div className="flex items-center gap-3">
+                    <span className={`chip ${selected.archivedAt ? "status-off" : "status-active"}`}>
+                      {selected.archivedAt
+                        ? records.archived
+                        : enrollments.some((e) => e.status === "active")
+                          ? copy.statuses.active
+                          : copy.all}
+                    </span>
+                    <RecordMenu
+                      entity="student"
+                      id={selected.id}
+                      label={selected.admissionNo}
+                      archived={Boolean(selected.archivedAt)}
+                      canArchive={studentCan.archive && canManage}
+                      canRestore={studentCan.restore && canManage}
+                      canDelete={studentCan.delete}
+                      copy={records}
+                    />
+                  </div>
                 </div>
                 <div className="panel-body grid gap-6">
                   <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

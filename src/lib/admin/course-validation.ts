@@ -1,3 +1,10 @@
+import { isKnownTermsVersion } from "@/content/admission-terms";
+import {
+  MAX_BALANCE_DUE_DAYS,
+  MAX_COURSE_FEE,
+  MAX_DURATION_MONTHS
+} from "./course-operations";
+
 export const COURSE_FAMILIES = ["machine", "modern", "software"] as const;
 export type CourseFamily = (typeof COURSE_FAMILIES)[number];
 
@@ -10,6 +17,14 @@ export type CourseInput = {
   nameGu: string;
   family: CourseFamily;
   durationWeeks: number | null;
+  /** Months, where the owner has confirmed one. Never derived from weeks. */
+  durationMonths: number | null;
+  software: string | null;
+  feeTotal: number | null;
+  feeAdmission: number | null;
+  feeBalanceDueDays: number | null;
+  termsVersion: number | null;
+  publicVisible: boolean;
   sortOrder: number;
   active: boolean;
 };
@@ -63,12 +78,22 @@ function validTime(value: unknown): string | null {
   return value;
 }
 
+const checkbox = (value: unknown) =>
+  value === true || value === "true" || value === "on";
+
 export function validateCourseInput(input: {
   slug: unknown;
   nameEn: unknown;
   nameGu: unknown;
   family: unknown;
   durationWeeks?: unknown;
+  durationMonths?: unknown;
+  software?: unknown;
+  feeTotal?: unknown;
+  feeAdmission?: unknown;
+  feeBalanceDueDays?: unknown;
+  termsVersion?: unknown;
+  publicVisible?: unknown;
   sortOrder?: unknown;
   active?: unknown;
 }): Validation<CourseInput> {
@@ -80,6 +105,12 @@ export function validateCourseInput(input: {
       ? (input.family as CourseFamily)
       : null;
   const durationWeeks = optionalInteger(input.durationWeeks, 1, 104);
+  const durationMonths = optionalInteger(input.durationMonths, 1, MAX_DURATION_MONTHS);
+  const feeTotal = optionalInteger(input.feeTotal, 0, MAX_COURSE_FEE);
+  const feeAdmission = optionalInteger(input.feeAdmission, 0, MAX_COURSE_FEE);
+  const feeBalanceDueDays = optionalInteger(input.feeBalanceDueDays, 0, MAX_BALANCE_DUE_DAYS);
+  const software = input.software == null || input.software === "" ? null : cleanText(input.software, 1, 80);
+  const rawTermsVersion = optionalInteger(input.termsVersion, 1, 9999);
   const sortOrder = input.sortOrder == null || input.sortOrder === "" ? 0 : integer(input.sortOrder, -999, 999);
 
   if (
@@ -89,10 +120,24 @@ export function validateCourseInput(input: {
     !nameGu ||
     !family ||
     durationWeeks === undefined ||
+    durationMonths === undefined ||
+    feeTotal === undefined ||
+    feeAdmission === undefined ||
+    feeBalanceDueDays === undefined ||
+    rawTermsVersion === undefined ||
+    (input.software != null && input.software !== "" && !software) ||
     sortOrder == null
   ) {
     return { ok: false };
   }
+
+  /* Mirrors chk_course_fees. Rejected in the application as well as the
+     database so an operator gets a message rather than a constraint error. */
+  if (feeAdmission != null && feeTotal == null) return { ok: false };
+  if (feeAdmission != null && feeTotal != null && feeAdmission > feeTotal) return { ok: false };
+  /* A version that does not exist would record consent to text nobody can
+     produce. Better to refuse the course edit than to store the number. */
+  if (rawTermsVersion != null && !isKnownTermsVersion(rawTermsVersion)) return { ok: false };
 
   return {
     ok: true,
@@ -102,8 +147,15 @@ export function validateCourseInput(input: {
       nameGu,
       family,
       durationWeeks,
+      durationMonths,
+      software,
+      feeTotal,
+      feeAdmission,
+      feeBalanceDueDays,
+      termsVersion: rawTermsVersion,
+      publicVisible: input.publicVisible === undefined ? true : checkbox(input.publicVisible),
       sortOrder,
-      active: input.active === true || input.active === "true" || input.active === "on"
+      active: checkbox(input.active)
     }
   };
 }

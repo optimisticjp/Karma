@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, or } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
 import { hasPermission } from "@/lib/auth/access";
 import { admissionsCopy } from "@/lib/admin/admissions-copy";
+import { recordsCopy } from "@/lib/admin/records-copy";
+import { canPerform } from "@/lib/admin/record-actions";
+import { RecordMenu } from "@/components/admin/RecordMenu";
 import {
   APPLICATION_STATUSES,
   isApplicationStatus,
@@ -13,12 +16,22 @@ import {
 import { ApplicationNoteForm, ApplicationUpdateForm, ManualEnquiryForm } from "./AdmissionForms";
 
 type PageProps = {
-  searchParams: Promise<{ status?: string; q?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; archived?: string }>;
 };
 
 export default async function AdmissionsPage({ searchParams }: PageProps) {
   const session = await requireAdmin("/admin/admissions");
   const copy = admissionsCopy(session.staff.adminLocale);
+  const records = recordsCopy(session.staff.adminLocale);
+  const subject = {
+    role: session.role,
+    has: (permission: Parameters<typeof hasPermission>[1]) => hasPermission(session.staff, permission)
+  };
+  const applicationCan = {
+    archive: canPerform(subject, "application", "archive"),
+    restore: canPerform(subject, "application", "restore"),
+    delete: canPerform(subject, "application", "delete")
+  };
   const canView =
     hasPermission(session.staff, "applications.view") ||
     hasPermission(session.staff, "applications.manage");
@@ -38,6 +51,7 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const statusFilter = isApplicationStatus(params.status) ? params.status : null;
   const query = typeof params.q === "string" ? params.q.trim().toLowerCase().slice(0, 120) : "";
+  const showArchived = params.archived === "1";
 
   const [rawApplications, staff, courses] = await Promise.all([
     db
@@ -50,6 +64,10 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
         locale: schema.applications.locale,
         courseSlug: schema.applications.courseSlug,
         preferredTiming: schema.applications.preferredTiming,
+        preferredSchedule: schema.applications.preferredSchedule,
+        demoSlot: schema.applications.demoSlot,
+        termsVersion: schema.applications.termsVersion,
+        archivedAt: schema.applications.archivedAt,
         experience: schema.applications.experience,
         occupation: schema.applications.occupation,
         area: schema.applications.area,
@@ -69,6 +87,8 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
       })
       .from(schema.applications)
       .leftJoin(schema.staff, eq(schema.applications.assignedTo, schema.staff.id))
+      /* Archived enquiries stay reachable but are out of the working list. */
+      .where(showArchived ? undefined : isNull(schema.applications.archivedAt))
       .orderBy(desc(schema.applications.createdAt))
       .limit(200),
     db
@@ -85,7 +105,7 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
     db
       .select({ slug: schema.courses.slug, nameEn: schema.courses.nameEn, nameGu: schema.courses.nameGu })
       .from(schema.courses)
-      .where(eq(schema.courses.active, true))
+      .where(and(eq(schema.courses.active, true), isNull(schema.courses.archivedAt)))
       .orderBy(asc(schema.courses.sortOrder), asc(schema.courses.nameEn))
   ]);
 
@@ -167,7 +187,7 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
         <p className="form-note mt-6">{copy.viewOnly}</p>
       )}
 
-      <form method="get" className="panel panel-body mt-8 grid gap-4 md:grid-cols-[1fr_16rem_auto] md:items-end">
+      <form method="get" className="toolbar mt-6 md:grid-cols-[1fr_14rem_auto_auto] md:items-end">
         <Field label={copy.search} htmlFor="admissions-search">
           <input
             id="admissions-search"
@@ -186,13 +206,17 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
             ))}
           </select>
         </Field>
+        <label className="choice-chip text-smallmeta w-fit self-end">
+          <input type="checkbox" name="archived" value="1" className="size-4 accent-vermilion" defaultChecked={showArchived} />
+          {records.showArchived}
+        </label>
         <div className="flex gap-2">
           <button className="btn btn-primary" type="submit">{copy.applyFilters}</button>
           <Link className="btn btn-secondary" href="/admin/admissions">{copy.clearFilters}</Link>
         </div>
       </form>
 
-      <section className="mt-8 grid gap-5" aria-label={copy.title}>
+      <section className="data-list mt-6" aria-label={copy.title}>
         {applications.length === 0 ? (
           <p className="empty-state">{copy.empty}</p>
         ) : (
@@ -203,26 +227,50 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
               ? courseNames.get(application.courseSlug) ?? application.courseSlug
               : "—";
             return (
-              <article key={application.id} className="panel">
-                <div className="panel-head flex-wrap gap-4">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="microlabel">{application.reference}</p>
-                      {application.duplicateOfPhone ? <span className="status status-pending">{copy.duplicate}</span> : null}
-                    </div>
-                    <h2 className="text-h4 mt-1">{application.fullName}</h2>
-                    <p className="form-note mt-1">
-                      <a href={`https://wa.me/91${application.whatsapp}`}>WhatsApp {application.whatsapp}</a>
-                      {application.email ? ` · ${application.email}` : ""}
-                    </p>
-                  </div>
-                  <span className={`status ${statusTone(status)}`}>{copy.statuses[status]}</span>
-                </div>
+              /* A closed row is one line of facts a follow-up can be made from
+                 without opening anything; opening it reveals the full record
+                 and the forms. Native <details>, so no JavaScript and no page
+                 change — the operator keeps their place in the list. */
+              <details key={application.id}>
+                <summary className={`data-row ${application.archivedAt ? "is-archived" : ""}`}>
+                  <span className="data-row__title">{application.fullName}</span>
+                  <span className="data-row__actions">
+                    {application.duplicateOfPhone ? (
+                      <span className="chip status-pending">{copy.duplicate}</span>
+                    ) : null}
+                    <span className={`chip ${application.archivedAt ? "status-off" : statusTone(status)}`}>
+                      {application.archivedAt ? records.archived : copy.statuses[status]}
+                    </span>
+                  </span>
+                  <span className="data-row__meta">
+                    <span>{application.reference}</span>
+                    <span>{application.whatsapp}</span>
+                    <span>{courseName}</span>
+                    {application.nextFollowUp ? <span>{application.nextFollowUp}</span> : null}
+                    <span>{application.assignedName ?? copy.unassigned}</span>
+                  </span>
+                </summary>
 
-                <div className="panel-body grid gap-6">
-                  <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-6 border-t border-line bg-ivory-2/40 px-3 py-4 md:px-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <a className="stitch-link font-semibold" href={`https://wa.me/91${application.whatsapp}`}>
+                      WhatsApp {application.whatsapp}
+                    </a>
+                    <RecordMenu
+                      entity="application"
+                      id={application.id}
+                      label={application.reference}
+                      archived={Boolean(application.archivedAt)}
+                      canArchive={applicationCan.archive && canManage}
+                      canRestore={applicationCan.restore && canManage}
+                      canDelete={applicationCan.delete}
+                      copy={records}
+                    />
+                  </div>
+
+                  <dl className="kv-grid">
                     <Fact label={copy.course} value={courseName} />
-                    <Fact label={copy.timing} value={application.preferredTiming ?? "—"} />
+                    <Fact label={copy.timing} value={application.preferredSchedule ?? application.preferredTiming ?? "—"} />
                     <Fact label={copy.area} value={application.area ?? "—"} />
                     <Fact label={copy.created} value={formatDateTime(application.createdAt, session.staff.adminLocale)} />
                     <Fact label={copy.experience} value={application.experience ?? "—"} />
@@ -271,7 +319,7 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
                     {canManage ? <div className="mt-5"><ApplicationNoteForm applicationId={application.id} copy={copy} /></div> : null}
                   </section>
                 </div>
-              </article>
+              </details>
             );
           })
         )}
@@ -290,7 +338,7 @@ function Metric({ label, value }: { label: string; value: number }) {
 }
 
 function Fact({ label, value }: { label: string; value: string }) {
-  return <div><dt className="microlabel">{label}</dt><dd className="mt-1 text-smallmeta">{value}</dd></div>;
+  return <div><dt className="kv-label">{label}</dt><dd className="kv-value mt-0.5">{value}</dd></div>;
 }
 
 function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
