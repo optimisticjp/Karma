@@ -453,7 +453,7 @@ Update this table after every completed/merged phase.
 | 5 | Mobile conversion / call / directions / demo | ✅ Complete + merged | PR #16 — `build` + Cloudflare Workers Builds green |
 | 6 | Studio / B2B commercial embroidery | ✅ Complete + merged | PR #17 — `build` + Cloudflare Workers Builds green |
 | 7 | Machine Notes / social-to-search content | ✅ Complete + merged | PR #18 — `build` + Cloudflare Workers Builds green |
-| 8 | Local SEO / structured data / measurement | 🚧 In progress | branch `phase-8/local-seo` |
+| 8 | Local SEO / structured data / measurement | ✅ Complete + merged | PR #19 — `build` + Cloudflare Workers Builds green |
 | 9 | Accessibility / performance / responsive hardening | ⏳ Pending | |
 | 10 | Final whole-site creative polish | ⏳ Pending | |
 
