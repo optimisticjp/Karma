@@ -347,7 +347,7 @@ can never quietly re-assert itself later.
 
 ## 7. The access decision
 
-Seven conditions, evaluated in a fixed order by `evaluateAccess`
+Six conditions, evaluated in a fixed order by `evaluateAccess`
 (`src/lib/auth/access.ts` — pure, and unit-tested for every state):
 
 1. a verified Supabase user

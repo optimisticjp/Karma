@@ -81,5 +81,5 @@ enforces it.
 | `typecheck` / `lint` | `tsc --noEmit` / ESLint |
 | `db:generate` / `db:migrate` / `db:seed` / `db:backup` / `db:studio` | Drizzle + Supabase Postgres |
 | `admin:bootstrap` | Create the single Owner account (invitation-only) |
-| `preview` / `deploy` | OpenNext build + Cloudflare preview / deploy |
+| `preview` / `deploy` / `upload` | OpenNext's delegated path — **local experimentation only.** Production deploys from Git with `OPEN_NEXT_DEPLOY=true npx wrangler deploy --keep-vars`; see docs/deployment.md §6 |
 | `cf-typegen` | Generate Cloudflare env types |
