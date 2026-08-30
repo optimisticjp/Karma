@@ -6,8 +6,7 @@ import { CourseFamilies } from "@/components/home/CourseFamilies";
 import { ScreenToStitch } from "@/components/home/ScreenToStitch";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { Trainers } from "@/components/home/Trainers";
-import { WorkStrip } from "@/components/home/WorkStrip";
-import { Stories } from "@/components/home/Stories";
+import { Proof } from "@/components/home/Proof";
 import { LatestVideos } from "@/components/home/LatestVideos";
 import { BatchesTeaser } from "@/components/home/BatchesTeaser";
 import { Investment } from "@/components/home/Investment";
@@ -67,12 +66,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <CourseFamilies />
       <BatchesTeaser />
 
-      <ScreenToStitch />
-      <HowItWorks />
+      <ScreenToStitch>
+        <HowItWorks />
+      </ScreenToStitch>
 
       <HomepageStats />
-      <WorkStrip />
-      <Stories />
+      <Proof />
       <Trainers />
       <LatestVideos />
 

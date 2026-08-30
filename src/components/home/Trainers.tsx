@@ -23,6 +23,9 @@ export function Trainers() {
   const locale = useLocale();
   const gu = locale === "gu";
   const confirmed = trainers.filter((tr) => !tr.sample);
+  /* No "profiles coming soon" note: an unfinished marker on a live page reads
+     as a broken site. The verified teaching facts above answer the question on
+     their own, and the cards appear the moment real profiles exist. */
 
   const practice: Array<[string, string]> = [
     [t("p1Label"), t("p1Value")],
@@ -32,7 +35,7 @@ export function Trainers() {
   ];
 
   return (
-    <section className="section">
+    <section className="section-compact">
       <div className="container-site">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <SectionHeading title={t("h2")} sub={t("sub")} />
@@ -80,12 +83,7 @@ export function Trainers() {
               </Reveal>
             ))}
           </ul>
-        ) : (
-          <p className="pending-block mt-8 max-w-2xl text-smallmeta text-stone">
-            <span className="pending-label">{t("pendingLabel")}</span>
-            {t("pendingNote")}
-          </p>
-        )}
+        ) : null}
       </div>
     </section>
   );

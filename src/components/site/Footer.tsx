@@ -12,7 +12,7 @@ export function Footer() {
   return (
     <footer className="site-footer border-t border-line bg-ivory-2">
       <div className="container-site section-compact">
-        <div className="grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-12">
+        <div className="grid gap-x-8 gap-y-8 md:grid-cols-2 md:gap-y-10 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <p className="font-display text-h3 font-semibold leading-tight">Karma Design Studio</p>
             <p className="mt-2 text-smallmeta font-semibold text-vermilion-deep">{t("descriptor")}</p>
@@ -26,7 +26,7 @@ export function Footer() {
             </div>
           </div>
 
-          <nav className="lg:col-span-2" aria-label={t("learn")}>
+          <nav className="hidden md:block lg:col-span-2" aria-label={t("learn")}>
             <p className="microlabel">{t("learn")}</p>
             <ul className="mt-2 text-smallmeta">
               <li><Link className="stitch-link" href="/courses">{tn("courses")}</Link></li>
@@ -40,7 +40,7 @@ export function Footer() {
             </ul>
           </nav>
 
-          <nav className="lg:col-span-2" aria-label={t("students")}>
+          <nav className="hidden md:block lg:col-span-2" aria-label={t("students")}>
             <p className="microlabel">{t("students")}</p>
             <ul className="mt-2 text-smallmeta">
               <li><Link className="stitch-link" href="/admissions">{tn("admissions")}</Link></li>
@@ -68,7 +68,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-x-4 gap-y-2 border-t border-line pt-6 text-smallmeta text-stone md:flex-row md:items-center md:justify-between">
+        <div className="mt-8 flex flex-col md:mt-10 gap-x-4 gap-y-2 border-t border-line pt-6 text-smallmeta text-stone md:flex-row md:items-center md:justify-between">
           <p>{t("rights", { year })}</p>
           <div className="flex flex-wrap gap-x-4 gap-y-2">
             <Link className="stitch-link" href="/privacy">{t("privacy")}</Link>

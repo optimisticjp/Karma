@@ -8,7 +8,14 @@ import { cn } from "@/lib/utils";
  * EN | ગુ pill. Switches to the SAME page in the other language and remembers
  * the explicit choice (plan 13.2). Text labels, never flags.
  */
-export function LanguageToggle({ className }: { className?: string }) {
+export function LanguageToggle({
+  className,
+  /** Header needs "EN / ગુ"; the mobile menu has room for the full words. */
+  compact = false
+}: {
+  className?: string;
+  compact?: boolean;
+}) {
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
@@ -21,17 +28,22 @@ export function LanguageToggle({ className }: { className?: string }) {
     router.replace(pathname, { locale: next });
   };
 
-  const btn = (code: "en" | "gu", label: string) => (
+  /* lang on the label matters twice over: a screen reader announces "ગુજરાતી"
+     with the right voice, and the browser gives the Gujarati vowel marks the
+     line box they need instead of cramping them into the Latin one. */
+  const btn = (code: "en" | "gu", label: string, short: string) => (
     <button
       type="button"
       onClick={() => switchTo(code)}
       aria-pressed={locale === code}
       className={cn(
-        "rounded-full px-3 py-1 text-sm font-semibold transition-colors duration-150",
+        "rounded-full py-1 text-sm font-semibold transition-colors duration-150",
+        compact ? "px-2.5" : "px-3",
         locale === code ? "bg-carbon text-ivory" : "text-stone hover:text-carbon"
       )}
     >
-      {label}
+      <span lang={code} className="leading-normal">{compact ? short : label}</span>
+      {compact ? <span className="sr-only" lang={code}>{label}</span> : null}
     </button>
   );
 
@@ -41,8 +53,8 @@ export function LanguageToggle({ className }: { className?: string }) {
       role="group"
       aria-label="Language / ભાષા"
     >
-      {btn("en", "English")}
-      {btn("gu", "ગુજરાતી")}
+      {btn("en", "English", "EN")}
+      {btn("gu", "ગુજરાતી", "ગુ")}
     </div>
   );
 }

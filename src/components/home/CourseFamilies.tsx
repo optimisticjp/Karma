@@ -34,7 +34,7 @@ export function CourseFamilies() {
       <div className="container-site">
         <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} />
 
-        <div className="u-section-body grid items-stretch gap-6 lg:grid-cols-4 lg:gap-8">
+        <div className="u-section-body grid grid-cols-2 items-stretch gap-4 sm:gap-6 lg:grid-cols-4 lg:gap-8">
           {keys.map((key, i) => {
             const f = families[key];
             const count = courses.filter((c) => c.family === key).length;
@@ -44,13 +44,13 @@ export function CourseFamilies() {
               <Reveal
                 key={key}
                 delay={i * 80}
-                className={cn(lead && "lg:col-span-2", "min-w-0")}
+                className={cn(lead ? "col-span-2" : "col-span-1", "min-w-0")}
               >
                 <article className="card card-lift flex h-full flex-col overflow-hidden">
-                  <div className={cn("border-b border-line", lead ? "h-24 md:h-32" : "h-20")}>
+                  <div className={cn("border-b border-line", lead ? "h-20 md:h-24" : "h-16")}>
                     <TechniquePlate variant={key} seed={i} className="card-img" />
                   </div>
-                  <div className="flex flex-1 flex-col p-6 md:p-7">
+                  <div className="flex flex-1 flex-col p-5 md:p-6">
                     <div className="flex items-center justify-between gap-4">
                       <Icon name={familyIcon[key]} size={24} className="text-vermilion-deep" />
                       <span className="microlabel tabular">

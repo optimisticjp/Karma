@@ -112,14 +112,6 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
             ? "અમે કઈ વિગત લઈએ છીએ, શા માટે લઈએ છીએ, કેટલો સમય રાખીએ છીએ, અને તમે એ કઢાવી કઈ રીતે શકો."
             : "What we collect, why we collect it, how long we keep it, and how you get it removed."
         }
-        aside={
-          <p className="pending-block">
-            <span className="pending-label">{gu ? "ડ્રાફ્ટ" : "Draft"}</span>
-            {gu
-              ? "લોન્ચ પહેલાં માલિક અને લીગલ રિવ્યૂ જરૂરી (DPDP Act 2023)."
-              : "Owner and legal review required before launch (DPDP Act 2023)."}
-          </p>
-        }
       />
       <section className="section">
         <div className="container-site reading-shell">

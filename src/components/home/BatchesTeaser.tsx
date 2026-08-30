@@ -52,7 +52,7 @@ export function BatchesTeaser() {
   };
 
   return (
-    <section className="section border-t border-line bg-ivory-2" id="upcoming-batches">
+    <section className="section-compact border-t border-line bg-ivory-2" id="upcoming-batches">
       <div className="container-site">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <SectionHeading title={t("h2")} sub={t("sub")} />
@@ -64,7 +64,7 @@ export function BatchesTeaser() {
           </Link>
         </div>
 
-        <div className="mt-8" aria-live="polite">
+        <div className="u-section-body" aria-live="polite">
           {state.kind === "loading" ? (
             <div className="space-y-3">
               <div className="skeleton h-20" />
@@ -114,29 +114,29 @@ export function BatchesTeaser() {
           ) : null}
 
           {state.kind === "empty" ? (
-            <div className="card p-6 md:p-8">
+            <div className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-5">
               <p className="font-semibold">{t("empty")}</p>
               <a
                 href={`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(tc("waPrefillDemo"))}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-secondary mt-4"
+                className="btn btn-secondary shrink-0"
               >
-                {tc("whatsapp")}
+                <Icon name="whatsapp" size={18} /> {tc("whatsapp")}
               </a>
             </div>
           ) : null}
 
           {state.kind === "error" ? (
-            <div className="card border-warn p-6 md:p-8">
+            <div className="card border-warn flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-5">
               <p className="font-semibold">{t("error")}</p>
               <a
                 href={`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(tc("waPrefillDemo"))}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-secondary mt-4"
+                className="btn btn-secondary shrink-0"
               >
-                {tc("whatsapp")}
+                <Icon name="whatsapp" size={18} /> {tc("whatsapp")}
               </a>
             </div>
           ) : null}

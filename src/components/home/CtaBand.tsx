@@ -15,7 +15,7 @@ export function CtaBand() {
   return (
     <section className="on-carbon">
       <div aria-hidden="true" className="stitch-line" />
-      <div className="container-site section-major">
+      <div className="container-site section">
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:gap-16">
           <div>
             <h2 className="text-h2 max-w-2xl">{t("h2")}</h2>

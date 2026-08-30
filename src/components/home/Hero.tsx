@@ -89,7 +89,7 @@ export function Hero() {
       {/* The decision facts close the hero edge to edge. Kept inside the left
           column they left a stranded half-row under the index panel; spanning
           the full width they give the whole viewport a base line. */}
-      <Reveal className="container-site mt-12 lg:mt-16">
+      <Reveal className="container-site mt-8 lg:mt-10">
         <dl className="fact-rail">
           {facts.map(([label, value]) => (
             <div key={label}>

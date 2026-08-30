@@ -53,14 +53,6 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
             ? "ટ્રેનિંગ અને બિઝનેસ સર્વિસ માટેની મુખ્ય શરતો, સાદી ભાષામાં."
             : "The key terms for training and business services, in plain language."
         }
-        aside={
-          <p className="pending-block">
-            <span className="pending-label">{gu ? "ડ્રાફ્ટ" : "Draft"}</span>
-            {gu
-              ? "લોન્ચ પહેલાં માલિકનો રિવ્યૂ જરૂરી."
-              : "Owner review required before launch."}
-          </p>
-        }
       />
       <section className="section">
         <div className="container-site">

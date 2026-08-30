@@ -55,8 +55,8 @@ export function TechniquePlate({
             patternTransform={`rotate(${angle})`}
           >
             <rect width="7" height="7" fill="var(--color-ivory-2)" />
-            <path d="M1.5 0v7" stroke="var(--color-vermilion)" strokeWidth="1.6" opacity="0.34" />
-            <path d="M4.5 0v7" stroke="var(--color-carbon)" strokeWidth="0.7" opacity="0.14" />
+            <path d="M1.5 0v7" stroke="var(--color-vermilion)" strokeWidth="1.8" opacity="0.6" />
+            <path d="M4.5 0v7" stroke="var(--color-carbon)" strokeWidth="0.8" opacity="0.22" />
           </pattern>
         ) : null}
 
@@ -74,10 +74,10 @@ export function TechniquePlate({
               d="M1.5 9.5c0-4.5 6-4.5 6 0M9.5 9.5c0-4.5 6-4.5 6 0"
               fill="none"
               stroke="var(--color-vermilion)"
-              strokeWidth="1.1"
-              opacity="0.34"
+              strokeWidth="1.25"
+              opacity="0.62"
             />
-            <path d="M0 11.5h16" stroke="var(--color-carbon)" strokeWidth="0.6" opacity="0.12" />
+            <path d="M0 11.5h16" stroke="var(--color-carbon)" strokeWidth="0.7" opacity="0.2" />
           </pattern>
         ) : null}
 
@@ -85,13 +85,13 @@ export function TechniquePlate({
           /* Path and nodes: a design still on screen, not yet thread. */
           <pattern id={uid} width="22" height="22" patternUnits="userSpaceOnUse">
             <rect width="22" height="22" fill="var(--color-ivory-2)" />
-            <path d="M22 0H0v22" fill="none" stroke="var(--color-carbon)" strokeWidth="0.5" opacity="0.13" />
+            <path d="M22 0H0v22" fill="none" stroke="var(--color-carbon)" strokeWidth="0.6" opacity="0.22" />
             <path
               d="M0 16C6 16 6 6 11 6s5 10 11 10"
               fill="none"
               stroke="var(--color-vermilion)"
-              strokeWidth="1"
-              opacity="0.34"
+              strokeWidth="1.15"
+              opacity="0.62"
             />
             <rect
               x="9"
@@ -100,8 +100,8 @@ export function TechniquePlate({
               height="4"
               fill="var(--color-card)"
               stroke="var(--color-vermilion)"
-              strokeWidth="0.8"
-              opacity="0.5"
+              strokeWidth="0.9"
+              opacity="0.8"
             />
           </pattern>
         ) : null}

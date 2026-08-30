@@ -15,7 +15,7 @@ export async function HomeFaq() {
   const [t, faqs] = await Promise.all([getTranslations("home.faq"), getPublicFaqs()]);
 
   return (
-    <section className="section border-t border-line bg-ivory-2">
+    <section className="section-compact border-t border-line bg-ivory-2">
       <div className="container-site grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
         <div>
           <SectionHeading title={t("h2")} sub={t("sub")} />

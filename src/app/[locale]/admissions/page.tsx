@@ -6,7 +6,6 @@ import { FaqList } from "@/components/site/FaqList";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Ledger, LedgerRow } from "@/components/ui/Ledger";
-import { StickyActionBar } from "@/components/site/StickyActionBar";
 import { JsonLd } from "@/components/site/JsonLd";
 import { Icon } from "@/components/ui/Icon";
 import { getPublicFaqs } from "@/lib/content/public";
@@ -179,8 +178,6 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ loc
         </div>
       </section>
 
-      <StickyActionBar />
-      <div className="h-20 md:hidden" aria-hidden="true" />
     </>
   );
 }

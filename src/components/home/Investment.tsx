@@ -21,15 +21,15 @@ export function Investment() {
   const notIncluded = t.raw("notIncluded") as string[];
 
   return (
-    <section className="section bg-ivory-2">
+    <section className="section-compact bg-ivory-2">
       <div className="container-site">
         <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} />
 
         <div className="u-section-body grid gap-6 lg:grid-cols-12 lg:gap-8">
           <Reveal className="lg:col-span-7">
-            <div className="card h-full p-6 md:p-8">
+            <div className="card h-full p-5 md:p-6">
               <h3 className="text-h4 font-display">{t("includedTitle")}</h3>
-              <ul className="mt-6 space-y-4">
+              <ul className="mt-4 space-y-2.5">
                 {included.map((item) => (
                   <li key={item} className="flex gap-3">
                     <Icon name="check" size={18} strokeWidth={2} className="mt-1 text-success" />
@@ -37,7 +37,7 @@ export function Investment() {
                   </li>
                 ))}
               </ul>
-              <div className="mt-8 border-t border-line pt-6">
+              <div className="mt-5 border-t border-line pt-4">
                 <p className="microlabel">{t("notIncludedTitle")}</p>
                 <ul className="mt-3 space-y-2">
                   {notIncluded.map((item) => (
@@ -51,7 +51,7 @@ export function Investment() {
           </Reveal>
 
           <Reveal delay={80} className="lg:col-span-5">
-            <div className="card flex h-full flex-col p-6 md:p-8">
+            <div className="card flex h-full flex-col p-5 md:p-6">
               <Icon name="spool" size={28} className="text-vermilion-deep" />
               <h3 className="text-h4 mt-5 font-display">{t("howTitle")}</h3>
               <p className="u-lede">{t("howBody")}</p>

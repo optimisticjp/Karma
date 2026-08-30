@@ -108,9 +108,38 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
         </div>
       </section>
 
-      <section className="section" id="brief">
-        <div className="container-site max-w-3xl">
-          <BriefForm />
+      {/* The form used to sit alone in the middle of a very wide empty band.
+          Pairing it with what happens next removes the dead space and answers
+          the questions that otherwise arrive as a follow-up email. Every line
+          in the panel is drawn from copy already on this page. */}
+      <section className="section-compact bg-ivory-2" id="brief">
+        <div className="container-site grid gap-8 lg:grid-cols-[1.35fr_0.65fr] lg:items-start lg:gap-12">
+          <div className="card p-5 md:p-7">
+            <BriefForm />
+          </div>
+          <aside className="lg:sticky lg:top-24">
+            <p className="microlabel !text-vermilion-deep">{t("afterTitle")}</p>
+            <ol className="ledger mt-4">
+              {(t.raw("afterSteps") as string[]).map((step, i) => (
+                <li key={step} className="ledger-row">
+                  <span className="ledger-index">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="ledger-title !font-normal !text-smallmeta">{step}</span>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-5 text-smallmeta text-stone">{t("form.filesHelp")}</p>
+            <p className="mt-4 border-t border-line pt-4 text-smallmeta text-stone">
+              {t("confidential")}
+            </p>
+            <a
+              href={waLink(tc("waPrefillBusiness"))}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-secondary mt-5 w-full"
+            >
+              <Icon name="whatsapp" size={18} /> {t("afterWhatsapp")}
+            </a>
+          </aside>
         </div>
       </section>
     </>

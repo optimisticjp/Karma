@@ -9,7 +9,6 @@ import { FaqList } from "@/components/site/FaqList";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { TechniquePlate } from "@/components/ui/TechniquePlate";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { StickyActionBar } from "@/components/site/StickyActionBar";
 import { JsonLd } from "@/components/site/JsonLd";
 import { courseBySlug, coursesByFamily, coursesInFamily, families } from "@/content/courses";
 import { faqs } from "@/content/collections";
@@ -162,10 +161,6 @@ export default async function CourseDetailPage({
         <div className="container-site grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
           <div>
             <SectionHeading title={t("modulesTitle")} sub={t("modulesNote")} />
-            <p className="pending-block mt-8 text-smallmeta text-stone">
-              <span className="pending-label">{t("machinesTitle")}</span>
-              {t("machinesBody")}
-            </p>
           </div>
           <div className="u-section-body lg:mt-0">
             <ModuleAccordion modules={course.modules} />
@@ -212,8 +207,6 @@ export default async function CourseDetailPage({
         </section>
       ) : null}
 
-      <StickyActionBar waText={waCourse} courseSlug={course.slug} />
-      <div className="h-20 md:hidden" aria-hidden="true" />
     </>
   );
 }
