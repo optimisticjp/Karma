@@ -455,7 +455,7 @@ Update this table after every completed/merged phase.
 | 7 | Machine Notes / social-to-search content | ✅ Complete + merged | PR #18 — `build` + Cloudflare Workers Builds green |
 | 8 | Local SEO / structured data / measurement | ✅ Complete + merged | PR #19 — `build` + Cloudflare Workers Builds green |
 | 9 | Accessibility / performance / responsive hardening | ✅ Complete + merged | PR #20 — `build` + Cloudflare Workers Builds green |
-| 10 | Final whole-site creative polish | 🚧 In progress | branch `phase-10/final-polish` |
+| 10 | Final whole-site creative polish | ✅ Complete + merged | PR #21 — `build` + Cloudflare Workers Builds green |
 
 Status values:
 
