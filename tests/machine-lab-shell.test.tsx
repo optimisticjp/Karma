@@ -243,7 +243,13 @@ describe("button microinteractions", () => {
   });
 
   it("shows the finished state under reduced motion", () => {
-    const reduced = css.slice(css.lastIndexOf("@media (prefers-reduced-motion: reduce)"));
+    /* All of them, not just the last: the stylesheet has more than one
+       reduced-motion block and gained another during the hardening pass.
+       What matters is that the rule is covered SOMEWHERE, not where. */
+    const reduced = css
+      .split("@media (prefers-reduced-motion: reduce)")
+      .slice(1)
+      .join("\n");
     expect(reduced).toContain(".btn-stitch::after");
     expect(reduced).toContain("transition: none !important");
   });
