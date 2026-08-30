@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Icon } from "@/components/ui/Icon";
+import { TrackedLink } from "@/components/site/TrackedLink";
 import { site, ownerProvidedFacts } from "@/lib/site";
 
 /**
@@ -36,11 +37,17 @@ export function SocialAuthority() {
         <ul className="social-rail">
           {channels.map((c) => (
             <li key={c.key}>
-              <a href={c.href} target="_blank" rel="noopener noreferrer" className="social-link">
+              <TrackedLink
+                href={c.href}
+                event="social_click"
+                props={{ channel: c.key, surface: "stories" }}
+                external
+                className="social-link"
+              >
                 <span className="social-value tabular">{c.value}</span>
                 <span className="social-label">{c.label}</span>
                 <Icon name="arrow" size={16} className="arrow social-go" />
-              </a>
+              </TrackedLink>
             </li>
           ))}
         </ul>

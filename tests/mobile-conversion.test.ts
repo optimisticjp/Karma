@@ -44,9 +44,13 @@ describe("the two mobile numbers keep their separate roles", () => {
   });
 
   it("lists both numbers in structured data rather than promoting one", () => {
-    const layout = read("src/app/[locale]/layout.tsx");
-    expect(layout).toContain("`+${site.callPhone}`");
-    expect(layout).toContain("`+${site.whatsapp}`");
+    // Schema moved into one module in Phase 8 so the fact discipline lives in
+    // one place; the assertion follows it rather than the page that used to
+    // build it inline.
+    const schema = read("src/lib/schema.ts");
+    expect(schema).toContain("`+${site.callPhone}`");
+    expect(schema).toContain("`+${site.whatsapp}`");
+    expect(schema).toContain("`+${site.landline}`");
   });
 });
 
@@ -73,7 +77,9 @@ describe("analytics carries no personal data", () => {
   const analytics = read("src/lib/analytics.ts");
 
   it("allows only enumerable context keys", () => {
-    expect(analytics).toContain('const ALLOWED = ["course", "surface", "locale", "step"] as const');
+    expect(analytics).toContain(
+      'const ALLOWED = ["course", "surface", "locale", "step", "channel", "note"] as const'
+    );
     for (const pii of ["name", "phone", "email", "whatsapp", "message", "goal", "area"]) {
       expect(analytics).not.toContain(`"${pii}"`);
     }
