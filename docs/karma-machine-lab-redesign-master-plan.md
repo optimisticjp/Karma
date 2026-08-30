@@ -1848,7 +1848,7 @@ Claude must execute phases in order, one clean PR at a time unless a smaller spl
 | --- | --- | --- |
 | 1 | Audit + Design System v4 “Machine Lab” foundation | ✅ Complete + merged |
 | 2 | Global shell + hero + signature Screen-to-Stitch interaction | ✅ Complete + merged |
-| 3 | Homepage full rebuild | ⏳ Pending |
+| 3 | Homepage full rebuild | ✅ Complete + merged |
 | 4 | 11-course Machine Index + all course pages | ⏳ Pending |
 | 5 | Proof ecosystem: student work, stories, trainers, studio/machines | ⏳ Pending |
 | 6 | Admission + conversion + contact experience | ⏳ Pending |
@@ -2102,6 +2102,94 @@ Implement the full architecture in §17.
 Do not use endless card grids. Use ledger/spec-grid/editorial/full-bleed compositions deliberately.
 
 Acceptance is the 3/10/20/30-second decision model in §3.
+
+## Implementation record — merged 2026-08-30
+
+**Branch:** `redesign/phase-3-homepage` · **PR:** #30
+
+### The order, and why
+
+The page answers questions in the order people actually ask them, not in
+brochure order: what is this → does anyone rate it → show me the claim → what
+does the work involve → what can I learn → will it fix my problem → prove it →
+what does it cost → what does a fee cover → when does it run → show me the work
+→ who teaches and where → visit/FAQ → not a student → close.
+
+### The EMCAD DAHAO decision block — the most valuable thing on the page
+
+The studio confirmed one course's duration, timetable and fee in writing, so
+the page states them instead of asking people to enquire about a number:
+3 months · four batch timings · a free 2-day demo at 2 hours a session ·
+₹35,000 total, ₹25,000 at admission, ₹10,000 within 30 days · live machine
+practical throughout.
+
+**Every figure renders from `src/content/course-operations.ts`.** Nothing is
+typed into a message catalogue — the catalogues hold labels and sentences and
+no numbers at all, and a test asserts that. A correction is therefore made in
+exactly one file and the page cannot drift from the record.
+
+**It names the one course they belong to** and says in its own copy that they
+are not true of the other ten, because a fee block sitting above an
+eleven-course index is exactly where a duration leaks sideways.
+
+**No payment CTA.** Publishing a fee is not collecting it. The block states in
+copy that there is no gateway, no payment link and no UPI request on this site
+— which is where somebody hunting for a pay button will be looking. `<Investment>`
+was rescoped to the institute-wide half of the money question (what a fee
+covers) and its duplicate no-gateway box removed.
+
+### The Machine Index
+
+`src/components/courses/MachineIndex.tsx`, reusable by Phase 4's `/courses`
+page. A row carries its index, media, name, what the technique physically
+produces, its family, a verified duration where one exists, and a live-practical
+cue. **Photography leads where the shoot covers a course; the technique
+signature leads where it does not — same slot, same size**, so the three
+signature-led courses are not visibly second-class and nothing about the layout
+changes when the eight photographs land. No fee appears on a row, and a
+duration appears only where the owner confirmed one.
+
+### Proof surfaces
+
+- **`<StudentWorkWall>`** — the six G-slots as a mixed-ratio editorial wall.
+  Each frame asks the manifest for its own ratio: a bridal panel is tall, a
+  dupatta is square, a screen-and-result pair is wide, and a uniform tile grid
+  throws away the one thing worth showing about textile work. No student name,
+  outcome or earning is attached to any frame.
+- **`<WhereYouLearn>`** — A1/A2/F1 plus the four machine stations. Each station
+  is named by the technique it runs **and nothing else**: no head count, no
+  model, no RPM, no capacity. A test bans any number standing next to a machine
+  word, and the copy says why the stations carry none.
+- **`<Trainers>`** — T1–T3 reserved as frames that name the photograph they are
+  waiting for. The distinction that makes that safe: a labelled empty frame is
+  a visible work-in-progress; a card headed "Sample: lead trainer name" is a
+  person who does not exist. No invented name, role or speciality.
+
+### A rhythm bug the tests caught
+
+`<BusinessBand>` and `<CtaBand>` were **both dark and adjacent** — and had been
+since before this phase, while a comment claimed the page had "exactly two dark
+bands". Two dark surfaces running together stop being punctuation. The audience
+switch is now a steel edge on a light ground and the dark is saved for the
+close. A test walks the rendered section order and fails if two dark bands ever
+become adjacent again.
+
+### Also
+
+A sixth production fault (machine setup) joins the five already named. The
+close uses the studio's own line. `home.workflow.s2d` now names EMCAD DAHAO in
+full. Band rhythm across the page alternates MACHINE / MATERIAL / HUMAN / INFO,
+every dark band followed by a light one.
+
+⚠ **Carried to Phase 13:** `emCAD` still appears in `src/content/notes.ts`,
+`src/content/collections.ts` and `src/lib/admin/courses-copy.ts`. The
+site-wide rename to `EMCAD DAHAO` belongs with the copy/i18n/SEO consistency
+pass, not with a homepage rebuild.
+
+### Gates
+
+`npm run typecheck`, `npm run lint`, `npm test` (35 files, 480 tests) and
+`npm run build` all green. No dependency added.
 
 ---
 

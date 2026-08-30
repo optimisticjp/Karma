@@ -5,15 +5,21 @@ import { Icon } from "@/components/ui/Icon";
 /**
  * The second door. Everything above this point is written for someone who
  * wants to learn; this is the one place the page turns to a garment business
- * instead — so it changes surface rather than politely blending in. Dark is
- * doing structural work here: it marks the audience switch, and it gives the
- * long light run above it somewhere to end.
+ * instead — so it changes surface rather than politely blending in.
+ *
+ * It used to be dark, on the reasoning that dark marks the audience switch.
+ * That reasoning was sound and the placement was not: the close directly below
+ * is also dark, so the two ran together and neither read as punctuation any
+ * more. The switch is now marked by a steel edge and a change of ground, and
+ * the dark is saved for the close — which is what a close is for.
+ * `tests/machine-lab-homepage.test.tsx` fails if two dark bands ever become
+ * adjacent again.
  */
 export function BusinessBand() {
   const t = useTranslations("home.business");
 
   return (
-    <section className="on-carbon section-compact">
+    <section className="section-compact band-info business-door">
       <div className="container-site flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-end">
         <div className="max-w-2xl">
           <p className="eyebrow">{t("eyebrow")}</p>

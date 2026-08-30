@@ -3,6 +3,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Hero } from "@/components/home/Hero";
 import { TrustRail } from "@/components/home/TrustRail";
 import { ProductionRailSection } from "@/components/home/ProductionRailSection";
+import { EmcadDecision } from "@/components/home/EmcadDecision";
+import { StudentWorkWall } from "@/components/home/StudentWorkWall";
+import { WhereYouLearn } from "@/components/home/WhereYouLearn";
 import { HomepageStats } from "@/components/home/HomepageStats";
 import { CourseCatalogue } from "@/components/home/CourseCatalogue";
 import { ProductionWorkflow } from "@/components/home/ProductionWorkflow";
@@ -46,37 +49,46 @@ export async function generateMetadata({
  * order below is the order that answers their questions as they actually ask
  * them, rather than the order a brochure would use:
  *
- *   1. What is this, and what do I do?     Hero (offer, 3 actions, machine facts)
- *   2. Does anyone else rate it?            Trust rail
- *   3. Show me the claim.                   01 DESIGN → 02 MACHINE → 03 RESULT
- *   4. What does the work actually involve? Workflow 01→06
- *   5. What can I learn, and when?          Catalogue (11) · Batches
- *   6. Will it fix my problem?              Problems we teach you to solve
- *   7. Prove it.                            File → failed → correction → stitch
- *   8. Who says so?                         Work · Trainers · Channel · Reviews
- *   9. What will it cost, where is it?      Fees · Visit
- *  10. Still unsure?                        FAQ
- *  11. Not a student?                       Business door
- *  12. Close.                               CTA
+ *   1.  What is this, and what do I do?      Hero — offer, three actions, facts
+ *   2.  Does anyone else rate it?            Trust rail
+ *   3.  Show me the claim.                   01 DESIGN → 02 MACHINE → 03 RESULT
+ *   4.  What does the work actually involve? Workflow 01→06
+ *   5.  What can I learn?                    Machine Index — all eleven
+ *   6.  Will it fix my problem?              Six production faults, named
+ *   7.  Prove it.                            File → failed → correction → stitch
+ *   8.  What does it cost, exactly?          EMCAD DAHAO decision block
+ *   9.  What does a fee cover?               What is and is not included
+ *  10.  When does it run?                    Batches
+ *  11.  Show me the work.                    Material wall · gallery · stories
+ *  12.  Who teaches, and where?              Trainers · the studio floor
+ *  13.  Anything else?                       Channel · reviews · visit · FAQ
+ *  14.  Not a student?                       Business door
+ *  15.  Close.                               CTA
  *
- * Steps 6 and 7 are the ones no competing institute has. Naming five real
+ * Steps 6 and 7 are the ones no competing institute has. Naming six real
  * production faults and then showing a stitch-out that failed, with the file
  * change that fixes it, is worth more than any adjective on the page.
  *
+ * Step 8 is the newest and the most valuable: the studio confirmed EMCAD
+ * DAHAO's duration, timetable and fee in writing, so the page states them
+ * plainly instead of asking people to enquire about a number. It reads those
+ * figures straight from `src/content/course-operations.ts`, and it names the
+ * one course they belong to — the other ten have no confirmed duration and no
+ * published fee, and must not inherit either by standing nearby.
+ *
  * The <ScreenToStitch> slider is deliberately not here. It showed the same
  * motif as file, path and finished piece — which the machine-proof strip now
- * does with two more states and a failure, in less height. Keeping both cost
- * 800px of desktop to say the same thing twice. The component stays for a
- * course detail page, where the interaction has room to earn its place.
+ * does with two more states and a failure, in less height. The component
+ * stays for a course detail page, where the interaction has room to earn it.
  *
- * Dark bands are punctuation: the hero (the machine floor), the production
- * rail directly under it, the audience switch and the close. Each is followed
- * by a light band, because a dark surface stops being punctuation the moment
- * two of them run together.
- *
- * Phase 3 of the Machine Lab redesign rebuilds this composition in full; this
- * order is the Phase 2 state, with the hero, trust rail and production rail
- * already in their final places.
+ * BAND RHYTHM — HUMAN / MACHINE / MATERIAL
+ * ----------------------------------------
+ * Dark machine bands are punctuation: the hero, the production rail, the
+ * EMCAD decision, the audience switch and the close. Every one of them is
+ * followed by a light band, because two dark surfaces in a row stop being
+ * punctuation and start being wallpaper. Between them the page alternates
+ * MATERIAL (the index, the work wall — bright, editorial) and HUMAN (trainers,
+ * the studio, visiting — warm), so a long scroll never reads as one surface.
  */
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -89,20 +101,24 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <ProductionRailSection />
 
       <ProductionWorkflow />
-
       <CourseCatalogue />
-      <BatchesTeaser />
 
       <ProblemsSolved />
       <MachineProof />
 
+      <EmcadDecision />
+      <Investment />
+      <BatchesTeaser />
+
+      <StudentWorkWall />
       <HomepageStats />
       <Proof />
+
       <Trainers />
+      <WhereYouLearn />
+
       <LatestVideos />
       <Reviews />
-
-      <Investment />
       <VisitStudio />
 
       <HomeFaq />

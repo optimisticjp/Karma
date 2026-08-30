@@ -131,7 +131,7 @@
       "s1t": "Design",
       "s1d": "Read artwork the way the trade reads it: technique, scale, material, and what the fabric will allow.",
       "s2t": "Digitise",
-      "s2d": "Build the file in emCAD — stitch types, underlay, density and the travel order the head will follow.",
+      "s2d": "Build the file in EMCAD DAHAO — stitch types, underlay, density and the travel order the head will follow.",
       "s3t": "Set",
       "s3d": "Frame, thread, tension and needle chosen for this cloth. Setup is where half of all faults are decided.",
       "s4t": "Test",
@@ -148,6 +148,26 @@
       "sub": "Pick by the work you want to do, not by the course name. Each one is taught at the machine, with a trainer beside you.",
       "count": "{count, plural, one {# course} other {# courses}}",
       "cta": "Full syllabus and course details"
+    },
+    "emcad": {
+      "eyebrow": "The one course with confirmed numbers",
+      "h2": "EMCAD DAHAO Embroidery Designing",
+      "sub": "This is the only course whose duration, timetable and fee the studio has confirmed in writing. Everything below is that written record — nothing here is true of the other ten courses.",
+      "courseLabel": "The course",
+      "softwareLabel": "Software",
+      "durationLabel": "Duration",
+      "practicalLabel": "Training",
+      "practicalValue": "Live machine practical throughout",
+      "demoLabel": "Free demo",
+      "timingsLabel": "Batch timings",
+      "timingsNote": "Four timings run. Tell us which suits you when you book — these are preferences, not a seat held on a date.",
+      "feeLabel": "Fee",
+      "feeTotalNote": "Total for the three-month course.",
+      "feeAtAdmission": "at admission",
+      "feeBalance": "balance, within {days} days of joining",
+      "offline": "Fees are discussed and paid at the studio. There is no online payment on this site — no gateway, no payment link, no UPI request. If a page ever asks you to pay online, it is not us.",
+      "ctaDemo": "Book the free 2-day demo",
+      "ctaCourse": "Full course page"
     },
     "batches": {
       "h2": "Find a batch that fits your schedule.",
@@ -179,7 +199,30 @@
       "p4f": "The operator compensates for a bad file.",
       "p4c": "Slowing the head down ships the fault anyway. Fix it upstream, in the digitising, and it stays fixed for every run.",
       "p5f": "Production is too slow to be worth it.",
-      "p5c": "Stitch count, colour changes and trims are design decisions. A better file runs faster on the same machine."
+      "p5c": "Stitch count, colour changes and trims are design decisions. A better file runs faster on the same machine.",
+      "p6f": "Every machine on the floor is set up differently.",
+      "p6c": "Frame, stabiliser, needle and tension are decisions, not defaults. Set the machine for the cloth in front of you and the same file runs the same way on any head."
+    },
+    "wall": {
+      "eyebrow": "Off the machine",
+      "h2": "Work made here",
+      "sub": "Pieces stitched on this floor, photographed as they came off the machine. Different techniques, different cloth, different shapes — which is why this is a wall and not a grid of six identical tiles.",
+      "count": "{count} pieces",
+      "cta": "See the full archive"
+    },
+    "studio": {
+      "eyebrow": "Where you actually learn",
+      "h2": "A real floor, with machines on it",
+      "sub": "Mota Varachha, Surat. You can walk in during studio hours and see the machines running before you decide anything.",
+      "floorCaption": "The machine floor.",
+      "entranceCaption": "The entrance and signboard — what to look for from the road.",
+      "wideCaption": "The floor, wide.",
+      "stationsLabel": "Machines on the floor",
+      "station_zardosi": "Zardosi",
+      "station_beads": "Beads",
+      "station_laser": "Laser",
+      "station_tufting": "Tufting",
+      "noSpecsNote": "Named by the technique each one runs, and nothing else. We do not publish head counts, speeds or model numbers we have not verified."
     },
     "machineProof": {
       "eyebrow": "Proof from the machine",
@@ -235,7 +278,10 @@
       "p4Label": "After class",
       "p4Value": "Doubt-clearing with your trainer during studio hours.",
       "pendingLabel": "Still to come",
-      "pendingNote": "Trainer profiles — real names, real specialities, real portraits — go here once each one is confirmed. We would rather show you nothing than a stand-in."
+      "pendingNote": "Trainer profiles — real names, real specialities, real portraits — go here once each one is confirmed. We would rather show you nothing than a stand-in.",
+      "eyebrow": "The people on the machine floor",
+      "portraitsLabel": "Portraits reserved",
+      "portraitsNote": "Three frames, waiting for the studio shoot. Names, specialities and profiles go in when the photographs and the confirmations arrive together — not before."
     },
     "videos": {
       "h2": "Latest from the studio",
@@ -251,8 +297,8 @@
     },
     "investment": {
       "eyebrow": "Fees",
-      "h2": "What it costs, and what that includes.",
-      "sub": "Fees depend on the course and batch, so we go through the exact number with you at the free demo. Here is what the fee always covers.",
+      "h2": "What a course fee includes.",
+      "sub": "The EMCAD DAHAO fee is stated above. For the other ten courses the number depends on the course and batch, so we go through it with you at the free demo. What the fee covers is the same either way.",
       "includedTitle": "Included in every course fee",
       "included": [
         "Machine time in class: you train on the actual production machine, not a demo unit",
@@ -266,11 +312,10 @@
       "notIncluded": [
         "Material for large personal projects beyond classwork",
         "A machine to take home",
-        "emCAD software licence for your own computer"
+        "An EMCAD DAHAO licence for your own computer"
       ],
       "howTitle": "How we share the number",
       "howBody": "Come for the free demo, see the machines, and we will tell you the fee for the course and batch you actually want. No obligation, no pressure to decide the same day.",
-      "noGateway": "There is no online payment on this website. Fees are paid in person at the studio, with a receipt.",
       "askCta": "Ask about fees"
     },
     "visit": {
@@ -319,8 +364,8 @@
       "visitCta": "Visit the studio"
     },
     "cta": {
-      "h2": "Your first design should not stop at the screen.",
-      "sub": "Come and prove it on the machine. Book a practical demo, or call and ask what the current batch is running.",
+      "h2": "Your design should not stop at the screen.",
+      "sub": "Come and prove it on the machine. Book the free two-day demo, or call and ask what the current batch is running.",
       "signoff": "From screen to stitch."
     }
   },
