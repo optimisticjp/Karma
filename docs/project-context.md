@@ -1341,9 +1341,14 @@ the logic.
 
 ## 36. Milestones and pull-request history
 
+History begins **2026-08-26** with a one-line README. `main` carries ~139
+commits; there are no git tags. The public site arrived in two bulk commits
+(`4b8f25b` "Update Karma website", 127 files, and `194e670` "…to v4") before the
+numbered PRs started.
+
 | PR | Title | Significance |
 | --- | --- | --- |
-| #1 | Cloudflare preview pipeline test | — |
+| #1 | Cloudflare preview pipeline test | **Closed without merging.** The first merged PR is #2. |
 | #2 | Supabase auth and Karma Console foundation | The console begins |
 | #3 | Bind Supabase Hyperdrive | Runtime DB path |
 | #4 | Allow Supabase Auth through CSP | The exact-origin CSP decision |
@@ -1357,9 +1362,17 @@ the logic.
 | **#12–#21** | **Screen to Stitch, phases 1–10** | The current public site (§7) |
 | **#22** | **Keep unverified opening hours out of schema** | The current tip of `main` (§31) |
 
-Pre-redesign work also delivered: verified business facts replacing template
-filler, the three owner-confirmed courses, Zardosi-leads catalogue ordering, and
-the removal of the verified-catalogue import button from the console.
+Between #11 and #12 sit six unnumbered Claude-authored merges that delivered:
+verified business facts replacing the template filler, the three owner-confirmed
+courses, Zardosi-leads catalogue ordering, tightened rhythm and navigation, and
+the removal of the verified-catalogue import button from the console. PRs #12–#21
+are a linear chain of single-parent squash commits, all landed on 2026-08-30;
+**#22 is the only PR-numbered true merge commit.**
+
+One historical detail worth knowing if you go spelunking: PR #2's own commit
+message describes "Supabase Auth with mandatory TOTP MFA". That was accurate
+when written and was reversed three PRs later by #5. Commit messages are not
+current state.
 
 ---
 
