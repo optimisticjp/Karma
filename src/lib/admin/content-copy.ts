@@ -111,7 +111,7 @@ const COPY = {
       crossstitch: "Cross Stitch",
       laser: "Laser",
       tufting: "Tufting",
-      emcad: "emCAD"
+      emcad: "EMCAD DAHAO"
     },
     errors: {
       denied: "Your role does not allow that content change.",
@@ -192,7 +192,7 @@ const COPY = {
       crossstitch: "ક્રોસ સ્ટિચ",
       laser: "Laser",
       tufting: "Tufting",
-      emcad: "emCAD"
+      emcad: "EMCAD DAHAO"
     },
     errors: {
       denied: "તમારા role પાસે આ content change કરવાની permission નથી.",

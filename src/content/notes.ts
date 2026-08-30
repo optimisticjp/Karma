@@ -109,7 +109,7 @@ export const machineNotes: MachineNote[] = [
     slug: "why-one-software",
     courseSlug: "emcad-embroidery-design",
     tags: [
-      "emCAD DAHAO classes Surat",
+      "EMCAD DAHAO classes Surat",
       "EMCAD DAHAO embroidery training Surat",
       "computerised embroidery design course"
     ],
@@ -175,7 +175,10 @@ export const machineNotes: MachineNote[] = [
     courseSlug: "emcad-embroidery-design",
     tags: [
       "computerised embroidery design course",
-      "emCAD classes Surat"
+      "EMCAD DAHAO classes Surat",
+      /* People search the short name too. A tag is a search theme, not a
+         brand statement, so the naming pass must not cost a real query. */
+      "EMCAD classes Surat"
     ],
     questionEn: "From a physical sample to a machine-ready file",
     questionGu: "ફિઝિકલ સેમ્પલથી મશીન-રેડી ફાઇલ સુધી",

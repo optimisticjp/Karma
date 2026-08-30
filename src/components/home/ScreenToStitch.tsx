@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
  * It used to render three empty panels reading "📷 … (shoot list #2)", so the
  * one moment meant to explain the whole studio was a production note shown to
  * the public. It is now *drawn*: one buta motif in its three real states —
- * the emCAD outline with its control points, the stitch path the machine
+ * the EMCAD DAHAO outline with its control points, the stitch path the machine
  * follows, and the finished satin fill. That is a better explanation than a
  * photograph would have been anyway, because you can see the path.
  *

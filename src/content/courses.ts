@@ -2,7 +2,7 @@
  * Course catalog.
  *
  * The first eight are the VERIFIED list from the studio's own YouTube bio
- * (Zardosi, 4-Beads, Coding, Chain, Multi, Sequence, Laser, Tufting + emCAD),
+ * (Zardosi, 4-Beads, Coding, Chain, Multi, Sequence, Laser, Tufting + EMCAD DAHAO),
  * NOT the old template's fictional list. See master plan, decision log #1.
  *
  * Flat Embroidery, Appliqué & 3D and Cross Stitch were added after the owner

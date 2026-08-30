@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
 import { PageHead } from "@/components/admin/PageHead";
@@ -50,8 +50,14 @@ export default async function FeesPage({ searchParams }: Props) {
   const q = typeof params.q === "string" ? params.q.trim().toLowerCase().slice(0, 120) : "";
   const pendingOnly = params.pending === "1";
 
-  const [enrollments, ledger] = await Promise.all([
-    db.select({
+  /* The enrolments first, then only the ledger rows those enrolments own.
+     The ledger read used to be `select … from fee_records` with no filter at
+     all: every receipt ever written, on every load of this page, to build
+     per-enrolment histories for the enrolments on screen. It is now scoped to
+     those ids, so it shrinks with the list rather than growing with the
+     studio's whole trading history — and it shrinks again for free the day
+     this page paginates. */
+  const enrollments = await db.select({
       enrollmentId: schema.enrollments.id,
       enrollmentStatus: schema.enrollments.status,
       joinedOn: schema.enrollments.joinedOn,
@@ -71,8 +77,11 @@ export default async function FeesPage({ searchParams }: Props) {
       .innerJoin(schema.students, eq(schema.enrollments.studentId, schema.students.id))
       .innerJoin(schema.batches, eq(schema.enrollments.batchId, schema.batches.id))
       .innerJoin(schema.courses, eq(schema.batches.courseId, schema.courses.id))
-      .orderBy(desc(schema.enrollments.createdAt)),
-    db.select({
+      .orderBy(desc(schema.enrollments.createdAt));
+
+  const enrollmentIds = enrollments.map((row) => row.enrollmentId);
+  const ledger = enrollmentIds.length
+    ? await db.select({
       id: schema.feeRecords.id,
       enrollmentId: schema.feeRecords.enrollmentId,
       courseFee: schema.feeRecords.courseFee,
@@ -83,8 +92,11 @@ export default async function FeesPage({ searchParams }: Props) {
       dueDate: schema.feeRecords.dueDate,
       notes: schema.feeRecords.notes,
       createdAt: schema.feeRecords.createdAt
-    }).from(schema.feeRecords).orderBy(desc(schema.feeRecords.createdAt))
-  ]);
+      })
+        .from(schema.feeRecords)
+        .where(inArray(schema.feeRecords.enrollmentId, enrollmentIds))
+        .orderBy(desc(schema.feeRecords.createdAt))
+    : [];
 
   const byEnrollment = new Map<number, FeeRow[]>();
   for (const row of ledger) {

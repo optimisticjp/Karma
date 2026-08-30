@@ -1858,7 +1858,7 @@ Claude must execute phases in order, one clean PR at a time unless a smaller spl
 | 10 | Karma Console shell + Today at Karma + mobile operational system | ✅ Complete + merged |
 | 11 | Admissions, Students, Courses/Batches, Fees admin redesign | ✅ Complete + merged |
 | 12 | Attendance, Certificates, Design Desk, Content, Reports, Team admin redesign | ✅ Complete + merged |
-| 13 | Backend/query/free-tier audit + copy/i18n/SEO consistency | ⏳ Pending |
+| 13 | Backend/query/free-tier audit + copy/i18n/SEO consistency | ✅ Complete + merged |
 | 14 | Accessibility/performance/responsive hardening + final whole-product creative audit | ⏳ Pending |
 
 ---
@@ -2942,6 +2942,76 @@ Check:
 - served artifacts such as `llms.txt`, sitemap and robots
 
 Do not change architecture just to satisfy a generic best-practice skill.
+
+---
+
+## Implementation record — merged 2026-08-30
+
+**Branch:** `redesign/phase-13-audit` · **PR:** #40
+
+### Two unbounded reads, found and fixed
+
+**Certificates pulled every attendance record ever written.** One row per
+student per session, transferred and tallied in a Node loop, to produce one
+percentage per enrolment. A single batch of 30 students over three months is
+already ~2,300 rows and the table only grows — the page paid for all of it on
+every load. It is now a `group by (student_id, batch_id)` with
+`count(*)` and a filtered count: one row per pair, the same answer.
+
+**Fees read the entire ledger.** `select … from fee_records` with no filter at
+all — every receipt the studio has ever written, on every page load, to build
+histories for the enrolments on screen. Now scoped with
+`inArray(enrollmentId, enrollmentIds)`, so it shrinks with the list rather than
+growing with the studio's whole trading history, and shrinks again for free the
+day the page paginates.
+
+### An index deliberately NOT added
+
+`fee_records.enrollment_id` has no index, and the new filter reads it. At this
+studio's scale — a few hundred receipts, a few thousand in five years — a
+sequential scan is faster than the planner's alternative, and §48 warns against
+changing architecture to satisfy generic best practice. The unbounded *shape*
+was the bug; the scan is not. Recorded here so a future session with real
+volume knows where to look rather than adding a migration nobody can measure.
+
+### The naming sweep each phase deferred
+
+`emCAD` → `EMCAD DAHAO` across every remaining user-facing string in both
+catalogues and every source file. A test now fails on `emCAD` anywhere in
+`src/` or the catalogues.
+
+**The slug and the technique key were left alone** — `emcad-embroidery-design`
+and `technique: "emcad"` are identifiers, not names a visitor reads, and
+renaming them would break a URL and an upsert.
+
+**And the rename was not allowed to cost a search term.** A test caught that
+`"emCAD classes Surat"` had become `"EMCAD DAHAO classes Surat"`, losing the
+short form people actually type. Both are now tags: a tag is a search theme,
+not a brand statement.
+
+### The rest of the audit
+
+- **PII in analytics** — every `track()` call in `src/` is scanned; a name,
+  phone, guardian phone, email, area, goal, reference or message in one fails
+  the suite.
+- **JSON-LD** — exactly one module emits `@context` (`src/lib/schema.ts`); no
+  offers, price, rating or review; `timeRequired` only where a duration is
+  confirmed.
+- **Served artifacts** — `llms.txt` builds from `EMCAD_DAHAO` rather than typed
+  figures; sitemap and robots agree on what is indexable.
+- **Copy tone** — the brief's banned phrases ("unlock your creativity",
+  "world-class", "cutting-edge", "unleash", …) are absent from both catalogues
+  and now tested.
+- **Gujarati** — a sweep across all three stylesheets asserts that every
+  `:lang(gu)` block which touches `text-transform` sets it to `none`, and every
+  one which touches `letter-spacing` sets it to `0`.
+
+### Gates
+
+`npm run typecheck`, `npm run lint`, `npm test` (45 files, 643 tests) and
+`npm run build` all green. No dependency, **no migration**, no schema change,
+no permission change.
+
 
 ---
 
