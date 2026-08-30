@@ -25,14 +25,17 @@ import { coursesByFamily, type Course } from "@/content/courses";
  *   schema is a claim about a real human being.
  * - `offers` / `price` — fees are discussed offline and there is no gateway.
  * - `timeRequired` — course durations are unconfirmed (`durationWeeks: null`).
+ * - `openingHoursSpecification` — exact day-by-day opening hours are still
+ *   owner-confirmation-needed. "Evening batches till 10:30 pm" does not prove
+ *   that the business closes at 22:30 every day.
  * - Student outcomes, pass rates, placement figures, student counts.
  *
  * ## What may appear
  *
- * The address, the landmark, the three published phone numbers, the opening
- * hours, the social profiles, the course catalogue and the machine notes —
- * all of which are either verified against two sources or are descriptions of
- * the studio's own offering.
+ * The address, the landmark, the three published phone numbers, the social
+ * profiles, the course catalogue and the machine notes — all of which are
+ * either verified against two sources or are descriptions of the studio's own
+ * offering.
  */
 
 /** Stable node ids, so the graph refers to one studio rather than repeating it. */
@@ -73,17 +76,9 @@ export function studioSchema(locale: Locale) {
     areaServed: { "@type": "City", name: "Surat" },
     availableLanguage: ["gu", "hi", "en"],
     knowsLanguage: ["gu", "hi", "en"],
-    /* Evening batches until 22:30 are the studio's actual differentiator for
-       working students, so they belong in the listing rather than only in copy. */
-    openingHoursSpecification: [
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: [
-          "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-        ],
-        closes: "22:30"
-      }
-    ],
+    /* Exact day-by-day business hours are deliberately absent until the owner
+       confirms them. The public copy may still truthfully say that evening
+       batches run till 10:30 pm; that is a batch fact, not a closing-hours fact. */
     sameAs: [
       site.socials.instagram,
       site.socials.youtube,
