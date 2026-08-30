@@ -446,7 +446,7 @@ Update this table after every completed/merged phase.
 
 | Phase | Scope | Status | PR / merge notes |
 | --- | --- | --- | --- |
-| 1 | Brand system + design foundations | 🚧 In progress | branch `phase-1/brand-system-foundations` |
+| 1 | Brand system + design foundations | ✅ Complete + merged | PR #12 — `build` + Cloudflare Workers Builds green |
 | 2 | Homepage / 30-second decision | ⏳ Pending | |
 | 3 | Courses / production-led detail pages | ⏳ Pending | |
 | 4 | Proof ecosystem: work, stories, reviews, trainers | ⏳ Pending | |
