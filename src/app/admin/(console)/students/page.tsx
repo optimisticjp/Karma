@@ -9,6 +9,8 @@ import { isEnrollmentStatus, positiveId, type EnrollmentStatus } from "@/lib/adm
 import { recordsCopy } from "@/lib/admin/records-copy";
 import { canPerform } from "@/lib/admin/record-actions";
 import { RecordMenu } from "@/components/admin/RecordMenu";
+import { PrintLink } from "@/components/admin/PrintLink";
+import { printCopy } from "@/lib/admin/print-copy";
 import {
   AddEnrollmentForm,
   ConvertEnquiryForm,
@@ -28,6 +30,7 @@ export default async function StudentsPage({ searchParams }: Props) {
   if (!canView) redirect("/admin/no-access?reason=permission");
   const copy = studentsCopy(session.staff.adminLocale);
   const records = recordsCopy(session.staff.adminLocale);
+  const sheets = printCopy(session.staff.adminLocale);
   const subject = {
     role: session.role,
     has: (permission: Parameters<typeof hasPermission>[1]) => hasPermission(session.staff, permission)
@@ -189,7 +192,16 @@ export default async function StudentsPage({ searchParams }: Props) {
       <Heading title={copy.title} lede={copy.lede} />
 
       {canManage ? (
-        <section className="mt-8 grid gap-4 lg:grid-cols-2">
+        <p className="mt-6">
+          {/* A walk-in is a conversation at a counter; the record comes after.
+              Making staff create a student row before they can print a form to
+              fill in by hand gets that order backwards. */}
+          <PrintLink href="/admin/print/admission/blank" label={sheets.blankForm} />
+        </p>
+      ) : null}
+
+      {canManage ? (
+        <section className="mt-6 grid gap-4 lg:grid-cols-2">
           <details className="panel">
             <summary className="panel-head cursor-pointer list-none"><div><h2 className="text-h4">{copy.directAdmission}</h2><p className="form-note mt-1">{copy.directAdmissionHint}</p></div><span aria-hidden className="text-h4">＋</span></summary>
             <div className="panel-body border-t border-rule"><DirectAdmissionForm batches={batches} copy={copy} /></div>
@@ -252,6 +264,8 @@ export default async function StudentsPage({ searchParams }: Props) {
                           ? copy.statuses.active
                           : copy.all}
                     </span>
+                    <PrintLink href={`/admin/print/admission/${selected.id}`} label={sheets.admissionForm} compact />
+                    <PrintLink href={`/admin/print/student/${selected.id}`} label={sheets.studentSummary} compact />
                     <RecordMenu
                       entity="student"
                       id={selected.id}

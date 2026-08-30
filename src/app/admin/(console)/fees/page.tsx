@@ -8,6 +8,8 @@ import { isOverdue, summariseFees, type FeeStatus } from "@/lib/admin/fee-status
 import { recordsCopy } from "@/lib/admin/records-copy";
 import { canPerform } from "@/lib/admin/record-actions";
 import { RecordMenu } from "@/components/admin/RecordMenu";
+import { PrintLink } from "@/components/admin/PrintLink";
+import { printCopy } from "@/lib/admin/print-copy";
 import { AgreementForm, FeeEntryForm } from "./FeeForm";
 
 type Props = { searchParams: Promise<{ q?: string; pending?: string }> };
@@ -32,6 +34,7 @@ export default async function FeesPage({ searchParams }: Props) {
   if (!canView) redirect("/admin/no-access?reason=permission");
   const copy = feesCopy(session.staff.adminLocale);
   const records = recordsCopy(session.staff.adminLocale);
+  const sheets = printCopy(session.staff.adminLocale);
   const canDeleteFeeRecord = canPerform(
     {
       role: session.role,
@@ -159,10 +162,17 @@ export default async function FeesPage({ searchParams }: Props) {
               </span>
             </summary>
             <div className="grid gap-6 border-t border-line bg-ivory-2/40 px-3 py-4 md:px-4">
-              <p className="form-note">
-                {session.staff.adminLocale === "gu" ? card.courseNameGu : card.courseNameEn} ·{" "}
-                <a href={`https://wa.me/91${card.whatsapp ?? card.phone}`}>WhatsApp</a>
-              </p>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="form-note">
+                  {session.staff.adminLocale === "gu" ? card.courseNameGu : card.courseNameEn} ·{" "}
+                  <a href={`https://wa.me/91${card.whatsapp ?? card.phone}`}>WhatsApp</a>
+                </p>
+                <PrintLink
+                  href={`/admin/print/statement/${card.enrollmentId}`}
+                  label={sheets.feeStatement}
+                  compact
+                />
+              </div>
               <dl className="kv-grid">
                 <Fact label={copy.courseFee} value={card.summary.agreed != null ? money(card.summary.agreed) : "—"} />
                 <Fact label={copy.discount} value={card.summary.discount > 0 ? money(card.summary.discount) : "—"} />
@@ -190,6 +200,13 @@ export default async function FeesPage({ searchParams }: Props) {
                           {row.received > 0 ? money(row.received) : "—"}
                         </span>
                         <span className="data-row__actions">
+                          {row.received > 0 ? (
+                            <PrintLink
+                              href={`/admin/print/receipt/${row.id}`}
+                              label={sheets.feeReceipt}
+                              compact
+                            />
+                          ) : null}
                           {/* A ledger entry is never EDITED — a corrected receipt
                               would leave the original amount nowhere. A genuinely
                               mistaken one is deleted by the Owner, and the

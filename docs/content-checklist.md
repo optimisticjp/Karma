@@ -145,16 +145,84 @@ call number.
 | Q15 | Attendance rule for certificates: 75% shipped as draft. Correct? | admissions copy + Phase 3 logic |
 | Q16 | Who receives notifications: confirm karmadesignclasses@gmail.com, add more? | `STUDIO_EMAIL`, digest |
 
-## B. The photo/video shoot list (plan §16)
+## B. Photography — the FINAL list (owner, 2026-08-30)
+
+> **⚠ IGNORE EVERY EARLIER SHOOT LIST.** The owner supplied
+> `Karma_Design_Studio_Updated_Photo_List.pdf` on 2026-08-30. That document is
+> the specification. The older list is preserved below it for reference only,
+> because a `PhotoSlot` label in the code may still match one of its lines —
+> but where the two disagree, the updated list wins, and nobody is to shoot
+> from the old one.
+
+**32 photographs**, allocated:
+
+| Slot | Count |
+| --- | ---: |
+| Hero | 3 |
+| Course | 8 |
+| Student work | 6 |
+| Trainers | 3 |
+| Studio / machines | 6 |
+| Student stories | 2 |
+| Screen to Stitch | 3 |
+| Studio floor, wide | 1 |
+| **Total** | **32** |
+
+**How they are to be shot and sent:**
+
+- The subject or machine is **centred**.
+- Leave **crop-safe space** around the subject — the site crops to several
+  aspect ratios, and a shot framed tight on one is unusable on another.
+- **Natural light**, sharp.
+- Originals transferred **without WhatsApp compression** — "Send as Document",
+  not as a photo. A WhatsApp-compressed image is not recoverable, and a
+  re-shoot costs an evening.
+
+**Status:** the real photographs are expected in roughly two days from
+2026-08-30.
+
+### ⚠ Do not fill the gap
+
+Until the real files arrive, every visual stays a drawn device or a named
+`<PhotoSlot>` that states the shot it is waiting for. **No stock photography, no
+generated image, no placeholder from another studio** — a labelled empty frame
+is a visible work-in-progress; a stock photo of someone else's workshop is a
+false claim about this business that would outlive the fix.
+
+### 🟠 Open: 8 course photographs, 11 courses
+
+The final list allocates **8** course photographs. The catalogue has **11**
+courses (since 2026-08-29). Three courses will therefore have no photograph of
+their own.
+
+**This is recorded, not resolved, and it is not for an engineer to resolve.**
+Do not invent three extra slots, do not reuse one course's photograph on
+another, and do not quietly drop three courses from the catalogue to make the
+numbers agree. When the photographs arrive, ask the owner which eight courses
+they cover; the remaining three keep their `<PhotoSlot>` until there is a
+photograph of the real thing.
+
+### The asset pipeline is deliberately undecided
+
+`next/image` optimisation is not configured and **R2 is not being activated for
+this**. Public photography may not need R2 at all — optimised, pre-sized static
+assets deployed with the Worker may be the better answer for 32 images that
+change rarely. That decision waits until the real files exist and their sizes
+are known. See `docs/project-context.md` §40.
+
+---
+
+### The earlier shoot list (superseded, kept for slot labels)
+
 One phone, one evening batch, window light. Every `PhotoSlot` label matches
 this list, so a shot drops straight into place.
-1. **Hero loop (video, 10-15 s):** emCAD screen → machine stitching close →
-   finished piece. Landscape + a vertical crop for reels.
-2. **Screen-to-stitch trio (one project):** emCAD screen / stitching mid-way
-   / finished fabric. Same framing, tripod if possible.
+1. **Hero loop (video, 10-15 s):** EMCAD DAHAO screen → machine stitching close
+   → finished piece. Landscape + a vertical crop for reels.
+2. **Screen-to-stitch trio (one project):** EMCAD DAHAO screen / stitching
+   mid-way / finished fabric. Same framing, tripod if possible.
 3. Machine floor wide shot during a live evening batch.
 4. Each machine, straight-on: zardosi, 4-beads, sequence, coding, chain,
-   multi-head, laser, tufting frame, emCAD station.
+   multi-head, laser, tufting frame, EMCAD DAHAO station.
 5. Hands + fabric macros: zardosi gold, beads catching light, sequence
    shimmer, cording curve, tufting stroke.
 6. 8-12 finished student pieces on plain ivory background (gallery).

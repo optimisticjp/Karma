@@ -4,6 +4,8 @@ import { desc, eq } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
 import { hasPermission } from "@/lib/auth/access";
+import { PrintLink } from "@/components/admin/PrintLink";
+import { printCopy } from "@/lib/admin/print-copy";
 import { designCopy } from "@/lib/admin/design-copy";
 import { DESIGN_STATUSES, isDesignStatus, type DesignStatus } from "@/lib/admin/design";
 import { DesignJobForm, DesignStatusForm, type DesignValue } from "./DesignForms";
@@ -58,6 +60,7 @@ export default async function DesignPage({ searchParams }: Props) {
   });
   const historyByJob = groupBy(histories, (item) => item.enquiryId);
   const filesByJob = groupBy(files, (item) => item.enquiryId);
+  const sheets = printCopy(session.staff.adminLocale);
   const today = kolkataDate();
   const terminal = new Set<DesignStatus>(["delivered", "closed"]);
   const needsAction = jobs.filter((job) => ["new", "info_needed", "quote_prepared", "quote_sent", "revision"].includes(job.status)).length;
@@ -91,7 +94,7 @@ export default async function DesignPage({ searchParams }: Props) {
           return (
             <article key={job.id} className="panel">
               <div className="panel-head flex-wrap gap-4">
-                <div><p className="microlabel">{job.reference}</p><h2 className="text-h4 mt-1">{job.name}{job.company ? ` · ${job.company}` : ""}</h2><p className="form-note mt-1"><a href={`https://wa.me/91${job.phone}`}>WhatsApp {job.phone}</a>{job.email ? ` · ${job.email}` : ""}</p></div>
+                <div><p className="microlabel">{job.reference}</p><h2 className="text-h4 mt-1">{job.name}{job.company ? ` · ${job.company}` : ""}</h2><p className="form-note mt-1"><a href={`https://wa.me/91${job.phone}`}>WhatsApp {job.phone}</a>{job.email ? ` · ${job.email}` : ""}</p><p className="mt-2"><PrintLink href={`/admin/print/brief/${job.id}`} label={sheets.brief} compact /></p></div>
                 <span className={`status ${statusTone(status)}`}>{copy.statuses[status]}</span>
               </div>
               <div className="panel-body grid gap-6">

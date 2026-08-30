@@ -14,6 +14,8 @@ import { readCourseOperations, operationsToForm } from "@/lib/admin/course-opera
 import { recordsCopy } from "@/lib/admin/records-copy";
 import { canPerform } from "@/lib/admin/record-actions";
 import { RecordMenu } from "@/components/admin/RecordMenu";
+import { PrintLink } from "@/components/admin/PrintLink";
+import { printCopy } from "@/lib/admin/print-copy";
 import {
   BatchForm,
   CourseForm,
@@ -29,6 +31,7 @@ export default async function CoursesPage({
   const session = await requireAdmin("/admin/courses");
   const copy = catalogCopy(session.staff.adminLocale);
   const records = recordsCopy(session.staff.adminLocale);
+  const sheets = printCopy(session.staff.adminLocale);
   const { archived } = await searchParams;
   /**
    * Archived courses are OUT of the operational picture by default and one
@@ -304,6 +307,10 @@ export default async function CoursesPage({
                                     </span>
                                   </summary>
                                   <div className="border-t border-line px-3 py-4 md:px-4">
+                                    <div className="mb-4 flex flex-wrap items-center justify-end gap-3">
+                                      <PrintLink href={`/admin/print/roster/${batch.id}`} label={sheets.roster} compact />
+                                      <PrintLink href={`/admin/print/register/${batch.id}`} label={sheets.register} compact />
+                                    </div>
                                     {canManageBatches || batchCan.delete ? (
                                       <div className="mb-4 flex justify-end">
                                         <RecordMenu

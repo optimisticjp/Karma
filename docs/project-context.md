@@ -12,7 +12,7 @@ It is written to be read, not skimmed. Read it before significant work.
 | | |
 | --- | --- |
 | **Written** | 2026-08-30 |
-| **Verified against** | `main` @ `9ad15e1` ("Vendor the Claude skill library, and give the repo a memory", PR #23), plus the operational work that followed it |
+| **Verified against** | `main` after PRs #24-#27 — the operational work of 2026-08-30 |
 | **Last substantive update** | 2026-08-30 — the owner's verified EMCAD DAHAO facts, the course operational model and migration `0004` |
 | **Rule** | Where this document and the code disagree, **the code is right.** Fix the document. |
 
@@ -1257,7 +1257,7 @@ unrelated work.
 
 ## 26. Certificates
 
-Issuing, numbering, a print view (`/admin/certificates/print/[certNo]`) and
+Issuing, numbering, an A4 print sheet (`/admin/print/certificate/[certNo]`, §29a — moved out of the console shell on 2026-08-30, with a permanent redirect from the old path) and
 **public verification** at `/verify` and `/verify/[id]`.
 
 Open: the exact issuing name, the signatory, and whether historical certificates
@@ -1339,6 +1339,78 @@ Actions. It guards against CSV formula injection (`=+-@`) and **fails loudly** �
 any table failure exits non-zero and reddens the run, because a silently partial
 backup is worse than none. **The artifacts contain PII**; treat downloads
 accordingly.
+
+---
+
+## 29a. Printed paperwork (2026-08-30)
+
+Karma runs on paper as well as on screens: an admission is signed, a receipt is
+handed over, a trainer marks a register while the tablet is on charge. Nine A4
+sheets live in their own route group, `src/app/admin/(print)/`, with their own
+stylesheet.
+
+| Sheet | Route | Orientation |
+| --- | --- | --- |
+| Admission form (filled) | `/admin/print/admission/[studentId]` | portrait |
+| Admission form (blank) | `/admin/print/admission/blank` | portrait |
+| Fee receipt | `/admin/print/receipt/[feeId]` | portrait |
+| Fee statement | `/admin/print/statement/[enrollmentId]` | portrait |
+| Student record | `/admin/print/student/[studentId]` | portrait |
+| Batch roster | `/admin/print/roster/[batchId]` | **landscape** |
+| Attendance register | `/admin/print/register/[batchId]` | **landscape** |
+| Design brief | `/admin/print/brief/[enquiryId]` | portrait |
+| Certificate | `/admin/print/certificate/[certNo]` | portrait |
+
+**Why a separate route group.** Printing an operational screen produces a page
+with the navigation rail down one side, buttons that do nothing on paper, and a
+table cut in half at the page break. `(print)` has its own layout: no shell, no
+rail, white paper on screen as well as on paper.
+
+**Authorization is not relaxed by being printable.** The layout runs
+`requireAdmin`, and **every sheet re-checks the specific permission its data
+needs** — a fee receipt is not readable by someone who can see students but not
+fees. The student record goes further and gates only the money columns on
+`fees.view`, so the rest of the record still prints.
+
+Design decisions worth keeping:
+
+- `@page` A4 with a 14mm/13mm margin, chosen so a home or office printer's
+  unprintable edge never eats a signature line.
+- **Black and white throughout.** No design token for vermilion, success, warn
+  or error appears in `print.css`, and a test asserts it: a studio printer is
+  monochrome, and anything whose meaning depended on a hue would come out an
+  indistinguishable grey.
+- **Table headings repeat on every page** (`display: table-header-group`) and a
+  row never splits. A register whose column numbers are on page one only is
+  unusable on page two.
+- The declaration and its signature block never separate.
+- Gujarati is never uppercased or letterspaced — every uppercase label style in
+  `print.css` has a `:lang(gu)` override, as on the rest of the site.
+
+Two things the sheets fixed rather than inherited:
+
+1. The certificate page rendered its Print button as a **server** component with
+   `onClick={undefined}` — inert by construction — plus instruction text asking
+   staff to use the browser's print menu. There is now a real button (one tiny
+   client island; the sheets themselves stay server-rendered, which keeps a
+   roster of eighty students out of the browser bundle).
+2. It **hard-coded the `workers.dev` origin** in the verification URL, which
+   would keep pointing there after the domain cutover — exactly what
+   `docs/launch-checklist.md` says never to do. It derives from `site.url` now.
+
+**The blank admission form exists on purpose.** An admission is a conversation
+at a counter and the record is created afterwards; making staff create a student
+row before they can print a form to fill in by hand gets the order backwards and
+leaves half-empty records for people who did not join. It prints the verified
+EMCAD DAHAO fee plan, so the number on the counter is the number in the console.
+
+**The register is deliberately blank.** The console already holds what was
+marked; what a trainer needs on paper is a sheet to mark on. Printing recorded
+attendance would only be transcribed back in and get out of step.
+
+**The admission form prints the agreement THIS student signed** — the
+enrolment's snapshot — never today's course fee. A test asserts the sheet never
+reads `courses.feeTotal`.
 
 ---
 
@@ -1533,7 +1605,7 @@ This is why **Hyperdrive must be connected with the table-owning role**.
 `server-only` is aliased to a stub so server modules are importable in a test
 runner while the guard stays real in the app.
 
-**26 test files, 271 tests** (`vitest run`, ~3 s). Many encode a *policy* decision rather than a code detail,
+**32 test files, 393 tests** (`vitest run`, ~3 s). Many encode a *policy* decision rather than a code detail,
 which is the point — the policy survives a refactor:
 
 | Test | Guards |
@@ -1551,6 +1623,12 @@ which is the point — the policy survives a refactor:
 | `machine-notes`, `studio-b2b`, `courses-console`, `catalog-import`, `course-validation` | content and catalogue contracts |
 | `validation`, `phone`, `files`, `hardening`, `api-helpers` | input validation, normalisation, upload signatures, fail-closed behaviour |
 | `admissions-console`, `console-completion` | console flows |
+| `course-operations` | the verified EMCAD DAHAO facts, that they do not leak onto another course, the versioned admission norms, and seed/import ordering coherence |
+| `admission-flow` | the guardian requirement and where it deliberately does not bite, slot validation on both sides, terms acceptance, the agreement snapshot |
+| `fee-status` | the derived unpaid/partial/paid states, overdue, and that a course edit cannot reprice an existing student |
+| `record-actions` | the action policy — above all, that an admin holding EVERY permission still cannot delete anything |
+| `console-density` | ≥44px targets inside compact rows, safe-area insets, no component kit, Gujarati never letterspaced |
+| `print-sheets` | per-sheet permission checks, A4/print CSS contracts, black-and-white readability, EN/GU parity of print labels |
 
 ### The tests are brittle on purpose
 
@@ -1619,7 +1697,12 @@ numbered PRs started.
 | #10 | Reports, content and console polish | Content Desk, exports |
 | #11 | Premium product redesign system | Pre-Screen-to-Stitch visual pass |
 | **#12–#21** | **Screen to Stitch, phases 1–10** | The current public site (§7) |
-| **#22** | **Keep unverified opening hours out of schema** | The current tip of `main` (§31) |
+| **#22** | **Keep unverified opening hours out of schema** | The opening-hours fix (§31) |
+| #23 | Vendor the Claude skill library, and give the repo a memory | `.claude/skills/` + this document |
+| **#24** | **The owner's verified EMCAD DAHAO facts + the course operational model** | Migration `0004`; EMCAD DAHAO only; seed/import ordering fixed (§21) |
+| **#25** | **The admission flow the institute actually runs** | Guardian on every admission, timetable + demo slots, versioned norms, the fee-agreement snapshot (§22, §25) |
+| **#26** | **The record action model + the console's dense pass** | Owner-only permanent deletion with preflight and tombstone; compact mobile console (§9a) |
+| **#27** | **The A4 print system** | Nine printable sheets in their own route group (§29a) |
 
 Between #11 and #12 sit six unnumbered Claude-authored merges that delivered:
 verified business facts replacing the template filler, the three owner-confirmed
@@ -1752,8 +1835,28 @@ content is fixed.*
 
 Photography: every visual is drawn or a named `<PhotoSlot>` placeholder that
 states the shot it is waiting for. They are designed to be replaced by real
-photography without a layout change. The shoot list is in
-`docs/content-checklist.md` §B.
+photography without a layout change.
+
+**The FINAL shoot list arrived on 2026-08-30** —
+`Karma_Design_Studio_Updated_Photo_List.pdf`, **32 photographs**: 3 hero · 8
+course · 6 student work · 3 trainers · 6 studio/machines · 2 student stories ·
+3 screen-to-stitch · 1 studio floor wide. Subjects centred, crop-safe space
+around them, natural light, originals sent **as documents** so WhatsApp does not
+compress them. Real files expected around 2026-09-01. **Every earlier shoot list
+is superseded** — `docs/content-checklist.md` §B keeps the old one only because
+some `PhotoSlot` labels still match its lines.
+
+Two things about it are deliberately unresolved, and neither is an engineer's
+to resolve:
+
+- **8 course photographs, 11 courses.** Three courses will have none. Do not
+  invent three slots, do not reuse one course's photograph on another, and do
+  not drop three courses to make the numbers agree. Ask the owner which eight
+  the photographs cover.
+- **The asset pipeline.** `next/image` optimisation is not configured and R2 is
+  **not** being activated for this. Optimised, pre-sized static assets deployed
+  with the Worker may well be the better answer for 32 images that change
+  rarely. Decide once the real files and their sizes exist.
 
 ---
 
@@ -1816,7 +1919,7 @@ effect of unrelated work.**
 | **Playwright / E2E** | Not written | Flows worth scripting end to end |
 | **Public-media upload tooling** | Content Desk images use same-origin deployed asset paths | A public-media workflow is designed |
 | **ISR / R2 incremental cache** | Available in `open-next.config.ts`, not enabled | Traffic makes per-request rendering wasteful |
-| **`next/image` optimisation** | Not configured — there are no real photos yet | The studio shoot lands |
+| **`next/image` optimisation** | Not configured — there are no real photos yet. The final 32-photograph list arrived 2026-08-30; the files themselves have not. **R2 is not to be activated for public photography** without deciding it is actually the right store — static assets may be. | The photographs land, and their sizes are known |
 | **Dropping `students.pin` / `applications.message`** | Deprecated, still present | A supervised destructive migration |
 | **Analytics provider** | The event abstraction exists and emits no network call | Owner picks a provider |
 
@@ -2086,7 +2189,7 @@ scope for a documentation change. **Do not treat these as invisible.**
 | Gap | Why it matters |
 | --- | --- |
 | **`content_items` is not in `scripts/backup.ts`'s `TABLES` list** (18 entries, written before migration `0003`). | Every Content Desk row is outside the weekly CSV backup. A one-line fix, but it widens what the PII-bearing artifact contains. |
-| **The certificate print page hard-codes the `workers.dev` verify origin** instead of deriving it from `site.url`. | It will keep pointing at `workers.dev` after the domain cutover — exactly what `docs/launch-checklist.md` §2 says never to do. |
+| ~~**The certificate print page hard-codes the `workers.dev` verify origin.**~~ **FIXED 2026-08-30.** | It moved into the A4 print system and derives from `site.url`; a test fails if a host is hard-coded there again. It mattered more than the other URL bugs because a printed certificate cannot be corrected after it is handed over. |
 | ~~**`public/llms.txt` hard-codes `karmadesignstudio.in` URLs** and lists only eight courses.~~ **FIXED 2026-08-30.** | It is now generated at `src/app/llms.txt/route.ts`: URLs derive from `site.url`, the catalogue derives from `src/content/courses.ts`, and the EMCAD DAHAO facts derive from `src/content/course-operations.ts`. The static file is deleted. Both problems had the same cause — it was the one public surface that derived from nothing. |
 | **The CSV export route writes no audit row.** | Exporting student, fee and design data is the one sensitive operation that leaves no trace beyond the Worker log. There is no audit action constant for `exports.run`. |
 | **Reference and receipt years are derived inconsistently** — students use IST (`kolkataDate`), but the admissions reference and fee `receiptNo` use the Worker's UTC year. | Between 00:00 and 05:30 IST on 1 January they produce the previous year. |

@@ -609,6 +609,7 @@ rather than removed: an audit row must keep pointing at a real staff record.
 | Content desk | shipped (PR #10) |
 | Offline fee ledger | shipped (PR #9); agreement snapshot + derived status added 2026-08-30 |
 | Reports & exports | shipped (PR #10) — `students`, `admissions`, `attendance`, `fees`, `design` |
+| A4 print sheets | shipped 2026-08-30 — nine sheets in their own `(print)` route group |
 
 **Every console module has shipped.** What remains inside them is content and
 polish, not construction — see `docs/project-context.md` §§22-29 for what each

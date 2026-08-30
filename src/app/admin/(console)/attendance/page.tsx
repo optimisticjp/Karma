@@ -3,6 +3,8 @@ import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
 import { hasPermission } from "@/lib/auth/access";
+import { PrintLink } from "@/components/admin/PrintLink";
+import { printCopy } from "@/lib/admin/print-copy";
 import { attendanceCopy } from "@/lib/admin/attendance-copy";
 import { isAttendanceStatus, positiveAttendanceId, sessionIsLocked, validIsoDate } from "@/lib/admin/attendance";
 import { AttendanceRegister } from "./AttendanceForm";
@@ -15,6 +17,7 @@ export default async function AttendancePage({ searchParams }: Props) {
   const canManage = hasPermission(session.staff, "attendance.manage");
   if (!canView) redirect("/admin/no-access?reason=permission");
   const copy = attendanceCopy(session.staff.adminLocale);
+  const sheets = printCopy(session.staff.adminLocale);
   const db = getDb();
   if (!db) return <div className="max-w-[76rem]"><Heading title={copy.title} lede={copy.lede} /><p className="alert alert-error mt-8">Database unavailable.</p></div>;
 
@@ -97,7 +100,7 @@ export default async function AttendancePage({ searchParams }: Props) {
       {!selectedBatch ? <p className="empty-state mt-8">{copy.noBatch}</p> : (
         <section className="panel mt-8">
           <div className="panel-head flex-wrap gap-3">
-            <div><p className="microlabel">{formatDate(date, session.staff.adminLocale)}</p><h2 className="text-h3 mt-1">{session.staff.adminLocale === "gu" ? selectedBatch.courseNameGu : selectedBatch.courseNameEn}</h2><p className="form-note mt-1">{selectedBatch.label}</p></div>
+            <div><p className="microlabel">{formatDate(date, session.staff.adminLocale)}</p><h2 className="text-h3 mt-1">{session.staff.adminLocale === "gu" ? selectedBatch.courseNameGu : selectedBatch.courseNameEn}</h2><p className="form-note mt-1">{selectedBatch.label}</p><p className="mt-2"><PrintLink href={`/admin/print/register/${selectedBatch.id}`} label={sheets.register} compact /></p></div>
             {locked ? <span className="status status-pending">{copy.locked}</span> : <span className="status status-active">{copy.roster}</span>}
           </div>
           <div className="panel-body border-t border-rule">

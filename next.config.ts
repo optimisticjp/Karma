@@ -72,6 +72,16 @@ const nextConfig: NextConfig = {
         source: "/:locale(en|gu)/notes/emcad-or-wilcom",
         destination: "/:locale/notes/why-one-software",
         permanent: true
+      },
+      /**
+       * The certificate sheet moved out of the console shell into the print
+       * route group when the A4 print system landed. Staff bookmark a
+       * certificate they print often, so the old path keeps working.
+       */
+      {
+        source: "/admin/certificates/print/:certNo",
+        destination: "/admin/print/certificate/:certNo",
+        permanent: true
       }
     ];
   },
