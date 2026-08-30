@@ -600,18 +600,23 @@ rather than removed: an audit row must keep pointing at a real staff record.
 | Today at Karma | shipped (real counts only) |
 | Team (owner-only) | shipped |
 | Account & security | shipped |
-| Admissions CRM | later phase |
-| Student 360 | later phase |
-| Courses & batches editor | later phase |
-| Attendance | later phase |
-| Certificates | later phase |
-| Design Desk | later phase |
-| Content desk | later phase |
-| Offline fee ledger | later phase, owner opt-in |
-| Reports & exports | later phase |
+| Admissions CRM | shipped (PR #8) |
+| Student 360 | shipped (PR #9) |
+| Courses & batches editor | shipped (PR #6) |
+| Attendance | shipped (PR #9) |
+| Certificates | shipped (PR #9) |
+| Design Desk | shipped (PR #9) — file upload/download waits on R2 (§14) |
+| Content desk | shipped (PR #10) |
+| Offline fee ledger | shipped (PR #9) |
+| Reports & exports | shipped (PR #10) — `students`, `admissions`, `attendance`, `fees`, `design` |
 
-Unshipped modules appear in the navigation, marked plainly unavailable. They do
-not open screens of invented rows.
+**Every console module has shipped.** What remains inside them is content and
+polish, not construction — see `docs/project-context.md` §§22-29 for what each
+one does and what it still defers.
+
+A module the caller lacks permission for appears in the navigation marked
+plainly unavailable. It does not open a screen of invented rows, and the hidden
+link is UX only: the page and every server action re-check server-side.
 
 **Today at Karma** counts only what the current schema actually holds: new
 applications, follow-ups due, applications this week, running and upcoming
@@ -648,12 +653,18 @@ outside the `[locale]` segment on purpose: staff type `/admin`, not `/en/admin`.
 
 R2 stays **private**. No public buckets, no unauthenticated object URLs.
 
+**R2 is not bound.** The `r2_buckets` block in `wrangler.jsonc` is commented
+out, no bucket has been created, and the brief form's file-upload field has been
+removed until one exists — with no binding an attached file would fail in
+production and be dropped in demo mode. Everything in this table is planned, not
+live. Do not activate R2 as a side effect of other work (`CLAUDE.md` §18).
+
 | Use | State |
 | --- | --- |
-| B2B brief files (`karma-brief-files`) | in use by the public brief form |
-| Design Desk assets (`.dst .emb .pes .jef .pdf .ai .zip`) | later phase |
-| Certificate PDFs | later phase |
-| Encrypted database backups (`karma-db-backups`) | later phase |
+| B2B brief files (`karma-brief-files`) | **deferred** — API route, size and magic-byte guards written; upload field removed |
+| Design Desk assets (`.dst .emb .pes .jef .pdf .ai .zip`) | deferred — `service_files.r2_key` column exists |
+| Certificate PDFs | deferred — `certificates.pdf_key` column exists; today it is browser Print / Save as PDF |
+| Encrypted database backups (`karma-db-backups`) | deferred — the interim mechanism is weekly CSV artifacts in GitHub Actions |
 
 Authenticated downloads will flow through authorised server routes or
 short-lived signed access, gated on `design.view` / `certificates.view`. The
