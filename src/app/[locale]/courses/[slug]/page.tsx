@@ -9,10 +9,12 @@ import { FaqList } from "@/components/site/FaqList";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { TechniquePlate } from "@/components/ui/TechniquePlate";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { StitchRule } from "@/components/ui/StitchPath";
+import { SampleTag } from "@/components/ui/SampleTag";
 import { JsonLd } from "@/components/site/JsonLd";
 import { courseBySlug, coursesByFamily, coursesInFamily, families } from "@/content/courses";
-import { faqs } from "@/content/collections";
-import { site } from "@/lib/site";
+import { faqs, trainers } from "@/content/collections";
+import { site, waLink } from "@/lib/site";
 import { Icon } from "@/components/ui/Icon";
 import { pageMeta } from "@/lib/seo";
 
@@ -32,10 +34,27 @@ export async function generateMetadata({
     locale,
     path: `/courses/${slug}`,
     title: `${gu ? course.nameGu : course.nameEn} | Karma Design Studio`,
-    description: gu ? course.leadGu : course.leadEn
+    // What the technique produces is a better search snippet than a course
+    // blurb: people search for the work, not for the class.
+    description: gu ? course.production.producesGu : course.production.producesEn
   });
 }
 
+/**
+ * Course detail — ordered around commercial outcomes, not around a syllabus.
+ *
+ * The old page led with who it's for and then went straight to modules, which
+ * is how a brochure is written and not how anyone decides. A prospective
+ * student — often already running a machine — wants to know what this
+ * technique makes, whether it fixes the fault they keep hitting, what it runs
+ * on, and what the work sells as. Modules answer none of that, so they now sit
+ * near the bottom in a native `<details>` accordion where the people who do
+ * want them can find them.
+ *
+ * Every technical claim on this page is trade knowledge about the technique,
+ * held in `course.production`. Nothing asserts a duration, a fee, a student
+ * outcome or a placement.
+ */
 export default async function CourseDetailPage({
   params
 }: {
@@ -53,9 +72,19 @@ export default async function CourseDetailPage({
   ]);
   const gu = l === "gu";
   const fam = families[course.family];
-  const related = coursesInFamily(course.family).filter((c) => c.slug !== course.slug);
+  const p = course.production;
+  /* Three, not eight. The machine family has nine courses, so an uncapped
+     related list added 2,500px of cards to the bottom of a phone page that
+     nobody scrolls that far into. The catalogue link carries the rest. */
+  const related = coursesInFamily(course.family)
+    .filter((c) => c.slug !== course.slug)
+    .slice(0, 3);
   const name = gu ? course.nameGu : course.nameEn;
   const position = coursesByFamily.findIndex((c) => c.slug === course.slug);
+
+  /* The trainer who covers this family. Every profile is still sample data,
+     so the card says so rather than presenting a placeholder as a person. */
+  const trainer = course.family === "software" ? trainers[1] : trainers[0];
 
   const crumbs = {
     "@context": "https://schema.org",
@@ -67,12 +96,19 @@ export default async function CourseDetailPage({
     ]
   };
 
+  /**
+   * `Course` schema only. No `offers` (fees are discussed offline and there is
+   * no gateway), no `timeRequired` (durations are unconfirmed), and no
+   * `aggregateRating` (nothing has been collected). An empty or invented value
+   * in any of those is worse than its absence.
+   */
   const courseLd = {
     "@context": "https://schema.org",
     "@type": "Course",
     name: course.nameEn,
-    description: course.leadEn,
+    description: p.producesEn,
     inLanguage: ["gu", "en"],
+    teaches: course.outcomesEn,
     provider: {
       "@type": "Organization",
       name: "Karma Design Studio & Classes",
@@ -96,10 +132,12 @@ export default async function CourseDetailPage({
       <JsonLd data={courseLd} />
       <JsonLd data={crumbs} />
 
+      {/* 1. What this technique produces. It is the lede, because it is the
+             only sentence that answers "is this the work I want to do?" */}
       <PageIntro
         eyebrow={gu ? fam.nameGu : fam.nameEn}
         title={name}
-        lede={gu ? course.leadGu : course.leadEn}
+        lede={gu ? p.producesGu : p.producesEn}
         actions={
           <>
             <Link
@@ -108,19 +146,14 @@ export default async function CourseDetailPage({
             >
               {t("demoCta")} <Icon name="arrow" size={18} className="arrow" />
             </Link>
-            <a
-              href={`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(waCourse)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-secondary"
-            >
-              <Icon name="whatsapp" size={18} /> {tc("whatsapp")}
+            <a href={`tel:+${site.whatsapp}`} className="btn btn-secondary">
+              <Icon name="phone" size={17} /> {t("callCta")}
             </a>
           </>
         }
         aside={
           <>
-            <div className="mb-5 aspect-[3/2] overflow-hidden rounded border border-line">
+            <div className="course-plate">
               <TechniquePlate variant={course.family} seed={position} />
             </div>
             <dl className="ledger !border-t-0">
@@ -135,16 +168,17 @@ export default async function CourseDetailPage({
         }
       />
 
+      {/* 2 + 7. Who it is for, and what you will be able to do. */}
       <section className="section">
-        <div className="container-site grid gap-10 lg:grid-cols-2 lg:gap-16">
+        <div className="container-site split">
           <div>
             <h2 className="text-h3 font-display">{t("whoTitle")}</h2>
-            <span aria-hidden="true" className="rule-stitch" />
+            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
             <p className="prose-measure mt-5 text-stone">{gu ? course.whoGu : course.whoEn}</p>
           </div>
           <div>
-            <h2 className="text-h3 font-display">{t("outcomesTitle")}</h2>
-            <span aria-hidden="true" className="rule-stitch" />
+            <h2 className="text-h3 font-display">{t("skillsTitle")}</h2>
+            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
             <ul className="mt-5 space-y-3">
               {(gu ? course.outcomesGu : course.outcomesEn).map((o) => (
                 <li key={o} className="flex gap-3">
@@ -157,8 +191,152 @@ export default async function CourseDetailPage({
         </div>
       </section>
 
+      {/* 3. The production problems this technique's training exists to fix.
+             Named faults, not adjectives: an operator who recognises one of
+             these has just been told what this course is for. */}
       <section className="section bg-ivory-2">
-        <div className="container-site grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+        <div className="container-site">
+          <SectionHeading eyebrow={t("problemsEyebrow")} title={t("problemsTitle")} sub={t("problemsSub")} rule />
+          <ol className="problem-list u-section-body">
+            {(gu ? p.problemsGu : p.problemsEn).map((row) => (
+              <li key={row} className="problem-row">
+                <p className="problem-fault">{row}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* 4 + 5. What it runs on, and what the hands actually do. */}
+      <section className="section">
+        <div className="container-site split">
+          <div className="surface surface-machine surface-feature">
+            <p className="microlabel">{t("machineTitle")}</p>
+            <p className="mt-3 text-bodylg font-semibold">{gu ? p.machineGu : p.machineEn}</p>
+            {p.softwareEn ? (
+              <>
+                <p className="microlabel mt-6">{t("softwareTitle")}</p>
+                <p className="mt-3 text-smallmeta">{gu ? p.softwareGu : p.softwareEn}</p>
+              </>
+            ) : null}
+          </div>
+          <div>
+            <h2 className="text-h3 font-display">{t("practiceTitle")}</h2>
+            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
+            <p className="prose-measure mt-5 text-stone">{gu ? p.practiceGu : p.practiceEn}</p>
+            <p className="mt-5 text-smallmeta text-stone">{t("practiceNote")}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. What the finished work sells as. */}
+      <section className="section-compact bg-ivory-2">
+        <div className="container-site">
+          <SectionHeading title={t("outputsTitle")} sub={t("outputsSub")} />
+          <ul className="output-list u-section-body">
+            {(gu ? p.outputsGu : p.outputsEn).map((o, i) => (
+              <li key={o} className="output-item">
+                <span className="output-index tabular" aria-hidden="true">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                {o}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* 8 + 9. Proof, and who teaches it. Both are honest about what does not
+             exist yet rather than filling the space. */}
+      <section className="section">
+        <div className="container-site split">
+          <div>
+            <h2 className="text-h3 font-display">{t("proofTitle")}</h2>
+            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
+            <p className="prose-measure mt-5 text-stone">{t("proofBody")}</p>
+            <p className="u-actions action-row">
+              <Link href="/student-work" className="btn btn-secondary">
+                {t("proofCta")} <Icon name="arrow" size={18} className="arrow" />
+              </Link>
+            </p>
+          </div>
+          <div className="surface">
+            <p className="microlabel">{t("trainerTitle")}</p>
+            <p className="mt-3 font-display text-h4">{gu ? trainer.nameGu : trainer.nameEn}</p>
+            <p className="mt-1 text-smallmeta font-semibold text-vermilion-deep">
+              {gu ? trainer.roleGu : trainer.roleEn}
+            </p>
+            <p className="mt-3 text-smallmeta text-stone">{gu ? trainer.focusGu : trainer.focusEn}</p>
+            {trainer.sample ? (
+              <p className="mt-4">
+                <SampleTag />
+              </p>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      {/* 10. Current batches, live from the database. */}
+      <section className="section bg-ivory-2" id="batches">
+        <div className="container-site">
+          <SectionHeading title={t("batchesTitle")} sub={t("batchesSub")} />
+          <div className="u-section-body">
+            <BatchTable courseSlug={course.slug} limit={6} />
+          </div>
+        </div>
+      </section>
+
+      {/* 11 + 12. The fee answer, and the demo. There is no public price list
+             and no gateway; saying so plainly beats an evasive blank. */}
+      <section className="section">
+        <div className="container-site split">
+          <div>
+            <h2 className="text-h3 font-display">{t("feeTitle")}</h2>
+            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
+            <p className="prose-measure mt-5 text-stone">{t("feeBody")}</p>
+            <p className="mt-4 text-smallmeta text-stone">{t("feeNote")}</p>
+          </div>
+          <div className="surface surface-feature">
+            <p className="microlabel !text-vermilion-deep">{t("demoTitle")}</p>
+            <p className="mt-3 text-bodylg">{t("demoBody")}</p>
+            <div className="u-actions action-row">
+              <Link
+                href={{ pathname: "/admission", query: { course: course.slug, src: "course" } }}
+                className="btn btn-primary"
+              >
+                {t("demoCta")} <Icon name="arrow" size={18} className="arrow" />
+              </Link>
+              <a
+                href={waLink(waCourse)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-secondary"
+              >
+                <Icon name="whatsapp" size={18} /> {tc("whatsapp")}
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 13. FAQ. */}
+      <section className="section bg-ivory-2">
+        <div className="container-site split">
+          <div>
+            <SectionHeading title={t("faqTitle")} />
+            <div className="surface mt-8">
+              <p className="microlabel !text-vermilion-deep">{t("certTitle")}</p>
+              <p className="mt-3 text-smallmeta text-stone">{t("certBody")}</p>
+            </div>
+          </div>
+          <FaqList items={faqs.slice(0, 4)} />
+        </div>
+      </section>
+
+      {/* Secondary: the syllabus, for the people who came looking for it.
+          Native <details>, so it is accessible and costs nothing until opened. */}
+      <section className="section-compact">
+        <div className="container-site split">
           <div>
             <SectionHeading title={t("modulesTitle")} sub={t("modulesNote")} />
           </div>
@@ -168,32 +346,18 @@ export default async function CourseDetailPage({
         </div>
       </section>
 
-      <section className="section" id="batches">
-        <div className="container-site">
-          <SectionHeading title={t("batchesTitle")} sub={t("batchesSub")} />
-          <div className="u-section-body">
-            <BatchTable courseSlug={course.slug} limit={6} />
-          </div>
-        </div>
-      </section>
-
-      <section className="section border-t border-line bg-ivory-2">
-        <div className="container-site grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
-          <div>
-            <SectionHeading title={t("faqTitle")} />
-            <div className="card mt-8 p-5 md:p-6">
-              <p className="microlabel !text-vermilion-deep">{t("certTitle")}</p>
-              <p className="mt-3 text-smallmeta text-stone">{t("certBody")}</p>
-            </div>
-          </div>
-          <FaqList items={faqs.slice(0, 4)} />
-        </div>
-      </section>
-
       {related.length > 0 ? (
-        <section className="section">
+        <section className="section border-t border-line">
           <div className="container-site">
-            <SectionHeading title={t("relatedTitle")} />
+            <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+              <SectionHeading title={t("relatedTitle")} />
+              <Link
+                href="/courses"
+                className="stitch-link mb-1 inline-flex min-h-8 shrink-0 items-center gap-1.5 font-semibold text-vermilion-deep"
+              >
+                {t("relatedAll")} <Icon name="arrow" size={16} className="arrow" />
+              </Link>
+            </div>
             <div className="u-section-body grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
               {related.map((c) => (
                 <CourseCard
@@ -206,7 +370,6 @@ export default async function CourseDetailPage({
           </div>
         </section>
       ) : null}
-
     </>
   );
 }

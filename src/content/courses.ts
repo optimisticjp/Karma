@@ -42,6 +42,41 @@ export type Course = {
   durationWeeks: number | null; // null = confirm with owner
   photoLabel: string; // shoot-list label for the PhotoSlot
   modules: CourseModule[];
+  production: CourseProduction;
+};
+
+/**
+ * What the technique makes, what it fixes, and what it runs on.
+ *
+ * This is trade knowledge about the technique — the same facts a supervisor
+ * would give a new operator — NOT a claim about Karma. Nothing here asserts a
+ * duration, a fee, a student outcome or a placement, and nothing here needs
+ * owner confirmation to be true, because none of it is about this business.
+ *
+ * `software` is optional and deliberately so: only the design course teaches a
+ * digitising package, and claiming otherwise would be a false statement about
+ * what a course covers. Where it is set, it names emCAD as what is taught and
+ * is careful about what transfers to Wilcom rather than implying both are.
+ */
+export type CourseProduction = {
+  /** One sentence: what this technique physically produces. */
+  producesEn: string;
+  producesGu: string;
+  /** Production faults this technique's training exists to prevent. */
+  problemsEn: string[];
+  problemsGu: string[];
+  /** The machine it is run on. */
+  machineEn: string;
+  machineGu: string;
+  /** Only where a course genuinely involves design software. */
+  softwareEn?: string;
+  softwareGu?: string;
+  /** What the hands actually do on the floor. */
+  practiceEn: string;
+  practiceGu: string;
+  /** What the finished work sells as. */
+  outputsEn: string[];
+  outputsGu: string[];
 };
 
 export const families = {
@@ -159,6 +194,34 @@ export const courses: Course[] = [
     ],
     durationWeeks: null,
     photoLabel: "Zardosi machine with gold thread work in progress",
+    production: {
+      producesEn: "Raised metallic work — zari, dabka and kasab laid in relief on bridal lehengas, dupattas, sherwanis and heavy blouse panels.",
+      producesGu: "ઊપસેલું મેટાલિક કામ — બ્રાઇડલ લહેંગા, દુપટ્ટા, શેરવાની અને હેવી બ્લાઉઝ પેનલ પર રિલીફમાં લગાવેલા ઝરી, ડબકા અને કસબ.",
+      problemsEn: [
+        "Metallic thread shredding and snapping mid-run",
+        "Relief that flattens under the presser or collapses after washing",
+        "Heavy panels puckering because the ground was never stabilised"
+      ],
+      problemsGu: [
+        "મેટાલિક થ્રેડ વચ્ચે જ છોલાઈને તૂટવો",
+        "પ્રેસર નીચે ઊંચાઈ દબાઈ જવી, કે ધોયા પછી બેસી જવી",
+        "ગ્રાઉન્ડ સ્ટેબલ ન કર્યું હોવાથી હેવી પેનલ પકરાવું"
+      ],
+      machineEn: "Zardosi hand-guided machines, on the studio floor.",
+      machineGu: "ઝરદોશી હેન્ડ-ગાઇડેડ મશીન, સ્ટુડિયોના ફ્લોર પર.",
+      practiceEn: "Frame and stabiliser choice for heavy ground, needle and metallic-thread pairing, guiding speed, and reading relief height as you work rather than after.",
+      practiceGu: "હેવી ગ્રાઉન્ડ માટે ફ્રેમ અને સ્ટેબિલાઇઝર પસંદગી, નીડલ અને મેટાલિક થ્રેડનું જોડાણ, ગાઇડિંગ સ્પીડ, અને કામ પતી ગયા પછી નહીં પણ કરતાં કરતાં જ રિલીફની ઊંચાઈ વાંચવી.",
+      outputsEn: [
+        "Bridal lehenga and dupatta panels",
+        "Sherwani and jacket borders",
+        "Blouse and yoke work for boutiques"
+      ],
+      outputsGu: [
+        "બ્રાઇડલ લહેંગા અને દુપટ્ટા પેનલ",
+        "શેરવાની અને જેકેટની બોર્ડર",
+        "બુટિક માટે બ્લાઉઝ અને યોકનું કામ"
+      ]
+    },
     modules: draftModules("zardosi", "ઝરદોશી")
   },
   {
@@ -186,6 +249,34 @@ export const courses: Course[] = [
     ],
     durationWeeks: null,
     photoLabel: "Beads catching light on the 4-beads machine",
+    production: {
+      producesEn: "Bead and stone embellishment laid at production speed — all-over scatter, borders and motif fills on fashion and festive wear.",
+      producesGu: "પ્રોડક્શન સ્પીડ પર બીડ અને સ્ટોનનું એમ્બેલિશમેન્ટ — ફેશન અને ફેસ્ટિવ વેર પર ઓલઓવર સ્કેટર, બોર્ડર અને મોટિફ ફિલ.",
+      problemsEn: [
+        "Beads jamming or feeding short so the run stops every few metres",
+        "Beads sitting proud and catching, or lying flat and dull",
+        "Spacing drifting across a panel so two halves do not match"
+      ],
+      problemsGu: [
+        "બીડ જામ થવા કે ઓછા ફીડ થવા, જેથી દર થોડા મીટરે રન અટકે",
+        "બીડ બહાર નીકળીને ભરાઈ જવા, કે સપાટ પડીને ફિક્કા લાગવા",
+        "પેનલ પર સ્પેસિંગ ખસી જવું, જેથી બે બાજુ સરખી ન રહે"
+      ],
+      machineEn: "4-beads machines with live bead feed.",
+      machineGu: "લાઇવ બીડ ફીડ સાથેની 4-બીડ્સ મશીન.",
+      practiceEn: "Loading and clearing the feed, tension for the bead size in hand, spacing set from the design rather than by eye, and keeping finish consistent across a full run.",
+      practiceGu: "ફીડ ભરવું અને ક્લિયર કરવું, હાથમાં જે સાઇઝના બીડ છે એ પ્રમાણે ટેન્શન, આંખના અંદાજને બદલે ડિઝાઇનમાંથી નક્કી થતું સ્પેસિંગ, અને આખા રનમાં એકસરખી ફિનિશ જાળવવી.",
+      outputsEn: [
+        "All-over bead work on dress fabric",
+        "Bead borders and neck patterns",
+        "Festive and party-wear panels"
+      ],
+      outputsGu: [
+        "ડ્રેસ ફેબ્રિક પર ઓલઓવર બીડ વર્ક",
+        "બીડની બોર્ડર અને નેક પેટર્ન",
+        "ફેસ્ટિવ અને પાર્ટી-વેર પેનલ"
+      ]
+    },
     modules: draftModules("4-beads", "4-બીડ્સ")
   },
   {
@@ -213,6 +304,34 @@ export const courses: Course[] = [
     ],
     durationWeeks: null,
     photoLabel: "Sequence work shimmer, macro shot",
+    production: {
+      producesEn: "Sequin work with a consistent lie and light — the shimmer Surat's fashion units order by the metre, in scatter, border and filled motif.",
+      producesGu: "એકસરખી બેઠક અને ચમક સાથેનું સિકવન્સ કામ — સ્કેટર, બોર્ડર અને ભરેલા મોટિફમાં, જે ચમક સુરતના ફેશન યુનિટ મીટરના હિસાબે મંગાવે છે.",
+      problemsEn: [
+        "Sequins landing out of register so a repeat visibly shifts",
+        "Sequins flipping or overlapping and killing the light",
+        "Thread cutting the sequin edge and the run failing halfway"
+      ],
+      problemsGu: [
+        "સિકવન્સ રજિસ્ટરની બહાર બેસવા, જેથી રિપીટ દેખીતી રીતે ખસી જાય",
+        "સિકવન્સ ઊંધા પડવા કે એકબીજા પર ચઢવા, અને ચમક મરી જવી",
+        "થ્રેડથી સિકવન્સની કિનારી કપાવી અને રન વચ્ચે જ બગડવો"
+      ],
+      machineEn: "Sequence machines with live sequin feed.",
+      machineGu: "લાઇવ સિકવન્સ ફીડ સાથેની સિકવન્સ મશીન.",
+      practiceEn: "Feed setup and registration, holding stitch and travel order, matching sequin size to the motif, and correcting a repeat that has drifted before the whole length is run.",
+      practiceGu: "ફીડ સેટઅપ અને રજિસ્ટ્રેશન, હોલ્ડિંગ સ્ટિચ અને ટ્રાવેલ ઓર્ડર, મોટિફ પ્રમાણે સિકવન્સ સાઇઝ, અને આખી લંબાઈ ચલાવતાં પહેલાં ખસી ગયેલો રિપીટ સુધારવો.",
+      outputsEn: [
+        "Sequin dupattas and sarees",
+        "Repeat borders by the metre",
+        "Party and festive garment panels"
+      ],
+      outputsGu: [
+        "સિકવન્સ દુપટ્ટા અને સાડી",
+        "મીટરના હિસાબે રિપીટ બોર્ડર",
+        "પાર્ટી અને ફેસ્ટિવ ગારમેન્ટ પેનલ"
+      ]
+    },
     modules: draftModules("sequence", "સિકવન્સ")
   },
   {
@@ -240,6 +359,34 @@ export const courses: Course[] = [
     ],
     durationWeeks: null,
     photoLabel: "Cording machine laying dori along a curve",
+    production: {
+      producesEn: "Corded outline and raised line work — the drawn, rope-like line that defines borders, monograms and structured motifs.",
+      producesGu: "કોર્ડેડ આઉટલાઇન અને ઊપસેલી લાઇનનું કામ — દોરેલી, દોરડા જેવી લાઇન જે બોર્ડર, મોનોગ્રામ અને સ્ટ્રક્ચર્ડ મોટિફને આકાર આપે છે.",
+      problemsEn: [
+        "Cord wandering off the drawn line on curves",
+        "Cord showing through the covering stitch in patches",
+        "Ends unravelling because the start and finish were never locked"
+      ],
+      problemsGu: [
+        "વળાંક પર કોર્ડ દોરેલી લાઇનથી ખસી જવો",
+        "કવરિંગ સ્ટિચમાંથી જગ્યાએ જગ્યાએ કોર્ડ દેખાવો",
+        "શરૂઆત અને છેડો લોક ન કર્યા હોવાથી છેડા ઉકલી જવા"
+      ],
+      machineEn: "Coding / cording machines.",
+      machineGu: "કોડિંગ / કોર્ડિંગ મશીન.",
+      practiceEn: "Cord thickness against stitch width, feeding through curves and corners, locking starts and ends, and holding an even line at speed.",
+      practiceGu: "સ્ટિચની પહોળાઈ સામે કોર્ડની જાડાઈ, વળાંક અને ખૂણામાં ફીડિંગ, શરૂઆત અને છેડા લોક કરવા, અને સ્પીડ પર એકસરખી લાઇન જાળવવી.",
+      outputsEn: [
+        "Corded borders and outlines",
+        "Monograms and logo work",
+        "Structured motif work on jackets and kurtas"
+      ],
+      outputsGu: [
+        "કોર્ડેડ બોર્ડર અને આઉટલાઇન",
+        "મોનોગ્રામ અને લોગોનું કામ",
+        "જેકેટ અને કુર્તા પર સ્ટ્રક્ચર્ડ મોટિફ કામ"
+      ]
+    },
     modules: draftModules("coding", "કોડિંગ")
   },
   {
@@ -267,6 +414,34 @@ export const courses: Course[] = [
     ],
     durationWeeks: null,
     photoLabel: "Multi-head machine floor, all heads running",
+    production: {
+      producesEn: "Chain-stitch fill and outline, and multi-head running of the same design across several panels at once.",
+      producesGu: "ચેઇન-સ્ટિચ ફિલ અને આઉટલાઇન, અને મલ્ટી-હેડ પર એક જ ડિઝાઇન એકસાથે ઘણી પેનલ પર ચલાવવી.",
+      problemsEn: [
+        "Chain skipping stitches or unravelling from the tail",
+        "Heads drifting out of match so panel three does not equal panel one",
+        "Downtime lost to threading and frame changes on a multi-head"
+      ],
+      problemsGu: [
+        "ચેઇનમાં સ્ટિચ સ્કિપ થવા કે પૂંછડીથી ઉકલવું",
+        "હેડ એકબીજાથી ખસી જવા, જેથી ત્રીજી પેનલ પહેલી જેવી ન રહે",
+        "મલ્ટી-હેડ પર થ્રેડિંગ અને ફ્રેમ બદલવામાં સમય બગડવો"
+      ],
+      machineEn: "Chain machines and multi-head machines.",
+      machineGu: "ચેઇન મશીન અને મલ્ટી-હેડ મશીન.",
+      practiceEn: "Chain tension and lock-off, framing several panels to match, changeover discipline, and keeping every head producing the same piece.",
+      practiceGu: "ચેઇન ટેન્શન અને લોક-ઓફ, ઘણી પેનલ સરખી બેસે એ રીતે ફ્રેમિંગ, ચેન્જઓવરની શિસ્ત, અને દરેક હેડ પરથી એકસરખો પીસ કઢાવવો.",
+      outputsEn: [
+        "Chain-stitch dress and kurta panels",
+        "Repeat orders across multiple pieces",
+        "Job work for units that sell by volume"
+      ],
+      outputsGu: [
+        "ચેઇન-સ્ટિચ ડ્રેસ અને કુર્તા પેનલ",
+        "ઘણા પીસ પર રિપીટ ઓર્ડર",
+        "વોલ્યુમમાં વેચતાં યુનિટ માટે જોબ વર્ક"
+      ]
+    },
     modules: draftModules("chain & multi", "ચેઇન અને મલ્ટી")
   },
   {
@@ -294,6 +469,34 @@ export const courses: Course[] = [
     ],
     durationWeeks: null,
     photoLabel: "Laser machine cutting pattern into fabric",
+    production: {
+      producesEn: "Laser cutting and etching on fabric and leather — cut-work panels, perforated patterns and sealed edges that need no hemming.",
+      producesGu: "ફેબ્રિક અને લેધર પર લેસર કટિંગ અને એચિંગ — કટ-વર્ક પેનલ, પરફોરેટેડ પેટર્ન અને સીલ થયેલી કિનારી, જેને હેમની જરૂર નથી.",
+      problemsEn: [
+        "Scorched or yellowed edges on light fabric",
+        "Cuts not going fully through, or going through the backing too",
+        "Synthetics melting and welding to the layer beneath"
+      ],
+      problemsGu: [
+        "હળવા કાપડ પર કિનારી બળી જવી કે પીળી પડવી",
+        "કટ પૂરો ન થવો, કે બેકિંગ સુધ્ધાં કપાઈ જવું",
+        "સિન્થેટિક ઓગળીને નીચેના લેયર સાથે ચોંટી જવું"
+      ],
+      machineEn: "Laser cutting and etching equipment.",
+      machineGu: "લેસર કટિંગ અને એચિંગ મશીન.",
+      practiceEn: "Power and speed against material, test cuts before a run, nesting a layout to save cloth, and knowing which materials must not go under a laser at all.",
+      practiceGu: "મટીરિયલ પ્રમાણે પાવર અને સ્પીડ, રન પહેલાં ટેસ્ટ કટ, કાપડ બચાવવા લેઆઉટ ગોઠવવો, અને કયું મટીરિયલ લેસર નીચે મૂકવું જ નહીં એ સમજવું.",
+      outputsEn: [
+        "Cut-work dupattas and dress panels",
+        "Perforated leather and faux-leather pieces",
+        "Etched detail combined with embroidery"
+      ],
+      outputsGu: [
+        "કટ-વર્ક દુપટ્ટા અને ડ્રેસ પેનલ",
+        "પરફોરેટેડ લેધર અને ફોક્સ-લેધર પીસ",
+        "એમ્બ્રોઇડરી સાથે જોડેલી એચ કરેલી ડિટેલ"
+      ]
+    },
     modules: draftModules("laser", "લેસર")
   },
   {
@@ -321,6 +524,34 @@ export const courses: Course[] = [
     ],
     durationWeeks: null,
     photoLabel: "Tufting gun mid-stroke on stretched cloth",
+    production: {
+      producesEn: "Tufted pile work — rugs, wall pieces and textured panels built by punching yarn into a stretched backing.",
+      producesGu: "ટફ્ટેડ પાઇલ વર્ક — તાણેલા બેકિંગમાં યાર્ન પંચ કરીને બનતા રગ, વોલ પીસ અને ટેક્સચર્ડ પેનલ.",
+      problemsEn: [
+        "Pile pulling out because the backing was never glued off",
+        "Uneven pile height so the surface reads patchy",
+        "Backing sagging in the frame and the shape distorting"
+      ],
+      problemsGu: [
+        "બેકિંગ પર ગુંદર ન લગાવ્યું હોવાથી પાઇલ નીકળી જવો",
+        "પાઇલની ઊંચાઈ અસમાન અને સપાટી ડાઘાળી લાગવી",
+        "ફ્રેમમાં બેકિંગ ઢીલું પડવું અને શેપ બગડવો"
+      ],
+      machineEn: "Tufting guns on a stretched frame.",
+      machineGu: "તાણેલી ફ્રેમ પર ટફ્ટિંગ ગન.",
+      practiceEn: "Frame tension, gun height and pace for an even pile, cut versus loop, gluing off the back, and trimming and carving to finish.",
+      practiceGu: "ફ્રેમ ટેન્શન, સરખો પાઇલ મળે એ માટે ગનની ઊંચાઈ અને ગતિ, કટ કે લૂપ, પાછળ ગુંદર લગાવવું, અને ફિનિશ માટે ટ્રિમિંગ અને કાર્વિંગ.",
+      outputsEn: [
+        "Custom rugs and mats",
+        "Textured wall pieces",
+        "Logo and lettering rugs for shops and studios"
+      ],
+      outputsGu: [
+        "કસ્ટમ રગ અને મેટ",
+        "ટેક્સચર્ડ વોલ પીસ",
+        "દુકાન અને સ્ટુડિયો માટે લોગો અને લેટરિંગ રગ"
+      ]
+    },
     modules: draftModules("tufting", "ટફ્ટિંગ")
   },
   {
@@ -348,6 +579,36 @@ export const courses: Course[] = [
     ],
     durationWeeks: null,
     photoLabel: "Student at emCAD screen, stitch paths visible",
+    production: {
+      producesEn: "Machine-ready embroidery files — the digitised design that decides, before a single stitch is run, whether the job comes out right.",
+      producesGu: "મશીન-રેડી એમ્બ્રોઇડરી ફાઇલ — ડિજિટાઇઝ કરેલી એ ડિઝાઇન, જે એક પણ ટાંકો પડ્યા પહેલાં નક્કી કરી દે છે કે જોબ સારો આવશે કે નહીં.",
+      problemsEn: [
+        "A design that looks right on screen and puckers on cloth",
+        "Stitch count and colour changes making a job too slow to be worth running",
+        "Files that have to be re-worked at every machine they are sent to"
+      ],
+      problemsGu: [
+        "સ્ક્રીન પર સાચી લાગતી અને કાપડ પર પકરાતી ડિઝાઇન",
+        "સ્ટિચ કાઉન્ટ અને કલર ચેન્જના કારણે જોબ એટલો ધીમો કે પોસાય નહીં",
+        "દરેક મશીન પર મોકલતાં ફરીથી સુધારવી પડતી ફાઇલો"
+      ],
+      machineEn: "Design workstations, with stitch-outs run on the studio's machines.",
+      machineGu: "ડિઝાઇન વર્કસ્ટેશન, અને સ્ટિચ-આઉટ સ્ટુડિયોની મશીન પર.",
+      softwareEn: "Taught on emCAD, the package the studio digitises production files on. The decisions transfer: underlay, density, stitch types, pull compensation and travel order are the same in any digitising software, including Wilcom, so the thinking is not locked to one product.",
+      softwareGu: "emCAD પર શીખવાય છે, જેના પર સ્ટુડિયો પ્રોડક્શન ફાઇલ ડિજિટાઇઝ કરે છે. નિર્ણયો બધે કામ લાગે છે: અન્ડરલે, ડેન્સિટી, સ્ટિચ ટાઇપ, પુલ કોમ્પેન્સેશન અને ટ્રાવેલ ઓર્ડર દરેક ડિજિટાઇઝિંગ સોફ્ટવેરમાં — Wilcom સહિત — એકસરખા છે, એટલે સમજણ એક પ્રોડક્ટ પૂરતી સીમિત નથી રહેતી.",
+      practiceEn: "Digitise a design, run it on a machine, read the sample, and correct the file. The loop is the course: a file is not finished until it has stitched out.",
+      practiceGu: "ડિઝાઇન ડિજિટાઇઝ કરો, મશીન પર ચલાવો, સેમ્પલ વાંચો, અને ફાઇલ સુધારો. આ લૂપ જ કોર્સ છે: ફાઇલ સ્ટિચ-આઉટ થાય નહીં ત્યાં સુધી પૂરી ન કહેવાય.",
+      outputsEn: [
+        "Digitising job work for units and boutiques",
+        "Production files for your own machines",
+        "Sampling and correction before a bulk run"
+      ],
+      outputsGu: [
+        "યુનિટ અને બુટિક માટે ડિજિટાઇઝિંગ જોબ વર્ક",
+        "પોતાની મશીન માટે પ્રોડક્શન ફાઇલ",
+        "બલ્ક રન પહેલાં સેમ્પલિંગ અને કરેક્શન"
+      ]
+    },
     modules: draftModules("emCAD design", "emCAD ડિઝાઇન")
   },
   {
@@ -375,6 +636,34 @@ export const courses: Course[] = [
     ],
     durationWeeks: null,
     photoLabel: "Flat embroidery running on the machine, multi-colour design",
+    production: {
+      producesEn: "Flat surface embroidery — satin, fill and outline. The foundation every other machine technique is built on.",
+      producesGu: "ફ્લેટ સરફેસ એમ્બ્રોઇડરી — સાટિન, ફિલ અને આઉટલાઇન. બાકીની દરેક મશીન ટેકનિકનો પાયો આ જ છે.",
+      problemsEn: [
+        "Fabric puckering under a fill because no underlay was laid",
+        "Satin thinning and gapping, or so dense it stiffens the cloth",
+        "Outlines landing off the fill edge"
+      ],
+      problemsGu: [
+        "અન્ડરલે ન નાખ્યું હોવાથી ફિલ નીચે કાપડ પકરાવું",
+        "સાટિન પાતળું પડીને ગેપ પડવા, કે એટલું ગાઢ કે કાપડ કડક થઈ જાય",
+        "આઉટલાઇન ફિલની કિનારીથી બહાર બેસવી"
+      ],
+      machineEn: "Flat embroidery machines.",
+      machineGu: "ફ્લેટ એમ્બ્રોઇડરી મશીન.",
+      practiceEn: "Underlay, density and stitch direction; hooping and stabiliser for the cloth in hand; needle, thread and tension chosen together rather than one at a time.",
+      practiceGu: "અન્ડરલે, ડેન્સિટી અને સ્ટિચ ડિરેક્શન; હાથમાં જે કાપડ છે એ માટે હૂપિંગ અને સ્ટેબિલાઇઝર; નીડલ, થ્રેડ અને ટેન્શન એક પછી એક નહીં પણ સાથે નક્કી કરવા.",
+      outputsEn: [
+        "Logo and monogram work",
+        "Dress, kurta and saree panels",
+        "Sampling before a production run"
+      ],
+      outputsGu: [
+        "લોગો અને મોનોગ્રામનું કામ",
+        "ડ્રેસ, કુર્તા અને સાડીની પેનલ",
+        "પ્રોડક્શન રન પહેલાંનું સેમ્પલિંગ"
+      ]
+    },
     modules: draftModules("flat embroidery", "ફ્લેટ એમ્બ્રોઇડરી")
   },
   {
@@ -402,6 +691,34 @@ export const courses: Course[] = [
     ],
     durationWeeks: null,
     photoLabel: "Appliqué panel with satin edge beside a 3D foam motif",
+    production: {
+      producesEn: "Applied fabric shapes and raised foam work — patches, cut-away appliqué and the 3D lettering used on caps, jackets and stage wear.",
+      producesGu: "લગાવેલા ફેબ્રિક શેપ અને ઊપસેલું ફોમ વર્ક — પેચ, કટ-અવે એપ્લિક, અને કેપ, જેકેટ તથા સ્ટેજ વેર પર વપરાતું 3D લેટરિંગ.",
+      problemsEn: [
+        "Applied fabric fraying at the cut edge after a wash",
+        "Foam showing at the ends of a 3D letter",
+        "Patch edges lifting because the tack-down never held"
+      ],
+      problemsGu: [
+        "ધોયા પછી લગાવેલા કાપડની કાપેલી કિનારી ઉકલવી",
+        "3D લેટરના છેડે ફોમ દેખાવો",
+        "ટેક-ડાઉન બરાબર ન પકડ્યું હોવાથી પેચની કિનારી ઊંચકાવી"
+      ],
+      machineEn: "Flat and multi-head machines, with appliqué and 3D foam setups.",
+      machineGu: "ફ્લેટ અને મલ્ટી-હેડ મશીન, એપ્લિક અને 3D ફોમ સેટઅપ સાથે.",
+      practiceEn: "Placement, tack-down and cover stitching; cutting cleanly in the frame; foam thickness against letter width, and closing the ends so no foam shows.",
+      practiceGu: "પ્લેસમેન્ટ, ટેક-ડાઉન અને કવર સ્ટિચિંગ; ફ્રેમમાં જ સાફ કટિંગ; લેટરની પહોળાઈ સામે ફોમની જાડાઈ, અને છેડા એવા બંધ કરવા કે ફોમ ન દેખાય.",
+      outputsEn: [
+        "Caps, jackets and uniform patches",
+        "3D lettering for teams and events",
+        "Cut-away appliqué on ethnic wear"
+      ],
+      outputsGu: [
+        "કેપ, જેકેટ અને યુનિફોર્મના પેચ",
+        "ટીમ અને ઇવેન્ટ માટે 3D લેટરિંગ",
+        "એથનિક વેર પર કટ-અવે એપ્લિક"
+      ]
+    },
     modules: draftModules("appliqué and 3D", "એપ્લિક અને 3D")
   },
   {
@@ -429,6 +746,34 @@ export const courses: Course[] = [
     ],
     durationWeeks: null,
     photoLabel: "Cross stitch panel on a kurti, close-up of the grid",
+    production: {
+      producesEn: "Counted cross-stitch worked on the machine — the grid-based motif and border work used on home textiles and traditional garment panels.",
+      producesGu: "મશીન પર કરેલું કાઉન્ટેડ ક્રોસ સ્ટિચ — હોમ ટેક્સટાઇલ અને પરંપરાગત ગારમેન્ટ પેનલ પર વપરાતું ગ્રિડ આધારિત મોટિફ અને બોર્ડરનું કામ.",
+      problemsEn: [
+        "Crosses drifting off the grid so the motif skews",
+        "Arms of the cross landing unequal and the fill reading uneven",
+        "Ground distorting because the count was set for a different weave"
+      ],
+      problemsGu: [
+        "ક્રોસ ગ્રિડથી ખસી જવા અને મોટિફ ત્રાંસું થવું",
+        "ક્રોસના હાથ અસમાન બેસવા અને ફિલ અસમાન દેખાવું",
+        "બીજા વણાટ માટે કાઉન્ટ સેટ કર્યો હોવાથી ગ્રાઉન્ડ બગડવું"
+      ],
+      machineEn: "Embroidery machines set up for counted cross work.",
+      machineGu: "કાઉન્ટેડ ક્રોસ કામ માટે સેટ કરેલી એમ્બ્રોઇડરી મશીન.",
+      practiceEn: "Reading a chart onto the grid, holding the count against the weave, keeping the arms even, and planning the travel so the back stays clean.",
+      practiceGu: "ચાર્ટને ગ્રિડ પર વાંચવો, વણાટ સામે કાઉન્ટ જાળવવો, હાથ સરખા રાખવા, અને ટ્રાવેલ એવો ગોઠવવો કે પાછળનો ભાગ સાફ રહે.",
+      outputsEn: [
+        "Home textiles: cushions, runners and wall pieces",
+        "Traditional motif borders",
+        "Gift and personalised pieces"
+      ],
+      outputsGu: [
+        "હોમ ટેક્સટાઇલ: કુશન, રનર અને વોલ પીસ",
+        "પરંપરાગત મોટિફ બોર્ડર",
+        "ગિફ્ટ અને પર્સનલાઇઝ્ડ પીસ"
+      ]
+    },
     modules: draftModules("cross stitch", "ક્રોસ સ્ટિચ")
   }
 ];

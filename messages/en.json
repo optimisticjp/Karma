@@ -317,6 +317,34 @@
           "d": "Job work, a studio floor, or your own machines and your own clients."
         }
       ]
+    },
+    "familyLabel": "{count, plural, one {# course} other {# courses}}",
+    "countNote": "This catalogue lists {count} courses in three families.",
+    "cue": {
+      "foundation": "Start here",
+      "leads": "Most asked for"
+    },
+    "relate": {
+      "h2": "How the three families fit together.",
+      "line": "They are not three separate schools. A machine technique gives you the hands, the design software gives you control over what the machine is asked to do, and the modern techniques sell alongside both.",
+      "points": [
+        {
+          "t": "Flat embroidery is the vocabulary",
+          "d": "Underlay, density and stitch direction are decided the same way in every machine technique. Learn them once and every other course reads faster."
+        },
+        {
+          "t": "The machine techniques are the trade",
+          "d": "Zardosi, beads, sequence, coding, chain and multi are what Surat's units order every day, and each has its own faults to learn."
+        },
+        {
+          "t": "emCAD is the leverage",
+          "d": "An operator runs someone's file. A digitiser decides whether the job works before the machine is switched on — and can take digitising work on its own."
+        },
+        {
+          "t": "Laser and tufting open other buyers",
+          "d": "Cut-work and tufted pieces sell to boutiques, interior work and gifting, which is a different order book from garment job work."
+        }
+      ]
     }
   },
   "courseDetail": {
@@ -324,8 +352,6 @@
     "outcomesTitle": "What you'll be able to do",
     "modulesTitle": "What you'll learn, module by module",
     "modulesNote": "Draft syllabus: final module topics are confirmed with the studio (see admissions FAQ).",
-    "machinesTitle": "Still to come",
-    "machinesBody": "Photographs of this course’s machines, named and shot on the studio floor, are published here after the studio shoot.",
     "batchesTitle": "Upcoming batches for this course",
     "certTitle": "Certificate requirements",
     "certBody": "The certificate needs your attendance, completed practicals and a finished final project. Every certificate carries a QR code verifiable on this website.",
@@ -339,7 +365,28 @@
     "langLabel": "Language",
     "langValue": "ગુજરાતી + Hindi + English terms",
     "demoCta": "Book a free demo of this course",
-    "batchesSub": "Seats per batch are limited. If none of these fit, message us — batches for this course open regularly."
+    "batchesSub": "Seats per batch are limited. If none of these fit, message us — batches for this course open regularly.",
+    "callCta": "Call about this course",
+    "skillsTitle": "What you will be able to do",
+    "problemsEyebrow": "Why this course exists",
+    "problemsTitle": "The production problems this fixes.",
+    "problemsSub": "If you already run a machine, you have met at least one of these. Each is a fault with a cause, and the cause is what gets taught.",
+    "machineTitle": "Machine",
+    "softwareTitle": "Software",
+    "practiceTitle": "Real machine practice",
+    "practiceNote": "Practice is on the studio's own production machines, in every session — not a demonstration you watch.",
+    "outputsTitle": "What this work sells as",
+    "outputsSub": "The orders this technique is actually paid for, in Surat and beyond.",
+    "proofTitle": "Student work",
+    "proofBody": "Work from this course is published as students finish pieces and agree to have them shown. Nothing on this site is stock photography, and nothing is published without consent — which is why the gallery fills up slowly rather than all at once.",
+    "proofCta": "See student work",
+    "trainerTitle": "Who teaches it",
+    "feeTitle": "What it costs",
+    "feeBody": "Fees are discussed in person, at your demo or on a call. There is no public price list and no online payment on this site — what a course costs depends on the technique and the batch, and quoting a number that turns out not to apply to you helps nobody.",
+    "feeNote": "Ask for the current fee when you call or come in. Receipts are issued for every payment.",
+    "demoTitle": "Before you decide",
+    "demoBody": "Come for a practical demo. Sit at the machine, watch a sample run, and ask whatever you want — there is no obligation and no booking fee.",
+    "relatedAll": "See the full catalogue"
   },
   "admissionsPage": {
     "eyebrow": "Admissions",

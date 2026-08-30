@@ -448,7 +448,7 @@ Update this table after every completed/merged phase.
 | --- | --- | --- | --- |
 | 1 | Brand system + design foundations | ✅ Complete + merged | PR #12 — `build` + Cloudflare Workers Builds green |
 | 2 | Homepage / 30-second decision | ✅ Complete + merged | PR #13 — `build` + Cloudflare Workers Builds green |
-| 3 | Courses / production-led detail pages | ⏳ Pending | |
+| 3 | Courses / production-led detail pages | ✅ Complete + merged | PR #14 — `build` + Cloudflare Workers Builds green |
 | 4 | Proof ecosystem: work, stories, reviews, trainers | ⏳ Pending | |
 | 5 | Mobile conversion / call / directions / demo | ⏳ Pending | |
 | 6 | Studio / B2B commercial embroidery | ⏳ Pending | |
@@ -917,6 +917,83 @@ Current canonical durations are intentionally `null` until owner confirmation.
 Do not invent real public durations as facts.
 
 Merge when green; update progress.
+
+## Implementation record
+
+### The data change that made this possible
+`Course` gained a required `production` field (`CourseProduction` in
+`src/content/courses.ts`), filled for all eleven courses in both languages:
+
+| Field | What it holds |
+| --- | --- |
+| `produces` | One sentence: what the technique physically makes |
+| `problems` | Three named production faults its training exists to prevent |
+| `machine` | What it is run on |
+| `software` | **Optional** — set only on the design course |
+| `practice` | What the hands actually do on the floor |
+| `outputs` | What the finished work sells as |
+
+All of it is trade knowledge about the *technique* — the facts a supervisor
+gives a new operator — not a claim about Karma. Nothing in it asserts a
+duration, a fee, a student outcome or a placement, so none of it needs owner
+confirmation.
+
+### Courses index
+Eleven cards became a ledger that leads with what each technique produces,
+because that is the axis someone is actually choosing between: bridal zardosi
+panels, sequin dupattas by the metre, tufted rugs, machine-ready files. A
+family plate heads each group, and a new section explains how the three
+families relate — the one thing a list of eleven cannot say.
+
+Two cues are marked, and **both are facts rather than difficulty ratings**:
+*Start here* on Flat Embroidery (underlay, density and stitch direction are
+the vocabulary every other machine technique is written in) and *Most asked
+for* on Zardosi (owner-confirmed, 2026-08-29, which is also why it heads
+`COURSE_DISPLAY_ORDER`). No course carries an invented "beginner" or
+"advanced" label.
+
+### Course detail, reordered
+The old page went who-it's-for → modules, which is how a brochure is written
+and not how anyone decides. The new order follows the brief exactly: what it
+produces (the lede) → who it is for → skills → the production problems it
+fixes → machine and software → real machine practice → what the work sells as
+→ student work and trainer → batches → fees and the demo → FAQ. **Modules moved
+to the bottom**, in the existing native `<details>` accordion.
+
+### Decisions
+1. **emCAD is named as what is taught; Wilcom is described as what transfers.**
+   The `software` field is optional and set on one course, because claiming
+   every course teaches a digitising package would be false. The wording says
+   the *decisions* — underlay, density, stitch types, pull compensation,
+   travel order — are the same in any package including Wilcom, which is true,
+   rather than implying both are taught.
+2. **The fee section says there is no price list, and why.** An evasive blank
+   reads worse than the honest answer, and the honest answer ("what a course
+   costs depends on the technique and the batch") is also the true one.
+3. **`Course` structured data carries no `offers`, `timeRequired` or
+   `aggregateRating`.** Fees are offline, durations are unconfirmed, and no
+   reviews have been collected. An invented value in any of those is worse
+   than its absence. `teaches` was added, because the outcomes are real.
+4. **Related courses capped at three.** The machine family has eight, so an
+   uncapped list added ~2,500px of cards to the bottom of a phone page. A link
+   to the full catalogue carries the rest.
+5. **No trailing chevron on catalogue rows.** The whole row is the link and
+   `a.ledger-row` already marks itself with the brand thread; the glyph
+   wrapped onto its own line whenever the description ran to two lines.
+6. **Durations remain `null`** for all eleven, and the page prints the
+   "confirm with the studio" value rather than a guess.
+
+### Verification
+`npm run typecheck`, `npm run lint`, `npm test` (196 passing) and
+`npm run build` all clean. Responsive audit at 320, 360, 375, 390, 430, 768,
+820, 1024, 1280, 1440 and 1728 across the index and two detail pages in both
+locales: **zero horizontal overflow, zero sub-24px non-inline targets**. All
+eleven ledger rows and both cues confirmed at every width. All 22 course
+detail routes (11 × 2 locales) and every other public route return 200. The
+homepage is unchanged at every width — no regression from the shared changes.
+
+Course detail height fell from 11,233px to 9,229px mobile and 7,244px to
+6,180px desktop after the related-courses cap.
 
 ---
 

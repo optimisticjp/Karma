@@ -1523,3 +1523,111 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
   color: var(--color-stone);
   max-width: 68ch;
 }
+
+/* ============================ course experience ===========================
+ * Phase 3. The catalogue and the detail page are ordered around what the work
+ * produces and what it fixes, so these primitives all exist to carry a fact
+ * rather than to frame a picture.
+ * ========================================================================= */
+
+/* --- catalogue family head ------------------------------------------------ */
+.family-head {
+  display: grid;
+  gap: clamp(1rem, 0.8rem + 0.9vw, 1.75rem);
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .family-head { grid-template-columns: 9rem minmax(0, 1fr); }
+}
+.family-plate {
+  height: 5.5rem;
+  border: var(--hairline);
+  border-radius: var(--radius-panel);
+  overflow: clip;
+  background: var(--color-card);
+}
+@media (min-width: 900px) {
+  .family-plate { height: 7rem; }
+}
+
+/* --- a catalogue row ------------------------------------------------------
+ * The row leads with what the technique makes, because that is the axis a
+ * visitor is really choosing on. No trailing chevron: the whole row is the
+ * link, and `a.ledger-row` already marks itself with the brand thread. */
+.course-row .ledger-note {
+  color: var(--color-stone);
+  max-width: 62ch;
+}
+.course-cue {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.625rem;
+  border-radius: 999px;
+  padding: 0.0625rem 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  vertical-align: 0.15em;
+  white-space: nowrap;
+}
+:lang(gu) .course-cue { letter-spacing: 0; font-size: 0.75rem; vertical-align: 0; }
+/* Two facts, two tones. "Start here" is a route, so it takes the technical
+   cue colour; "most asked for" is demand, so it takes the accent. */
+.course-cue--foundation {
+  background: color-mix(in srgb, var(--color-needle) 12%, transparent);
+  color: var(--color-needle);
+}
+.course-cue--leads {
+  background: color-mix(in srgb, var(--color-vermilion) 12%, transparent);
+  color: var(--color-vermilion-deep);
+}
+
+/* --- course detail -------------------------------------------------------- */
+.course-plate {
+  margin-bottom: 1.25rem;
+  aspect-ratio: 3 / 2;
+  overflow: clip;
+  border: var(--hairline);
+  border-radius: var(--radius-panel);
+  background: var(--color-card);
+}
+
+/* Commercial outputs: numbered, hairline-separated, never a card grid — the
+   list is short and specific and a card would pad each line to a box. */
+.output-list {
+  display: grid;
+  gap: 0;
+  border-top: var(--hairline);
+}
+@media (min-width: 760px) {
+  .output-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.output-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding-block: 0.875rem;
+  border-bottom: var(--hairline);
+  font-size: var(--text-smallmeta);
+  line-height: var(--text-smallmeta--line-height);
+}
+@media (min-width: 760px) {
+  .output-item {
+    padding-right: 1.5rem;
+    border-right: var(--hairline);
+  }
+  .output-item:nth-child(3n),
+  .output-item:last-child { padding-right: 0; border-right: 0; }
+}
+.output-index {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.8125rem;
+  color: var(--color-vermilion);
+  flex: 0 0 auto;
+}
+
+/* On a course page the problem rows carry no cause column — the cause is the
+   whole course — so they set as a single hairline-separated list. */
+.problem-list .problem-row:only-child { border-bottom: var(--hairline); }
