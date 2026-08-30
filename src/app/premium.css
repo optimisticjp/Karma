@@ -2003,3 +2003,41 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
 /* On the machine surface the checklist rules have to be visible against
    Steel Indigo, not against cream. */
 .surface-machine .stack-lines > * { border-bottom-color: color-mix(in srgb, #ffffff 18%, transparent); }
+
+/* ============================== Machine Notes =============================
+ * Phase 7. Reference notes, not blog posts — so no date, no byline, no card
+ * grid. The index is a ledger of questions and a note is a reading column
+ * beside a checklist.
+ * ========================================================================= */
+
+.note-course-plate {
+  margin-top: 0.875rem;
+  aspect-ratio: 3 / 2;
+  border: var(--hairline);
+  border-radius: var(--radius-panel);
+  overflow: clip;
+  background: var(--color-card);
+}
+
+/* What to check, in order. Numbered because the order is the advice: each
+   check rules out a cause before the next one is worth trying. */
+.note-checks {
+  margin-top: 1rem;
+  border-top: var(--hairline);
+}
+.note-checks > li {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.5rem;
+  padding-block: 0.875rem;
+  border-bottom: var(--hairline);
+  font-size: var(--text-smallmeta);
+  line-height: var(--text-smallmeta--line-height);
+}
+.note-checks > :last-child { border-bottom: 0; }
+.note-check-index {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.8125rem;
+  color: var(--color-vermilion);
+}

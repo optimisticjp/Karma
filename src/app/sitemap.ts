@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
 import { courses } from "@/content/courses";
+import { machineNotes } from "@/content/notes";
 import { CONTENT_LAST_UPDATED, site } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -11,6 +12,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/admissions",
     "/admission",
     "/student-work",
+    "/notes",
+    ...machineNotes.map((n) => `/notes/${n.slug}`),
     "/services",
     "/about",
     "/success-stories",

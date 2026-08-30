@@ -452,7 +452,7 @@ Update this table after every completed/merged phase.
 | 4 | Proof ecosystem: work, stories, reviews, trainers | ✅ Complete + merged | PR #15 — `build` + Cloudflare Workers Builds green |
 | 5 | Mobile conversion / call / directions / demo | ✅ Complete + merged | PR #16 — `build` + Cloudflare Workers Builds green |
 | 6 | Studio / B2B commercial embroidery | ✅ Complete + merged | PR #17 — `build` + Cloudflare Workers Builds green |
-| 7 | Machine Notes / social-to-search content | ⏳ Pending | |
+| 7 | Machine Notes / social-to-search content | 🚧 In progress | branch `phase-7/machine-notes` |
 | 8 | Local SEO / structured data / measurement | ⏳ Pending | |
 | 9 | Accessibility / performance / responsive hardening | ⏳ Pending | |
 | 10 | Final whole-site creative polish | ⏳ Pending | |
@@ -1641,6 +1641,93 @@ note → course → demo
 course → relevant note
 
 Merge when green; update progress.
+
+## Implementation record
+
+### The name stayed **Machine Notes**
+Research produced nothing stronger. It is accurate (they are notes, and they
+are about machines), it is not "blog", and it inherits the brand's existing
+vocabulary — the Phase 4 machine case notes already use the phrase, so the
+site now has one idea appearing in two places rather than two competing ones.
+
+### Architecture: a typed source file, not a CMS section
+Content Desk exists for content the **owner** publishes — student work,
+stories, verified numbers — each with a consent and verification workflow
+behind it. Machine notes are technical writing that ships with the code, is
+reviewed in a diff like code, and links to courses by slug.
+
+A generic rich-text page builder would have added an editing surface nobody
+asked for and lost the structure: "what to check" is a numbered list where the
+order *is* the advice, not a paragraph someone might bold. So notes live in
+`src/content/notes.ts`, exactly like `courses.ts`.
+
+### Eight notes, fully bilingual
+`read-a-failed-stitch-out`, `emcad-or-wilcom`, `needle-and-thread-matching`,
+`sample-to-machine-ready-file`, `what-to-learn-first`,
+`sequence-out-of-registration`, `density-is-not-always-better`,
+`choosing-stitch-direction`.
+
+Every field is written in both languages. Nothing is machine-duplicated — the
+brief's "do not force low-quality automatic duplication" is met by writing the
+Gujarati rather than by shipping English-only pages.
+
+### Structure per note
+Question → answer in two sentences → why it happens → the machine detail → an
+example → **what to check, numbered** → related course → demo CTA. Someone
+standing at a machine with a bad sample gets their answer in the first screen;
+someone deciding whether to learn properly reads on and finds the course.
+
+### Decisions
+1. **Not a blog: no dates, no bylines, no "read more".** A note is either
+   still true or it gets corrected, and neither is a function of when it was
+   written. The index is a ledger of questions, because the question is what
+   someone types.
+2. **`TechArticle`, not `BlogPosting`**, and **no author `Person` and no
+   `datePublished`**. No trainer has been confirmed, so a byline would be a
+   fabricated person in structured data — the exact thing Phase 4's rules
+   forbid. The studio is the publisher.
+3. **Media fields exist and are empty.** `reelUrl`, `youtubeUrl` and
+   `thumbnail` are in the type so a note can point at the studio's own video
+   the moment the owner supplies a verified link. All three are unset on all
+   eight notes, because inventing a URL that points at the wrong reel is worse
+   than having no video. The UI renders the block only when a link exists, and
+   **links outward rather than embedding a player** — no Instagram or Facebook
+   embed anywhere.
+4. **Every claim is trade knowledge**, so no note carries a sample flag and
+   none needs owner verification. Examples describe a fault and its fix, never
+   a person: "a filled motif came off with the ground rippled around it", not
+   "a student's piece".
+5. **Internal linking runs both ways.** A note sends a reader to its course;
+   a course page now lists the notes that cover its technique. Someone
+   weighing a course wants evidence the teaching goes deeper than a syllabus.
+
+### SEO cluster
+Each note carries the themes it genuinely covers as `tags`, and a test asserts
+all seven of the brief's themes are covered across the set — emCAD classes
+Surat, Wilcom embroidery training Surat, machine embroidery training Surat,
+embroidery design classes Surat, computerised embroidery design course, beads
+and sequence training, practical embroidery machine training. The index and
+all eight notes are in the sitemap with hreflang alternates.
+
+### One layout fix this caused
+The header nav went from seven items to eight. At 1280 the brand started
+crowding the nav, so the desktop gap dropped from 20px to 16px between 1280
+and 1535. Measured after: brand 206px, no collision, no overflow.
+
+### Tests (`tests/machine-notes.test.ts`, 11 new — 239 total)
+Six to ten notes; every field filled in both languages; unique slugs pointing
+at real courses; linking works both ways; no company or student named; no
+guarantee, salary or currency figure; **media URLs unset**; `TechArticle` with
+no author or date; sitemap coverage; all seven search themes present; reachable
+from header and footer.
+
+### Verification
+`npm run typecheck`, `npm run lint`, `npm test` (**239 passing**) and
+`npm run build` all clean. Audited at 320, 360, 375, 390, 430, 768, 820, 1024,
+1280, 1440 and 1728 in both locales across the index, a note and a linked
+course page: **zero horizontal overflow, zero sub-24px non-inline targets**,
+eight ledger rows, four checks rendering, nav at eight items without crushing
+the brand. All note routes return 200 in both locales.
 
 ---
 

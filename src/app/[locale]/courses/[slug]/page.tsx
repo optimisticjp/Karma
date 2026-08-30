@@ -15,6 +15,7 @@ import { TrackedLink } from "@/components/site/TrackedLink";
 import { TrackView } from "@/components/site/TrackView";
 import { JsonLd } from "@/components/site/JsonLd";
 import { courseBySlug, coursesByFamily, coursesInFamily, families } from "@/content/courses";
+import { notesForCourse } from "@/content/notes";
 import { faqs, trainers } from "@/content/collections";
 import { site, waLink } from "@/lib/site";
 import { Icon } from "@/components/ui/Icon";
@@ -67,9 +68,10 @@ export default async function CourseDetailPage({
   const course = courseBySlug(slug);
   if (!course) notFound();
 
-  const [t, tc, l] = await Promise.all([
+  const [t, tc, tn, l] = await Promise.all([
     getTranslations("courseDetail"),
     getTranslations("common"),
+    getTranslations("notesPage"),
     getLocale()
   ]);
   const gu = l === "gu";
@@ -94,6 +96,12 @@ export default async function CourseDetailPage({
         ? "sample-modern-trainer"
         : "sample-machine-trainer";
   const trainer = trainers.find((tr) => tr.slug === trainerSlug) ?? trainers[0];
+
+  /* Notes that answer a question about this technique. The link runs both
+     ways — a note sends a reader to its course, and a course sends a reader
+     to the notes — because someone weighing a course wants evidence that the
+     teaching goes deeper than the syllabus page. */
+  const notes = notesForCourse(course.slug);
 
   const crumbs = {
     "@context": "https://schema.org",
@@ -334,6 +342,34 @@ export default async function CourseDetailPage({
           </div>
         </div>
       </section>
+
+      {notes.length > 0 ? (
+        <section className="section-compact">
+          <div className="container-site split">
+            <div>
+              <SectionHeading title={tn("courseNotesTitle")} sub={tn("courseNotesSub")} />
+              <p className="u-actions action-row">
+                <Link href="/notes" className="btn btn-secondary">
+                  {tn("allNotes")} <Icon name="arrow" size={18} className="arrow" />
+                </Link>
+              </p>
+            </div>
+            <ul className="stack-lines">
+              {notes.map((n) => (
+                <li key={n.slug}>
+                  <Link
+                    href={`/notes/${n.slug}`}
+                    className="stitch-link inline-flex min-h-8 items-center font-semibold"
+                  >
+                    {gu ? n.questionGu : n.questionEn}
+                  </Link>
+                  <p className="mt-1 text-smallmeta text-stone">{gu ? n.answerGu : n.answerEn}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      ) : null}
 
       {/* 13. FAQ. */}
       <section className="section bg-ivory-2">
