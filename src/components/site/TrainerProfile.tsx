@@ -1,7 +1,20 @@
 import { useLocale, useTranslations } from "next-intl";
 import { SampleTag } from "@/components/ui/SampleTag";
-import { PhotoSlot } from "@/components/ui/PhotoSlot";
+import { ManifestPhoto, PhotoSlot } from "@/components/ui/PhotoSlot";
 import type { Trainer } from "@/content/collections";
+
+/**
+ * Which reserved portrait belongs to which profile.
+ *
+ * Mapped by slug, not by array position: re-ordering the trainer list must
+ * never silently reassign a photograph to a different person. A profile with
+ * no entry here keeps its free-text shoot label — it is not given somebody
+ * else's frame.
+ */
+const PORTRAIT_SLOT: Record<string, string> = {
+  "sample-machine-trainer": "T1_MAIN_TRAINER",
+  "sample-design-trainer": "T2_EMCAD_TRAINER"
+};
 
 /**
  * A trainer profile.
@@ -15,6 +28,12 @@ import type { Trainer } from "@/content/collections";
  * the absence of any `Person` structured data anywhere on the site. A
  * fabricated named person in schema is a different order of problem from a
  * labelled card, and the owner has not confirmed a single trainer yet.
+ *
+ * The portrait is the reserved manifest slot where one is mapped, so the frame
+ * already holds the exact shape the real photograph will be. Mapping is by
+ * slug — re-ordering the list must never reassign a photograph to a different
+ * person — and a profile with no mapping keeps its own shoot label rather than
+ * borrowing a frame that was briefed for someone else.
  */
 export function TrainerProfile({ trainer }: { trainer: Trainer }) {
   const t = useTranslations("proof.trainers");
@@ -34,7 +53,11 @@ export function TrainerProfile({ trainer }: { trainer: Trainer }) {
   return (
     <article className="trainer-card">
       <div className="trainer-media">
-        <PhotoSlot label={trainer.photoLabel} ratio="4/5" />
+        {PORTRAIT_SLOT[trainer.slug] ? (
+          <ManifestPhoto id={PORTRAIT_SLOT[trainer.slug]} editorial />
+        ) : (
+          <PhotoSlot label={trainer.photoLabel} ratio="4/5" />
+        )}
       </div>
       <div className="trainer-body">
         <h3 className="trainer-name">{gu ? trainer.nameGu : trainer.nameEn}</h3>

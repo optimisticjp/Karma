@@ -1,22 +1,18 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Reveal } from "@/components/ui/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Icon } from "@/components/ui/Icon";
 import { MonoNote } from "@/components/ui/MonoNote";
-import { ManifestPhoto } from "@/components/ui/PhotoSlot";
 import { photosInGroup } from "@/content/photo-manifest";
+import { MaterialWall } from "@/components/work/MaterialWall";
 
 /**
  * The material wall — six pieces, six different shapes.
  *
- * A uniform grid of six identical tiles is what a stock-photo site does, and
- * it flattens the one thing that makes textile work worth showing: a bridal
- * zardosi panel is tall, a dupatta is square, a screen-and-result pair is
- * wide. The manifest already carries each shot's real dimensions, so the wall
- * simply asks each frame for its own ratio. It is a mixed-ratio editorial
- * wall today with placeholders and stays exactly that wall when the six
- * photographs land — no relayout, no CLS.
+ * The wall itself is `<MaterialWall>`, shared with `/student-work` so the
+ * homepage teaser and the archive cannot drift into two different ideas of
+ * what a piece frame is. Why it is a wall and not a grid, and why exactly one
+ * frame carries a registration mark, are explained there.
  *
  * WHAT IS AND IS NOT CLAIMED HERE
  * -------------------------------
@@ -42,13 +38,7 @@ export function StudentWorkWall() {
           <MonoNote className="mb-1 shrink-0">{t("count", { count: pieces.length })}</MonoNote>
         </div>
 
-        <ul className="work-wall u-section-body">
-          {pieces.map((piece, i) => (
-            <Reveal as="li" key={piece.id} delay={i * 40} className="work-wall-item">
-              <ManifestPhoto id={piece.id} editorial />
-            </Reveal>
-          ))}
-        </ul>
+        <MaterialWall className="u-section-body" />
 
         <p className="u-actions">
           <Link href="/student-work" className="btn btn-secondary">

@@ -1850,7 +1850,7 @@ Claude must execute phases in order, one clean PR at a time unless a smaller spl
 | 2 | Global shell + hero + signature Screen-to-Stitch interaction | ✅ Complete + merged |
 | 3 | Homepage full rebuild | ✅ Complete + merged |
 | 4 | 11-course Machine Index + all course pages | ✅ Complete + merged |
-| 5 | Proof ecosystem: student work, stories, trainers, studio/machines | ⏳ Pending |
+| 5 | Proof ecosystem: student work, stories, trainers, studio/machines | ✅ Complete + merged |
 | 6 | Admission + conversion + contact experience | ⏳ Pending |
 | 7 | Machine Notes technical archive | ⏳ Pending |
 | 8 | B2B Studio/services | ⏳ Pending |
@@ -2293,6 +2293,80 @@ Rebuild:
 Use G/T/A/S/F placeholders exactly.
 
 Do not invent factual identities/outcomes.
+
+## Implementation record — merged 2026-08-30
+
+**Branch:** `redesign/phase-5-proof` · **PR:** #32
+
+### The material archive
+
+`<MaterialWall>` (`src/components/work/MaterialWall.tsx`) is now shared by the
+homepage teaser and `/student-work`, so the two cannot drift into two different
+ideas of what a piece frame is. Six pieces, six shapes, each frame taking its
+ratio from the manifest.
+
+**Exactly one registration mark on the wall.** A registration mark means
+"precision / reference" in this system; on every image it means nothing, and
+that is how a technical language turns into wallpaper. The mark is a prop on
+the wall rather than a decoration inside `<ManifestPhoto>` precisely so it
+cannot spread, and a test counts it.
+
+**The two galleries stay two things.** `<MaterialWall>` is the six photographs
+the shoot is for: fixed slots, fixed ratios, no attribution.
+`<WorkLedger>` is whatever staff published through Content Desk, with its
+technique, course, production note and sample tags intact. Merging them would
+mean either the shoot slots become deletable from an admin screen, or published
+items lose their consent metadata.
+
+### BEFORE → LEARNED → NOW
+
+`<StoryCase>` now leads with the three-step arc on **one** stitch path — the
+same 9-on / 6-off geometry as everywhere else, drawn once down the column
+rather than as three connectors. The shape is the argument: something specific
+was learned between one state and the other. The final step carries a
+`<KnotPoint>`, because in this system a knot means "decision / completion",
+which is exactly what NOW is. It is not a bullet.
+
+A story whose LEARNED field is empty drops the step rather than rendering a
+blank one; the extra `why` / `changed` detail moved below the arc and stays out
+of teaser mode.
+
+### Frames, never people
+
+S1/S2 are reserved on `/success-stories` and T1/T2 map to trainer profiles **by
+slug** — re-ordering the trainer list must never reassign a photograph to a
+different person, and a profile with no mapping keeps its own shoot label
+rather than borrowing a frame briefed for someone else. Every frame names the
+photograph it is waiting for and nothing about who is in it; the manifest's own
+alt guidance for both groups says the name goes on only with written consent.
+Still no `Person` structured data anywhere.
+
+### /about
+
+The machine wall now gives each of the eleven techniques **its own signature**
+instead of three shared family swatches: a swatch told a visitor which of three
+buckets a course sat in, a signature tells them what the stitch does. The page
+also gains the studio evidence — the floor wide and the entrance signboard —
+with machines named by technique only and a line saying why there are no head
+counts, speeds or model numbers.
+
+### Two tests that were wrong, and the fix worth keeping
+
+A blunt ban on the word "placement" failed on `learnedEn: "Placement,
+tack-down and cover stitching…"` — appliqué vocabulary — and a ban on
+"earning"/"placed" failed on the page's own honest disclaimer ("none of them
+claims an income, a job or a placement") and on the word "replaced". Both were
+narrowed to ban **the claim, not the word**: `job placement`, `placement
+guarantee/assistance/record/rate/support`, `100% placement`, `job guarantee`,
+plus salary/earnings/lakh/₹ — and scoped to the story DATA rather than the
+page's framing copy, with a separate test asserting the disclaimer is present.
+A test that fails on an honest disclaimer teaches the next session to delete
+the disclaimer.
+
+### Gates
+
+`npm run typecheck`, `npm run lint`, `npm test` (37 files, 519 tests) and
+`npm run build` all green. No dependency added.
 
 ---
 

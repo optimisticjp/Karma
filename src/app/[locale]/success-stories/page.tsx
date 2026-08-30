@@ -5,6 +5,10 @@ import { PageIntro } from "@/components/ui/PageIntro";
 import { StoryCase } from "@/components/site/StoryCase";
 import { ReviewWall } from "@/components/site/ReviewWall";
 import { SocialAuthority } from "@/components/site/SocialAuthority";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import { ManifestPhoto } from "@/components/ui/PhotoSlot";
+import { MonoNote } from "@/components/ui/MonoNote";
+import { photosInGroup } from "@/content/photo-manifest";
 import { Icon } from "@/components/ui/Icon";
 import { getPublicStories } from "@/lib/content/public";
 import { pageMeta } from "@/lib/seo";
@@ -34,6 +38,16 @@ export async function generateMetadata({
  *
  * None of this reaches structured data. There is no `Review` or `Person`
  * markup on this page, and there will not be until the stories are real.
+ *
+ * THE TWO RESERVED PORTRAITS
+ * --------------------------
+ * S1 and S2 from the shoot list are held here as frames that name the
+ * photograph they are waiting for, with no name attached. That distinction is
+ * the whole safeguard: a labelled empty frame is a visible work-in-progress; a
+ * portrait captioned with a person is a claim about someone who has not
+ * consented. The manifest's own alt guidance for these two slots says the same
+ * thing — name the person ONLY with written consent — and the frames stay
+ * anonymous until Content Desk's consent gate has been passed.
  */
 export default async function StoriesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -44,6 +58,7 @@ export default async function StoriesPage({ params }: { params: Promise<{ locale
     getPublicStories()
   ]);
   const anySample = stories.some((s) => s.sample);
+  const portraits = photosInGroup("story");
 
   return (
     <>
@@ -66,9 +81,25 @@ export default async function StoriesPage({ params }: { params: Promise<{ locale
         }
       />
 
+      {/* Two frames, waiting for two photographs. No names on them. */}
+      <section className="section-compact band-human">
+        <div className="container-site">
+          <MonoNote as="p">{t("portraitsLabel")}</MonoNote>
+          <ul className="story-portraits">
+            {portraits.map((portrait) => (
+              <li key={portrait.id}>
+                <ManifestPhoto id={portrait.id} editorial />
+              </li>
+            ))}
+          </ul>
+          <p className="story-portraits-note">{t("portraitsNote")}</p>
+        </div>
+      </section>
+
       <section className="section">
         <div className="container-site">
-          <div className="story-grid">
+          <SectionHeading title={t("casesTitle")} sub={t("casesSub")} />
+          <div className="story-grid u-section-body">
             {stories.map((s, i) => (
               <StoryCase key={`${s.nameEn}-${i}`} story={s} />
             ))}
