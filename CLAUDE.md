@@ -137,4 +137,18 @@ Then: **feature branch → PR → CI + Cloudflare preview green → merge.** Do 
 - Durable project memory: `docs/project-context.md`
 
 ## Current roadmap state
-The public site (Screen to Stitch, phases 1-10), platform foundation, Admissions CRM, Courses/Batches, Student 360, Attendance, offline Fees, Certificates, Design Jobs, Content Desk and core reporting are built. The owner's verified EMCAD DAHAO operational facts landed on 2026-08-30 with migration `0004`. What remains is real content from the owner (including the 32 studio photographs), the open confirmations in `docs/content-checklist.md`, role-aware console polish, exports/audit UX and remaining operational hardening. Turnstile, R2/private file delivery, public-media upload tooling and custom-domain migration are separate infrastructure steps and must not be silently activated by feature work.
+The public site and Karma Console have both been through the **Machine Lab
+full-product redesign** (`docs/karma-machine-lab-redesign-master-plan.md`,
+fourteen phases, PRs #28–#41, all merged). Design system **v4 "Machine Lab"**
+extends v3 additively: `src/app/machine-lab.css` is a third, unlayered
+stylesheet imported after `premium.css` in both root layouts — read
+`docs/design-system.md` before adding a primitive.
+
+What remains is real content from the owner (including the 32 studio
+photographs, which have typed, reserved frames waiting in
+`src/content/photo-manifest.ts`), the open confirmations in
+`docs/content-checklist.md` — including the **10:30 pm vs 23:00 last-class
+conflict** found during the redesign — and the owner's review of the finished
+system. Turnstile, R2/private file delivery, public-media upload tooling and
+custom-domain migration are separate infrastructure steps and must not be
+silently activated by feature work.

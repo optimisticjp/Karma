@@ -2049,3 +2049,58 @@
     scroll-margin-top: 1.5rem;
   }
 }
+
+/* ------------------------------------------------------------------ *
+ * 28. Hardening
+ *
+ * A focus ring that is clipped is a focus ring a keyboard user cannot
+ * see. The global `:focus-visible` draws 3px OUTSIDE the element, which
+ * is right for a button sitting in open space and wrong for a full-bleed
+ * row: inside `.queue` (which clips) the ring disappears, and inside the
+ * index and the archive it pushes past the container edge and can cost a
+ * horizontal scrollbar at 320px. These rows draw their ring inside.
+ * ------------------------------------------------------------------ */
+
+.queue-link:focus-visible,
+.mi-link:focus-visible,
+.note-archive-link:focus-visible,
+.rail-tab:focus-visible {
+  outline: 2px solid var(--color-vermilion-deep);
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+.on-carbon .rail-tab:focus-visible {
+  outline-color: #e2765f;
+}
+
+/* Anything third-party or visitor-supplied can carry a token longer than its
+   container. These rows already ellipsis their own text; the caption under a
+   photo frame and the queue meta line may not. */
+.photo-slot figcaption,
+.queue-row-meta,
+.rail-caption {
+  overflow-wrap: var(--break-anywhere);
+}
+
+/* ---- reduced motion, for everything this redesign added ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  .mi-link,
+  .note-archive-link,
+  .queue-link,
+  .rail-tab,
+  .rail-media,
+  .m-l1,
+  .m-l2,
+  .m-l3,
+  .m-l4 {
+    transition: none !important;
+  }
+  /* The progress seam is state, not motion: it must still read correctly,
+     so only the transition goes. */
+  .sp-seg,
+  .sp-step.is-current .sp-seg::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

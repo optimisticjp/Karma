@@ -1859,7 +1859,7 @@ Claude must execute phases in order, one clean PR at a time unless a smaller spl
 | 11 | Admissions, Students, Courses/Batches, Fees admin redesign | ✅ Complete + merged |
 | 12 | Attendance, Certificates, Design Desk, Content, Reports, Team admin redesign | ✅ Complete + merged |
 | 13 | Backend/query/free-tier audit + copy/i18n/SEO consistency | ✅ Complete + merged |
-| 14 | Accessibility/performance/responsive hardening + final whole-product creative audit | ⏳ Pending |
+| 14 | Accessibility/performance/responsive hardening + final whole-product creative audit | ✅ Complete + merged |
 
 ---
 
@@ -3058,6 +3058,79 @@ Then do one final independent creative-director pass asking:
 > Does this feel like a real Surat commercial embroidery studio, or an agency concept for one?
 
 Remove anything that answers “agency concept.”
+
+---
+
+## Implementation record — merged 2026-08-30
+
+**Branch:** `redesign/phase-14-hardening` · **PR:** #41
+
+### A focus ring nobody could see
+
+The global `:focus-visible` draws 2px at `outline-offset: 3px` — outside the
+element. That is right for a button in open space and wrong for a full-bleed
+row: inside `.queue` (which clips) the ring vanished entirely, and inside the
+Machine Index and the Machine Notes archive it pushed past the container edge,
+where at 320px it can produce a horizontal scrollbar on a page that otherwise
+has none.
+
+`.queue-link`, `.mi-link`, `.note-archive-link` and `.rail-tab` now draw the
+ring **inside**, at `outline-offset: -2px`, with the on-carbon variant for the
+dark rail.
+
+### Reduced motion, completed
+
+Every transition this redesign added is now covered: the index and archive row
+hovers, the queue row hover, the rail tab and rail media, and the four motion
+levels. The progress seam keeps its *state* (done / current / future is
+information, not decoration) and loses only its transition.
+
+### A test that assumed there was only one
+
+The Phase 2 reduced-motion test used `lastIndexOf("@media (prefers-reduced-motion")`
+— fine while there was one block, wrong the moment this phase added another.
+It now joins **every** reduced-motion block and asserts coverage somewhere,
+which is what actually matters and survives the next block.
+
+### Bundle
+
+`npx wrangler deploy --dry-run`: **2011.09 KiB gzip** against the 3 MB free
+plan. The pre-redesign figure was ~1930 KiB, so fourteen phases of new
+components, primitives, signatures and stylesheets cost roughly **80 KiB gzip**
+— and **no new dependency at all**. A test lists the libraries a redesign of
+this shape usually reaches for (framer-motion, gsap, lottie, three, recharts,
+chart.js, swiper, lucide, react-icons, shadcn, pdfkit) and fails if one appears.
+
+### The creative-director pass
+
+> Does this feel like a real Surat commercial embroidery studio, or an agency
+> concept for one?
+
+The things that answer "real studio" are now the things a test protects:
+
+- **Eleven courses, not a curated shortlist.** A concept picks six that look
+  good in a grid.
+- **Every photograph a named, reserved frame.** No stock host appears anywhere
+  in the public tree. An agency concept fills the gaps and apologises later.
+- **Six named production faults and eight technical notes.** A concept writes
+  adjectives; a studio names what goes wrong on the floor. If these ever thin
+  out, the site has drifted back to being a brochure, and the test says so.
+- **No invented specification.** No RPM, no stitch density, no GSM, no
+  `<number>-head` machine claim in either catalogue — and no
+  cursor-coordinate readout or engineering-dashboard theatre in any public
+  component.
+- **Dark surfaces stay punctuation.** At most four across the homepage's
+  fifteen sections — hero, claim, money, close — never adjacent, at most two
+  inline on any other page, and **none at all in the console**, which is a work
+  desk under fluorescent light rather than a brand surface.
+- **No decorative loop anywhere.** The only `infinite` animation permitted is
+  the loading skeleton, which is state.
+
+### Gates
+
+`npm run typecheck`, `npm run lint`, `npm test` (46 files, 656 tests) and
+`npm run build` all green. Wrangler dry-run clean.
+
 
 ---
 
