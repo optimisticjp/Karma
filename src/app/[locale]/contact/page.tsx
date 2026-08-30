@@ -3,6 +3,7 @@ import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { ManifestPhoto } from "@/components/ui/PhotoSlot";
 import { Icon } from "@/components/ui/Icon";
 import { site, waLink } from "@/lib/site";
 import { pageMeta } from "@/lib/seo";
@@ -24,6 +25,15 @@ export async function generateMetadata({
  * are ranked rather than presented as equal options, and each one says what
  * it is actually for. Every target is a full-width row: this page gets opened
  * on a phone, one-handed, usually while standing somewhere noisy.
+ *
+ * The icons here are deliberately ordinary — a phone, an envelope, a map.
+ * Branded concepts get niche icons; universal actions keep universal ones, and
+ * nobody standing on a footpath should have to decode an embroidery symbol to
+ * find "email". (The email row used to carry a thread spool.)
+ *
+ * The entrance frame is the last thing that actually decides a visit: the
+ * address gets someone to the road and the signboard gets them through the
+ * door. It is a reserved manifest slot, not a stand-in photograph.
  */
 export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -78,7 +88,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
     {
       href: `mailto:${site.email}`,
       external: false,
-      icon: "spool" as const,
+      icon: "mail" as const,
       label: t("emailLabel"),
       value: site.email,
       note: t("emailNote"),
@@ -103,7 +113,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
               rel="noopener noreferrer"
               className="btn btn-secondary"
             >
-              <Icon name="pin" size={18} /> {t("mapCta")}
+              <Icon name="map" size={18} /> {t("mapCta")}
             </a>
           </>
         }
@@ -118,7 +128,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
         }
       />
 
-      <section className="section">
+      <section className="section band-info">
         <div className="container-site grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
           <div>
             <SectionHeading title={t("reachTitle")} sub={t("reachSub")} />
@@ -170,6 +180,12 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
             {/* People in Mota Varachha navigate by landmark, not by PIN code.
                 Both landmarks are verified: Dhara Arcade from the studio's own
                 Google pin, Krishna Township Road from its JustDial listing. */}
+            {/* What to look for from the road. */}
+            <figure className="contact-entrance mt-6">
+              <ManifestPhoto id="A2_ENTRANCE_SIGNBOARD" editorial />
+              <figcaption className="contact-entrance-caption">{t("entranceCaption")}</figcaption>
+            </figure>
+
             <div className="card mt-6 p-5 md:p-6">
               {/* The landmark already sits with the address above; repeating it
                   here would be emphasis by duplication. This card carries the

@@ -284,6 +284,12 @@ const paths: Record<string, React.ReactNode> = {
       <path d="M15.8 15.8 21 21" />
     </>
   ),
+  mail: (
+    <>
+      <rect x="3" y="5" width="18" height="14" rx="1.5" />
+      <path d="M3.5 6.5 12 13l8.5-6.5" />
+    </>
+  ),
   map: (
     <>
       <path d="M9 4 3 6.2v14L9 18l6 2 6-2.2v-14L15 6z" />
@@ -345,7 +351,18 @@ export const ICON_GROUPS = {
   digitising: ["node", "handles", "density", "direction", "registration"],
   troubleshooting: ["thread-break", "misregistration", "density-problem", "correction"],
   /* Universal actions. Never replace one of these with an embroidery metaphor. */
-  universal: ["pencil", "trash", "printer", "search", "arrow", "phone", "map", "check", "plus"]
+  universal: [
+    "pencil",
+    "trash",
+    "printer",
+    "search",
+    "arrow",
+    "phone",
+    "map",
+    "mail",
+    "check",
+    "plus"
+  ]
 } as const satisfies Record<string, readonly IconName[]>;
 
 export function Icon({

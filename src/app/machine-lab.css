@@ -1465,3 +1465,176 @@
   line-height: 1.5;
   color: var(--color-stone);
 }
+
+/* ------------------------------------------------------------------ *
+ * 22. The admission progress seam
+ *
+ *   done     a finished running stitch — 9 on the surface, 6 off it
+ *   current  a needle penetration point: the needle is down, here, now
+ *   future   a faint construction line — planned, not sewn
+ *
+ * The states mean what they mean everywhere else in this system. A
+ * filling bar would say "you are 50% through a chore"; a seam says two
+ * of four are sewn and the needle is on the third.
+ * ------------------------------------------------------------------ */
+
+.stitch-progress {
+  --sp-gap: 0.5rem;
+}
+.sp-steps {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--sp-gap);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.sp-step {
+  min-width: 0;
+}
+
+/* future: the seam is planned, not sewn */
+.sp-seg {
+  display: block;
+  height: 5px;
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-line) 85%, transparent) 0 100%
+  );
+  background-size: 100% 1px;
+  background-repeat: no-repeat;
+  background-position: 0 50%;
+}
+
+/* done: the running stitch, at exact pixel scale */
+.sp-step.is-done .sp-seg {
+  background-image:
+    radial-gradient(circle 1.75px at 1.75px 50%, var(--color-vermilion) 99%, transparent 100%),
+    linear-gradient(90deg, var(--color-vermilion) 0 9px, transparent 9px 15px);
+  background-size: 15px 5px, 15px 2px;
+  background-repeat: repeat-x, repeat-x;
+  background-position: 0 50%, 0 50%;
+}
+
+/* current: the construction line, with the needle down on it */
+.sp-step.is-current .sp-seg {
+  position: relative;
+}
+.sp-step.is-current .sp-seg::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  translate: 0 -50%;
+  background: var(--color-vermilion);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-vermilion) 18%, transparent);
+}
+
+.sp-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  margin-top: 0.4375rem;
+  min-width: 0;
+}
+.sp-index {
+  color: var(--color-line);
+}
+.sp-label {
+  color: var(--color-stone);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sp-step.is-done .sp-index,
+.sp-step.is-current .sp-index {
+  color: var(--color-vermilion-deep);
+}
+.sp-step.is-current .sp-label {
+  color: var(--color-carbon);
+  font-weight: 700;
+}
+
+/* At 320px four labels do not fit side by side, so only the current one keeps
+   its text. The numbers stay, and the seam still shows how far along it is. */
+@media (max-width: 419px) {
+  .sp-step:not(.is-current) .sp-label {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * 23. The demo decision surface
+ *
+ * Four askable times, not four bookable slots — the studio keeps no
+ * per-date capacity, so these are chips a visitor points at, never
+ * buttons that reserve anything.
+ * ------------------------------------------------------------------ */
+
+.demo-grid {
+  display: grid;
+  gap: clamp(1.5rem, 1.2rem + 1.2vw, 2.5rem);
+}
+@media (min-width: 860px) {
+  .demo-grid {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: start;
+  }
+}
+.demo-facts {
+  display: grid;
+  gap: 1rem;
+  border-top: var(--hairline);
+  padding-top: 1.125rem;
+}
+.demo-fact-value {
+  margin-top: 0.25rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.0625rem;
+  line-height: 1.4;
+  color: var(--color-carbon);
+}
+:lang(gu) .demo-fact-value {
+  line-height: 1.6;
+}
+.demo-slots {
+  border-top: var(--hairline);
+  padding-top: 1.125rem;
+}
+.demo-slot-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.625rem;
+  list-style: none;
+  padding: 0;
+}
+.demo-slot {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  border: var(--hairline);
+  border-radius: 999px;
+  padding: 0.3125rem 0.6875rem;
+  color: var(--color-carbon);
+}
+.demo-slot-note {
+  margin-top: 0.875rem;
+  max-width: 62ch;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--color-stone);
+}
+
+/* The entrance frame on the contact page. */
+.contact-entrance-caption {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-stone);
+}
