@@ -766,3 +766,44 @@ and focus — 39px, the brand's own gesture at the size of a gesture. **No glow
 halo**; a glow would be the only decorative light on the page. The secondary
 action advances its arrow rather than growing a background. Reduced motion
 shows the finished state.
+
+## v4 homepage compositions (Phase 3)
+
+### The Machine Index — `.machine-index`
+
+The catalogue as a workshop list. A row is index · media · name · what the
+technique produces · cues · arrow, and it scans in one pass at 320px — which
+eleven cards never did, and which keeps working past eleven courses without a
+redesign.
+
+**Photography leads where there is one; the technique signature leads where
+there is not — same slot, same size.** That is what stops the three
+signature-led courses reading as second-class rows, and it means nothing about
+the layout changes when the eight course photographs land.
+
+A row shows a duration **only** where the owner confirmed one, and never shows
+a fee. A duration standing beside ten other rows reads as true of all of them.
+
+### The decision block — `.emcad-*`
+
+Two panels: what the course is, and what it costs. Every figure renders from
+`src/content/course-operations.ts` — the message catalogue holds labels and
+sentences and **no numbers**, so a correction happens in one file. The fee panel
+takes a vermilion border; the payment schedule uses `<KnotPoint>` for each
+instalment, which is the canonical mark for "decision / completion" and is
+therefore the right one here rather than a bullet.
+
+### The material wall — `.work-wall`
+
+Six pieces, six shapes. Each frame takes its ratio from the manifest instead of
+being forced into a uniform tile: a bridal panel is tall, a dupatta is square, a
+screen-and-result pair is wide, and flattening them throws away the one thing
+worth showing about textile work.
+
+### Dark bands never run together
+
+`tests/machine-lab-homepage.test.tsx` walks the page's rendered section order
+and fails if two `.on-carbon` sections are adjacent. This caught a pre-existing
+bug: the business band and the close were both dark and next to each other,
+while a comment claimed the page had "exactly two dark bands". A dark surface
+stops being punctuation the moment it repeats.

@@ -398,6 +398,24 @@ so the longer B2B chain reuses it. Page rhythm is `.band-machine` /
 `.band-material` / `.band-human` / `.band-info`, which add surface and texture
 only — `.on-carbon` remains the one dark-surface implementation.
 
+**The homepage (Phase 3).** Rebuilt around the 30-second decision. The piece
+worth knowing about: **`<EmcadDecision>` publishes the EMCAD DAHAO duration,
+timetable and fee, and renders every figure from
+`src/content/course-operations.ts`** — the message catalogues hold labels and
+sentences and no numbers, and a test asserts it, so a correction is made in one
+file and the page cannot drift from the record. The block names the one course
+the figures belong to and says in copy that they do not apply to the other ten.
+There is still **no payment CTA**; the block states that there is no gateway,
+payment link or UPI request, which is where somebody hunting for a pay button
+looks. `<Investment>` was rescoped to the institute-wide half of the money
+question. `<MachineIndex>` (in `src/components/courses/`, reusable by
+`/courses`) leads a row with a photograph where the shoot covers that course
+and with the technique signature where it does not — same slot, same size.
+`<StudentWorkWall>`, `<WhereYouLearn>` and the reserved trainer portraits use
+the manifest; machine stations are named by technique only, with no head count,
+model, speed or capacity. A test walks the rendered section order and fails if
+two dark bands become adjacent.
+
 **The 32-photograph manifest.** `src/content/photo-manifest.ts` is the typed
 list of every shot on the owner's final brief, with each slot's intrinsic
 dimensions. `<ManifestPhoto id="…">` reserves the photograph's exact aspect
@@ -1672,7 +1690,7 @@ modules are importable in a test runner while the guard stays real in the app.
 `jsx: "preserve"` for Next.js — without the override a test importing a `.tsx`
 component sees raw JSX and fails to parse.
 
-**34 test files, 456 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
+**35 test files, 480 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
 which is the point — the policy survives a refactor:
 
 | Test | Guards |
@@ -1680,6 +1698,7 @@ which is the point — the policy survives a refactor:
 | `i18n-parity` | EN/GU catalogue keys mirror exactly |
 | `machine-lab-system` | the design system v4 foundation: 32-photo manifest, icon family, eleven technique signatures, stitch semantics, motion levels, Gujarati overrides, reduced motion, no new dependency |
 | `machine-lab-shell` | the hero states EMCAD/machine/Surat/demo without photography; one course's facts never become the site's; one continuous thread and one Level-4 moment; the rail never autoplays, loops or needs a drag; bands never re-point the palette; the mobile bar keeps exactly two actions |
+| `machine-lab-homepage` | the section order; no two dark bands adjacent; the Machine Index carries no fee and only confirmed durations; every EMCAD figure renders from the verified record, never from a message; no payment provider anywhere near the fee block; no invented machine specification; trainer frames name a photograph, never a person |
 | `auth-guard`, `permissions` | the six-state access chain, owner bypass, grant handling |
 | `admin-seats` | one owner + five admin seats, invitation races |
 | `admin-invite`, `invite-callback`, `invite-persistence` | the token-hash invitation flow |

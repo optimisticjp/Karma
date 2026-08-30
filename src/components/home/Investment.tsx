@@ -5,14 +5,22 @@ import { Icon } from "@/components/ui/Icon";
 import { site } from "@/lib/site";
 
 /**
- * The fee objection, answered head-on. There is deliberately no payment
- * gateway here (a hard product rule), but "no gateway" must not mean "no
- * answer": silence about money reads as evasive and costs more enquiries
- * than any number would. So we publish exactly what is included, what is
- * not, and how the number is shared.
+ * What a fee buys — the half of the money question that is true of every
+ * course.
  *
- * ⚠ If the owner later decides to publish figures (checklist Q12), add them
- * to messages under home.investment.* : the layout already has room.
+ * This sits directly under <EmcadDecision>, and the split between them is
+ * deliberate. That block states the numbers the studio has confirmed, and they
+ * belong to EMCAD DAHAO alone. This one answers "what does the fee actually
+ * cover", which is the same answer for all eleven, so it is written as an
+ * institute-wide statement and carries no figures at all.
+ *
+ * The no-online-payment line moved into <EmcadDecision>, next to the money —
+ * which is where somebody looking for a pay button will be looking. Repeating
+ * it here would have been the third time the page said it.
+ *
+ * ⚠ The other ten courses still have no published fee (checklist Q12). When
+ * the owner confirms one, it goes into `src/content/course-operations.ts` and
+ * renders from there — never typed into a message catalogue.
  */
 export function Investment() {
   const t = useTranslations("home.investment");
@@ -21,7 +29,7 @@ export function Investment() {
   const notIncluded = t.raw("notIncluded") as string[];
 
   return (
-    <section className="section-compact bg-ivory-2">
+    <section className="section-compact band-info">
       <div className="container-site">
         <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} />
 
@@ -55,9 +63,6 @@ export function Investment() {
               <Icon name="spool" size={28} className="text-vermilion-deep" />
               <h3 className="text-h4 mt-5 font-display">{t("howTitle")}</h3>
               <p className="u-lede">{t("howBody")}</p>
-              <p className="mt-4 rounded-lg bg-ivory-2 p-4 text-smallmeta font-semibold text-stone">
-                {t("noGateway")}
-              </p>
               <div className="u-actions mt-auto flex flex-wrap gap-3 pt-6">
                 <a
                   href={`https://wa.me/${site.whatsapp}?text=${encodeURIComponent(tc("waPrefillDemo"))}`}
