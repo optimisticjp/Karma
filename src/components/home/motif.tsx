@@ -50,7 +50,7 @@ export const MOTIF = {
     [170, 44],
     [218, 84]
   ] as const,
-  /* The handful of anchors an emCAD file would actually expose. */
+  /* The handful of anchors an EMCAD DAHAO file would actually expose. */
   nodes: [
     [336, 46],
     [306, 190],

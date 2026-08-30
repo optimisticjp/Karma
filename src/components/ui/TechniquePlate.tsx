@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
  * shoot has not happened. Stock photography is off the table and grey boxes
  * are worse than nothing, so each course leads instead with a plate of the
  * thing it actually teaches: satin rows for machine work, loops and cut edges
- * for the modern techniques, path nodes for emCAD.
+ * for the modern techniques, path nodes for EMCAD DAHAO.
  *
  * Deliberately no viewBox. With one, the pattern scaled with the container and
  * a 9px satin pitch rendered as 60px candy stripes; without one, user units

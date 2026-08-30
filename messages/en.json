@@ -18,11 +18,11 @@
     },
     "work": {
       "title": "Student Work Gallery | Karma Design Studio, Surat",
-      "description": "Student embroidery from live batches: flat, zardosi, beads, sequence, appliqué, 3D, cross stitch, laser, tufting and emCAD screen-to-stitch pairs."
+      "description": "Student embroidery from live batches: flat, zardosi, beads, sequence, appliqué, 3D, cross stitch, laser, tufting and EMCAD DAHAO screen-to-stitch pairs."
     },
     "services": {
       "title": "Embroidery Design Services & Job Work in Surat | Karma Design Studio",
-      "description": "Design development, emCAD digitizing, sampling, embroidered patches and production job work for garment businesses. Send a design brief."
+      "description": "Design development, EMCAD DAHAO digitizing, sampling, embroidered patches and production job work for garment businesses. Send a design brief."
     },
     "about": {
       "title": "About the Studio & Machine Wall | Karma Design Studio, Surat",
@@ -230,7 +230,7 @@
       "h2": "What a first stitch-out actually looks like.",
       "sub": "Every institute shows you finished work. Here is the part they leave out: the same motif, stitched badly, with the four faults marked and the file change that fixes each one.",
       "fileLabel": "Screen file",
-      "fileNote": "The design as it leaves emCAD: outline, control points and colour blocks. Nothing here has met cloth yet.",
+      "fileNote": "The design as it leaves EMCAD DAHAO: outline, control points and colour blocks. Nothing here has met cloth yet.",
       "failedLabel": "Failed sample",
       "failedNote": "Puckered ground, a thin and gapping fill, the inner line out of register, and a broken thread. Four faults, four different causes.",
       "fixLabel": "Correction",
@@ -242,8 +242,8 @@
     "sts": {
       "eyebrow": "The workflow",
       "h2": "Watch a file become a stitch.",
-      "sub": "One motif in three states: the emCAD file, the path the machine follows, and the finished piece. Every course teaches all three, because knowing only one of them is what keeps an operator an operator.",
-      "stage1": "The emCAD file",
+      "sub": "One motif in three states: the EMCAD DAHAO file, the path the machine follows, and the finished piece. Every course teaches all three, because knowing only one of them is what keeps an operator an operator.",
+      "stage1": "The EMCAD DAHAO file",
       "stage2": "The stitch path",
       "stage3": "The finished piece",
       "note1": "Outline, control points and colour blocks: the design as it leaves the screen.",
@@ -861,7 +861,7 @@
     "twoSidesTitle": "Two halves, one floor",
     "twoSidesSub": "This is the part most institutes cannot claim: the trainers are not between jobs, they are between orders.",
     "academyTitle": "The academy",
-    "academyBody": "Eleven courses across machine embroidery, the modern techniques and emCAD design. Training happens at the machine from the first session, in Gujarati and Hindi, in morning and evening batches.",
+    "academyBody": "Eleven courses across machine embroidery, the modern techniques and EMCAD DAHAO design. Training happens at the machine from the first session, in Gujarati and Hindi, in morning and evening batches.",
     "academyCta": "See the courses",
     "labTitle": "The design lab",
     "labBody": "Design development, digitizing and production embroidery for garment businesses. The same machines, the same people, on live commercial work — which is why the teaching stays current.",

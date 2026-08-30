@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PageHead } from "@/components/admin/PageHead";
 import { redirect } from "next/navigation";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
 import { hasPermission } from "@/lib/auth/access";
@@ -35,20 +35,32 @@ export default async function CertificatesPage() {
       .innerJoin(schema.batches, eq(schema.enrollments.batchId, schema.batches.id))
       .innerJoin(schema.courses, eq(schema.batches.courseId, schema.courses.id))
       .orderBy(desc(schema.enrollments.createdAt)),
-    db.select({ studentId: schema.attendanceRecords.studentId, batchId: schema.attendanceSessions.batchId, status: schema.attendanceRecords.status })
+    /* Aggregated in Postgres, not in Node.
+       This used to select EVERY attendance record ever written — one row per
+       student per session — and tally them in memory. A single batch of 30
+       students over three months is already ~2,300 rows, and the table only
+       grows; the page paid for all of it on every load to compute one
+       percentage per enrolment. The group-by returns one row per
+       (student, batch) and gives exactly the same answer. */
+    db.select({
+      studentId: schema.attendanceRecords.studentId,
+      batchId: schema.attendanceSessions.batchId,
+      total: sql<number>`count(*)::int`,
+      present: sql<number>`(count(*) filter (where ${schema.attendanceRecords.status} in ('present', 'late')))::int`
+    })
       .from(schema.attendanceRecords)
-      .innerJoin(schema.attendanceSessions, eq(schema.attendanceRecords.sessionId, schema.attendanceSessions.id)),
+      .innerJoin(schema.attendanceSessions, eq(schema.attendanceRecords.sessionId, schema.attendanceSessions.id))
+      .groupBy(schema.attendanceRecords.studentId, schema.attendanceSessions.batchId),
     db.select({ id: schema.certificates.id, certNo: schema.certificates.certNo, enrollmentId: schema.certificates.enrollmentId, studentName: schema.certificates.studentName, courseName: schema.certificates.courseName, issuedOn: schema.certificates.issuedOn, grade: schema.certificates.grade, status: schema.certificates.status })
       .from(schema.certificates).orderBy(desc(schema.certificates.createdAt))
   ]);
 
   const attendanceMap = new Map<string, { total: number; present: number }>();
   for (const row of attendanceRows) {
-    const key = `${row.studentId}:${row.batchId}`;
-    const value = attendanceMap.get(key) ?? { total: 0, present: 0 };
-    value.total++;
-    if (row.status === "present" || row.status === "late") value.present++;
-    attendanceMap.set(key, value);
+    attendanceMap.set(`${row.studentId}:${row.batchId}`, {
+      total: Number(row.total),
+      present: Number(row.present)
+    });
   }
   const certsByEnrollment = new Map<number, typeof certificates>();
   for (const cert of certificates) {

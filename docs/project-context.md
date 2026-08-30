@@ -539,6 +539,22 @@ Owner-only administration / **no MFA gate**. The deletion-tombstone test now
 asserts the `auditLogs` insert happens **before** the `tx.delete`, not merely
 that the file mentions audit.
 
+**Audit (Phase 13).** Two unbounded console reads were fixed: the certificates
+page pulled **every attendance record ever written** and tallied it in Node
+(now a `group by (student_id, batch_id)` returning one row per pair), and the
+fees page read **the entire fee ledger** on every load (now scoped with
+`inArray` to the enrolments on screen). An index on
+`fee_records.enrollment_id` was deliberately **not** added: at this studio's
+volume a sequential scan is not the problem, the unbounded shape was, and §48
+warns against changing architecture for generic best practice. The
+`emCAD` → `EMCAD DAHAO` rename swept every remaining user-facing string, while
+leaving `emcad-embroidery-design` and `technique: "emcad"` alone — they are
+identifiers, not names — and keeping `"EMCAD classes Surat"` as a tag so the
+rename did not cost a real search term. Tests now enforce: no PII in any
+`track()` call, exactly one JSON-LD emitter with no price/rating/review, the
+banned generic-institute phrases, and that every `:lang(gu)` block touching
+`text-transform`/`letter-spacing` neutralises it.
+
 **The 32-photograph manifest.** `src/content/photo-manifest.ts` is the typed
 list of every shot on the owner's final brief, with each slot's intrinsic
 dimensions. `<ManifestPhoto id="…">` reserves the photograph's exact aspect
@@ -1823,7 +1839,7 @@ modules are importable in a test runner while the guard stays real in the app.
 `jsx: "preserve"` for Next.js — without the override a test importing a `.tsx`
 component sees raw JSX and fails to parse.
 
-**44 test files, 628 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
+**45 test files, 643 tests** (`vitest run`, ~5 s). Many encode a *policy* decision rather than a code detail,
 which is the point — the policy survives a refactor:
 
 | Test | Guards |
@@ -1831,6 +1847,7 @@ which is the point — the policy survives a refactor:
 | `i18n-parity` | EN/GU catalogue keys mirror exactly |
 | `machine-lab-system` | the design system v4 foundation: 32-photo manifest, icon family, eleven technique signatures, stitch semantics, motion levels, Gujarati overrides, reduced motion, no new dependency |
 | `machine-lab-shell` | the hero states EMCAD/machine/Surat/demo without photography; one course's facts never become the site's; one continuous thread and one Level-4 moment; the rail never autoplays, loops or needs a drag; bands never re-point the palette; the mobile bar keeps exactly two actions |
+| `machine-lab-audit` | no half-name of the software anywhere; slugs and keys untouched by the rename; no search term lost to it; console reads bounded; no PII in any analytics call; one JSON-LD emitter with no price/rating/review; banned copy phrases absent; Gujarati never uppercased or letterspaced in any stylesheet |
 | `machine-lab-modules` | one page-header implementation across the whole console; the attendance lock, the certificate no-file-pipeline rule, the twelve design statuses, Content Desk staying typed, Reports not becoming BI, and the one-Owner/five-Admin/no-MFA access model all fail the suite if undone; the deletion tombstone is written before the delete |
 | `machine-lab-modules` | one page-header implementation across the whole console; the attendance lock, the certificate no-file-pipeline rule, the twelve design statuses, Content Desk staying typed, Reports not becoming BI, and the one-Owner/five-Admin/no-MFA access model all fail the suite if undone; the deletion tombstone is written before the delete |
 | `machine-lab-operations` | one shared console page header, no local copies; every deep-linkable row is anchored and the queues link to those anchors; direct admission, the record-action policy, the full fee picture, receipt/statement printing and the derived (never stored) fee status all survive; schedule options and dated batches stay separate |

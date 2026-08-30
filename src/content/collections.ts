@@ -23,8 +23,8 @@ export const faqs: Faq[] = [
   {
     qEn: "Which language is training in?",
     qGu: "ટ્રેનિંગ કઈ ભાષામાં થાય છે?",
-    aEn: "Gujarati and Hindi, with English terms where the trade uses them (emCAD, machine names, and so on).",
-    aGu: "ગુજરાતી અને હિન્દીમાં, અને જ્યાં ટ્રેડમાં English શબ્દો વપરાય છે ત્યાં એ જ (emCAD, મશીનનાં નામ વગેરે)."
+    aEn: "Gujarati and Hindi, with English terms where the trade uses them (EMCAD DAHAO, machine names, and so on).",
+    aGu: "ગુજરાતી અને હિન્દીમાં, અને જ્યાં ટ્રેડમાં English શબ્દો વપરાય છે ત્યાં એ જ (EMCAD DAHAO, મશીનનાં નામ વગેરે)."
   },
   {
     qEn: "I work during the day. Are evening batches available?",
@@ -65,8 +65,8 @@ export const faqs: Faq[] = [
   {
     qEn: "Do you also take business design or job-work orders?",
     qGu: "તમે બિઝનેસ ડિઝાઇન કે જોબ-વર્કના ઓર્ડર પણ લો છો?",
-    aEn: "Yes. Design development, emCAD digitizing, patches and production job work: see the Services page and send a brief.",
-    aGu: "હા. ડિઝાઇન ડેવલપમેન્ટ, emCAD ડિજિટાઇઝિંગ, પેચિસ અને પ્રોડક્શન જોબ વર્ક: સર્વિસિસ પેજ જુઓ અને બ્રીફ મોકલો."
+    aEn: "Yes. Design development, EMCAD DAHAO digitizing, patches and production job work: see the Services page and send a brief.",
+    aGu: "હા. ડિઝાઇન ડેવલપમેન્ટ, EMCAD DAHAO ડિજિટાઇઝિંગ, પેચિસ અને પ્રોડક્શન જોબ વર્ક: સર્વિસિસ પેજ જુઓ અને બ્રીફ મોકલો."
   },
   {
     qEn: "Is there an age limit? Can students under 18 join?",
@@ -270,7 +270,7 @@ export const stories: Story[] = [
     changedGu: "અંદાજને બદલે સ્ટિચ કાઉન્ટ અને કલર ચેન્જ પરથી ભાવ આપવાનું શરૂ કર્યું.",
     nowEn: "Freelances digitising for small units and boutiques.",
     nowGu: "નાના યુનિટ અને બુટિક માટે ફ્રીલાન્સ ડિજિટાઇઝિંગ કરે છે.",
-    photoLabel: "Student at emCAD screen with a stitched sample (with consent)"
+    photoLabel: "Student at EMCAD DAHAO screen with a stitched sample (with consent)"
   },
   {
     sample: true,
@@ -447,8 +447,8 @@ export const sampleReviews: Review[] = [
     sample: true,
     nameEn: "Rina M.",
     nameGu: "રીના મ.",
-    contextEn: "emCAD design",
-    contextGu: "emCAD ડિઝાઇન",
+    contextEn: "EMCAD DAHAO design",
+    contextGu: "EMCAD DAHAO ડિઝાઇન",
     bodyEn:
       "Design screen par saras lagti hati pan fabric par bagadti hati. Ahiya density ane underlay samjaya pachhi problem j nathi thati. File ma sudharo karvanu shikhva malyu.",
     bodyGu:
@@ -544,7 +544,7 @@ export const techniqueChips: Record<string, { labelEn: string; labelGu: string; 
     crossstitch: { labelEn: "Cross Stitch", labelGu: "ક્રોસ સ્ટિચ", color: "" },
     laser: { labelEn: "Laser", labelGu: "લેસર", color: "" },
     tufting: { labelEn: "Tufting", labelGu: "ટફ્ટિંગ", color: "" },
-    emcad: { labelEn: "emCAD", labelGu: "emCAD", color: "" }
+    emcad: { labelEn: "EMCAD DAHAO", labelGu: "EMCAD DAHAO", color: "" }
   };
 
 /**
@@ -562,7 +562,7 @@ export const techniqueChips: Record<string, { labelEn: string; labelGu: string; 
 export const galleryItems: GalleryItem[] = [
   { sample: true, technique: "zardosi", ratio: "4/5", titleEn: "Bridal zardosi panel", titleGu: "બ્રાઇડલ ઝરદોશી પેનલ", noteEn: "Final project, evening batch", noteGu: "ફાઇનલ પ્રોજેક્ટ, સાંજની બેચ", hasPair: true, photoLabel: "Zardosi bridal panel, macro", courseSlug: "zardosi-machine-embroidery", outcomeEn: "Relief height held through the corners", outcomeGu: "ખૂણા સુધી રિલીફની ઊંચાઈ જળવાઈ" },
   { sample: true, technique: "sequence", ratio: "1/1", titleEn: "Festive sequence dupatta", titleGu: "ફેસ્ટિવ સિકવન્સ દુપટ્ટા", noteEn: "Week 5 production drill", noteGu: "અઠવાડિયું 5, પ્રોડક્શન પ્રેક્ટિસ", hasPair: false, photoLabel: "Sequence dupatta shimmer", courseSlug: "sequence-work", outcomeEn: "Repeat held across a full dupatta length", outcomeGu: "આખી દુપટ્ટાની લંબાઈમાં રિપીટ જળવાયો" },
-  { sample: true, technique: "emcad", ratio: "3/2", titleEn: "Peacock motif, screen to stitch", titleGu: "મોર મોટિફ, સ્ક્રીનથી સ્ટિચ સુધી", noteEn: "emCAD design + stitched result", noteGu: "emCAD ડિઝાઇન + સીવેલું પરિણામ", hasPair: true, photoLabel: "emCAD peacock design beside stitched fabric", courseSlug: "emcad-embroidery-design", outcomeEn: "File ran first time, no correction pass", outcomeGu: "ફાઇલ પહેલી જ વારમાં ચાલી, કરેક્શન વગર" },
+  { sample: true, technique: "emcad", ratio: "3/2", titleEn: "Peacock motif, screen to stitch", titleGu: "મોર મોટિફ, સ્ક્રીનથી સ્ટિચ સુધી", noteEn: "EMCAD DAHAO design + stitched result", noteGu: "EMCAD DAHAO ડિઝાઇન + સીવેલું પરિણામ", hasPair: true, photoLabel: "EMCAD DAHAO peacock design beside stitched fabric", courseSlug: "emcad-embroidery-design", outcomeEn: "File ran first time, no correction pass", outcomeGu: "ફાઇલ પહેલી જ વારમાં ચાલી, કરેક્શન વગર" },
   { sample: true, technique: "beads", ratio: "4/5", titleEn: "4-beads border run", titleGu: "4-બીડ્સ બોર્ડર રન", noteEn: "First full production run", noteGu: "પહેલો આખો પ્રોડક્શન રન", hasPair: false, photoLabel: "Beads border close-up", courseSlug: "four-beads-machine-work", outcomeEn: "Even spacing with no feed stoppage", outcomeGu: "ફીડ અટક્યા વગર એકસરખું સ્પેસિંગ" },
   { sample: true, technique: "tufting", ratio: "1/1", titleEn: "Tufted name board", titleGu: "ટફ્ટેડ નેમ બોર્ડ", noteEn: "Weekend batch product", noteGu: "વીકએન્ડ બેચની પ્રોડક્ટ", hasPair: false, photoLabel: "Tufted rug piece, colourful", courseSlug: "tufting", outcomeEn: "Even pile height, backing glued off", outcomeGu: "એકસરખી પાઇલ ઊંચાઈ, પાછળ ગુંદર લગાવેલું" },
   { sample: true, technique: "laser", ratio: "4/5", titleEn: "Laser-cut appliqué yoke", titleGu: "લેસર-કટ એપ્લિક યોક", noteEn: "Combined laser + embroidery", noteGu: "લેસર + એમ્બ્રોઇડરી સાથે", hasPair: true, photoLabel: "Laser-cut fabric layered piece", courseSlug: "laser-work", outcomeEn: "Sealed edges, no scorch on light ground", outcomeGu: "સીલ થયેલી કિનારી, હળવા ગ્રાઉન્ડ પર બળ્યા વગર" }
@@ -575,7 +575,7 @@ export type ServiceItem = { titleEn: string; titleGu: string; descEn: string; de
 // ⚠️ CONFIRM-WITH-OWNER: final service list before launch (plan 9.6).
 export const services: ServiceItem[] = [
   { titleEn: "Embroidery design development", titleGu: "એમ્બ્રોઇડરી ડિઝાઇન ડેવલપમેન્ટ", descEn: "Original designs developed for your garment, from concept to approved artwork.", descGu: "તમારા ગારમેન્ટ માટે ઓરિજિનલ ડિઝાઇન: કન્સેપ્ટથી ફાઇનલ આર્ટવર્ક સુધી." },
-  { titleEn: "emCAD digitizing", titleGu: "emCAD ડિજિટાઇઝિંગ", descEn: "Your artwork converted into clean, machine-ready embroidery files.", descGu: "તમારું આર્ટવર્ક ચોખ્ખી, મશીન-રેડી એમ્બ્રોઇડરી ફાઇલમાં." },
+  { titleEn: "EMCAD DAHAO digitizing", titleGu: "EMCAD DAHAO ડિજિટાઇઝિંગ", descEn: "Your artwork converted into clean, machine-ready embroidery files.", descGu: "તમારું આર્ટવર્ક ચોખ્ખી, મશીન-રેડી એમ્બ્રોઇડરી ફાઇલમાં." },
   { titleEn: "Sampling & stitch-path optimisation", titleGu: "સેમ્પલિંગ અને સ્ટિચ-પાથ ઓપ્ટિમાઇઝેશન", descEn: "Sample runs, density and pathing fixes before production, so production doesn't pay for mistakes.", descGu: "પ્રોડક્શન પહેલાં સેમ્પલ, ડેન્સિટી અને પાથિંગ સુધારા, જેથી ભૂલોની કિંમત પ્રોડક્શન ન ચૂકવે." },
   { titleEn: "Customised embroidered patches", titleGu: "કસ્ટમાઇઝ્ડ એમ્બ્રોઇડરી પેચિસ", descEn: "Logo and brand patches, small or bulk quantities.", descGu: "લોગો અને બ્રાન્ડ પેચિસ, નાની કે મોટી માત્રામાં." },
   { titleEn: "Production job work", titleGu: "પ્રોડક્શન જોબ વર્ક", descEn: "Zardosi, beads, sequence, coding and laser job work on your material.", descGu: "તમારા મટીરિયલ પર ઝરદોશી, બીડ્સ, સિકવન્સ, કોડિંગ અને લેસર જોબ વર્ક." },
@@ -786,8 +786,8 @@ export const trainers: Trainer[] = [
     slug: "sample-design-trainer",
     nameEn: "Sample: Nidhi P.",
     nameGu: "નમૂનો: નિધિ પ.",
-    roleEn: "emCAD design and digitising",
-    roleGu: "emCAD ડિઝાઇન અને ડિજિટાઇઝિંગ",
+    roleEn: "EMCAD DAHAO design and digitising",
+    roleGu: "EMCAD DAHAO ડિઝાઇન અને ડિજિટાઇઝિંગ",
     focusEn: "Teaches digitising as a production job, not a drawing class: a file is not finished until it has stitched out and been corrected.",
     focusGu: "ડિજિટાઇઝિંગને ડ્રોઇંગ ક્લાસ નહીં, પ્રોડક્શન જોબ તરીકે શીખવે છે: ફાઇલ સ્ટિચ-આઉટ થઈને સુધરે નહીં ત્યાં સુધી પૂરી ન કહેવાય.",
     specialityEn: "Turning client artwork into files that run first time.",

@@ -138,7 +138,7 @@ const COPY = {
     families: {
       machine: "Machine technique",
       modern: "Modern / advanced",
-      software: "Software / emCAD"
+      software: "Software / EMCAD DAHAO"
     },
     statuses: {
       open: "Open",
@@ -231,7 +231,7 @@ const COPY = {
     families: {
       machine: "Machine technique",
       modern: "Modern / advanced",
-      software: "Software / emCAD"
+      software: "Software / EMCAD DAHAO"
     },
     statuses: {
       open: "Open",

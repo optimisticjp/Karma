@@ -501,7 +501,7 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
 
 /* ======================= screen → stitch diagram =========================
  * The signature interaction, drawn rather than photographed. Three real
- * layers of the same motif: the vector outline as it exists in emCAD, the
+ * layers of the same motif: the vector outline as it exists in EMCAD DAHAO, the
  * stitch path the machine follows, and the filled result. It works today,
  * with no shoot, and it explains the workflow better than a photo would.
  * ========================================================================= */
