@@ -41,6 +41,7 @@ export function Footer() {
             <p className="microlabel">{t("learn")}</p>
             <ul className="mt-2 text-smallmeta">
               <li><Link className="stitch-link" href="/courses">{tn("courses")}</Link></li>
+              <li><Link className="stitch-link" href="/notes">{tn("notes")}</Link></li>
               {coursesByFamily.slice(0, 4).map((c) => (
                 <li key={c.slug}>
                   <Link className="stitch-link" href={`/courses/${c.slug}`}>

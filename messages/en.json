@@ -39,6 +39,10 @@
     "verify": {
       "title": "Verify a Certificate | Karma Design Studio",
       "description": "Check any Karma Design Studio certificate by its number. Every certificate carries a QR code that points here."
+    },
+    "notes": {
+      "title": "Machine Notes | Karma Design Studio, Surat",
+      "description": "Short technical notes from an embroidery production floor in Surat: reading a failed stitch-out, needle and thread matching, density, stitch direction, emCAD and Wilcom."
     }
   },
   "nav": {
@@ -49,7 +53,8 @@
     "services": "Services",
     "about": "About",
     "contact": "Contact",
-    "cta": "Book Free Demo"
+    "cta": "Book Free Demo",
+    "notes": "Machine Notes"
   },
   "common": {
     "bookDemo": "Book a Free Demo Class",
@@ -1061,5 +1066,31 @@
       "teaching": "How they teach",
       "selectedWork": "Selected work"
     }
+  },
+  "notesPage": {
+    "eyebrow": "Machine Notes",
+    "title": "Notes from the machine floor.",
+    "sub": "Short answers to the questions that come up at the machine — why a sample failed, what to check, and which setting actually moved. Written by the people who run the machines, not by a marketing team.",
+    "coursesCta": "See the courses",
+    "asideTitle": "Why these exist",
+    "asideBody": "Most of this already gets explained on Instagram, in Gujarati, standing next to a machine. It is good material trapped inside a video on somebody else's platform. These are the same answers in a form you can search, read on mobile data, and come back to.",
+    "listTitle": "Every note",
+    "listSub": "Each one is a question someone actually asked, with the answer first.",
+    "count": "{count, plural, one {# note} other {# notes}}",
+    "allNotes": "All machine notes",
+    "askCta": "Ask us about this",
+    "relatedCourse": "Where this is taught",
+    "courseCta": "Course details",
+    "whyTitle": "Why it happens",
+    "detailTitle": "The machine detail",
+    "exampleTitle": "An example",
+    "exampleNote": "Examples describe a fault and its fix. They are not a record of any student's or client's work.",
+    "checksTitle": "What to check, in order",
+    "watchCta": "Watch this on the studio's channel",
+    "demoTitle": "Easier to show than to write.",
+    "demoBody": "Bring the sample to a practical demo and put it on a machine. Ten minutes at the machine beats ten paragraphs.",
+    "moreTitle": "More notes",
+    "courseNotesTitle": "Machine notes for this technique",
+    "courseNotesSub": "Short answers from the floor about the faults this course teaches you to fix."
   }
 }

@@ -12,6 +12,7 @@ const NAV = [
   { href: "/courses", key: "courses" },
   { href: "/admissions", key: "admissions" },
   { href: "/student-work", key: "work" },
+  { href: "/notes", key: "notes" },
   { href: "/services", key: "services" },
   { href: "/about", key: "about" },
   { href: "/contact", key: "contact" }
@@ -111,7 +112,9 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-5 xl:flex 2xl:gap-6" aria-label="Primary">
+        {/* Eight items now that Machine Notes is here. gap-4 at 1280 keeps the
+            brand and the CTA clear of the nav; 2xl gets the roomier spacing. */}
+        <nav className="hidden items-center gap-4 xl:flex 2xl:gap-6" aria-label="Primary">
           {NAV.map((item) => (
             <Link
               key={item.key}
