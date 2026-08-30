@@ -701,6 +701,25 @@ the public publishable key.
 it: a deploy still serving through a direct `DATABASE_URL` is degraded-but-
 working, and the owner should be able to see that without the monitor screaming.
 
+**Verified live on 2026-08-30.** `/api/health` on the branch preview returned:
+
+```json
+{"ok":false,"production":true,
+ "checks":{"db":true,"dbViaHyperdrive":true,"supabaseAuth":true,
+           "turnstile":false,"email":false}}
+```
+
+So: **Hyperdrive is bound and is the active path** — the Worker is not on the
+temporary `DATABASE_URL` fallback — and Supabase Auth is configured. The `503`
+is the documented expected state, not a fault: `turnstile` is false because
+Turnstile is deliberately deferred (§40), and `email` is false because
+`RESEND_API_KEY` is unset on that deployment. Both gate `ok`, so a monitor
+pointed at this endpoint reports down until the owner finishes Turnstile — which
+is a real trade-off worth revisiting (§39), not a bug.
+
+The same check also confirmed `/` → 307 → `/en`, and `/en`, `/gu` and
+`/admin/login` all serving 200.
+
 ---
 
 ## 16. Cloudflare Workers and OpenNext
