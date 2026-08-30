@@ -47,20 +47,16 @@ export default async function StoriesPage({ params }: { params: Promise<{ locale
         }
         aside={
           <>
-            <p className="microlabel !text-vermilion-deep">{t("consentTitle")}</p>
-            <p className="mt-3">{t("consentBody")}</p>
+            <p className="microlabel !text-vermilion-deep">
+              {stories.length > 0 ? t("consentTitle") : th("pendingLabel")}
+            </p>
+            <p className="mt-3">{stories.length > 0 ? t("consentBody") : th("pendingNote")}</p>
           </>
         }
       />
 
       <section className="section">
         <div className="container-site">
-          {stories.length === 0 ? (
-            <p className="pending-block max-w-2xl text-smallmeta text-stone">
-              <span className="pending-label">{th("pendingLabel")}</span>
-              {th("pendingNote")}
-            </p>
-          ) : null}
           <div className="grid gap-6 lg:gap-8 md:grid-cols-2">
             {stories.map((s, i) => (
               <figure

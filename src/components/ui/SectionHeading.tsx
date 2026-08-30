@@ -16,14 +16,19 @@ export function SectionHeading({
   sub,
   className,
   onDark = false,
-  rule = true
+  rule = false
 }: {
   eyebrow?: string;
   title: ReactNode;
   sub?: ReactNode;
   className?: string;
   onDark?: boolean;
-  /** Set false for headings inside cards or tight blocks. */
+  /**
+   * The stitched rule is a signature, not a default. It used to render under
+   * every heading — about twenty per page — which made it read as mechanical
+   * decoration. Opt in on the two or three moments per page that genuinely
+   * deserve emphasis; elsewhere the spacing and surface change do the work.
+   */
   rule?: boolean;
 }) {
   return (

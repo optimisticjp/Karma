@@ -96,8 +96,8 @@
   display: grid;
   grid-template-columns: 2.25rem minmax(0, 1fr);
   align-items: baseline;
-  gap: 0.25rem 0.875rem;
-  padding-block: 0.9375rem;
+  gap: 0.1875rem 0.875rem;
+  padding-block: 0.75rem;
   position: relative;
 }
 .ledger-row > .ledger-meta { grid-column: 2; }
@@ -217,6 +217,10 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
   .spec-grid > :nth-child(3n) { border-right: var(--hairline); }
   .spec-grid > :nth-child(4n) { border-right: 0; }
 }
+/* A grid given an exact column count via inline --spec-cols (e.g. three
+   verified statistics) must not keep the generic 3n/4n rule clearing, or the
+   last cell in a row keeps a trailing border. */
+.spec-grid > :last-child { border-right: 0; }
 
 .spec-label {
   display: block;
@@ -461,6 +465,12 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
 /* Eleven rows at the default row height made the panel taller than the fold.
    Slightly tighter here only — the ledger keeps its normal rhythm elsewhere. */
 .hero-index-body .ledger-row { padding-block: 0.8125rem; }
+@media (max-width: 639px) {
+  .hero-index-body .ledger-row { padding-block: 0.625rem; }
+  /* "Machine Embroidery" eight times over is not worth 450px of a phone
+     screen; the family is still on every course page and on /courses. */
+  .hero-index-body .ledger-meta { display: none; }
+}
 .hero-index-foot {
   padding: 0.5rem clamp(1rem, 2.5vw, 1.5rem);
   border-top: var(--hairline);
@@ -787,4 +797,145 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
   a.ledger-row::before,
   a.ledger-row .ledger-title,
   .stage-tab { transition: none; }
+}
+
+/* ========================= mobile bottom navigation =======================
+ * Replaces three competing systems: the hamburger-only menu, the sticky
+ * course CTA bar, and the floating WhatsApp button. Five fixed destinations,
+ * booking in the middle under the thumb.
+ * ========================================================================= */
+
+.tabbar {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 45;
+  background: var(--color-card);
+  background: color-mix(in srgb, var(--color-card) 96%, transparent);
+  border-top: var(--hairline);
+  backdrop-filter: blur(10px);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tabbar-list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: stretch;
+}
+.tabbar-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1875rem;
+  /* WCAG 2.5.5: comfortably past the 44px floor even on a 320px screen. */
+  min-height: 3.5rem;
+  padding: 0.4375rem 0.125rem 0.5rem;
+  color: var(--color-stone);
+  text-decoration: none;
+  transition: color 160ms var(--ease-out-soft);
+}
+.tabbar-icon {
+  display: grid;
+  place-items: center;
+  height: 1.5rem;
+}
+.tabbar-label {
+  font-size: 0.6875rem;
+  font-weight: 650;
+  line-height: 1.1;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+:lang(gu) .tabbar-label { font-size: 0.625rem; letter-spacing: 0; }
+
+/* Active state has to be readable at a glance, so it is colour AND a mark —
+   never colour alone. */
+.tabbar-item[aria-current="page"] { color: var(--color-vermilion-deep); }
+.tabbar-item[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
+  width: 1.75rem;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: var(--color-vermilion);
+}
+.tabbar-item:focus-visible { outline-offset: -3px; }
+
+/* The booking action: a filled disc that lifts slightly out of the bar. */
+.tabbar-item.is-primary { color: var(--color-carbon); }
+.tabbar-item.is-primary .tabbar-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-top: -0.9375rem;
+  border-radius: 999px;
+  background: var(--color-vermilion);
+  color: var(--color-card);
+  border: 3px solid var(--color-card);
+  box-shadow: 0 2px 6px rgb(32 33 30 / 0.16);
+}
+.tabbar-item.is-primary[aria-current="page"] { color: var(--color-vermilion-deep); }
+
+/* Content must never end underneath the bar. */
+@media (max-width: 1279px) {
+  body { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
+}
+/* The bar runs to 1280, not 1024: seven nav items, the language toggle and the
+   booking CTA only fit in the header from 1280 up, so between 1024 and 1279 the
+   bar is the only visible primary navigation rather than a phone affordance
+   left switched on by accident. */
+@media (min-width: 1280px) {
+  .tabbar { display: none; }
+}
+
+/* A focused input means the on-screen keyboard is up and the bar is pinned
+   over the field the visitor is typing into. Get it out of the way. */
+@media (max-width: 1279px) {
+  body:has(input:focus, textarea:focus, select:focus) .tabbar {
+    transform: translateY(120%);
+    transition: transform 180ms var(--ease-out-soft);
+  }
+}
+
+/* ---------------------------- header refinements -------------------------- */
+
+/* Nav labels were 0.92rem and their only active mark was a hairline dash.
+   Larger, and the active item now carries weight and colour as well. */
+.site-nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  font-size: 0.9688rem;
+  font-weight: 600;
+  color: var(--color-stone);
+  transition: color 160ms var(--ease-out-soft);
+}
+.site-nav-link:hover { color: var(--color-carbon); }
+.site-nav-link[aria-current="page"] { color: var(--color-carbon); font-weight: 700; }
+.site-nav-link[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.1875rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-vermilion);
+}
+
+/* ------------------------- third surface + accents ------------------------ */
+
+.bg-sand { background: var(--color-sand); }
+
+/* A quiet vermilion wash for moments that need warmth without a dark band. */
+.bg-blush {
+  background: #f6ece3;
+  background: color-mix(in srgb, var(--color-vermilion) 7%, var(--color-ivory));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabbar, .tabbar-item, .site-nav-link { transition: none !important; }
 }

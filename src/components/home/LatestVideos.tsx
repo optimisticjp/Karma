@@ -16,9 +16,9 @@ export async function LatestVideos() {
     <section className="section-compact border-t border-line">
       <div className="container-site">
         <SectionHeading title={t("h2")} sub={t("sub")} />
-        <div className="mt-8">
+        <div className="u-section-body">
           {videos.length > 0 ? (
-            <ul className="grid gap-5 md:grid-cols-3">
+            <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
               {videos.map((v) => (
                 <li key={v.id} className="card card-lift overflow-hidden">
                   <a
@@ -36,7 +36,7 @@ export async function LatestVideos() {
                       loading="lazy"
                       className="card-img aspect-video w-full object-cover"
                     />
-                    <p className="p-4 text-smallmeta font-semibold">{v.title}</p>
+                    <p className="p-3 text-smallmeta font-semibold md:p-4">{v.title}</p>
                   </a>
                 </li>
               ))}

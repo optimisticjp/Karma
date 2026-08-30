@@ -14,12 +14,13 @@
 
 @theme {
   /* ------ palette: restrained neutrals + ONE accent ------ */
-  --color-ivory: #f7f3ea;        /* page background            */
-  --color-ivory-2: #f1ece0;      /* alternating section band   */
+  --color-ivory: #faf7f0;        /* page background            */
+  --color-ivory-2: #efe7d7;      /* alternating section band   */
+  --color-sand: #e6dbc6;         /* third surface: warmer, for punctuation */
   --color-card: #fffdf8;         /* soft white surfaces        */
-  --color-line: #dad5cb;         /* thread grey borders        */
-  --color-carbon: #20211e;       /* primary text               */
-  --color-stone: #6d6b64;        /* secondary text             */
+  --color-line: #d6cfc0;         /* thread grey borders        */
+  --color-carbon: #1f201d;       /* primary text               */
+  --color-stone: #605e56;        /* secondary text (AA on every surface) */
   --color-vermilion: #c54832;    /* THE accent: fills, stitch lines, large text */
   --color-vermilion-deep: #a93a27; /* small-text links + hovers (AA on ivory)   */
   --color-success: #2f7d46;      /* status only */
@@ -52,8 +53,8 @@
   --text-lead--line-height: 1.6;
   --text-bodylg: 1.125rem;
   --text-bodylg--line-height: 1.67;
-  --text-smallmeta: 0.875rem;
-  --text-smallmeta--line-height: 1.57;
+  --text-smallmeta: 0.9375rem;
+  --text-smallmeta--line-height: 1.6;
   --text-eyebrow: 0.75rem;
   --text-eyebrow--line-height: 1.33;
   --text-btn: 0.9375rem;
@@ -63,10 +64,10 @@
   /* Systematic vertical rhythm. Spacing between related text is a SYSTEM
      value, never a per-component judgment call. This is the single habit
      that separates designed pages from assembled ones. */
-  --space-eyebrow-to-h: 1rem;    /* 16 */
-  --space-h-to-lede: 1.25rem;    /* 20 */
-  --space-lede-to-action: 2rem;  /* 32 */
-  --space-heading-to-content: clamp(2.5rem, 1.9rem + 1.9vw, 4rem);
+  --space-eyebrow-to-h: 0.75rem; /* 12 */
+  --space-h-to-lede: 1rem;       /* 16 */
+  --space-lede-to-action: 1.5rem; /* 24 */
+  --space-heading-to-content: clamp(1.5rem, 1.2rem + 1.1vw, 2.5rem);
 
   --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -152,13 +153,14 @@
   }
   .prose-measure { max-width: 68ch; }
 
-  /* Section rhythm as one fluid system rather than three breakpoint steps.
-     Endpoints still land on the spec values (major 80→144, standard 64→112,
-     compact 48→80) but every width in between is now composed instead of
-     jumping. Tablet stops being "desktop, early". */
-  .section-major   { padding-block: clamp(5rem, 3.2rem + 5.6vw, 9rem); }
-  .section         { padding-block: clamp(4rem, 2.7rem + 4.1vw, 7rem); }
-  .section-compact { padding-block: clamp(3rem, 2.3rem + 2.2vw, 5rem); }
+  /* Section rhythm, retuned 2026-08-30 after the owner flagged the pages as
+     too long and too airy. Was 80→144 / 64→112 / 48→80, which on a page of
+     mostly short text blocks read as dead space rather than breathing room.
+     Now 48→88 / 40→72 / 28→48. Density is what earns the space: a three-line
+     callout must not occupy the same height as the course catalogue. */
+  .section-major   { padding-block: clamp(3rem, 2.2rem + 3.4vw, 5.5rem); }
+  .section         { padding-block: clamp(2.5rem, 1.9rem + 2.6vw, 4.5rem); }
+  .section-compact { padding-block: clamp(1.75rem, 1.35rem + 1.7vw, 3rem); }
 
   /* Eyebrow: 12px caps for Latin; weight + colour only for Gujarati */
   .eyebrow {

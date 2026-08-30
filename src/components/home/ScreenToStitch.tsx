@@ -189,7 +189,7 @@ function StageFinished({ uid }: { uid: string }) {
   );
 }
 
-export function ScreenToStitch() {
+export function ScreenToStitch({ children }: { children?: React.ReactNode }) {
   const t = useTranslations("home.sts");
   const uid = useId().replace(/:/g, "");
   const [v, setV] = useState(1);
@@ -200,11 +200,11 @@ export function ScreenToStitch() {
   const stages = [t("stage1"), t("stage2"), t("stage3")];
 
   return (
-    <section className="section-major bg-grid">
+    <section className="section bg-blush">
       <div className="container-site">
         <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-16">
           <div>
-            <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} />
+            <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} rule />
             <ol className="ledger mt-8">
               {stages.map((s, i) => (
                 <li
@@ -269,6 +269,11 @@ export function ScreenToStitch() {
             <p className="mt-3 text-center text-xs text-stone">{t("hint")}</p>
           </div>
         </div>
+
+        {/* The method steps used to be their own full section directly below,
+            with a second heading saying much the same thing. Same chapter, so
+            same section: one heading, one padding, half the height. */}
+        {children}
       </div>
     </section>
   );

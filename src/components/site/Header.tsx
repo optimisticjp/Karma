@@ -7,6 +7,7 @@ import { LanguageToggle } from "./LanguageToggle";
 import { cn } from "@/lib/utils";
 
 const NAV = [
+  { href: "/", key: "home" },
   { href: "/courses", key: "courses" },
   { href: "/admissions", key: "admissions" },
   { href: "/student-work", key: "work" },
@@ -35,6 +36,10 @@ export function Header() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  /* Home must match exactly: every path startsWith("/"). */
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -85,25 +90,25 @@ export function Header() {
       <div className="container-site flex h-full items-center justify-between gap-5">
         <Link
           href="/"
-          className="site-brand-mark flex min-w-0 items-center leading-none"
+          className="site-brand-mark flex shrink-0 items-center leading-none"
           aria-label="Karma Design Studio: home"
         >
           {/* One line only. The descriptor used to sit under the name and
               wrapped out of the header at every width below 1440. The hero
               and the footer both say it properly; the header's job is
               navigation. */}
-          <span className="truncate font-display text-xl font-semibold tracking-tight text-carbon md:text-2xl">
+          <span className="whitespace-nowrap font-display text-lg font-semibold tracking-tight text-carbon sm:text-xl xl:text-2xl">
             Karma Design Studio
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-5 xl:gap-7 lg:flex" aria-label="Primary">
+        <nav className="hidden items-center gap-5 xl:flex 2xl:gap-6" aria-label="Primary">
           {NAV.map((item) => (
             <Link
               key={item.key}
               href={item.href}
-              className="stitch-link inline-flex min-h-8 items-center whitespace-nowrap text-[0.92rem] font-semibold text-stone hover:text-carbon"
-              aria-current={pathname.startsWith(item.href) ? "page" : undefined}
+              className="site-nav-link whitespace-nowrap"
+              aria-current={isActive(item.href) ? "page" : undefined}
             >
               {t(item.key)}
             </Link>
@@ -111,15 +116,15 @@ export function Header() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-2.5">
-          <LanguageToggle className="hidden sm:flex" />
-          <Link href="/admission" className="btn btn-primary hidden !min-h-11 !px-4 text-sm md:inline-flex">
+          <LanguageToggle compact className="hidden sm:flex" />
+          <Link href="/admission" className="btn btn-primary hidden !min-h-11 !px-3.5 text-sm md:inline-flex">
             {t("cta")}
           </Link>
           <button
             ref={buttonRef}
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="btn btn-ghost !min-h-11 !px-2 lg:hidden"
+            className="btn btn-ghost !min-h-11 !px-2 xl:hidden"
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? tc("closeMenu") : tc("openMenu")}
@@ -139,7 +144,7 @@ export function Header() {
             aria-hidden="true"
             onClick={close}
             className={cn(
-              "fixed inset-x-0 bottom-0 z-40 bg-carbon/45 lg:hidden",
+              "fixed inset-x-0 bottom-0 z-40 bg-carbon/45 xl:hidden",
               condensed ? "top-16" : "top-16 md:top-20"
             )}
           />
@@ -150,7 +155,7 @@ export function Header() {
             aria-modal="true"
             aria-label={tc("openMenu")}
             className={cn(
-              "absolute inset-x-0 top-full z-50 overflow-y-auto overscroll-contain border-t border-line bg-ivory lg:hidden",
+              "absolute inset-x-0 top-full z-50 overflow-y-auto overscroll-contain border-t border-line bg-ivory xl:hidden",
               condensed ? "max-h-[calc(100dvh-4rem)]" : "max-h-[calc(100dvh-4rem)] md:max-h-[calc(100dvh-5rem)]"
             )}
           >
@@ -160,7 +165,7 @@ export function Header() {
                   key={item.key}
                   href={item.href}
                   className="group grid grid-cols-[2rem_1fr_auto] items-center gap-3 border-b border-line/70 py-3.5 text-lg font-semibold"
-                  aria-current={pathname.startsWith(item.href) ? "page" : undefined}
+                  aria-current={isActive(item.href) ? "page" : undefined}
                 >
                   <span className="font-display text-sm text-vermilion-deep" aria-hidden="true">
                     {String(index + 1).padStart(2, "0")}

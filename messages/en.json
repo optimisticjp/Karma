@@ -42,6 +42,7 @@
     }
   },
   "nav": {
+    "home": "Home",
     "courses": "Courses",
     "admissions": "Admissions",
     "work": "Student Work",
@@ -150,7 +151,8 @@
       "after": "Now",
       "sub": "Named outcomes, published only with the student’s consent.",
       "pendingLabel": "Not published yet",
-      "pendingNote": "Student outcomes go here once each person has agreed to be named and the studio has verified what changed for them. We would rather show none than write them ourselves."
+      "pendingNote": "Student outcomes go here once each person has agreed to be named and the studio has verified what changed for them. We would rather show none than write them ourselves.",
+      "visitCta": "Visit the studio"
     },
     "business": {
       "eyebrow": "For garment businesses",
@@ -233,6 +235,10 @@
       "h2": "The questions people ask before they come.",
       "sub": "Straight answers. If yours is not here, ask on WhatsApp and a person will reply.",
       "all": "See all questions"
+    },
+    "proof": {
+      "emptyTitle": "Proof, when there is proof.",
+      "emptyBody": "No student work or outcomes are published here yet, because nothing goes up without the student’s consent and the studio’s verification. Until then the real evidence is on the floor — come and look at it."
     }
   },
   "coursesPage": {
@@ -457,7 +463,11 @@
     "consentTitle": "How work gets published",
     "consentBody": "A piece appears here only after the student has given consent. Anything not yet verified stays visibly marked as a sample until it is replaced.",
     "pendingLabel": "Not published yet",
-    "pendingNote": "Finished student pieces are photographed on the studio floor and published here with the student’s consent, labelled by technique. Nothing on this page will ever be stock or a supplier sample, which is why it stays empty until the first shoot."
+    "pendingNote": "Finished student pieces are photographed on the studio floor and published here with the student’s consent, labelled by technique. Nothing on this page will ever be stock or a supplier sample, which is why it stays empty until the first shoot.",
+    "coursesCta": "See the courses",
+    "visitCta": "Visit the studio",
+    "meanwhileTitle": "The work is on the machines right now.",
+    "meanwhileBody": "Nothing is published here yet, so come and see the real thing instead. Walk in during studio hours and you can watch a batch working, or message us and we will show you what came off the floor this week."
   },
   "servicesPage": {
     "title": "Design development and production embroidery for garment businesses.",
@@ -527,7 +537,15 @@
     "whatTitle": "What the lab takes on",
     "whatSub": "If your job sits between two of these, send the brief anyway and we will tell you honestly whether it is ours.",
     "howSub": "Five steps, and you know the number before any work starts.",
-    "guideSub": "The more of this you include, the faster and more accurate the quote."
+    "guideSub": "The more of this you include, the faster and more accurate the quote.",
+    "afterTitle": "After you send it",
+    "afterSteps": [
+      "You get a reference number on screen straight away.",
+      "We read the brief and come back with questions or a quote.",
+      "A stitched or digitized sample before any full run.",
+      "Revisions until the sample is right, then delivery."
+    ],
+    "afterWhatsapp": "Rather talk it through?"
   },
   "aboutPage": {
     "eyebrow": "The studio",
@@ -851,5 +869,13 @@
       "ownerAll": "As the owner you hold every permission, including team administration.",
       "signOut": "Sign out"
     }
+  },
+  "tabbar": {
+    "label": "Main",
+    "home": "Home",
+    "courses": "Courses",
+    "book": "Book demo",
+    "work": "Work",
+    "contact": "Contact"
   }
 }

@@ -31,7 +31,7 @@ export function WhatsAppFab() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={t("whatsapp")}
-      className="fixed bottom-6 right-5 z-40 flex h-13 w-13 items-center justify-center rounded-full bg-vermilion text-ivory shadow-lg transition-transform duration-200 hover:scale-105"
+      className="fixed bottom-6 right-5 z-40 hidden h-13 w-13 items-center justify-center rounded-full bg-vermilion text-ivory shadow-lg transition-transform duration-200 hover:scale-105 xl:flex"
       style={{ height: 52, width: 52 }}
     >
       <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true">

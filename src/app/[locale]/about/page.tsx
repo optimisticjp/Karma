@@ -39,6 +39,16 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
   ]);
   const gu = l === "gu";
 
+  /* Built as a list, not as fixed cells: the grid takes its column count from
+     the number of verified facts, so an unverified one can never leave an
+     empty box on the page. */
+  const stats = [
+    ...(verifiedFacts.studentsTrained500 ? [{ label: t("n1"), value: "500+" }] : []),
+    { label: t("n2"), value: String(courses.length) },
+    { label: t("n4"), value: String(Object.keys(families).length) },
+    { label: t("n3"), value: "10:30" }
+  ];
+
   return (
     <>
       <PageIntro
@@ -128,52 +138,22 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
 
-      <section className="section">
-        <div className="container-site grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
-          <SectionHeading title={t("storyTitle")} sub={t("storySub")} />
-          <div className="space-y-6">
-            <div className="pending-block">
-              <span className="pending-label">{t("pendingLabel")}</span>
-              <p className="text-stone">{t("storyBody")}</p>
-            </div>
-            <div className="pending-block">
-              <span className="pending-label">{t("pendingLabel")}</span>
-              <p className="font-semibold">{t("karmaTitle")}</p>
-              <p className="mt-2 text-stone">{t("karmaBody")}</p>
-            </div>
-            <div className="pending-block">
-              <span className="pending-label">{t("pendingLabel")}</span>
-              <p className="font-semibold">{t("trainersTitle")}</p>
-              <p className="mt-2 text-stone">{t("trainersNote")}</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* The founding story, the meaning of the name and the trainer profiles
+          are the owner's to give and have not been collected. They used to
+          render as three "awaiting the owner" blocks on the live page, which
+          tells a visitor the site is unfinished. Nothing is lost by omitting
+          the section: the moment real copy lands, restore it from git. */}
 
       <section className="section border-t border-line bg-ivory-2">
         <div className="container-site">
           <SectionHeading title={t("numbersTitle")} sub={t("numbersNote")} />
-          <dl className="u-section-body spec-grid">
-            {verifiedFacts.studentsTrained500 ? (
-              <div>
-                <dt className="spec-label">{t("n1")}</dt>
-                <dd className="tabular mt-1 font-display text-h3">500+</dd>
+          <dl className="u-section-body spec-grid" style={{ "--spec-cols": stats.length } as React.CSSProperties}>
+            {stats.map((stat) => (
+              <div key={stat.label}>
+                <dt className="spec-label">{stat.label}</dt>
+                <dd className="tabular mt-1 font-display text-h3">{stat.value}</dd>
               </div>
-            ) : null}
-            <div>
-              <dt className="spec-label">{t("n2")}</dt>
-              <dd className="tabular mt-1 font-display text-h3">{courses.length}</dd>
-            </div>
-            <div>
-              <dt className="spec-label">{t("n4")}</dt>
-              <dd className="tabular mt-1 font-display text-h3">
-                {Object.keys(families).length}
-              </dd>
-            </div>
-            <div>
-              <dt className="spec-label">{t("n3")}</dt>
-              <dd className="tabular mt-1 font-display text-h3">10:30</dd>
-            </div>
+            ))}
           </dl>
         </div>
       </section>
