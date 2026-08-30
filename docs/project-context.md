@@ -1095,12 +1095,24 @@ named list of the moments that matter plus a `track()` function that emits a DOM
 
 - **No network request. No cookie. No third-party script. No consent banner
   needed. No dependency to remove later.**
-- Attaching a provider later is one listener:
-  `window.addEventListener("karma:event", (e) => provider.track(e.detail))`.
+- Attaching a provider later starts with one listener —
+  `window.addEventListener("karma:event", (e) => provider.track(e.detail))` —
+  but **that is not the whole integration**, whatever `analytics.ts` and
+  `docs/launch-checklist.md` imply. A provider that sends anything over the
+  network also needs its origin added to the CSP `connect-src` in
+  `next.config.ts`, and `tests/csp.test.ts` asserts that array *exactly*, so
+  the test changes with it.
 
 The eight events: `call_demo_click` · `directions_click` · `whatsapp_click` ·
 `demo_start` · `demo_complete` · `course_view` · `social_click` ·
 `note_course_click`.
+
+Two honest limits on the coverage, worth knowing before anyone reads the numbers
+as complete: the `step` prop is declared and allow-listed but **no caller ever
+passes it**, so there is no funnel-step dimension yet; and **most WhatsApp CTAs
+are untracked** — `WhatsAppFab`, the footer links and the `waLink` calls on
+admissions, student-work, contact, `Investment`, `BatchesTeaser`, `CtaBand` and
+`BatchTable` are plain anchors. Only `SocialAuthority` emits `social_click`.
 
 **The PII rule is enforced by construction, not by convention.** The props type
 admits only an allow-list — `course`, `surface`, `locale`, `step`, `channel`,
@@ -1280,6 +1292,34 @@ which is the point — the policy survives a refactor:
 | `machine-notes`, `studio-b2b`, `courses-console`, `catalog-import`, `course-validation` | content and catalogue contracts |
 | `validation`, `phone`, `files`, `hardening`, `api-helpers` | input validation, normalisation, upload signatures, fail-closed behaviour |
 | `admissions-console`, `console-completion` | console flows |
+
+### The tests are brittle on purpose
+
+Many of the guard tests do not exercise behaviour — they `readFileSync` the
+source and assert on its **text**: exact call strings like
+`authorizeAction({ permission: "courses.manage" })`, `db.transaction`
+occurrence *counts*, statement *ordering* (`authorizeAction` must appear before
+`getDb()`), and the presence or absence of specific literals. Several walk all
+of `src/app` and `src/components` and fail globally on any file containing
+`<iframe`, `<video`, `<audio`, `autoPlay` or `"@context"`.
+`tests/console-completion.test.ts` goes further and uses `existsSync` to assert
+that three MFA files do **not** exist — the no-MFA policy encoded as a
+filesystem check.
+
+**This is deliberate** (there is a comment block explaining it at
+`tests/admin-audit.test.ts:65-69`) and it has a consequence worth internalising:
+**a rename, a reformat or a reordered statement can fail CI without changing any
+behaviour.** When that happens, read the assertion before assuming the test is
+wrong — it is usually pinning a policy, not a detail. Some pin literals that are
+easy to trip over accidentally: `'4.8'`, `'author'` and `'duration'` may not
+appear anywhere in serialised schema, and `tests/mobile-conversion.test.ts`
+asserts the exact `ALLOWED` array source line in `analytics.ts`, so adding an
+event prop means editing that test string too.
+
+Two more mechanics: Vitest does **not** use `globals: true`, so every test file
+imports `describe`/`it`/`expect` explicitly; and `tsconfig.json` includes
+`**/*.ts`, so `npm run typecheck` covers `tests/` and `scripts/` and a type
+error there fails CI before Vitest runs at all.
 
 **CI** (`.github/workflows/ci.yml`) on every push to `main` and every PR, Node 22:
 
@@ -1687,6 +1727,43 @@ being. They are load-bearing.
   a test pins the blacklist. Do not read either as evidence that MFA routes
   exist, and do not "fix" the dead branch by making `evaluateAccess` emit those
   reasons.
+- **`JsonLd` uses `JSON.stringify` with no escaping of `<`.** Almost every
+  input is a typed source file, but `FAQPage` data comes from `getPublicFaqs()`
+  → `content_items.payload`, which is staff-authored Content Desk text validated
+  only for length. A staff-written FAQ answer containing `</script>` would break
+  out of the `ld+json` block. Same-origin and staff-only, but it is the one
+  dynamic path into a `<script>` tag.
+- **`noteSchema` and `courseSchema` always emit the ENGLISH strings**, even when
+  the locale is `gu` and `inLanguage` says `gu`; only the URL/`@id` and the
+  catalogue name are localised. `breadcrumbSchema` hardcodes the English word
+  "Home" in both locales. Consistent, not accidental — check the tests before
+  "fixing" it.
+- **`/terms` is `noIndex: true` but is still in the sitemap**, and
+  `tests/structured-data.test.ts` *requires* it to be there. Removing it breaks
+  a test; leaving it means the sitemap advertises a noindexed page. Resolve both
+  together or not at all.
+- **`site.hoursEn` ("Open daily · Evening batches till 10:30 pm") is still
+  rendered** on about, contact, admissions, `VisitStudio` and the footer, and in
+  `public/llms.txt`. PR #22 removed the *schema* claim only. Do not
+  "consistency-fix" by deleting the copy, and do not re-add the schema.
+- **`digest.yml` has a hardcoded `workers.dev` fallback URL** and no
+  checkout/setup-node step; it depends on the repo variable `SITE_URL`. After
+  the domain cutover that fallback becomes silently wrong.
+- **`hasStickyBar` in `WhatsAppFab.tsx` and `LangBanner.tsx` tests for a
+  per-page sticky action bar that no longer exists** as a component. Harmless —
+  the FAB is `xl:flex` and the bar is `xl:hidden`, so they can never collide —
+  but do not read it as evidence that such a component exists.
+- **Machine-note `tags` are rendered nowhere.** They exist purely as the
+  search-theme coverage assertion in `tests/machine-notes.test.ts`.
+- **`studioSchema` is rendered in `<body>`**, after `NextIntlClientProvider`,
+  not in `<head>`. That is valid for `ld+json`; do not "move it to head" via a
+  Metadata field.
+- **The sitemap's per-URL alternates carry only `en` and `gu`** while
+  `pageMeta()` emits `en`, `gu` **and** `x-default`. The two hreflang surfaces
+  are intentionally different shapes.
+- **The geo coordinates in `site.ts` (21.2379, 72.8877) are a Mota Varachha
+  approximation**, not a reading taken at the studio door. `mapsUrl` is the
+  owner's exact pin, so the directions button is correct regardless.
 - **The AAL plumbing is still live even though it gates nothing**:
   `guard.ts` calls `getAssuranceLevel()` on every guarded request (a local JWT
   decode, but it constructs a second cookie-backed Supabase client). Removing it
