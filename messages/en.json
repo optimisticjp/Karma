@@ -1253,6 +1253,7 @@
     "demoBody": "Bring the sample to a practical demo and put it on a machine. Ten minutes at the machine beats ten paragraphs.",
     "moreTitle": "More notes",
     "courseNotesTitle": "Machine notes for this technique",
-    "courseNotesSub": "Short answers from the floor about the faults this course teaches you to fix."
+    "courseNotesSub": "Short answers from the floor about the faults this course teaches you to fix.",
+    "issueLabel": "Issue"
   }
 }

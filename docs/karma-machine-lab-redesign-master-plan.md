@@ -1852,7 +1852,7 @@ Claude must execute phases in order, one clean PR at a time unless a smaller spl
 | 4 | 11-course Machine Index + all course pages | ✅ Complete + merged |
 | 5 | Proof ecosystem: student work, stories, trainers, studio/machines | ✅ Complete + merged |
 | 6 | Admission + conversion + contact experience | ✅ Complete + merged |
-| 7 | Machine Notes technical archive | ⏳ Pending |
+| 7 | Machine Notes technical archive | ✅ Complete + merged |
 | 8 | B2B Studio/services | ⏳ Pending |
 | 9 | About, verify, legal, errors/loading/404, footer + secondary public pages | ⏳ Pending |
 | 10 | Karma Console shell + Today at Karma + mobile operational system | ⏳ Pending |
@@ -2465,6 +2465,68 @@ Make this the strongest technical-archive expression in the site.
 Rebuild index and article templates without changing factual trade knowledge unnecessarily.
 
 Use real semantic notation; no fake measurements.
+
+## Implementation record — merged 2026-08-30
+
+**Branch:** `redesign/phase-7-machine-notes` · **PR:** #34
+
+### The notation, and its limit
+
+`<NoteSpec>` renders the archive header:
+
+```
+MACHINE NOTE / 06
+SEQUENCE WORK
+──────────────────────
+ISSUE   Registration
+```
+
+Full strength here and on the index, and **deliberately nowhere else**. A test
+fails if `<NoteSpec>` appears on the homepage, the course index, a course page,
+`/about` or `/contact`. If the whole site looked like this the notation would
+stop meaning "this is a technical record" and start meaning "this is how the
+brand decorates" — and the master plan says so in as many words.
+
+The body stays in Manrope / Noto Sans Gujarati and stays readable. Mono is for
+the notation around a note, never for the prose inside it.
+
+### One new field, and why it is a label rather than a claim
+
+`issueEn` / `issueGu` — the fault a note is about, in two or three words, drawn
+strictly from that note's own body. It exists so an operator scanning eight
+notes for the problem they are hitting today finds it without reading eight
+answers. A test caps it at three words: a sentence there would be a second
+answer competing with the real one.
+
+**No measurement anywhere in the notation.** A test scans the component and all
+sixteen issue labels for RPM, SPM, GSM, mm, stitches-per and `%`. The archive
+earns its authority by being right about causes, not by printing numbers nobody
+supplied.
+
+The ISSUE row carries a **registration point** — precision / reference, the
+mark's one meaning — and exactly one per note header.
+
+### The index
+
+A technical archive rather than a reading list: every row carries its note
+number, its technique and its fault. Still not a blog — no dates, no bylines,
+no "read more", asserted by test — because a note is either still true or it
+gets corrected, and neither is a function of when it was written.
+
+A note's number is the same on the index and on its own page, derived from the
+append-only array in both places.
+
+### Unchanged
+
+Every note's trade knowledge, both languages, all eight course links, and the
+absence of any named person, client, statistic or promised result. The
+`TechniquePlate` in the note aside became that course's own
+`<TechniqueSignature>`.
+
+### Gates
+
+`npm run typecheck`, `npm run lint`, `npm test` (39 files, 550 tests) and
+`npm run build` all green. No dependency added.
 
 ---
 

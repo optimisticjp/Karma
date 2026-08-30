@@ -5,12 +5,14 @@ import { Link } from "@/i18n/navigation";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { StitchRule } from "@/components/ui/StitchPath";
-import { TechniquePlate } from "@/components/ui/TechniquePlate";
+import { TechniqueSignature } from "@/components/ui/TechniqueSignature";
+import { NoteSpec } from "@/components/notes/NoteSpec";
+import { MonoNote, StepIndex } from "@/components/ui/MonoNote";
 import { JsonLd } from "@/components/site/JsonLd";
 import { TrackedLink } from "@/components/site/TrackedLink";
 import { Icon } from "@/components/ui/Icon";
 import { machineNotes, noteBySlug } from "@/content/notes";
-import { courseBySlug, coursesByFamily } from "@/content/courses";
+import { courseBySlug } from "@/content/courses";
 import { routing } from "@/i18n/routing";
 import { site } from "@/lib/site";
 import { breadcrumbSchema, noteSchema } from "@/lib/schema";
@@ -69,8 +71,10 @@ export default async function NotePage({
   ]);
   const gu = l === "gu";
   const course = courseBySlug(note.courseSlug);
-  const position = course ? coursesByFamily.findIndex((c) => c.slug === course.slug) : 0;
   const others = machineNotes.filter((n) => n.slug !== note.slug).slice(0, 3);
+  /* The note's own number in the archive. Stable because the array is
+     append-only, and it is what the index shows on the same note. */
+  const noteIndex = machineNotes.findIndex((n) => n.slug === note.slug) + 1;
   const question = gu ? note.questionGu : note.questionEn;
   const answer = gu ? note.answerGu : note.answerEn;
 
@@ -114,9 +118,11 @@ export default async function NotePage({
         aside={
           course ? (
             <>
-              <p className="microlabel !text-vermilion-deep">{t("relatedCourse")}</p>
+              <MonoNote as="p" tone="vermilion">
+                {t("relatedCourse")}
+              </MonoNote>
               <div className="note-course-plate">
-                <TechniquePlate variant={course.family} seed={position} />
+                <TechniqueSignature slug={course.slug} />
               </div>
               <p className="mt-3 font-display text-h4">{gu ? course.nameGu : course.nameEn}</p>
               <p className="mt-2 text-smallmeta text-stone">
@@ -139,10 +145,20 @@ export default async function NotePage({
         }
       />
 
-      <section className="section">
+      <section className="section band-info">
         <div className="container-site split">
           <div className="reading-shell">
-            <h2 className="text-h3 font-display">{t("whyTitle")}</h2>
+            {/* The archive notation. Full strength here and on the index, and
+                deliberately nowhere else on the site. */}
+            <NoteSpec
+              index={noteIndex}
+              technique={course ? (gu ? course.nameGu : course.nameEn) : undefined}
+              issueLabel={t("issueLabel")}
+              issue={gu ? note.issueGu : note.issueEn}
+              className="note-page-spec"
+            />
+
+            <h2 className="text-h3 mt-8 font-display">{t("whyTitle")}</h2>
             <StitchRule draw className="mt-4 max-w-[4.5rem]" />
             <p className="mt-5 text-stone">{gu ? note.whyGu : note.whyEn}</p>
 
@@ -157,13 +173,13 @@ export default async function NotePage({
           </div>
 
           <div className="surface surface-feature">
-            <p className="microlabel !text-vermilion-deep">{t("checksTitle")}</p>
+            <MonoNote as="p" tone="vermilion">
+              {t("checksTitle")}
+            </MonoNote>
             <ol className="note-checks">
               {(gu ? note.checksGu : note.checksEn).map((c, i) => (
                 <li key={c}>
-                  <span className="note-check-index tabular" aria-hidden="true">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
+                  <StepIndex n={i + 1} className="note-check-index" />
                   <span>{c}</span>
                 </li>
               ))}

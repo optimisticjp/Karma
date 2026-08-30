@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { PageIntro } from "@/components/ui/PageIntro";
-import { Ledger, LedgerLink } from "@/components/ui/Ledger";
+import { NoteSpec } from "@/components/notes/NoteSpec";
+import { MonoNote } from "@/components/ui/MonoNote";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Icon } from "@/components/ui/Icon";
 import { machineNotes } from "@/content/notes";
@@ -30,6 +31,14 @@ export async function generateMetadata({
  * Not a blog: no dates, no author bylines, no "read more". A note is either
  * still true or it gets corrected, and neither is a function of when it was
  * written.
+ *
+ * The index reads as a technical archive rather than a reading list: each row
+ * carries its note number, its technique and the fault it is about, so an
+ * operator scanning for the problem they are hitting today finds it without
+ * reading eight answers. That notation runs at full strength here and on a
+ * note page, and deliberately nowhere else — if the whole site looked like
+ * this, it would stop meaning "this is a record" and start meaning "this is
+ * how the brand decorates".
  */
 export default async function NotesIndexPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -65,30 +74,40 @@ export default async function NotesIndexPage({ params }: { params: Promise<{ loc
         }
       />
 
-      <section className="section">
+      <section className="section band-info">
         <div className="container-site">
           <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
             <SectionHeading title={t("listTitle")} sub={t("listSub")} rule />
-            <p className="microlabel tabular mb-1 shrink-0">
+            <MonoNote className="mb-1 shrink-0">
               {t("count", { count: machineNotes.length })}
-            </p>
+            </MonoNote>
           </div>
 
-          <Ledger className="u-section-body">
+          <ol className="note-archive u-section-body">
             {machineNotes.map((n, i) => {
               const course = courseBySlug(n.courseSlug);
               return (
-                <LedgerLink
-                  key={n.slug}
-                  href={`/notes/${n.slug}`}
-                  index={String(i + 1).padStart(2, "0")}
-                  title={gu ? n.questionGu : n.questionEn}
-                  meta={course ? (gu ? course.nameGu : course.nameEn) : undefined}
-                  note={gu ? n.answerGu : n.answerEn}
-                />
+                <li key={n.slug} className="note-archive-row">
+                  <Link href={`/notes/${n.slug}`} className="note-archive-link">
+                    <NoteSpec
+                      index={i + 1}
+                      technique={course ? (gu ? course.nameGu : course.nameEn) : undefined}
+                      issueLabel={t("issueLabel")}
+                      issue={gu ? n.issueGu : n.issueEn}
+                      className="note-archive-spec"
+                    />
+                    <span className="note-archive-body">
+                      <span className="note-archive-question">
+                        {gu ? n.questionGu : n.questionEn}
+                      </span>
+                      <span className="note-archive-answer">{gu ? n.answerGu : n.answerEn}</span>
+                    </span>
+                    <Icon name="arrow" size={18} className="note-archive-arrow arrow" />
+                  </Link>
+                </li>
               );
             })}
-          </Ledger>
+          </ol>
         </div>
       </section>
     </>
