@@ -34,6 +34,7 @@ saying something true instead of guessing.
 | Studio turnaround (B2B) | "Depends on technique, quantity and floor load — tell us your deadline" | Publish a realistic range on the services page |
 | Supported machine file formats | "Tell us what your machine takes" | Name the formats the studio actually delivers |
 | Exact opening hours | "Open daily · evening batches till 10:30 pm" | A precise `openingHoursSpecification` per day |
+| **⚠ NEW — the last class of the day: 10:30 pm or 11:00 pm?** | Both numbers are on the site because the owner supplied both. "Evening batches till 10:30 pm" is listed as verified below; the EMCAD DAHAO timetable on the printed admission material ends its fourth slot at **23:00**. Neither has been changed to match the other. | One answer fixes the site hours, the FAQ, `src/lib/site.ts`, the timing labels and the meta descriptions in one pass |
 | Module topics per course | The shared `draftModules` template, labelled a draft | Real syllabus per technique |
 | Google rating as *verified* | Shown as owner-provided, attributed to Google, linked to the listing | Flip `verifiedFacts.googleRating48` and state it as verified |
 | Trainer identities | Three sample profiles, tagged | Real people, with consent |
@@ -50,7 +51,7 @@ social profiles, its JustDial listing, or the owner directly.
 - Three phone numbers (roles unconfirmed — see above, but the numbers are real)
 - Email, Maps URL, Instagram, Facebook, YouTube, Threads
 - The eleven-course catalogue and its slugs
-- Evening batches running until 10:30 pm
+- Evening batches running until 10:30 pm — **but see the open question above**: the confirmed EMCAD DAHAO timetable runs its last slot to 23:00, and the two have not been reconciled
 - Teaching in Gujarati and Hindi
 - That every course is taught on live machines
 

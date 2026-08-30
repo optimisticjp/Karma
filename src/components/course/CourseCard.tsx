@@ -1,7 +1,9 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icon";
-import { TechniquePlate } from "@/components/ui/TechniquePlate";
+import { TechniqueSignature } from "@/components/ui/TechniqueSignature";
+import { ManifestPhoto } from "@/components/ui/PhotoSlot";
+import { coursePhotoFor } from "@/content/photo-manifest";
 import type { Course } from "@/content/courses";
 import { families } from "@/content/courses";
 import { cn } from "@/lib/utils";
@@ -11,10 +13,11 @@ import { cn } from "@/lib/utils";
  * two facts a visitor weighs (duration and level). `layout="horizontal"` gives
  * the editorial split used on the courses index at large sizes.
  *
- * The media panel is a drawn technique swatch rather than an empty photo
- * frame. Eight identical grey placeholders read as an unfinished site; eight
- * swatches read as a catalogue, and they tell the three families apart before
- * the visitor has read a word.
+ * The media panel leads with this course's own photograph where the studio
+ * shoot covers it, and with its technique signature where it does not. Both
+ * are specific to the course rather than to its family, so two cards side by
+ * side are visibly two different techniques before a word is read — which
+ * three shared family swatches never managed.
  */
 export function CourseCard({
   course,
@@ -31,6 +34,7 @@ export function CourseCard({
   const fam = families[course.family];
   const gu = locale === "gu";
   const horizontal = layout === "horizontal";
+  const photo = coursePhotoFor(course.slug);
 
   return (
     <Link href={`/courses/${course.slug}`} className="group block h-full">
@@ -48,7 +52,11 @@ export function CourseCard({
               : "aspect-[3/2] border-b"
           )}
         >
-          <TechniquePlate variant={course.family} seed={index ?? 0} className="card-img" />
+          {photo ? (
+            <ManifestPhoto id={photo.id} compact editorial className="card-img !rounded-none !border-0" />
+          ) : (
+            <TechniqueSignature slug={course.slug} className="card-img card-signature" />
+          )}
           {index !== undefined ? (
             <span className="absolute left-3 top-3 rounded border border-line bg-card px-2 py-0.5 font-display text-xs font-semibold tabular text-vermilion-deep">
               {String(index + 1).padStart(2, "0")}

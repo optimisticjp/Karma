@@ -1849,7 +1849,7 @@ Claude must execute phases in order, one clean PR at a time unless a smaller spl
 | 1 | Audit + Design System v4 “Machine Lab” foundation | ✅ Complete + merged |
 | 2 | Global shell + hero + signature Screen-to-Stitch interaction | ✅ Complete + merged |
 | 3 | Homepage full rebuild | ✅ Complete + merged |
-| 4 | 11-course Machine Index + all course pages | ⏳ Pending |
+| 4 | 11-course Machine Index + all course pages | ✅ Complete + merged |
 | 5 | Proof ecosystem: student work, stories, trainers, studio/machines | ⏳ Pending |
 | 6 | Admission + conversion + contact experience | ⏳ Pending |
 | 7 | Machine Notes technical archive | ⏳ Pending |
@@ -2206,6 +2206,76 @@ Rebuild:
 - related Machine Notes/internal linking
 
 No course should read as a generic duplicated template.
+
+## Implementation record — merged 2026-08-30
+
+**Branch:** `redesign/phase-4-courses` · **PR:** #31
+
+### One index, two surfaces
+
+`/courses` now renders `<MachineIndex>` — the same component the homepage
+uses — grouped by family with continuous numbering across all eleven. The two
+surfaces therefore cannot drift apart in what a course row is allowed to
+claim: what the technique produces, its family, a duration only where the
+owner confirmed one, and no fee at all.
+
+A family heads with a **branded icon**, never with a technique signature. A
+signature belongs to exactly one technique; borrowing one to head nine courses
+would make the mark mean less than it does. A test enforces that.
+
+### Photograph where there is one, signature always
+
+The studio shoot covers eight of the eleven. Those eight lead their page, card
+and index row with their own frame. The other three get **no substitute** —
+never another course's photograph, never stock — and are not demoted for it:
+the technique signature is on all eleven, at the same size in the same slot,
+because it describes the structure of the stitch and is true of the technique
+whether or not anyone has photographed it yet.
+
+The signature caption is bilingual and lives in the message catalogues
+(`courseDetail.signatures.<slug>`). `TECHNIQUE_SIGNATURES[].description` stays
+as the English spec note the design system is written against — the two are
+deliberately separate, and a test checks the page renders the catalogue one.
+
+### Why no two of the eleven pages read the same
+
+Everything above the fold is per-course: the technique's own signature, its own
+photograph where one exists, what it physically produces, the faults its
+training exists to fix, what it runs on, what the finished work sells as.
+Tests assert that the produces line, the fault list, the output list, the
+practice description and the machine description are **all distinct across all
+eleven** — so a template with the nouns swapped would fail.
+
+### The duration and fee policy, tested
+
+Exactly one course has confirmed operational facts. The other ten carry
+`durationMonths: null` and `durationWeeks: null` and say "ask the studio",
+and a test fails the moment a second course gains a duration without the
+owner's confirmation reaching `src/content/course-operations.ts`. No course
+page offers a way to pay online.
+
+### ⚠ A factual conflict found and recorded, not resolved
+
+The site states "evening batches till 10:30 pm" — listed as verified — while
+the EMCAD DAHAO timetable on the owner's printed admission material ends its
+fourth slot at **23:00**. Both numbers came from the owner. Neither was
+changed to match the other; the conflict is now an open question at the top of
+`docs/content-checklist.md`, because which class ends when is the studio's
+fact to state, not an engineer's to average.
+
+### Naming
+
+`emCAD` → `EMCAD DAHAO` on the surfaces this phase rebuilt: the course index
+copy, its pathway and relate blocks, and the home and courses meta
+descriptions. The remaining occurrences (`src/content/notes.ts`,
+`src/content/collections.ts`, `src/lib/admin/courses-copy.ts`, and the
+work/services/about/admissions copy) stay with Phase 13's consistency pass —
+each phase renames the surfaces it rebuilds, and Phase 13 sweeps the rest.
+
+### Gates
+
+`npm run typecheck`, `npm run lint`, `npm test` (36 files, 500 tests) and
+`npm run build` all green. No dependency added.
 
 ---
 

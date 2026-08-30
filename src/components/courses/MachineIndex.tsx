@@ -41,11 +41,22 @@ export function MachineIndex({
   courses,
   locale,
   /** Where the row's index starts. The homepage teaser and /courses agree. */
-  startAt = 1
+  startAt = 1,
+  /**
+   * Optional per-course cue, keyed by slug. These are FACTS the owner
+   * confirmed — which course most enquiries ask for, which one the others are
+   * written in the vocabulary of — never an invented difficulty rating. No
+   * course carries a "beginner" or "advanced" label, because every course here
+   * is taught from zero.
+   */
+  cues,
+  renderCue
 }: {
   courses: Course[];
   locale: string;
   startAt?: number;
+  cues?: Record<string, string>;
+  renderCue?: (key: string) => string;
 }) {
   const gu = locale === "gu";
 
@@ -69,7 +80,14 @@ export function MachineIndex({
               </span>
 
               <span className="mi-body">
-                <span className="mi-name">{gu ? course.nameGu : course.nameEn}</span>
+                <span className="mi-name">
+                  {gu ? course.nameGu : course.nameEn}
+                  {cues?.[course.slug] && renderCue ? (
+                    <span className={`course-cue course-cue--${cues[course.slug]}`}>
+                      {renderCue(cues[course.slug])}
+                    </span>
+                  ) : null}
+                </span>
                 <span className="mi-produces">
                   {gu ? course.production.producesGu : course.production.producesEn}
                 </span>
