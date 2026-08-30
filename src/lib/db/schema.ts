@@ -186,11 +186,19 @@ export const students = pgTable("students", {
    *  supervised migration. */
   pin: varchar("pin", { length: 8 }),
   isMinor: boolean("is_minor").notNull().default(false),
+  /** From the institute's printed admission form. Distinct from a guardian. */
+  fatherName: varchar("father_name", { length: 160 }),
+  /** Who referred this student. Optional: nobody is asked to invent one. */
+  referenceName: varchar("reference_name", { length: 160 }),
+  referencePhone: varchar("reference_phone", { length: 20 }),
   photoConsent: boolean("photo_consent").notNull().default(false),
   photoConsentAt: timestamp("photo_consent_at", { withTimezone: true }),
   notes: text("notes"),
+  archivedAt: timestamp("archived_at", { withTimezone: true }),
+  archivedBy: integer("archived_by").references((): AnyPgColumn => staff.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
-});
+},
+  (t) => [index("idx_students_archived").on(t.archivedAt)]);
 
 export const guardians = pgTable("guardians", {
   id: serial("id").primaryKey(),
@@ -206,18 +214,72 @@ export const guardians = pgTable("guardians", {
 
 /* ------------------------------ catalog ----------------------------------- */
 
+/**
+ * The course catalogue, and — since the owner supplied verified operational
+ * facts (2026-08-30) — the operational source of truth for how a course is
+ * timetabled, what it teaches and what it costs.
+ *
+ * Storage split, deliberate (see src/lib/admin/course-operations.ts):
+ *  - money, duration, software and the terms version are COLUMNS, because they
+ *    are constrained, queried and snapshotted onto an enrolment;
+ *  - the bounded per-course lists (timetable slots, demo slots, curriculum,
+ *    practical points) are a single validated JSONB payload, because four
+ *    child tables bought nothing but joins.
+ *
+ * `active` is the public/teaching switch. `archivedAt` is the lifecycle state:
+ * an archived course is out of every operational picker but its history — the
+ * students who took it, their fees, their certificates — is untouched.
+ */
 export const courses = pgTable("courses", {
   id: serial("id").primaryKey(),
   slug: varchar("slug", { length: 80 }).notNull().unique(),
   nameEn: varchar("name_en", { length: 160 }).notNull(),
   nameGu: varchar("name_gu", { length: 160 }).notNull(),
   family: varchar("family", { length: 40 }).notNull(), // machine | modern | software
+  /**
+   * Weeks stays for the pre-2026-08-30 model and is null on every course.
+   * Durations the owner has confirmed are recorded in MONTHS, because months
+   * is what the institute says. Never convert one into the other.
+   */
   durationWeeks: integer("duration_weeks"),
+  durationMonths: integer("duration_months"),
+  /** The digitising package taught, where a course teaches one. */
+  software: varchar("software", { length: 80 }),
+  /** Whole INR. Displayed publicly; collected offline. There is no gateway. */
+  feeTotal: integer("fee_total"),
+  feeAdmission: integer("fee_admission"),
+  feeBalanceDueDays: integer("fee_balance_due_days"),
+  /** Admission-norms version this course admits students under. */
+  termsVersion: integer("terms_version"),
+  /** Whether the course appears on the public site at all. */
+  publicVisible: boolean("public_visible").notNull().default(true),
   modules: jsonb("modules"), // [{titleEn,titleGu,pointsEn[],pointsGu[]}]
+  /** Validated by parseCourseOperations() before every write AND after every read. */
+  operations: jsonb("operations"),
   active: boolean("active").notNull().default(true),
+  archivedAt: timestamp("archived_at", { withTimezone: true }),
+  archivedBy: integer("archived_by").references(() => staff.id),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
-});
+},
+  (t) => [
+    index("idx_courses_archived").on(t.archivedAt),
+    check(
+      "chk_course_duration_months",
+      sql`${t.durationMonths} is null or (${t.durationMonths} > 0 and ${t.durationMonths} <= 60)`
+    ),
+    /**
+     * The admission amount can never exceed the total, and a total is required
+     * before an admission amount means anything. Enforced here as well as in
+     * the console because a fee plan is what a student's ledger is built from.
+     */
+    check(
+      "chk_course_fees",
+      sql`(${t.feeTotal} is null or ${t.feeTotal} >= 0)
+        and (${t.feeAdmission} is null or (${t.feeTotal} is not null and ${t.feeAdmission} >= 0 and ${t.feeAdmission} <= ${t.feeTotal}))
+        and (${t.feeBalanceDueDays} is null or (${t.feeBalanceDueDays} >= 0 and ${t.feeBalanceDueDays} <= 365))`
+    )
+  ]);
 
 export const batches = pgTable("batches", {
   id: serial("id").primaryKey(),
@@ -235,10 +297,13 @@ export const batches = pgTable("batches", {
   language: varchar("language", { length: 60 }).notNull().default("ગુજરાતી + Hindi"),
   trainerId: integer("trainer_id").references(() => staff.id),
   status: varchar("status", { length: 20 }).notNull().default("open"), // open|full|started|done
+  archivedAt: timestamp("archived_at", { withTimezone: true }),
+  archivedBy: integer("archived_by").references(() => staff.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
 },
   (t) => [
     index("idx_batches_start").on(t.startDate),
+    index("idx_batches_archived").on(t.archivedAt),
     index("idx_batches_status").on(t.status),
     index("idx_batches_course").on(t.courseId),
     check("chk_batch_seats", sql`${t.seats} >= 0 AND ${t.seatsTaken} >= 0 AND ${t.seatsTaken} <= ${t.seats}`),
@@ -264,8 +329,27 @@ export const applications = pgTable("applications", {
   /** DEPRECATED: unused (form uses goal). Drop in a supervised migration. */
   message: text("message"),
   ageBand: varchar("age_band", { length: 20 }), // under18|18-25|26-40|40plus
+  fatherName: varchar("father_name", { length: 160 }),
+  /**
+   * A parent/guardian contact is required on EVERY new application by owner
+   * decision (2026-08-30), not only for under-18s. The columns stay nullable
+   * because applications taken before that decision have none, and migrations
+   * here are additive; the requirement is enforced by validation on the way in.
+   */
   guardianName: varchar("guardian_name", { length: 160 }),
   guardianPhone: varchar("guardian_phone", { length: 20 }),
+  guardianRelation: varchar("guardian_relation", { length: 60 }),
+  referenceName: varchar("reference_name", { length: 160 }),
+  referencePhone: varchar("reference_phone", { length: 20 }),
+  /** Key of the course schedule option the applicant asked for. */
+  preferredSchedule: varchar("preferred_schedule", { length: 40 }),
+  /** Key of the free-demo slot the applicant asked for. A preference, not a booking. */
+  demoSlot: varchar("demo_slot", { length: 40 }),
+  /** Which version of the admission norms was shown, and when it was accepted. */
+  termsVersion: integer("terms_version"),
+  termsAcceptedAt: timestamp("terms_accepted_at", { withTimezone: true }),
+  archivedAt: timestamp("archived_at", { withTimezone: true }),
+  archivedBy: integer("archived_by").references(() => staff.id),
   privacyConsentAt: timestamp("privacy_consent_at", { withTimezone: true }),
   commsConsentAt: timestamp("comms_consent_at", { withTimezone: true }),
   utmSource: varchar("utm_source", { length: 80 }),
@@ -283,7 +367,8 @@ export const applications = pgTable("applications", {
     index("idx_applications_status").on(t.status),
     index("idx_applications_created").on(t.createdAt),
     index("idx_applications_followup").on(t.nextFollowUp),
-    index("idx_applications_whatsapp").on(t.whatsapp)
+    index("idx_applications_whatsapp").on(t.whatsapp),
+    index("idx_applications_archived").on(t.archivedAt)
   ]);
 
 export const applicationNotes = pgTable("application_notes", {
@@ -296,6 +381,15 @@ export const applicationNotes = pgTable("application_notes", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
 });
 
+/**
+ * A student in a batch — and the SNAPSHOT of what they agreed to.
+ *
+ * The agreement columns are copied from the course at the moment of joining and
+ * are never recalculated from it afterwards. Editing a course to ₹40,000 next
+ * year must not silently reprice a student who joined at ₹35,000; their ledger,
+ * their balance and their due date are what they signed. Changing an existing
+ * agreement is a deliberate, audited act on THIS row, with a reason.
+ */
 export const enrollments = pgTable("enrollments", {
   id: serial("id").primaryKey(),
   studentId: integer("student_id")
@@ -307,9 +401,27 @@ export const enrollments = pgTable("enrollments", {
   status: enrollmentStatusEnum("status").notNull().default("active"),
   joinedOn: date("joined_on"),
   completedOn: date("completed_on"),
+  /** Whole INR, as agreed on the joining date. Not a view of `courses`. */
+  agreedFeeTotal: integer("agreed_fee_total"),
+  agreedAdmissionAmount: integer("agreed_admission_amount"),
+  /** When the balance falls due. Derived once, from the joining date. */
+  agreedBalanceDueOn: date("agreed_balance_due_on"),
+  agreedDurationMonths: integer("agreed_duration_months"),
+  /** The course name as printed on their admission form. */
+  agreedCourseName: varchar("agreed_course_name", { length: 160 }),
+  termsVersion: integer("terms_version"),
+  termsAcceptedAt: timestamp("terms_accepted_at", { withTimezone: true }),
+  agreementNote: varchar("agreement_note", { length: 300 }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
 },
-  (t) => [uniqueIndex("uq_enrollment_student_batch").on(t.studentId, t.batchId)]);
+  (t) => [
+    uniqueIndex("uq_enrollment_student_batch").on(t.studentId, t.batchId),
+    check(
+      "chk_enrollment_agreement",
+      sql`(${t.agreedFeeTotal} is null or ${t.agreedFeeTotal} >= 0)
+        and (${t.agreedAdmissionAmount} is null or (${t.agreedFeeTotal} is not null and ${t.agreedAdmissionAmount} >= 0 and ${t.agreedAdmissionAmount} <= ${t.agreedFeeTotal}))`
+    )
+  ]);
 
 /* ----------------------------- attendance --------------------------------- */
 

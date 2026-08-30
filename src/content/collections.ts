@@ -75,20 +75,20 @@ export const faqs: Faq[] = [
     aGu: "18થી નાના સ્ટુડન્ટ્સ માતા-પિતા/વાલીની સંમતિ સાથે જોડાય છે; એડમિશન ફોર્મમાં એ વિગત લેવાય છે."
   },
   {
-    qEn: "Which software do you teach — emCAD or Wilcom?",
-    qGu: "કયું સોફ્ટવેર શીખવો છો — emCAD કે Wilcom?",
+    qEn: "Which software do you teach?",
+    qGu: "કયું સોફ્ટવેર શીખવો છો?",
     aEn:
-      "The design course is taught on emCAD, which is what the studio digitises production files on. The thinking transfers: underlay, density, stitch types, pull compensation and travel order are the same decisions in any digitising package, so an operator who understands them in emCAD reads a Wilcom file without starting over.",
+      "EMCAD DAHAO, and only EMCAD DAHAO. It is the package the studio digitises its own production files on, so a student learns the software the floor actually runs and stitches every design out on a live machine in the same session. Karma does not run classes in any other digitising package.",
     aGu:
-      "ડિઝાઇન કોર્સ emCAD પર શીખવાય છે, કારણ કે સ્ટુડિયોમાં પ્રોડક્શન ફાઇલ એના પર જ ડિજિટાઇઝ થાય છે. સમજણ બધે કામ લાગે: અન્ડરલે, ડેન્સિટી, સ્ટિચ ટાઇપ, પુલ કોમ્પેન્સેશન અને ટ્રાવેલ ઓર્ડર — આ નિર્ણય દરેક સોફ્ટવેરમાં એકસરખા છે. emCAD માં આ સમજી લેનાર Wilcom ની ફાઇલ પણ નવેસરથી શીખ્યા વગર વાંચી શકે."
+      "EMCAD DAHAO, અને માત્ર EMCAD DAHAO. સ્ટુડિયો પોતાની પ્રોડક્શન ફાઇલ એના પર જ ડિજિટાઇઝ કરે છે, એટલે સ્ટુડન્ટ એ જ સોફ્ટવેર શીખે છે જે ફ્લોર પર ચાલે છે, અને દરેક ડિઝાઇન એ જ સેશનમાં લાઇવ મશીન પર સ્ટિચ કરે છે. Karma બીજા કોઈ ડિજિટાઇઝિંગ સોફ્ટવેરના ક્લાસ ચલાવતું નથી."
   },
   {
     qEn: "How long does a course take?",
     qGu: "કોર્સ કેટલો સમય ચાલે છે?",
     aEn:
-      "It depends on the technique and on how much machine time you can give it each week, so we would rather tell you at your demo than publish a number that turns out to be wrong for you. Ask for the current duration when you call or come in.",
+      "EMCAD DAHAO Embroidery Designing runs for three months. For the machine techniques it depends on the technique and on how much machine time you can give it each week, so we would rather tell you at your demo than publish a number that turns out to be wrong for you.",
     aGu:
-      "એ ટેકનિક પર અને તમે અઠવાડિયે કેટલો મશીન ટાઇમ આપી શકો એના પર આધાર રાખે છે. એટલે ખોટો પડે એવો આંકડો છાપવા કરતાં ડેમો વખતે રૂબરૂ કહેવાનું અમને વધારે યોગ્ય લાગે છે. કૉલ કરો કે રૂબરૂ આવો ત્યારે અત્યારની ડ્યુરેશન પૂછી લેજો."
+      "EMCAD DAHAO એમ્બ્રોઇડરી ડિઝાઇનિંગ ત્રણ મહિનાનો છે. મશીન ટેકનિક માટે એ ટેકનિક પર અને તમે અઠવાડિયે કેટલો મશીન ટાઇમ આપી શકો એના પર આધાર રાખે છે, એટલે ખોટો પડે એવો આંકડો છાપવા કરતાં ડેમો વખતે રૂબરૂ કહેવાનું અમને વધારે યોગ્ય લાગે છે."
   },
   {
     qEn: "When does the next batch start?",
@@ -232,8 +232,8 @@ export const stories: Story[] = [
     sample: true,
     nameEn: "Ashish T.",
     nameGu: "આશિષ ટ.",
-    courseEn: "emCAD Embroidery Design",
-    courseGu: "emCAD એમ્બ્રોઇડરી ડિઝાઇન",
+    courseEn: "EMCAD DAHAO Embroidery Designing",
+    courseGu: "EMCAD DAHAO એમ્બ્રોઇડરી ડિઝાઇનિંગ",
     quoteEn: "I ran other people's files for four years. I never knew a bad sample was usually a bad file.",
     quoteGu: "ચાર વર્ષ સુધી બીજાની ફાઇલ ચલાવી. મને ખબર જ નહોતી કે ખરાબ સેમ્પલ મોટે ભાગે ખરાબ ફાઇલનું પરિણામ હોય છે.",
     beforeEn: "Machine operator, four years",
@@ -242,20 +242,20 @@ export const stories: Story[] = [
     afterGu: "જે ફાઇલ ચલાવે છે એ જાતે ડિજિટાઇઝ કરે છે",
     whyEn: "He was compensating at the machine for files he had not made, and losing time on every job.",
     whyGu: "જે ફાઇલ એણે બનાવી નહોતી એની ભરપાઈ મશીન પર કરતો, અને દરેક જોબમાં સમય ગુમાવતો.",
-    learnedEn: "Stitch types, underlay, density and pull compensation in emCAD — then running his own file and correcting it from the sample.",
-    learnedGu: "emCAD માં સ્ટિચ ટાઇપ, અન્ડરલે, ડેન્સિટી અને પુલ કોમ્પેન્સેશન — પછી પોતાની ફાઇલ ચલાવીને સેમ્પલ પરથી સુધારવી.",
+    learnedEn: "Stitch types, underlay, density and pull compensation in EMCAD DAHAO — then running his own file and correcting it from the sample.",
+    learnedGu: "EMCAD DAHAO માં સ્ટિચ ટાઇપ, અન્ડરલે, ડેન્સિટી અને પુલ કોમ્પેન્સેશન — પછી પોતાની ફાઇલ ચલાવીને સેમ્પલ પરથી સુધારવી.",
     changedEn: "Fixes faults in the file now, so they stay fixed for every run.",
     changedGu: "હવે ભૂલો ફાઇલમાં જ સુધારે છે, એટલે દરેક રનમાં સુધરેલી જ રહે છે.",
     nowEn: "Operates and digitises at the same unit.",
     nowGu: "એક જ યુનિટમાં ઓપરેટિંગ અને ડિજિટાઇઝિંગ બંને કરે છે.",
-    photoLabel: "Student at emCAD screen, stitch paths visible (with consent)"
+    photoLabel: "Student at EMCAD DAHAO screen, stitch paths visible (with consent)"
   },
   {
     sample: true,
     nameEn: "Krupa D.",
     nameGu: "કૃપા દ.",
-    courseEn: "emCAD Embroidery Design",
-    courseGu: "emCAD એમ્બ્રોઇડરી ડિઝાઇન",
+    courseEn: "EMCAD DAHAO Embroidery Designing",
+    courseGu: "EMCAD DAHAO એમ્બ્રોઇડરી ડિઝાઇનિંગ",
     quoteEn: "Clients do not want a pretty picture. They want a file that runs.",
     quoteGu: "ક્લાયન્ટને સુંદર ચિત્ર નથી જોઈતું. એમને એવી ફાઇલ જોઈએ છે જે ચાલે.",
     beforeEn: "Design student, no production experience",
@@ -794,15 +794,15 @@ export const trainers: Trainer[] = [
     specialityGu: "ક્લાયન્ટના આર્ટવર્કને પહેલી જ વારમાં ચાલે એવી ફાઇલમાં ફેરવવું.",
     machinesEn: ["Design workstations", "Flat embroidery for stitch-outs"],
     machinesGu: ["ડિઝાઇન વર્કસ્ટેશન", "સ્ટિચ-આઉટ માટે ફ્લેટ એમ્બ્રોઇડરી"],
-    softwareEn: "emCAD. Teaches the decisions — underlay, density, stitch types, pull compensation, travel order — as things that carry across any digitising package.",
-    softwareGu: "emCAD. અન્ડરલે, ડેન્સિટી, સ્ટિચ ટાઇપ, પુલ કોમ્પેન્સેશન અને ટ્રાવેલ ઓર્ડર — આ નિર્ણયો દરેક ડિજિટાઇઝિંગ સોફ્ટવેરમાં કામ લાગે એ રીતે શીખવે છે.",
+    softwareEn: "EMCAD DAHAO. Teaches the decisions — underlay, density, stitch types, pull compensation, travel order — against the machine that will run them.",
+    softwareGu: "EMCAD DAHAO. અન્ડરલે, ડેન્સિટી, સ્ટિચ ટાઇપ, પુલ કોમ્પેન્સેશન અને ટ્રાવેલ ઓર્ડર — આ નિર્ણયો જે મશીન ચલાવવાની છે એની સામે રાખીને શીખવે છે.",
     experienceEn: "Several years digitising for production",
     experienceGu: "પ્રોડક્શન માટે ડિજિટાઇઝિંગનો કેટલાંક વર્ષોનો અનુભવ",
     teachingEn: "Every file gets stitched out in the same week it is built, so students learn from their own sample rather than from a screen preview.",
     teachingGu: "દરેક ફાઇલ જે અઠવાડિયે બને એ જ અઠવાડિયે સ્ટિચ-આઉટ થાય છે, જેથી સ્ટુડન્ટ સ્ક્રીન પ્રિવ્યૂ નહીં પણ પોતાના સેમ્પલ પરથી શીખે.",
     selectedWorkEn: ["Production files for multi-head runs", "Logo and monogram digitising", "Correction work on files that failed elsewhere"],
     selectedWorkGu: ["મલ્ટી-હેડ રન માટે પ્રોડક્શન ફાઇલ", "લોગો અને મોનોગ્રામ ડિજિટાઇઝિંગ", "બીજે બગડેલી ફાઇલોનું કરેક્શન"],
-    photoLabel: "Trainer at emCAD screen, stitch paths visible (with consent)"
+    photoLabel: "Trainer at EMCAD DAHAO screen, stitch paths visible (with consent)"
   },
   {
     sample: true,

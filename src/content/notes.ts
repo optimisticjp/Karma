@@ -94,35 +94,35 @@ export const machineNotes: MachineNote[] = [
     exampleGu: "એક ભરેલું મોટિફ નીકળ્યું ત્યારે એની આસપાસ કાપડ લહેરાયેલું હતું. લહેર બરાબર ફિલની આઉટલાઇન પ્રમાણે હતી, એટલે એ ટેન્શન નહોતું — કાપડને પકડી રાખતું અન્ડરલે જ નહોતું. એક એજ-વોક અન્ડરલે અને વધુ મજબૂત સ્ટેબિલાઇઝર, અને પછીનો રન સપાટ આવ્યો."
   },
   {
-    slug: "emcad-or-wilcom",
+    slug: "why-one-software",
     courseSlug: "emcad-embroidery-design",
     tags: [
-      "emCAD classes Surat",
-      "Wilcom embroidery training Surat",
+      "emCAD DAHAO classes Surat",
+      "EMCAD DAHAO embroidery training Surat",
       "computerised embroidery design course"
     ],
-    questionEn: "emCAD or Wilcom — which should you learn?",
-    questionGu: "emCAD કે Wilcom — કયું શીખવું?",
-    answerEn: "Learn the decisions, not the menus. Underlay, density, stitch types, pull compensation and travel order are the same judgements in every digitising package. Whichever one you start in, those transfer; the keyboard shortcuts do not, and they are the part you can pick up in a week.",
-    answerGu: "મેનુ નહીં, નિર્ણય શીખો. અન્ડરલે, ડેન્સિટી, સ્ટિચ ટાઇપ, પુલ કોમ્પેન્સેશન અને ટ્રાવેલ ઓર્ડર — દરેક ડિજિટાઇઝિંગ સોફ્ટવેરમાં આ એક જ સમજણ છે. તમે જેનાથી શરૂ કરો, એ સમજણ સાથે આવે છે; કીબોર્ડ શોર્ટકટ નથી આવતા, અને એ તો અઠવાડિયામાં આવડી જાય છે.",
-    whyEn: "Digitising software is a way of writing down instructions for a needle. The needle does not know which program wrote them. A design that puckers in one package puckers in the other, for the same reason, and gets fixed the same way.",
-    whyGu: "ડિજિટાઇઝિંગ સોફ્ટવેર એટલે નીડલ માટે સૂચનાઓ લખવાની રીત. નીડલને ખબર નથી હોતી કે એ કયા પ્રોગ્રામે લખી છે. જે ડિઝાઇન એક સોફ્ટવેરમાં પકરાય છે એ બીજામાં પણ એ જ કારણે પકરાય છે, અને એ જ રીતે સુધરે છે.",
+    questionEn: "Why learn one digitising package properly instead of three badly?",
+    questionGu: "ત્રણ સોફ્ટવેર અધૂરાં શીખવા કરતાં એક બરાબર કેમ શીખવું?",
+    answerEn: "Because the machine does not care which program wrote the file — it cares whether the underlay, the density, the stitch types, the pull compensation and the travel order are right. Those are learned once, at a machine, in one package. Karma teaches EMCAD DAHAO, and every design a student builds in it is stitched out on a live machine in the same session.",
+    answerGu: "કારણ કે મશીનને એ નથી જોવું કે ફાઇલ કયા પ્રોગ્રામે લખી છે — એને એ જોવું છે કે અન્ડરલે, ડેન્સિટી, સ્ટિચ ટાઇપ, પુલ કોમ્પેન્સેશન અને ટ્રાવેલ ઓર્ડર સાચા છે કે નહીં. આ એક જ વાર, મશીન પાસે બેસીને, એક જ સોફ્ટવેરમાં શીખાય છે. Karma EMCAD DAHAO શીખવે છે, અને સ્ટુડન્ટ એમાં બનાવેલી દરેક ડિઝાઇન એ જ સેશનમાં લાઇવ મશીન પર સ્ટિચ થાય છે.",
+    whyEn: "A course that tours several packages spends its hours on menus. Menus are the part you can pick up in a week. What takes three months is judgement — knowing, before you run it, that a 0.8mm satin column will not survive production speed, and knowing what to change. That judgement is built by digitising, stitching out, reading the sample and correcting the file, over and over, on one set of tools.",
+    whyGu: "જે કોર્સ ઘણાં સોફ્ટવેર ફેરવે છે એ કલાકો મેનુમાં ખર્ચે છે. મેનુ તો અઠવાડિયામાં આવડી જાય. ત્રણ મહિના જે વસ્તુ માંગે છે એ છે સમજણ — ચલાવતાં પહેલાં જ ખબર પડવી કે 0.8mm ની સાટિન કોલમ પ્રોડક્શન સ્પીડમાં ટકશે નહીં, અને શું બદલવું એ ખબર હોવી. આ સમજણ ડિજિટાઇઝ કરીને, સ્ટિચ-આઉટ કરીને, સેમ્પલ વાંચીને અને ફાઇલ સુધારીને — વારંવાર, એક જ ટૂલસેટ પર — બને છે.",
     checksEn: [
-      "Which package does the unit you want to work at actually run? Start there if you know.",
       "Can you explain why a fill needs underlay, without naming a menu? That is the real test of whether you have learned digitising.",
       "Does your file run the same on someone else's machine? If not, the problem is in the file, not the software.",
-      "Can you read a stitch-out and say which setting to change? That skill is package-independent."
+      "Can you read a stitch-out and say which setting to change? That is the skill the hours are for.",
+      "Have you connected and set the device yourself, or only watched? Production knowledge is hands, not slides."
     ],
     checksGu: [
-      "તમે જ્યાં કામ કરવા માંગો છો એ યુનિટ ખરેખર કયું સોફ્ટવેર ચલાવે છે? ખબર હોય તો ત્યાંથી શરૂ કરો.",
       "મેનુનું નામ લીધા વગર તમે કહી શકો કે ફિલને અન્ડરલે કેમ જોઈએ? ડિજિટાઇઝિંગ ખરેખર આવડ્યું કે નહીં એની આ જ કસોટી છે.",
       "તમારી ફાઇલ બીજાની મશીન પર પણ એવી જ ચાલે છે? ના, તો પ્રોબ્લેમ ફાઇલમાં છે, સોફ્ટવેરમાં નહીં.",
-      "સ્ટિચ-આઉટ વાંચીને કઈ સેટિંગ બદલવી એ કહી શકો છો? આ કૌશલ્ય કોઈ પણ સોફ્ટવેરમાં કામ લાગે છે."
+      "સ્ટિચ-આઉટ વાંચીને કઈ સેટિંગ બદલવી એ કહી શકો છો? કલાકો આ જ સ્કિલ માટે છે.",
+      "ડિવાઇસ જાતે કનેક્ટ અને સેટ કર્યું છે, કે ફક્ત જોયું છે? પ્રોડક્શન નોલેજ હાથનું કામ છે, સ્લાઇડનું નહીં."
     ],
-    detailEn: "Karma teaches on emCAD, because that is what the studio digitises production files on and because a student can sit at a machine and stitch out what they just built in the same session. The thinking is not locked to it.",
-    detailGu: "કર્મામાં emCAD પર શીખવાય છે, કારણ કે સ્ટુડિયો પ્રોડક્શન ફાઇલ એના પર જ ડિજિટાઇઝ કરે છે, અને સ્ટુડન્ટ એ જ સેશનમાં મશીન પર બેસીને પોતે બનાવેલી ફાઇલ સ્ટિચ કરી શકે છે. સમજણ એક સોફ્ટવેર પૂરતી સીમિત નથી.",
-    exampleEn: "An operator of four years learned emCAD and found the hardest part was not the software at all — it was accepting that the files he had been compensating for at the machine were fixable upstream.",
-    exampleGu: "ચાર વર્ષના અનુભવવાળા એક ઓપરેટરે emCAD શીખ્યું, અને એને સૌથી અઘરું સોફ્ટવેર નહીં પણ આ સ્વીકારવાનું લાગ્યું: જે ફાઇલોની ભરપાઈ એ મશીન પર કરતો હતો, એ ઉપરથી જ સુધારી શકાતી હતી."
+    detailEn: "Karma teaches on EMCAD DAHAO because that is what the studio digitises its own production files on. A student sits at the same tools the floor runs, and can stitch out what they just built without leaving the room. The course does not run classes in any other digitising package.",
+    detailGu: "Karma EMCAD DAHAO પર શીખવે છે, કારણ કે સ્ટુડિયો પોતાની પ્રોડક્શન ફાઇલ એના પર જ ડિજિટાઇઝ કરે છે. સ્ટુડન્ટ એ જ ટૂલ પર બેસે છે જે ફ્લોર પર ચાલે છે, અને હમણાં બનાવેલી ડિઝાઇન રૂમ છોડ્યા વગર સ્ટિચ કરી શકે છે. કોર્સ બીજા કોઈ ડિજિટાઇઝિંગ સોફ્ટવેરના ક્લાસ ચલાવતો નથી.",
+    exampleEn: "An operator of four years learned EMCAD DAHAO and found the hardest part was not the software at all — it was accepting that the files he had been compensating for at the machine were fixable upstream.",
+    exampleGu: "ચાર વર્ષના અનુભવવાળા એક ઓપરેટરે EMCAD DAHAO શીખ્યું, અને એને સૌથી અઘરું સોફ્ટવેર નહીં પણ આ સ્વીકારવાનું લાગ્યું: જે ફાઇલોની ભરપાઈ એ મશીન પર કરતો હતો, એ ઉપરથી જ સુધારી શકાતી હતી."
   },
   {
     slug: "needle-and-thread-matching",

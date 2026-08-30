@@ -29,6 +29,13 @@
       "when": 1788014428475,
       "tag": "0003_content_desk",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788106756189,
+      "tag": "0004_course_operations",
+      "breakpoints": true
     }
   ]
 }

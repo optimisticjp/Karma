@@ -42,7 +42,7 @@
     },
     "notes": {
       "title": "Machine Notes | Karma Design Studio, Surat",
-      "description": "Short technical notes from an embroidery production floor in Surat: reading a failed stitch-out, needle and thread matching, density, stitch direction, emCAD and Wilcom."
+      "description": "Short technical notes from an embroidery production floor in Surat: reading a failed stitch-out, needle and thread matching, density, stitch direction, and designing on EMCAD DAHAO."
     }
   },
   "nav": {
@@ -397,6 +397,29 @@
     "demoTitle": "Before you decide",
     "demoBody": "Come for a practical demo. Sit at the machine, watch a sample run, and ask whatever you want — there is no obligation and no booking fee.",
     "relatedAll": "See the full catalogue"
+  },
+  "courseOps": {
+    "factsTitle": "The course, as the institute states it",
+    "durationLabel": "Duration",
+    "durationValue": "{months} months",
+    "softwareLabel": "Software",
+    "softwareNote": "Karma teaches this package and no other digitising software.",
+    "demoLabel": "Free demo",
+    "demoValue": "{days} days free, {hours} hours a session",
+    "batchTitle": "Batch timings",
+    "batchSub": "The times this course is regularly taught in. Tell us which suits you and we will confirm what is running.",
+    "hours": "{hours} hours a day",
+    "demoTitle": "Free demo timings",
+    "demoSub": "Pick the time that suits you when you ask for your demo. These are preferred times, not a booking — we confirm on WhatsApp or a call.",
+    "teachTitle": "What we teach",
+    "teachSub": "Every one of these is designed on screen and stitched out on a live machine.",
+    "practicalTitle": "Practical training",
+    "feeTitle": "Fees",
+    "feeTotal": "Total course fees",
+    "feeAdmission": "Required at admission",
+    "feeBalance": "Remaining",
+    "feeBalanceNote": "Payable within one month of joining.",
+    "feeOffline": "Fees are paid in person at the studio and a receipt is issued for every payment. There is no online payment on this website."
   },
   "admissionsPage": {
     "eyebrow": "Admissions",

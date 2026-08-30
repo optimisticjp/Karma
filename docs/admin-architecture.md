@@ -602,7 +602,7 @@ rather than removed: an audit row must keep pointing at a real staff record.
 | Account & security | shipped |
 | Admissions CRM | shipped (PR #8) |
 | Student 360 | shipped (PR #9) |
-| Courses & batches editor | shipped (PR #6) |
+| Courses & batches editor | shipped (PR #6); course operational model added 2026-08-30 |
 | Attendance | shipped (PR #9) |
 | Certificates | shipped (PR #9) |
 | Design Desk | shipped (PR #9) — file upload/download waits on R2 (§14) |
@@ -613,6 +613,42 @@ rather than removed: an audit row must keep pointing at a real staff record.
 **Every console module has shipped.** What remains inside them is content and
 polish, not construction — see `docs/project-context.md` §§22-29 for what each
 one does and what it still defers.
+
+### Courses: the operational model (2026-08-30)
+
+The `courses` table became the operational source of truth for how a course is
+timetabled, what it teaches and what it costs. Migration `0004_course_operations`
+adds, deliberately split by kind:
+
+| Kind | Fields | Why here |
+| --- | --- | --- |
+| Columns | `duration_months`, `software`, `fee_total`, `fee_admission`, `fee_balance_due_days`, `terms_version`, `public_visible`, `archived_at`, `archived_by` | Constrained by `chk_course_fees` and `chk_course_duration_months`, queried, and copied onto an enrolment. Money that decides what a student owes gets a typed column. |
+| `operations` JSONB | `scheduleOptions`, `demo`, `curriculum`, `practical` | Four bounded per-course lists, always read whole, never joined. Four child tables on a free-tier database would buy only joins. |
+
+Validated by `parseCourseOperations()` in `src/lib/admin/course-operations.ts`
+**before every write and after every read** — a stored payload is never trusted
+because it round-tripped through Postgres. A payload that fails validation
+renders as an empty timetable and logs; it does not 500 a staff page.
+
+**A schedule option is not a batch.** `courses.operations.scheduleOptions` says
+"this course is taught 08:00–12:00". A `batches` row says "this group starts on
+the 4th, has ten seats and a trainer". Do not create dated batch rows to
+represent standard timetable slots.
+
+**The enrolment carries a snapshot of the agreement.** `enrollments` gained
+`agreed_fee_total`, `agreed_admission_amount`, `agreed_balance_due_on`,
+`agreed_duration_months`, `agreed_course_name`, `terms_version`,
+`terms_accepted_at` and `agreement_note`. Editing a course must never reprice an
+existing student; changing an agreement is a deliberate, audited act on that
+enrolment row, with a reason.
+
+**Two owner-only buttons at `/admin/courses/import`, and they do different
+things.** "Import verified catalogue" only ever INSERTS
+(`onConflictDoNothing`) — overwriting a course the owner has edited is exactly
+the failure `scripts/seed.ts` used to have. "Apply verified operational facts"
+OVERWRITES the confirmed-fact columns for courses in
+`VERIFIED_OPERATIONS_ROWS`, and audits every course it changes with its before
+and after.
 
 A module the caller lacks permission for appears in the navigation marked
 plainly unavailable. It does not open a screen of invented rows, and the hidden

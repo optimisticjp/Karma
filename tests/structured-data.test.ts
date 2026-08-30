@@ -59,10 +59,33 @@ describe("nothing unverified reaches a search engine", () => {
     expect(everything).not.toContain("author");
   });
 
-  it("never emits a price, an offer or a duration", () => {
-    for (const key of ["offers", "price", "priceCurrency", "timeRequired", "duration"]) {
+  it("never emits a price or an offer", () => {
+    // Karma takes no payment online. The EMCAD DAHAO fee is published in full
+    // on its course page, but an `offers` node invites a buy-now rich result
+    // for something that cannot be bought here.
+    for (const key of ["offers", "price", "priceCurrency"]) {
       expect(everything, key).not.toContain(key);
     }
+  });
+
+  it("emits a duration ONLY for the one course whose duration the owner confirmed", () => {
+    /**
+     * Before 2026-08-30 no course had a confirmed duration, so `timeRequired`
+     * was banned outright. The owner then confirmed EMCAD DAHAO Embroidery
+     * Designing as a THREE MONTH course, in writing, so that one course may
+     * state it — and the ban still holds for the other ten.
+     *
+     * Months, not weeks: `P3M`, because "3 Months" is what the business said.
+     */
+    const withDuration = courses.filter((c) => c.durationMonths != null);
+    expect(withDuration.map((c) => c.slug)).toEqual(["emcad-embroidery-design"]);
+
+    const emitted = courses
+      .map((c) => courseSchema(c, "en") as Record<string, unknown>)
+      .filter((ld) => "timeRequired" in ld);
+    expect(emitted).toHaveLength(1);
+    expect(emitted[0].timeRequired).toBe("P3M");
+    expect(everything).not.toContain("P12W");
   });
 
   it("carries no sample identity", () => {

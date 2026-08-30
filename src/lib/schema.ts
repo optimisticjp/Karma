@@ -23,8 +23,9 @@ import { coursesByFamily, type Course } from "@/content/courses";
  * - `Review` — every review on the site is sample text.
  * - `Person` — no trainer has been confirmed by the owner. A named person in
  *   schema is a claim about a real human being.
- * - `offers` / `price` — fees are discussed offline and there is no gateway.
- * - `timeRequired` — course durations are unconfirmed (`durationWeeks: null`).
+ * - `offers` / `price` — Karma takes no payment online. The EMCAD DAHAO fee is
+ *   published in full on its course page, but an `offers` node invites a
+ *   buy-now rich result for something that cannot be bought on this site.
  * - `openingHoursSpecification` — exact day-by-day opening hours are still
  *   owner-confirmation-needed. "Evening batches till 10:30 pm" does not prove
  *   that the business closes at 22:30 every day.
@@ -36,6 +37,11 @@ import { coursesByFamily, type Course } from "@/content/courses";
  * profiles, the course catalogue and the machine notes — all of which are
  * either verified against two sources or are descriptions of the studio's own
  * offering.
+ *
+ * `timeRequired` joined that list on 2026-08-30, but ONLY for a course whose
+ * duration the owner has confirmed in writing. That is EMCAD DAHAO Embroidery
+ * Designing (`P3M`) and no other course; the remaining ten still carry
+ * `durationMonths: null` and emit no duration at all.
  */
 
 /** Stable node ids, so the graph refers to one studio rather than repeating it. */
@@ -103,7 +109,10 @@ export function studioSchema(locale: Locale) {
   };
 }
 
-/** One course. No offers, no timeRequired, no rating — see the file note. */
+/**
+ * One course. No offers, no price, no rating — see the file note. `timeRequired`
+ * appears only for a course whose duration the owner has confirmed in writing.
+ */
 export function courseSchema(course: Course, locale: Locale) {
   return {
     "@context": "https://schema.org",
@@ -117,6 +126,22 @@ export function courseSchema(course: Course, locale: Locale) {
     /* Real, and useful: this is genuinely on-site, in-person instruction. */
     courseMode: "onsite",
     provider: { "@id": STUDIO_ID },
+    /**
+     * `timeRequired` is emitted ONLY where the owner has confirmed a duration
+     * in writing — today that is EMCAD DAHAO Embroidery Designing at three
+     * months, and nothing else. Every other course has `durationMonths: null`
+     * and the key is omitted entirely rather than guessed.
+     *
+     * ISO 8601 months (`P3M`), not weeks: the institute says three months, and
+     * converting that into "P12W" would have this repository restate a business
+     * fact in a shape the business did not choose.
+     *
+     * `offers` and `price` stay out even for this course. The fee is published
+     * on the page in full, but Karma takes no payment online, and an `offers`
+     * node invites a buy-now rich result for something that cannot be bought
+     * on this site.
+     */
+    ...(course.durationMonths ? { timeRequired: `P${course.durationMonths}M` } : {}),
     hasCourseInstance: {
       "@type": "CourseInstance",
       courseMode: "onsite",
