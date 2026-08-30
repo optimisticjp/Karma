@@ -515,9 +515,21 @@
     "title": "Joining is a conversation and a chair at a machine.",
     "sub": "There is no online payment on this website and no application fee. You come, you sit at a machine for a free demo class, and then you decide.",
     "asideTitle": "Before you ask",
-    "asideBody": "Fees depend on the course and batch, so we go through the exact number with you at the demo — not before, and never as a deposit taken online.",
+    "asideBody": "For EMCAD DAHAO the fee is published. For the other courses it depends on the batch, so we go through the exact number with you at the demo — never as a deposit taken online.",
     "stepsTitle": "How joining actually goes",
     "stepsSub": "Five steps, none of which cost anything until you have decided.",
+    "demo": {
+      "title": "The free demo, exactly as it runs",
+      "sub": "Two days, two hours a session, no fee and no obligation. You sit at a machine, watch a design go from the screen to the cloth, and ask whatever you want before anyone talks about money.",
+      "daysLabel": "Length",
+      "slotsLabel": "Times you can ask for",
+      "slotsNote": "Tell us which suits you when you book. These are preferences — we do not hold a seat on a date until we have spoken.",
+      "costLabel": "Cost",
+      "costValue": "Free",
+      "bringLabel": "Bring",
+      "bringValue": "Nothing. Thread, needles and practice cloth are ours.",
+      "cta": "Book the free 2-day demo"
+    },
     "steps": [
       {
         "t": "Message us, or walk in",
@@ -545,11 +557,11 @@
     "beforeTitle": "The things people check before deciding",
     "beforeSub": "Answered plainly, so you are not chasing a phone call for basics.",
     "feesTitle": "Fees",
-    "feesBody": "Depend on the course and batch. Shared at your demo or on WhatsApp before you decide anything. Paid in person at the studio, with a receipt.",
+    "feesBody": "The EMCAD DAHAO course fee is published in full on its course page. For the other ten, the number depends on the course and batch and is shared at your demo or on WhatsApp before you decide anything. Every fee is paid in person at the studio, with a receipt.",
     "eligTitle": "Certificate eligibility",
     "eligBody": "At least 75% attendance, completed practicals, and a finished final project reviewed by your trainer. Every certificate carries a verification QR.",
     "langTitle": "Language of instruction",
-    "langBody": "Gujarati and Hindi, with the English terms the trade uses — emCAD, machine names, and so on. Written material follows the same mix.",
+    "langBody": "Gujarati and Hindi, with the English terms the trade uses — EMCAD DAHAO, machine names, and so on. Written material follows the same mix.",
     "bringTitle": "What to bring",
     "bringBody": "A notebook. Thread, needles and practice fabric for classwork are provided at the studio.",
     "handbookTitle": "Student handbook, in short",
@@ -889,7 +901,8 @@
     "directionsTitle": "Finding the door",
     "directionsBody": "Middle Point is on Mahadev Chowk. Come to the third floor — unit 302. If you are close and cannot spot it, send a WhatsApp and someone will come down.",
     "demoCallLabel": "Call for a demo",
-    "demoCallNote": "The number the studio lists on Facebook. Ask for the current batch and fee."
+    "demoCallNote": "The number the studio lists on Facebook. Ask for the current batch and fee.",
+    "entranceCaption": "The entrance and signboard. The address gets you to the road; this is what gets you through the door."
   },
   "verifyPage": {
     "title": "Verify a certificate",

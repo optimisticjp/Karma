@@ -8,6 +8,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Ledger, LedgerRow } from "@/components/ui/Ledger";
 import { JsonLd } from "@/components/site/JsonLd";
 import { Icon } from "@/components/ui/Icon";
+import { DemoFacts } from "@/components/admission/DemoFacts";
 import { getPublicFaqs } from "@/lib/content/public";
 import { site, waLink } from "@/lib/site";
 import { pageMeta } from "@/lib/seo";
@@ -96,7 +97,12 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ loc
         </div>
       </section>
 
-      <section className="section bg-ivory-2" id="batches">
+      {/* What the demo actually is. It is the whole conversion, and it is
+          the one thing a visitor has read a vague version of on ten other
+          institute sites. */}
+      <DemoFacts />
+
+      <section className="section band-human" id="batches">
         <div className="container-site">
           <SectionHeading title={t("batchesTitle")} sub={t("batchesSub")} />
           <div className="u-section-body">

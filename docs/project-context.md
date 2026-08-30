@@ -439,6 +439,20 @@ T1/T2 are reserved frames that name a photograph and never a person, mapped
 signature rather than three shared family swatches, and shows the floor and
 entrance with machines named by technique only.
 
+**Admission and contact (Phase 6).** `<StitchProgress>` renders the form's
+progress as a seam — done is a running stitch, current is a needle penetration
+point, future is a faint construction line — while keeping the
+`role="progressbar"` semantics, the live region and the focus move exactly as
+they were. The review step (consents, norms acceptance, validation errors) no
+longer animates. **Every public-form defence is unchanged and now tested**:
+honeypot, server-side minimum-fill window, idempotency key, Turnstile-ready
+widget, required guardian mobile, versioned norms acceptance, three separate
+consents, and a test that fails if any typed value reaches `track()`.
+`<DemoFacts>` states the free demo from the verified record and deliberately
+offers no date picker — the studio keeps no per-date capacity, so the four
+times are preferences a visitor names, not inventory. The contact page's email
+row now uses an ordinary envelope rather than a thread spool.
+
 **The 32-photograph manifest.** `src/content/photo-manifest.ts` is the typed
 list of every shot on the owner's final brief, with each slot's intrinsic
 dimensions. `<ManifestPhoto id="…">` reserves the photograph's exact aspect
@@ -1713,7 +1727,7 @@ modules are importable in a test runner while the guard stays real in the app.
 `jsx: "preserve"` for Next.js — without the override a test importing a `.tsx`
 component sees raw JSX and fails to parse.
 
-**37 test files, 519 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
+**38 test files, 537 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
 which is the point — the policy survives a refactor:
 
 | Test | Guards |
@@ -1721,6 +1735,7 @@ which is the point — the policy survives a refactor:
 | `i18n-parity` | EN/GU catalogue keys mirror exactly |
 | `machine-lab-system` | the design system v4 foundation: 32-photo manifest, icon family, eleven technique signatures, stitch semantics, motion levels, Gujarati overrides, reduced motion, no new dependency |
 | `machine-lab-shell` | the hero states EMCAD/machine/Surat/demo without photography; one course's facts never become the site's; one continuous thread and one Level-4 moment; the rail never autoplays, loops or needs a drag; bands never re-point the palette; the mobile bar keeps exactly two actions |
+| `machine-lab-admission` | every public-form defence still present; no typed value in any analytics call; progressbar semantics kept; the review step does not animate; demo figures render from the verified record and offer nothing bookable; universal actions keep universal icons |
 | `machine-lab-proof` | one shared material wall with exactly one registration mark; reserved slots and the editable gallery stay separate; the BEFORE→LEARNED→NOW arc and its stitch geometry; portraits mapped by slug and never captioned with a person; no job-placement, salary or earnings claim in any story's data |
 | `machine-lab-courses` | one index component for both surfaces; every course has a signature and only its own photograph; exactly one course carries confirmed duration/fee facts; no two course pages share a produces line, fault list, output list, practice or machine description |
 | `machine-lab-homepage` | the section order; no two dark bands adjacent; the Machine Index carries no fee and only confirmed durations; every EMCAD figure renders from the verified record, never from a message; no payment provider anywhere near the fee block; no invented machine specification; trainer frames name a photograph, never a person |

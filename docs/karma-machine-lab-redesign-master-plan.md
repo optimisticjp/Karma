@@ -1851,7 +1851,7 @@ Claude must execute phases in order, one clean PR at a time unless a smaller spl
 | 3 | Homepage full rebuild | ✅ Complete + merged |
 | 4 | 11-course Machine Index + all course pages | ✅ Complete + merged |
 | 5 | Proof ecosystem: student work, stories, trainers, studio/machines | ✅ Complete + merged |
-| 6 | Admission + conversion + contact experience | ⏳ Pending |
+| 6 | Admission + conversion + contact experience | ✅ Complete + merged |
 | 7 | Machine Notes technical archive | ⏳ Pending |
 | 8 | B2B Studio/services | ⏳ Pending |
 | 9 | About, verify, legal, errors/loading/404, footer + secondary public pages | ⏳ Pending |
@@ -2382,6 +2382,79 @@ Redesign:
 - terms presentation
 
 Preserve all backend/security behavior.
+
+## Implementation record — merged 2026-08-30
+
+**Branch:** `redesign/phase-6-admission` · **PR:** #33
+
+### The progress seam
+
+`<StitchProgress>` replaces the filling bar. Three states, each meaning what it
+means everywhere else in this system rather than being invented for this
+screen: **done** is a finished running stitch (9 on, 6 off), **current** is a
+needle penetration point, **future** is a faint construction line.
+
+A filling bar says "you are 50% through a chore". A seam says two of four are
+sewn and the needle is on the third — the same information, told in the
+language of the trade the visitor is signing up to learn.
+
+**Accessibility was not traded for this.** The container keeps
+`role="progressbar"` with min/max/now and its label; the step list is
+`aria-hidden` because it repeats what the label says; the form's own live
+region and focus-move on step change are untouched. All asserted.
+
+At 320px four labels do not fit, so only the current step keeps its text. The
+numbers stay and the seam still shows how far along it is.
+
+### Motion level 0 where it matters
+
+The review step carries the consents, the admission-norms acceptance and every
+validation error. Its enter animation is now off: nothing a visitor has to read
+carefully and get right should be moving while they read it.
+
+### Nothing in the defence was weakened
+
+Honeypot, minimum-fill window, idempotency key, Turnstile-ready widget,
+required parent/guardian mobile, the versioned norms acceptance, and the three
+separate consents are all still there and now have tests that fail if one is
+removed. A test also walks every `track()` call and fails if a typed value —
+name, phone, guardian phone, area, reference — ever reaches analytics. The
+minimum-fill check is asserted where it is actually enforced: on the server,
+where a bot cannot skip it.
+
+### The demo, stated as it runs
+
+`<DemoFacts>` says what the free demo actually is: two days, two hours a
+session, free, bring nothing, four times you can ask for. Every figure renders
+from `src/content/course-operations.ts`; the catalogue holds labels and
+sentences and no numbers, so the demo cannot be described one way here and
+another way on the course page.
+
+**The times are preferences, not inventory.** The studio keeps no per-date demo
+capacity, so there is no date picker and no button that reserves anything, and
+the copy says so plainly. A test fails if an input or a button appears in that
+section.
+
+### Fees, now that one is published
+
+`/admissions` said fees "depend on the course and batch". That is now only half
+true, so it says the EMCAD DAHAO fee is published in full and the other ten are
+still shared in person, with a receipt, at the studio.
+
+### Channel hierarchy
+
+The email row carried a **thread spool**. Branded concepts get niche icons;
+universal actions keep universal ones, and nobody standing on a footpath should
+decode an embroidery symbol to find "email" — so an ordinary `mail` icon was
+added to the universal group and directions now use `map`. Both mobiles are
+still named by channel and never merged. The contact page gains the reserved
+entrance/signboard frame: the address gets someone to the road, the signboard
+gets them through the door.
+
+### Gates
+
+`npm run typecheck`, `npm run lint`, `npm test` (38 files, 537 tests) and
+`npm run build` all green. No dependency added.
 
 ---
 

@@ -8,6 +8,7 @@ import { track } from "@/lib/analytics";
 import { cleanIndianMobile } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
+import { StitchProgress } from "@/components/ui/StitchProgress";
 
 /**
  * A course as the form needs it: identity, plus the timetable and free-demo
@@ -464,19 +465,12 @@ export function AdmissionForm({
       <p className="sr-only" aria-live="polite">
         {t("stepLabel", { current: step + 1, total: 4 })} {stepNames[step]}
       </p>
-      <div
-        role="progressbar"
-        aria-valuemin={1}
-        aria-valuemax={4}
-        aria-valuenow={step + 1}
-        aria-label={t("stepLabel", { current: step + 1, total: 4 })}
-        className="mt-3 h-0.5 w-full bg-line/50"
-      >
-        <div
-          className="stitch-line h-full transition-[width] duration-300"
-          style={{ width: `${((step + 1) / 4) * 100}%` }}
-        />
-      </div>
+      <StitchProgress
+        steps={stepNames}
+        current={step}
+        label={t("stepLabel", { current: step + 1, total: 4 })}
+        className="mt-4"
+      />
 
       {fromContext && contextCourse && step === 1 ? (
         <p className="mt-4 flex flex-wrap items-center gap-2 rounded-lg bg-ivory-2 px-4 py-2 text-smallmeta font-semibold">
@@ -522,7 +516,10 @@ export function AdmissionForm({
         </div>
       ) : null}
 
-      <div key={step} className="step-in mt-8 space-y-6">
+      {/* The review step carries the consents, the admission-norms acceptance
+          and every validation error. Motion level 0: nothing a visitor has to
+          read carefully and get right should be moving while they read it. */}
+      <div key={step} className={cn("mt-8 space-y-6", step < 3 && "step-in")}>
         {/* ---------------------- STEP 1 · WHAT YOU WANT ---------------------- */}
         {step === 0 ? (
           <>
