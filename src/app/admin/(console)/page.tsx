@@ -19,11 +19,13 @@ import { PageHead } from "@/components/admin/PageHead";
  * have a trend worth plotting, and a chart here would be decoration wearing an
  * analytics costume.
  *
- * A queue row links to its MODULE, not to a per-record page: there are no
- * per-record routes yet (`/admin/admissions` is one list of `<details>` rows,
- * not `/admin/admissions/[id]`), and a queue full of 404s would be worse than
- * the metric cards it replaced. When Phases 11 and 12 rebuild those lists they
- * can add row anchors and these links can deep-link into them.
+ * A queue row links to its module and then to the record's ANCHOR within that
+ * module's list — `/admin/admissions#app-12`. There are no per-record routes
+ * (the console is one list of `<details>` rows per module, not
+ * `/admin/admissions/[id]`), so an id in the path would 404. The design queue
+ * still links to its module without an anchor because that list has not been
+ * rebuilt yet; a test resolves every href here against the route tree, so a
+ * link to a page that does not exist fails the suite.
  *
  * Each admin sees only queues their explicit permissions let them work on, and
  * **only those queues are queried** — an admin with attendance rights alone
@@ -109,7 +111,7 @@ export default async function TodayPage() {
                 {queues.newApplications.map((row) => (
                   <QueueRow
                     key={row.id}
-                    href="/admin/admissions"
+                    href={`/admin/admissions#app-${row.id}`}
                     title={row.fullName}
                     meta={[row.reference, row.courseSlug ?? ""].filter(Boolean).join(" · ")}
                   />
@@ -127,7 +129,7 @@ export default async function TodayPage() {
                 {queues.followUps.map((row) => (
                   <QueueRow
                     key={row.id}
-                    href="/admin/admissions"
+                    href={`/admin/admissions#app-${row.id}`}
                     title={row.fullName}
                     meta={`${row.reference} · ${t("today.dueOn", { date: day(row.nextFollowUp) })}`}
                     status={row.status.replace(/_/g, " ")}
@@ -149,7 +151,7 @@ export default async function TodayPage() {
               {queues.batches.slice(0, QUEUE_LIMIT).map((row) => (
                 <QueueRow
                   key={row.id}
-                  href="/admin/courses"
+                  href={`/admin/courses#batch-${row.id}`}
                   title={row.label}
                   meta={`${row.startTime.slice(0, 5)}–${row.endTime.slice(0, 5)} · ${t("today.seatsTaken", {
                     taken: row.seatsTaken,

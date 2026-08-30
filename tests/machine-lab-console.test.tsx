@@ -110,16 +110,20 @@ describe("Today at Karma", () => {
     /* There are no per-record console routes yet — /admin/admissions is one
        list of <details> rows, not /admin/admissions/[id] — and a queue full
        of 404s would be worse than the metric cards it replaced. */
-    const hrefs = [...today.matchAll(/href="(\/admin[^"]*)"/g)].map((m) => m[1]);
+    const hrefs = [
+      ...today.matchAll(/href="(\/admin[^"]*)"/g),
+      ...today.matchAll(/href=\{`(\/admin[^`#]*)/g)
+    ].map((m) => m[1]);
     expect(hrefs.length).toBeGreaterThan(3);
     for (const href of hrefs) {
-      const segment = href.replace(/^\/admin\/?/, "");
+      const segment = href.split("#")[0].replace(/^\/admin\/?/, "").replace(/\/$/, "");
       const path = segment
         ? `src/app/admin/(console)/${segment}/page.tsx`
         : "src/app/admin/(console)/page.tsx";
       expect(() => read(path), href).not.toThrow();
     }
-    /* And no template-literal record link crept back in. */
+    /* A record id may only appear as a FRAGMENT. An id in the path would be a
+       per-record route, and there are none. */
     expect(today).not.toMatch(/href=\{`\/admin\/[a-z]+\/\$\{/);
   });
 

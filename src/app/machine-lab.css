@@ -2038,3 +2038,14 @@
 .console-main {
   padding-bottom: calc(1.75rem + env(safe-area-inset-bottom));
 }
+
+/* A record deep-linked from a queue must land below the sticky mobile console
+   header, not under it. */
+.record-anchor {
+  scroll-margin-top: 5rem;
+}
+@media (min-width: 1024px) {
+  .record-anchor {
+    scroll-margin-top: 1.5rem;
+  }
+}

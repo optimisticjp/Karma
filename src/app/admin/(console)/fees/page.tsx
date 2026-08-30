@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
+import { PageHead } from "@/components/admin/PageHead";
 import { hasPermission } from "@/lib/auth/access";
 import { feesCopy } from "@/lib/admin/fees-copy";
 import { isOverdue, summariseFees, type FeeStatus } from "@/lib/admin/fee-status";
@@ -44,7 +45,7 @@ export default async function FeesPage({ searchParams }: Props) {
     "delete"
   );
   const db = getDb();
-  if (!db) return <div className="max-w-[78rem]"><Heading title={copy.title} lede={copy.lede} /><p className="alert alert-error mt-8">Database unavailable.</p></div>;
+  if (!db) return <div className="max-w-[78rem]"><PageHead title={copy.title} context={copy.lede} /><p className="alert alert-error mt-8">Database unavailable.</p></div>;
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q.trim().toLowerCase().slice(0, 120) : "";
   const pendingOnly = params.pending === "1";
@@ -122,7 +123,7 @@ export default async function FeesPage({ searchParams }: Props) {
 
   return (
     <div className="max-w-[80rem]">
-      <Heading title={copy.title} lede={copy.lede} />
+      <PageHead title={copy.title} context={copy.lede} />
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <Metric label={copy.totalAgreed} value={money(totalNet)} />
         <Metric label={copy.totalReceived} value={money(totalReceived)} />
@@ -141,7 +142,7 @@ export default async function FeesPage({ searchParams }: Props) {
           /* Closed, a row answers the only question the front desk asks all
              day: who owes what, and by when. Opening it shows the ledger and
              the forms, without leaving the list. */
-          <details key={card.enrollmentId}>
+          <details key={card.enrollmentId} id={`fee-${card.enrollmentId}`} className="record-anchor">
             <summary className="data-row">
               <span className="data-row__title">{card.fullName}</span>
               <span className="data-row__actions">
@@ -261,7 +262,6 @@ export default async function FeesPage({ searchParams }: Props) {
   );
 }
 
-function Heading({ title, lede }: { title: string; lede: string }) { return <div><h1 className="text-h2">{title}</h1><span aria-hidden className="rule-stitch is-in" /><p className="u-lede">{lede}</p></div>; }
 function Metric({ label, value }: { label: string; value: string }) { return <div className="panel panel-body"><p className="microlabel">{label}</p><p className="text-h3 mt-2">{value}</p></div>; }
 function Fact({ label, value }: { label: string; value: string }) { return <div><dt className="kv-label">{label}</dt><dd className="kv-value mt-0.5">{value}</dd></div>; }
 function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) { return <div><label className="label" htmlFor={htmlFor}>{label}</label>{children}</div>; }

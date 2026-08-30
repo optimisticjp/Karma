@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { and, asc, desc, eq, inArray, isNull, or } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
+import { PageHead } from "@/components/admin/PageHead";
 import { hasPermission } from "@/lib/auth/access";
 import { studentsCopy } from "@/lib/admin/students-copy";
 import { isEnrollmentStatus, positiveId, type EnrollmentStatus } from "@/lib/admin/students";
@@ -41,7 +42,7 @@ export default async function StudentsPage({ searchParams }: Props) {
     delete: canPerform(subject, "student", "delete")
   };
   const db = getDb();
-  if (!db) return <div className="max-w-[76rem]"><Heading title={copy.title} lede={copy.lede} /><p className="alert alert-error mt-8">Database unavailable.</p></div>;
+  if (!db) return <div className="max-w-[76rem]"><PageHead title={copy.title} context={copy.lede} /><p className="alert alert-error mt-8">Database unavailable.</p></div>;
 
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q.trim().toLowerCase().slice(0, 120) : "";
@@ -189,7 +190,7 @@ export default async function StudentsPage({ searchParams }: Props) {
 
   return (
     <div className="max-w-[80rem]">
-      <Heading title={copy.title} lede={copy.lede} />
+      <PageHead title={copy.title} context={copy.lede} />
 
       {canManage ? (
         <p className="mt-6">
@@ -333,7 +334,6 @@ function summarizeFees(rows: Array<{ enrollmentId: number; courseFee: number; di
   return { received, due: Math.max(0, agreed - received) };
 }
 
-function Heading({ title, lede }: { title: string; lede: string }) { return <div><h1 className="text-h2">{title}</h1><span aria-hidden className="rule-stitch is-in" /><p className="u-lede">{lede}</p></div>; }
 function Fact({ label, value }: { label: string; value: string }) { return <div><dt className="microlabel">{label}</dt><dd className="mt-1 text-smallmeta">{value}</dd></div>; }
 function Metric({ label, value }: { label: string; value: string }) { return <div className="panel panel-body"><p className="microlabel">{label}</p><p className="text-h3 mt-2">{value}</p></div>; }
 function formatInr(value: number) { return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value); }
