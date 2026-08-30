@@ -448,7 +448,7 @@ Update this table after every completed/merged phase.
 | --- | --- | --- | --- |
 | 1 | Brand system + design foundations | ✅ Complete + merged | PR #12 — `build` + Cloudflare Workers Builds green |
 | 2 | Homepage / 30-second decision | ✅ Complete + merged | PR #13 — `build` + Cloudflare Workers Builds green |
-| 3 | Courses / production-led detail pages | 🚧 In progress | branch `phase-3/course-experience` |
+| 3 | Courses / production-led detail pages | ✅ Complete + merged | PR #14 — `build` + Cloudflare Workers Builds green |
 | 4 | Proof ecosystem: work, stories, reviews, trainers | ⏳ Pending | |
 | 5 | Mobile conversion / call / directions / demo | ⏳ Pending | |
 | 6 | Studio / B2B commercial embroidery | ⏳ Pending | |
