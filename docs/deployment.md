@@ -11,6 +11,12 @@ one covers the accounts.
 > The custom domain `karmadesignstudio.in` is a LAUNCH step and is deliberately
 > not connected. Do not point Supabase Auth or `NEXT_PUBLIC_SITE_URL` at it
 > until the owner says the website is complete.
+>
+> **Three sections below are DEFERRED, not pending.** Steps 2 (Turnstile) and 4
+> (R2) describe how to activate infrastructure the owner has deliberately not
+> activated yet, and the custom domain in step 6 is the same. Do not work
+> through them as part of an unrelated task: `/api/health` reporting Turnstile
+> or R2 absent is the expected state today. See `docs/project-context.md` §40.
 
 ## 0. GitHub + Codespaces
 1. Create a GitHub repo, push this project, open a Codespace.
@@ -29,9 +35,10 @@ one covers the accounts.
    before running this against a live database.**
 5. `npm run db:seed` → verified courses + starter batches.
 6. `npm run dev` → batch tables now show live data (no sample tag).
-7. Configure Supabase Auth (email+password on, public sign-ups OFF, TOTP MFA
-   on, Site URL and redirect URLs) — the exact settings are in
-   `docs/admin-architecture.md` §17.
+7. Configure Supabase Auth (email+password on, public sign-ups OFF, Site URL
+   and redirect URLs) — the exact settings are in
+   `docs/admin-architecture.md` §17. **Do not enable TOTP as an access
+   requirement**: Karma Console is password-only by explicit owner decision.
 8. **Authentication → Emails → Templates → "Invite user": replace the body with
    the token-hash template in `docs/admin-architecture.md` §9.** This is not
    optional. The stock template returns the session in a URL fragment, which a
@@ -43,7 +50,13 @@ Free-tier note: a Supabase free project pauses after a period of inactivity.
 The weekly backup workflow and the uptime monitor (step 7) keep it warm.
 Re-check the current pause policy before launch — provider limits change.
 
-## 2. Turnstile (spam protection)
+## 2. Turnstile (spam protection) — DEFERRED
+
+**Do not do this as part of another task.** Turnstile is deliberately not
+configured; both keys are empty and the verification path already fails closed
+in production. Activate it only when the owner asks, or when form abuse actually
+appears. The steps, for that day:
+
 1. Cloudflare dashboard → Turnstile → Add site (domain: your site, plus
    `localhost` for dev if you want).
 2. Put the **site key** in `.env` as `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
@@ -51,6 +64,14 @@ Re-check the current pause policy before launch — provider limits change.
 3. Keep the **secret key** handy for step 5.
 
 ## 3. Resend (email notifications)
+
+Karma has **two independent email paths**, and they are easy to confuse:
+*notification* mail (a new application, a new brief, the daily digest) goes
+through **Resend**, configured here; *auth and invitation* mail goes through
+**Supabase Auth with custom SMTP**, configured in the Supabase dashboard
+(step 1). `/api/health`'s `email` check reads `RESEND_API_KEY` — it reports on
+the notification path only and says nothing about Supabase SMTP.
+
 1. https://resend.com → API key → `.env` `RESEND_API_KEY`.
 2. Until you verify a domain, keep `EMAIL_FROM` as
    `Karma Design Studio <onboarding@resend.dev>`. After DNS verification of
@@ -58,14 +79,25 @@ Re-check the current pause policy before launch — provider limits change.
 3. Free tier: 100 emails/day. The site sends one per application/brief plus
    one daily digest, so this is comfortable.
 
-## 4. Cloudflare account + R2
+## 4. Cloudflare account (+ R2, DEFERRED)
+
 ```bash
 npx wrangler login
+```
+
+**R2 is deliberately not activated.** The `r2_buckets` block in `wrangler.jsonc`
+is commented out, and the B2B brief form's file-upload field has been removed
+until a binding exists — with no binding an attached file would fail in
+production and be dropped in demo mode. Do not create the bucket as part of
+another task. When the owner asks for private file delivery:
+
+```bash
 npx wrangler r2 bucket create karma-brief-files
 ```
-Then in `wrangler.jsonc`, uncomment the `r2_buckets` block. The bucket stays
-private; files are only written by the brief API and read (Phase 2+) through
-authed admin routes.
+
+then uncomment the `r2_buckets` block and restore the upload field. The bucket
+stays private; files are only written by the brief API and read through authed
+admin routes.
 
 ## 5. Cloudflare configuration
 
@@ -113,10 +145,19 @@ https://<branch-or-commit>-karma-design-studio.essanciaonline.workers.dev
 Cloudflare runs:
 
 ```
-build:   npx @opennextjs/cloudflare build
-deploy:  npx @opennextjs/cloudflare deploy     (production branch: main)
-preview: npx @opennextjs/cloudflare upload     (non-production branches)
+build:    npx @opennextjs/cloudflare build
+deploy:   OPEN_NEXT_DEPLOY=true npx wrangler deploy --keep-vars   (production branch: main)
+preview:  npx wrangler versions upload --keep-vars                (non-production branches)
 ```
+
+**Do not "simplify" the deploy command back to
+`npx @opennextjs/cloudflare deploy`.** OpenNext's delegated deploy path
+attempted local Hyperdrive proxy delegation during the production deploy, which
+fails in the Cloudflare build environment. Setting `OPEN_NEXT_DEPLOY=true` and
+invoking `wrangler deploy` directly was the fix; `--keep-vars` preserves
+dashboard-set variables that are not in `wrangler.jsonc`. The
+`preview`/`deploy`/`upload` scripts still in `package.json` use OpenNext's
+delegated path and are for local experimentation only.
 
 To check the bundle locally without deploying:
 ```bash
@@ -153,13 +194,15 @@ variables, add the new callback URL to Supabase Auth, and redeploy.
   down; also keeps the Supabase project warm.
 - Google Search Console: add the domain, submit `/sitemap.xml`.
 - Test on a real phone: `/gu` end to end, admission form incl. the WhatsApp
-  handoff, and one brief with a file (check it lands in R2).
+  handoff, and one B2B brief. (The brief's file-upload field is removed until
+  R2 is activated — see step 4.)
 
 ## 8. Karma Console accounts
 Once the deploy is green, work through `docs/admin-architecture.md` §17 steps
 17-20: set `INITIAL_OWNER_EMAIL`, run `npm run admin:bootstrap`, accept the
-invitation, set a password, enrol an authenticator, sign in, invite the first
-admin. There is no other way to create an Owner and no public sign-up.
+invitation, set a password, sign in, invite the first admin. There is **no
+authenticator to enrol** — Karma Console is password-only. There is no other
+way to create an Owner and no public sign-up.
 
 ## Redeploying later
 Any change → `npm run build` and `npm test` locally to verify → push. Cloudflare

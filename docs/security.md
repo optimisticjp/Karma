@@ -128,8 +128,10 @@ returns to `invited` and still owes onboarding; one that accepted returns to
 `active`.
 
 **Supabase Data API lockdown.** The publishable key is public. Migration 0002
-enables RLS with no policies on all eighteen app tables and revokes all grants
-from `anon` and `authenticated`, so that key cannot read a student, an
+enables RLS with no policies on the eighteen app tables that existed then and
+revokes all grants from `anon` and `authenticated`; migration 0003 applies the
+same two locks to `content_items`, so all nineteen are covered. That key cannot
+read a student, an
 application or a design brief through PostgREST. The backend is unaffected: it
 connects as the table owner, which bypasses RLS (no `FORCE ROW LEVEL SECURITY`).
 

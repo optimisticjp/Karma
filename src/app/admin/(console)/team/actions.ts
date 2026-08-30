@@ -20,7 +20,8 @@ import { AUDIT_ACTIONS, auditValues } from "@/lib/admin/audit";
 /**
  * Team administration. OWNER ONLY — every action in this file starts with
  * `authorizeAction({ ownerOnly: true })`, which requires a verified Supabase
- * user, a linked ACTIVE staff record, the owner role, AND an AAL2 session.
+ * user, a linked ACTIVE staff record, lifecycle `active` and the owner role.
+ * (Karma Console is password-only; there is no assurance-level requirement.)
  *
  * An ordinary admin reaching these directly (they are POST endpoints like any
  * server action) gets `denied`, not a partial success. There is deliberately

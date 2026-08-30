@@ -137,8 +137,10 @@ middleware can be reasoned around, and the real decision needs the database.
 
 The publishable key is public. Without this, anyone holding it could read
 students, applications and design briefs through PostgREST. Migration
-`0002_admin_foundation.sql` therefore applies two independent locks to all
-eighteen application tables:
+`0002_admin_foundation.sql` therefore applies two independent locks to the
+eighteen application tables that existed at the time, and migration
+`0003_content_desk.sql` applies the same two locks to `content_items` — so all
+**nineteen** app tables are locked today:
 
 - `ENABLE ROW LEVEL SECURITY` with **no policies** — deny by default;
 - `REVOKE ALL … FROM anon, authenticated` — no grants for the Data API roles.
@@ -705,7 +707,9 @@ Nothing below can be done from the repository. Work top to bottom.
 4. Authentication → Sign In / Providers → **Email**: enable email + password.
 5. Authentication → Sign In / Providers → **disable public sign-ups**. Karma is
    invitation-only; this is not optional.
-6. Authentication → Multi-Factor → enable **TOTP**.
+6. Authentication → Multi-Factor: **nothing to do.** Karma Console is
+   password-only (§8). Do not enable TOTP as an access requirement, and do not
+   treat Supabase's MFA capability as part of the sign-in flow.
 7. Authentication → URL Configuration → **Site URL**:
    `https://karma-design-studio.essanciaonline.workers.dev`
 8. Same screen → **Redirect URLs**, add:
@@ -757,15 +761,15 @@ Settings → Variables → Build)
 **Database migration** (only after reviewing the SQL)
 
 15. Locally, with `DATABASE_URL` set to the direct Supabase connection:
-    `npm run db:migrate` — applies `0000`, `0001` and `0002`.
+    `npm run db:migrate` — applies `0000`, `0001`, `0002` and `0003`.
 16. Optional: `npm run db:seed` for the verified course catalog.
 
 **First owner**
 
 17. Set `INITIAL_OWNER_EMAIL` (and `INITIAL_OWNER_NAME`) in `.env`.
 18. `npm run admin:bootstrap -- --dry-run`, then `npm run admin:bootstrap`.
-19. Open the invitation email, set a password, scan the authenticator QR, enter
-    the six-digit code.
+19. Open the invitation email and set a password. That is the whole of
+    onboarding — there is no authenticator to enrol (§8).
 20. Sign in at `/admin/login`, then invite the first admin from `/admin/team`.
 
 **Still outstanding, on purpose**

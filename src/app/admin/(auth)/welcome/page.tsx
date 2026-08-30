@@ -7,18 +7,17 @@ import { requireInvitedConsoleUser } from "@/lib/auth/guard";
 /**
  * Invitation acceptance.
  *
- * This is the one console screen that legitimately renders below AAL2 — an
- * invitee cannot enrol an authenticator before they have the password that
- * gets them a session. Everything else is still enforced, by
- * `requireInvitedConsoleUser()`: a LINKED staff record, active, a console role,
- * and lifecycle `invited`.
+ * This is the one console screen that renders for an account that is not yet
+ * `active` — an invitee has no password until they set one here. Everything
+ * else is still enforced, by `requireInvitedConsoleUser()`: a LINKED staff
+ * record, active, a console role, and lifecycle `invited`.
  *
  * The ways in that are NOT allowed, and where each goes:
  *   - dead or already-used invite link → the expired panel below
  *   - no session at all                → /admin/login
  *   - Supabase user, no staff row      → /admin/no-access
  *   - deactivated account              → /admin/no-access
- *   - already accepted                 → onward to MFA or the console
+ *   - already accepted                 → onward to the console
  */
 export default async function WelcomePage({
   searchParams
@@ -44,8 +43,8 @@ export default async function WelcomePage({
   if (params.state === "expired") return expiredPanel;
 
   // Everything else is the guard's decision: no session → login, no staff row
-  // or deactivated → no-access, already accepted → onward to MFA or the
-  // console. Only a linked, active, still-invited console user gets the form.
+  // or deactivated → no-access, already accepted → onward to the console.
+  // Only a linked, active, still-invited console user gets the form.
   await requireInvitedConsoleUser();
 
   return (

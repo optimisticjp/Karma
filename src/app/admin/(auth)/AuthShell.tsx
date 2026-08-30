@@ -2,8 +2,9 @@ import Link from "next/link";
 import type { AdminLocale } from "@/lib/admin/i18n";
 
 /**
- * Chrome for the four unauthenticated console screens (login, MFA setup, MFA
- * challenge, invite acceptance).
+ * Chrome for the unauthenticated console screens: login, invite acceptance
+ * and no-access. (Two legacy MFA screens once used this shell; Karma Console
+ * is password-only and no longer has them.)
  *
  * Karma's own typography and tokens, not Supabase's branding: ivory ground,
  * one vermilion stitch line, precise borders, no illustration dependency, no

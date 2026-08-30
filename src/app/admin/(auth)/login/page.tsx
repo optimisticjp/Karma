@@ -25,8 +25,9 @@ export default async function LoginPage({
   const locale = await getPreLoginLocale();
   const t = getAdminT(locale);
 
-  // Already signed in? Send them wherever they actually belong — which may
-  // still be an MFA step.
+  // Already signed in? Send them wherever they actually belong. The two
+  // mfa-* reasons below are legacy compatibility only — password-only Karma
+  // never emits them — but the redirect stays exhaustive.
   const { decision } = await resolveAccess();
   if (decision.ok) redirect(next);
   if (!decision.ok && (decision.reason === "mfa-setup" || decision.reason === "mfa-challenge")) {
