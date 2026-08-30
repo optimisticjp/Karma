@@ -149,6 +149,14 @@
 /* Label/value variant: a description list rather than an indexed catalogue.
    The label takes the leading column, so no index element is needed and the
    markup can stay a valid <dl>. */
+/* No index, no index column. An empty 2.25rem cell indented every row of an
+   unnumbered ledger against nothing. */
+.ledger-row.is-plain { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 640px) {
+  .ledger-row.is-plain { grid-template-columns: minmax(0, 1fr) auto; }
+  .ledger-row.is-plain > .ledger-meta { grid-column: 2; }
+  .ledger-row.is-plain > .ledger-note { grid-column: 1 / -1; }
+}
 .ledger-row.is-labelled { grid-template-columns: minmax(0, 1fr); }
 .ledger-row.is-labelled > .ledger-note { grid-column: 1 / -1; }
 @media (min-width: 640px) {

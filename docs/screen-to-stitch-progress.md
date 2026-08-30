@@ -455,7 +455,7 @@ Update this table after every completed/merged phase.
 | 7 | Machine Notes / social-to-search content | ✅ Complete + merged | PR #18 — `build` + Cloudflare Workers Builds green |
 | 8 | Local SEO / structured data / measurement | ✅ Complete + merged | PR #19 — `build` + Cloudflare Workers Builds green |
 | 9 | Accessibility / performance / responsive hardening | ✅ Complete + merged | PR #20 — `build` + Cloudflare Workers Builds green |
-| 10 | Final whole-site creative polish | ⏳ Pending | |
+| 10 | Final whole-site creative polish | ✅ Complete + merged | PR #21 — `build` + Cloudflare Workers Builds green |
 
 Status values:
 
@@ -2316,6 +2316,115 @@ Confirm production Workers build.
 Do not connect the custom domain.
 
 Then mark all phases complete.
+
+## Implementation record
+
+### The audit came first
+Every public route was inspected in both locales before anything was edited —
+25 routes measured for height, section count, card count, dark-band count,
+plate count, heading count and word count, plus 404, error and loading states
+and an `/admin` smoke check.
+
+The copy was scanned against the brief's banned-phrase list plus a dozen more
+("unlock your creativity", "world-class", "seamless", "empower", "journey",
+"cutting-edge"…). **Zero hits in either locale**, in the message catalogues or
+the typed content modules. The tone rules held on their own.
+
+### What the audit found
+
+1. **The 404 and error pages were the only centred compositions on the site.**
+   Everything else is left-aligned editorial setting, which made the one page
+   a visitor reaches *by accident* look like it came from somewhere else. A
+   centred apology is also the least useful thing that space can hold.
+
+   Both rebuilt in the site's own composition. The 404 now uses the same
+   `PageIntro` as every interior page and spends the rest of its height on
+   what the visitor was probably looking for — the four most-wanted
+   destinations and the first six courses. The error page gained a call
+   action, because a visitor who has hit an error twice should not be left on
+   a broken page with only a retry button.
+
+2. **An unnumbered ledger indented every row against nothing.** `RowInner`
+   rendered the index `<span>` unconditionally, so an empty cell still
+   occupied the 2.25rem grid column. Visible on the 404 aside and anywhere a
+   ledger is used as a plain link list. The column now collapses when there
+   is no index.
+
+### Deliberately not changed
+- **`/en/terms` is `noIndex`,** flagged in source as "draft: remove after
+  owner review". That is an owner decision, not a polish decision. Recorded in
+  the checklist.
+- **`/en/verify` is a thin page**, and should be: it is one input and one
+  button, and padding it out would be decoration for its own sake.
+- **The homepage is 11.5k px on desktop.** Fifteen sections, each earning its
+  place; the length was interrogated in Phases 2 and 4 and cut twice on
+  evidence. Cutting further now would remove substance, not air.
+
+### Documentation
+- `docs/content-checklist.md` **restructured around the three buckets the
+  brief asked for** — 🔴 SAMPLE (replace before launch), 🟡 OWNER CONFIRMATION
+  NEEDED (with what the site does today, and what one answer would change),
+  🟢 VERIFIED — plus a full contact audit across every surface.
+- `docs/design-system.md` gained the rules the hardening pass established:
+  surfaces own their text colours; container queries for "is there room";
+  `.u-break` for text the studio did not write; import font subsets, not
+  families; compositions stay left-aligned; measurement and schema each have
+  one door.
+- `docs/launch-checklist.md` (Phase 8) holds the cutover steps.
+
+---
+
+# Before the custom domain: the genuine blockers
+
+Everything below is a decision or an asset only the owner can supply. The site
+works today without any of them — each one is handled by saying something true
+instead of guessing — but each is worth resolving before the domain goes live.
+
+## One sentence unblocks each of these
+
+1. **Which mobile does a person answer, and which is WhatsApp-only?**
+   +91 81605 17429 and +91 99043 76340 are both published, each labelled by
+   channel. One answer collapses this to a single number everywhere.
+2. **Course durations.** All eleven are `null`; pages say "confirm with the
+   studio". A real duration per course also unlocks `timeRequired` in schema.
+3. **Fees.** No price list anywhere; "shared in person at your demo".
+4. **Current batches.** The database drives these; the site shows what is in
+   it. Seed the real ones.
+5. **Exact opening hours per day.** Currently "open daily, evening batches
+   till 10:30 pm".
+6. **Studio turnaround** for B2B work, and **which machine file formats** the
+   studio actually delivers. Both are currently answered by asking the buyer.
+7. **Whether the Google rating may be stated as verified.**
+   `verifiedFacts.googleRating48` is `false`; the 4.8 shows as owner-provided,
+   attributed and linked, and never enters schema.
+8. **Terms wording**, so the `noIndex` flag can come off.
+
+## Content to replace
+
+9. **Reviews** (7 sample) — real Google reviews, with consent.
+10. **Student stories** (6 sample archetypes) — real, consented outcomes.
+11. **Trainer profiles** (3 sample) — real names, roles and specialities, with
+    consent. Experience must stay a range unless the owner confirms a figure.
+12. **Student work** (6 shoot-list placeholders) — real, consented pieces.
+13. **Studio project types** (3 generic) — real commissions, only with the
+    client's written permission.
+
+## Photography
+14. **The studio shoot.** Every visual on the site is drawn or a named
+    placeholder naming the shot it is waiting for. `<ManagedPhoto>` takes
+    `priority` and `sizes` so the one true LCP image can be marked. Nothing
+    needs redesigning when the photographs arrive.
+
+## Infrastructure, when wanted
+15. **R2** — activates private file delivery and restores the brief form's
+    upload field. Until then an attached file would fail in production, which
+    is why the field is deferred rather than decorative.
+16. **Turnstile** — the verification path exists and fails closed in
+    production.
+17. **Analytics** — the hooks exist and carry no personal data. One listener
+    is the whole integration.
+18. **The custom domain** — `docs/launch-checklist.md`. It is one environment
+    variable, and a test keeps it that way.
 
 ---
 

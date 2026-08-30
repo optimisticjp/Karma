@@ -39,9 +39,16 @@ type RowContent = {
 function RowInner({ index, title, meta, note }: RowContent) {
   return (
     <>
-      <span className="ledger-index" aria-hidden={index === undefined ? undefined : true}>
-        {index}
-      </span>
+      {/* Rendered only when there is an index. An empty span still occupies
+          the 2.25rem grid column, which indented every row of an unnumbered
+          ledger against nothing — visible on the 404 aside and anywhere else
+          a ledger is used as a plain link list. `.is-plain` collapses the
+          column so the title starts at the rule. */}
+      {index === undefined ? null : (
+        <span className="ledger-index" aria-hidden="true">
+          {index}
+        </span>
+      )}
       <span className="ledger-title">{title}</span>
       {meta ? <span className="ledger-meta">{meta}</span> : null}
       {note ? <span className="ledger-note">{note}</span> : null}
@@ -56,7 +63,7 @@ export function LedgerRow({
   ...content
 }: RowContent & { as?: "li" | "div"; className?: string }) {
   return (
-    <As className={cn("ledger-row", className)}>
+    <As className={cn("ledger-row", content.index === undefined && "is-plain", className)}>
       <RowInner {...content} />
     </As>
   );
@@ -73,7 +80,10 @@ export function LedgerLink({
 }: RowContent & { href: string; className?: string }) {
   return (
     <li>
-      <Link href={href} className={cn("ledger-row", className)}>
+      <Link
+        href={href}
+        className={cn("ledger-row", content.index === undefined && "is-plain", className)}
+      >
         <RowInner {...content} />
       </Link>
     </li>
