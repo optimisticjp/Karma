@@ -352,6 +352,58 @@ document as it landed:
 **Do not replace this system with a generic design system** — including the one
 belonging to the skill-library template in `.claude/skills/`.
 
+### v4 — "Machine Lab" (from 2026-08-30)
+
+The owner's full-product redesign brief is
+`docs/karma-machine-lab-redesign-master-plan.md`, executed in fourteen phases.
+**v4 extends v3; it does not replace it.** No v3 token was renamed or retuned,
+because `globals.css` is shared with Karma Console and a rename silently
+restyles the admin. Everything v4 adds is additive.
+
+**Cascade order — this matters and is easy to get wrong:**
+
+```
+globals.css (@layer base, components)  →  premium.css  →  machine-lab.css
+```
+
+`premium.css` is deliberately *unlayered*, so it outranks every `@layer` in
+`globals.css`. A v4 primitive placed in `globals.css` would therefore lose to
+any v3 rule in `premium.css` touching the same property. `src/app/machine-lab.css`
+is likewise unlayered and imported **after** `premium.css` in both root layouts
+(`src/app/[locale]/layout.tsx` and `src/app/admin/layout.tsx`).
+`tests/machine-lab-system.test.tsx` asserts that import order.
+
+**What v4 adds:**
+
+| Piece | Where | Note |
+| --- | --- | --- |
+| Machine-notation tokens | `globals.css` `@theme` | `--font-mono` is the **platform** monospace stack. No new font was loaded; the project still imports exactly two `@fontsource` families, and a test enforces it. |
+| Motion levels 1–4 | `--dur-l1`…`--dur-l4`, `--ease-machine` | Level 4 is the one signature moment a page is allowed. There is no level 5. |
+| Texture tokens | `--texture-ink`, `--texture-strength` | Strength is capped at 2–5% by test. |
+| The Karma Stitch icon family | `src/components/ui/Icon.tsx` | Four branded groups (production, technique, digitising, troubleshooting) plus deliberately ordinary universal actions. **Branded concepts get niche icons; universal actions keep universal icons** — nobody decodes an embroidery symbol to find Edit. |
+| Eleven technique signatures | `src/components/ui/TechniqueSignature.tsx` | One per course slug, keyed by slug and asserted against `src/content/courses.ts`. Each builds itself **once** on first reveal and stops; nothing loops. |
+| Canonical stitch marks | `src/components/ui/StitchMark.tsx` | Six marks, six meanings, exported as `STITCH_SEMANTICS`. Running stitch and thread path stay in `StitchPath.tsx`. |
+| Machine notation | `src/components/ui/MonoNote.tsx` | `01 DESIGN`, `EMCAD / PATH`, indexes. Not body copy, not navigation, not buttons. |
+| Textures, glass, machine light, motion utilities, signature CSS | `src/app/machine-lab.css` | One glass treatment only (`.lab-glass`); there is deliberately no card variant. |
+
+**The 32-photograph manifest.** `src/content/photo-manifest.ts` is the typed
+list of every shot on the owner's final brief, with each slot's intrinsic
+dimensions. `<ManifestPhoto id="…">` reserves the photograph's exact aspect
+ratio, so swapping the real file in later causes **zero layout shift**. A slot
+that has no photograph renders as an honest labelled frame. It is never filled
+with stock, a generated image, another institute's work, or another course's
+photograph — see §38 and `docs/content-checklist.md` §B.
+
+**Nothing drawn may invent a specification.** No RPM, stitch density, GSM,
+machine ratio, CAD coordinate, machine model or head count appears anywhere in
+the signature or icon geometry, and tests fail if one does. A drawing that
+invents a number is the same lie as a stock photograph, only harder to spot.
+
+**Testing note.** `vitest.config.ts` now sets `oxc.jsx.runtime = "automatic"`.
+`tsconfig.json` sets `jsx: "preserve"` because Next.js runs its own transform;
+without the override a test importing a `.tsx` component sees raw JSX and fails
+to parse. This changes nothing about how the application is built.
+
 ---
 
 ## 8. Bilingual EN/GU
@@ -1601,16 +1653,20 @@ This is why **Hyperdrive must be connected with the table-owning role**.
 
 ## 35. Testing and CI
 
-`npm test` runs Vitest (`vitest.config.ts`, node environment, `tests/**/*.test.ts`).
-`server-only` is aliased to a stub so server modules are importable in a test
-runner while the guard stays real in the app.
+`npm test` runs Vitest (`vitest.config.ts`, node environment,
+`tests/**/*.test.{ts,tsx}`). `server-only` is aliased to a stub so server
+modules are importable in a test runner while the guard stays real in the app.
+`oxc.jsx.runtime` is set to `"automatic"` because `tsconfig.json` uses
+`jsx: "preserve"` for Next.js — without the override a test importing a `.tsx`
+component sees raw JSX and fails to parse.
 
-**32 test files, 393 tests** (`vitest run`, ~3 s). Many encode a *policy* decision rather than a code detail,
+**33 test files, 430 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
 which is the point — the policy survives a refactor:
 
 | Test | Guards |
 | --- | --- |
 | `i18n-parity` | EN/GU catalogue keys mirror exactly |
+| `machine-lab-system` | the design system v4 foundation: 32-photo manifest, icon family, eleven technique signatures, stitch semantics, motion levels, Gujarati overrides, reduced motion, no new dependency |
 | `auth-guard`, `permissions` | the six-state access chain, owner bypass, grant handling |
 | `admin-seats` | one owner + five admin seats, invitation races |
 | `admin-invite`, `invite-callback`, `invite-persistence` | the token-hash invitation flow |

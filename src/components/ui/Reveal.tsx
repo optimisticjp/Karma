@@ -75,16 +75,18 @@ export function Reveal({
 
 /**
  * Self-registering watcher for elements that hide themselves until `is-in`
- * lands: `.media-unveil` (photo unveil) and `.stitch-wipe` (a stitch laying
- * itself down).
+ * lands: `.media-unveil` (photo unveil), `.stitch-wipe` (a stitch laying
+ * itself down) and `.sig-play` (a technique signature building once).
  *
- * Why this exists: both hide via clip-path. Anything relying on a <Reveal>
- * ancestor would stay invisible forever if that ancestor were missing, so
+ * Why this exists: each of them hides itself until the class lands. Anything
+ * relying on a <Reveal> ancestor would stay invisible forever if that ancestor
+ * were missing, so
  * nothing is trusted to wrap them: this observes every such element on the
  * page directly, and re-scans after client navigation. A failed animation
  * must never cost a photo — or a section's only visible divider.
  */
-const SELF_REVEAL = ".media-unveil:not(.is-in), .stitch-wipe:not(.is-in)";
+const SELF_REVEAL =
+  ".media-unveil:not(.is-in), .stitch-wipe:not(.is-in), .sig-play:not(.is-in)";
 
 export function UnveilWatcher() {
   useEffect(() => {
@@ -106,7 +108,7 @@ export function UnveilWatcher() {
 
     // Absolute failsafe: if anything above went wrong, reveal everything.
     const failsafe = window.setTimeout(() => {
-      document.querySelectorAll<HTMLElement>(".media-unveil, .stitch-wipe").forEach((el) => {
+      document.querySelectorAll<HTMLElement>(".media-unveil, .stitch-wipe, .sig-play").forEach((el) => {
         const r = el.getBoundingClientRect();
         if (r.top < window.innerHeight) el.classList.add("is-in");
       });

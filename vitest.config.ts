@@ -11,5 +11,10 @@ export default defineConfig({
       "server-only": path.resolve(__dirname, "tests/stubs/server-only.ts")
     }
   },
-  test: { environment: "node", include: ["tests/**/*.test.ts"] }
+  /* tsconfig sets jsx: "preserve" because Next.js does its own transform.
+     esbuild honours that, so a test importing a .tsx component would see raw
+     JSX and fail to parse. Tests transform it themselves instead — this
+     changes nothing about how the app is built. */
+  oxc: { jsx: { runtime: "automatic" } },
+  test: { environment: "node", include: ["tests/**/*.test.{ts,tsx}"] }
 });
