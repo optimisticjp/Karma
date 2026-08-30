@@ -20,6 +20,14 @@ describe("course catalogue validation", () => {
         nameGu: "ઝરદોસી મશીન",
         family: "machine",
         durationWeeks: 12,
+        /* Operational fields default to "not stated" rather than to a guess. */
+        durationMonths: null,
+        software: null,
+        feeTotal: null,
+        feeAdmission: null,
+        feeBalanceDueDays: null,
+        termsVersion: null,
+        publicVisible: true,
         sortOrder: 4,
         active: true
       }

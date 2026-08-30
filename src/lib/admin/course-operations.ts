@@ -260,3 +260,140 @@ export function addDays(isoDate: string, days: number): string {
   d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
 }
+
+/* --------------------------- editing from a form -------------------------- */
+
+/**
+ * How the console edits the bounded lists, and why it is shaped like this.
+ *
+ * A JSON textarea would be the five-minute answer and exactly the "giant
+ * untyped dump" this model exists to avoid: nothing would validate it until it
+ * failed, and a misplaced brace would take a course's timetable with it.
+ *
+ * Instead:
+ *  - timetable and demo slots are a FIXED number of paired time inputs. Blank
+ *    rows are ignored, so adding and removing a slot needs no JavaScript and
+ *    the form works before hydration — which matters on a phone on a shop
+ *    floor. The cap is a real one: an institute running more than six start
+ *    times for one course has a scheduling problem, not a form problem.
+ *  - the curriculum and practical lists are PAIRED TEXTAREAS, one item per
+ *    line, English beside Gujarati. Bilingual parity is then visible while
+ *    typing and enforced on submit: mismatched line counts are rejected rather
+ *    than silently padded, because a curriculum that is eleven lines in English
+ *    and nine in Gujarati is how a Gujarati-first site quietly becomes an
+ *    English one.
+ */
+export const SLOT_ROWS = 6;
+
+function pairedLines(en: unknown, gu: unknown, max: number): BilingualLine[] | null {
+  const split = (value: unknown) =>
+    typeof value === "string"
+      ? value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+      : [];
+  const enLines = split(en);
+  const guLines = split(gu);
+  if (enLines.length !== guLines.length) return null;
+  if (enLines.length > max) return null;
+  const out: BilingualLine[] = [];
+  for (let i = 0; i < enLines.length; i += 1) {
+    if (enLines[i].length > OPERATION_LIMITS.lineLength) return null;
+    if (guLines[i].length > OPERATION_LIMITS.lineLength) return null;
+    out.push({ en: enLines[i], gu: guLines[i] });
+  }
+  return out;
+}
+
+/** One `HH:MM`-`HH:MM` pair from the form, or null when the row is blank. */
+function slotFromRow(start: unknown, end: unknown): { startTime: string; endTime: string } | null | "invalid" {
+  const s = typeof start === "string" ? start.trim() : "";
+  const e = typeof end === "string" ? end.trim() : "";
+  if (!s && !e) return null;
+  if (!TIME.test(s) || !TIME.test(e)) return "invalid";
+  if (slotMinutes(s, e) <= 0) return "invalid";
+  return { startTime: s, endTime: e };
+}
+
+/**
+ * Builds the `operations` payload from console form fields.
+ *
+ * Slot KEYS are derived from the time (`slot-0800`) rather than typed. A key is
+ * a stable identifier an admission record points at; asking an operator to
+ * invent one would be asking them to maintain a primary key by hand.
+ */
+export function parseOperationsForm(form: {
+  scheduleStart: unknown[];
+  scheduleEnd: unknown[];
+  demoDays: unknown;
+  demoHours: unknown;
+  demoFree: unknown;
+  demoStart: unknown[];
+  demoEnd: unknown[];
+  curriculumEn: unknown;
+  curriculumGu: unknown;
+  practicalEn: unknown;
+  practicalGu: unknown;
+}): CourseOperations | null {
+  const scheduleOptions: ScheduleOption[] = [];
+  for (let i = 0; i < form.scheduleStart.length; i += 1) {
+    const row = slotFromRow(form.scheduleStart[i], form.scheduleEnd[i]);
+    if (row === "invalid") return null;
+    if (!row) continue;
+    const key = `slot-${row.startTime.replace(":", "")}`;
+    if (scheduleOptions.some((o) => o.key === key)) return null;
+    scheduleOptions.push({ ...row, key, partOfDay: partOfDayFor(row.startTime) });
+  }
+
+  const demoSlots: DemoSlot[] = [];
+  for (let i = 0; i < form.demoStart.length; i += 1) {
+    const row = slotFromRow(form.demoStart[i], form.demoEnd[i]);
+    if (row === "invalid") return null;
+    if (!row) continue;
+    const key = `demo-${row.startTime.replace(":", "")}`;
+    if (demoSlots.some((o) => o.key === key)) return null;
+    demoSlots.push({ ...row, key });
+  }
+
+  const days = form.demoDays === "" || form.demoDays == null ? null : Number(form.demoDays);
+  const hours = form.demoHours === "" || form.demoHours == null ? null : Number(form.demoHours);
+
+  let demo: DemoPolicy | null = null;
+  if (days != null || hours != null || demoSlots.length > 0) {
+    if (days == null || !Number.isInteger(days) || days < 0 || days > 31) return null;
+    if (hours == null || !Number.isFinite(hours) || hours <= 0 || hours > 12) return null;
+    demo = {
+      days,
+      hours,
+      free: form.demoFree === true || form.demoFree === "on" || form.demoFree === "true",
+      slots: demoSlots
+    };
+  }
+
+  const curriculum = pairedLines(form.curriculumEn, form.curriculumGu, OPERATION_LIMITS.curriculum);
+  const practical = pairedLines(form.practicalEn, form.practicalGu, OPERATION_LIMITS.practical);
+  if (!curriculum || !practical) return null;
+
+  return { scheduleOptions, demo, curriculum, practical };
+}
+
+/** Turns a stored payload back into the flat shape the form renders. */
+export function operationsToForm(operations: CourseOperations) {
+  const pad = <T,>(list: T[], make: (index: number) => T): T[] =>
+    Array.from({ length: SLOT_ROWS }, (_, i) => list[i] ?? make(i));
+
+  return {
+    schedule: pad(operations.scheduleOptions, () => ({
+      key: "",
+      startTime: "",
+      endTime: "",
+      partOfDay: "morning" as PartOfDay
+    })),
+    demoSlots: pad(operations.demo?.slots ?? [], () => ({ key: "", startTime: "", endTime: "" })),
+    demoDays: operations.demo?.days ?? "",
+    demoHours: operations.demo?.hours ?? "",
+    demoFree: operations.demo?.free ?? true,
+    curriculumEn: operations.curriculum.map((l) => l.en).join("\n"),
+    curriculumGu: operations.curriculum.map((l) => l.gu).join("\n"),
+    practicalEn: operations.practical.map((l) => l.en).join("\n"),
+    practicalGu: operations.practical.map((l) => l.gu).join("\n")
+  };
+}

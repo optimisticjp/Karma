@@ -797,6 +797,247 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
   .console-root .btn { min-height: 3rem; }
 }
 
+/* ======================= Karma Console: the dense pass ====================
+ * The console is used standing up, on a phone, between a machine and a
+ * counter. It was built as a page of generous cards, which reads well on a
+ * laptop and shows about three facts per screen on a 390px phone.
+ *
+ * The operating model this pass borrows from is the merchant app a shop owner
+ * actually uses: compact rows, many facts visible at once, one clear status per
+ * row, and the actions for a record sitting next to that record instead of on
+ * another screen. That is the UX principle; none of the visual language is
+ * borrowed. This is still Screen to Stitch — the same tokens, the same one
+ * vermilion accent, borders instead of shadows, status colours used only as
+ * statuses, and no component kit added to the Worker budget.
+ *
+ * Density and touch size are NOT in tension here, and the resolution is worth
+ * saying out loud: rows are visually tight (a 2-line row is ~64px) while every
+ * interactive control inside one keeps a >=44px hit area, using padding that
+ * overflows the row rather than a taller row.
+ * ======================================================================== */
+
+/* A list of records. One hairline between rows, none doubled at the edges. */
+.data-list {
+  border: var(--hairline);
+  background: var(--color-card);
+}
+.data-list > * + * { border-top: var(--hairline); }
+
+.data-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.375rem 0.75rem;
+  padding: 0.625rem 0.75rem;
+}
+@media (min-width: 768px) {
+  .data-row { padding: 0.625rem 1rem; gap: 0.375rem 1rem; }
+}
+.data-row:hover { background: rgb(197 72 50 / 0.025); }
+
+/* Line 1: who or what this row is. */
+.data-row__title {
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+/* Line 2: the facts that let someone act without opening the record. */
+.data-row__meta {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: var(--color-stone);
+}
+.data-row__meta > * + *::before {
+  content: "·";
+  margin-inline-end: 0.5rem;
+  color: var(--color-line);
+}
+@media (min-width: 768px) {
+  .data-row__meta { grid-column: 1; }
+}
+.data-row__actions {
+  grid-row: 1;
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+/* An archived record is present but plainly not in play. */
+.data-row.is-archived { background: rgb(17 23 22 / 0.02); }
+.data-row.is-archived .data-row__title { color: var(--color-stone); }
+
+/* Numbers read as numbers: tabular figures stop a column of money jittering. */
+.data-num {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+/* A compact status chip. Colour still comes from .status-* — status only. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  padding: 0.0625rem 0.4375rem;
+  border: var(--hairline);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+:lang(gu) .chip { letter-spacing: 0; }
+.chip::before {
+  content: "";
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+/* Key/value pairs at a density that fits a phone: label above value, tight. */
+.kv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem 1rem;
+}
+@media (min-width: 640px) { .kv-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .kv-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.kv-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-stone);
+}
+:lang(gu) .kv-label { letter-spacing: 0; text-transform: none; font-size: 0.75rem; }
+.kv-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* Search and filters stay reachable while a long list scrolls under them. */
+.toolbar {
+  position: sticky;
+  top: 4rem;
+  z-index: 20;
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.625rem 0;
+  background: color-mix(in srgb, var(--color-ivory) 96%, transparent);
+  backdrop-filter: blur(8px);
+}
+@media (min-width: 1024px) {
+  /* No mobile header on desktop, so the rail's own top edge is the anchor. */
+  .toolbar { top: 0; }
+}
+.toolbar .input { min-height: 2.75rem; }
+
+/* Interactive controls inside a dense row. The row stays short; the target
+   does not — negative margin lets the hit area overflow the row's padding. */
+.tap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  margin: -0.5rem -0.375rem;
+  padding: 0.5rem 0.375rem;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-stone);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.tap:hover { color: var(--color-vermilion-deep); }
+.tap:focus-visible { outline: 2px solid var(--color-vermilion); outline-offset: -2px; }
+.tap.is-danger { color: var(--color-error); }
+
+/* Record actions: a menu on a laptop, a bottom sheet on a phone. Built on
+   <details> so it costs no JavaScript and works before hydration. */
+.rec-menu { position: relative; }
+.rec-menu > summary {
+  list-style: none;
+  cursor: pointer;
+}
+.rec-menu > summary::-webkit-details-marker { display: none; }
+
+.rec-menu__panel {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 60;
+  display: grid;
+  gap: 0.125rem;
+  padding: 0.5rem 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
+  background: var(--color-card);
+  border-top: 2px solid var(--color-carbon);
+}
+.rec-menu__panel::before {
+  content: "";
+  justify-self: center;
+  width: 2.25rem;
+  height: 0.25rem;
+  margin-bottom: 0.5rem;
+  border-radius: 999px;
+  background: var(--color-line);
+}
+@media (min-width: 768px) {
+  /* Above the fold of a laptop it is an ordinary dropdown, anchored right so
+     it never pushes the table sideways. */
+  .rec-menu__panel {
+    position: absolute;
+    inset: calc(100% + 0.25rem) 0 auto auto;
+    width: max-content;
+    min-width: 12rem;
+    padding: 0.25rem;
+    border: var(--hairline);
+    border-top-width: 2px;
+  }
+  .rec-menu__panel::before { display: none; }
+}
+.rec-menu__item {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: start;
+  color: var(--color-carbon);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.rec-menu__item:hover { background: rgb(197 72 50 / 0.05); }
+.rec-menu__item.is-danger { color: var(--color-error); }
+.rec-menu__item[aria-disabled="true"] { color: var(--color-stone); cursor: not-allowed; }
+
+/* The destructive area. Deliberately unlovely: it should not look like the
+   rest of the console, because it does not behave like the rest of it. */
+.danger-zone {
+  border: 1px solid var(--color-error);
+  background: rgb(197 72 50 / 0.03);
+  padding: 1rem;
+}
+.danger-zone > * + * { margin-top: 0.75rem; }
+.danger-title {
+  font-weight: 800;
+  color: var(--color-error);
+}
+
+/* Phones: give the work surface the whole width and shorten the chrome. */
+@media (max-width: 767px) {
+  .console-main { padding-inline: 0.75rem; padding-block: 1rem; }
+  .console-page-head { margin-bottom: 1.25rem; padding-bottom: 1rem; gap: 0.625rem; }
+  .console-page-title { font-size: clamp(1.5rem, 1.2rem + 2vw, 2rem); }
+  .console-metrics > * { padding: 0.75rem 0.875rem; }
+  /* The last row of a list sits above the home indicator, not under it. */
+  .console-main > :last-child { padding-bottom: env(safe-area-inset-bottom); }
+}
+
 /* -------------------------- accessibility/performance --------------------- */
 
 @media (hover: none) {

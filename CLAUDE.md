@@ -101,7 +101,7 @@ Cloudflare production deployment currently uses the dashboard command `OPEN_NEXT
 - **A parent/guardian mobile is required on the public admission form and on a console direct admission**, and deliberately optional on the student edit form and the manual enquiry. The asymmetry is tested; read `docs/project-context.md` §22 before changing it.
 - **An enrolment snapshots the fee agreement** it was created under. Editing a course never reprices an existing student. Fee status is derived from the ledger — never store a paid/unpaid flag.
 - Navigation and Today at Karma are role/permission-aware. A hidden link is UX only; server guards remain authoritative.
-- No hard-delete UI for operational records. Archive/deactivate/lifecycle transitions preserve history.
+- **Archive is the ordinary path; permanent deletion is the deliberate exception.** The whole policy is one table — `src/lib/admin/record-actions.ts` — and every module reads it rather than inventing its own. Deletion is **Owner-only** even for an admin holding the module's manage permission, is preceded by a dependency preflight on its own page, needs a typed confirmation and a written reason, and writes its audit tombstone **before** the row disappears. Audit history, attendance evidence, enrolments and staff accounts are never deletable at all. Do not add `onDelete: cascade` to reach past a dependency block.
 - Dates that mean "today" to staff are pinned to `Asia/Kolkata`.
 
 ## Using the installed skills

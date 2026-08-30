@@ -210,3 +210,40 @@ authenticated content can leak into build output or an edge cache.
   manual CSV import for now (documented limitation until Phase 5 tooling).
 - **ALLOW_DEMO_MODE=true** exists for staging only. Never set it on the
   production worker.
+
+## Permanent deletion (2026-08-30)
+
+The owner replaced the blanket "archive, never hard-delete" rule, so the console
+can now destroy operational rows. What keeps that safe:
+
+- **Owner-only**, checked twice — `requireOwner` on the confirmation page and
+  `authorizeAction({ ownerOnly: true })` again in the action. An admin holding
+  every manage permission there is still cannot delete anything; the test for
+  that case is the one to keep.
+- **Never deletable at all:** `audit_logs` (the evidence that a deletion
+  happened), `attendance_records` and `attendance_corrections` (the evidence a
+  locked register was changed), `enrollments` (the fee agreement a student
+  signed), and `staff` / `staff_permissions` (audit rows must keep pointing at a
+  real identity; the `karma_staff_invariants` trigger refuses a DELETE of the
+  owner row regardless of the application).
+- **Dependencies block rather than cascade.** `courses → batches` and
+  `batches → enrollments` are `ON DELETE CASCADE` in the schema; the application
+  refuses the delete while dependents exist rather than letting one click take a
+  course's entire history. Do not add a cascade to route around a block.
+- **A tombstone before the row goes**, inside the same transaction. The audit
+  entry carries a short, deliberate set of non-secret identifying fields per
+  entity — never the whole row, and never a password, token, key or credential.
+  Keeping the whole row would turn `audit_logs` into a second, unmanaged copy of
+  the operational database, with none of the retention thinking the first one
+  gets.
+- **A typed confirmation and a written reason.** The record's own identifier for
+  anything expensive; the word DELETE only where the row carries no dependent
+  history.
+- **Two records refuse outright:** a locked attendance session, and a
+  certificate that has not been revoked — its verification URL may be with an
+  employer, and a 404 reads as a forgery while a revoked certificate reads as
+  what it is.
+
+**Open, and worth deciding with the owner:** `audit_logs` still has no retention
+policy and no indexes, and permanent deletion makes it grow faster and matter
+more. It is now the only record of anything that was destroyed.

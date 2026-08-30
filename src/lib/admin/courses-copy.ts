@@ -23,6 +23,29 @@ export type CatalogCopy = {
     durationWeeks: string;
     sortOrder: string;
     active: string;
+    publicVisible: string;
+  };
+  operations: {
+    title: string;
+    hint: string;
+    durationMonths: string;
+    software: string;
+    termsVersion: string;
+    feeTotal: string;
+    feeAdmission: string;
+    feeBalanceDueDays: string;
+    schedule: string;
+    scheduleHint: string;
+    from: string;
+    to: string;
+    demo: string;
+    demoHint: string;
+    demoDays: string;
+    demoHours: string;
+    demoFree: string;
+    curriculum: string;
+    practical: string;
+    listHint: string;
   };
   batchFields: {
     label: string;
@@ -74,7 +97,30 @@ const COPY = {
       family: "Course family",
       durationWeeks: "Duration (weeks)",
       sortOrder: "Sort order",
-      active: "Active course"
+      active: "Active course",
+      publicVisible: "Show on the public website"
+    },
+    operations: {
+      title: "How this course runs",
+      hint: "What the public course page and the admission form read. Leave a field blank when the studio has not confirmed it — blank means \u201Cnot stated\u201D, and the site says so honestly rather than guessing.",
+      durationMonths: "Duration (months)",
+      software: "Software taught",
+      termsVersion: "Admission norms version",
+      feeTotal: "Total fee (\u20B9)",
+      feeAdmission: "Due at admission (\u20B9)",
+      feeBalanceDueDays: "Balance due (days after joining)",
+      schedule: "Batch timings",
+      scheduleHint: "The times this course is regularly taught in. These are timetable slots, not live batches \u2014 a batch is a group with dates, seats and a trainer. Leave a row blank to remove it.",
+      from: "From",
+      to: "To",
+      demo: "Free demo",
+      demoHint: "What the demo offer is, and the times a visitor may ask for. These are preferences, not bookable seats.",
+      demoDays: "Demo days",
+      demoHours: "Hours per session",
+      demoFree: "Demo is free",
+      curriculum: "What is taught",
+      practical: "Practical training",
+      listHint: "One item per line. The two boxes must have the SAME number of lines \u2014 a list that is eleven lines in English and nine in Gujarati is how a bilingual site quietly becomes an English one."
     },
     batchFields: {
       label: "Batch label",
@@ -144,7 +190,30 @@ const COPY = {
       family: "કોર્સ family",
       durationWeeks: "અવધિ (અઠવાડિયા)",
       sortOrder: "Sort order",
-      active: "ચાલુ કોર્સ"
+      active: "ચાલુ કોર્સ",
+      publicVisible: "Public website પર બતાવો"
+    },
+    operations: {
+      title: "આ કોર્સ કઈ રીતે ચાલે છે",
+      hint: "Public course page અને admission form આ જ વાંચે છે. સ્ટુડિયોએ કન્ફર્મ ન કર્યું હોય એ ખાનું ખાલી રાખો — ખાલી એટલે \u201Cજણાવ્યું નથી\u201D, અને સાઇટ ધારણા કરવાને બદલે એ જ પ્રામાણિકતાથી કહે છે.",
+      durationMonths: "ડ્યુરેશન (મહિના)",
+      software: "કયું સોફ્ટવેર શીખવાય છે",
+      termsVersion: "એડમિશન નિયમોનું version",
+      feeTotal: "કુલ fee (\u20B9)",
+      feeAdmission: "એડમિશન વખતે ભરવાની (\u20B9)",
+      feeBalanceDueDays: "બાકી રકમ (જોડાયાના કેટલા દિવસમાં)",
+      schedule: "બેચ ટાઇમિંગ",
+      scheduleHint: "આ કોર્સ નિયમિત રીતે જે સમયે શીખવાય છે એ. આ timetable slot છે, live batch નહીં — batch એટલે તારીખ, સીટ અને trainer વાળું ગ્રુપ. કાઢી નાખવા માટે row ખાલી રાખો.",
+      from: "થી",
+      to: "સુધી",
+      demo: "ફ્રી ડેમો",
+      demoHint: "ડેમો ઓફર શું છે અને visitor કયો સમય માંગી શકે. આ પસંદગી છે, બુક થયેલી સીટ નહીં.",
+      demoDays: "ડેમો દિવસ",
+      demoHours: "દરેક સેશનના કલાક",
+      demoFree: "ડેમો ફ્રી છે",
+      curriculum: "શું શીખવાય છે",
+      practical: "પ્રેક્ટિકલ ટ્રેનિંગ",
+      listHint: "એક લાઇનમાં એક વસ્તુ. બંને boxes માં લાઇનની સંખ્યા સરખી હોવી જોઈએ — English માં અગિયાર અને ગુજરાતીમાં નવ લાઇન હોય, એ રીતે જ bilingual સાઇટ ધીમે ધીમે English સાઇટ બની જાય છે."
     },
     batchFields: {
       label: "બેચ નામ",

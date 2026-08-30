@@ -465,3 +465,47 @@ asserts no other file under `src/app` or `src/components` contains
 `"@context"`. Schema is where a labelled placeholder would silently become a
 fact a search engine repeats, so it is the one thing that is not allowed to be
 written twice.
+
+---
+
+## Karma Console — the dense pass (2026-08-30)
+
+The console is used **standing up, on a phone, between a machine and a
+counter**. It was built as a page of generous cards, which reads well on a
+laptop and shows about three facts per screen at 390px.
+
+The operating model it now borrows is the merchant app a shop owner actually
+uses: compact rows, many facts visible at once, one status per row, and a
+record's actions sitting next to that record instead of on another screen. **That
+is the UX principle. None of the visual language is borrowed** — this is still
+Screen to Stitch: the same tokens, the same one vermilion accent, borders
+instead of shadows, status colours used only as statuses, and no component kit
+added to the Worker budget.
+
+### The primitives (`premium.css`)
+
+| Class | What it is |
+| --- | --- |
+| `.data-list` / `.data-row` | A list of records, one hairline between rows. A row is a title, a `__meta` line of dot-separated facts, and a `__actions` slot. `.is-archived` mutes one without hiding it. |
+| `.chip` | A compact status pill. Colour still comes from `.status-*`, so it stays status-only. |
+| `.kv-grid` · `.kv-label` · `.kv-value` | Key/value pairs at a density that fits a phone: label above value, tabular figures. |
+| `.toolbar` | Sticky search and filters, clearing the mobile console header at `top: 4rem` and sitting at `top: 0` on desktop where there is none. |
+| `.tap` | A control inside a dense row. |
+| `.rec-menu` | Record actions: a dropdown on a laptop and a bottom sheet on a phone, from one `<details>`. |
+| `.danger-zone` | Deliberately unlovely. It should not look like the rest of the console, because it does not behave like it. |
+| `.data-num` | Tabular figures, so a column of money does not jitter. |
+
+### Density and touch size are not in tension
+
+This is the part to keep. Rows are visually tight — a two-line row is ~64px —
+while **every interactive control inside one keeps a ≥44px hit area** (WCAG
+2.5.5), using padding that overflows the row rather than a taller row. Bottom
+sheets and the last row of a list respect `env(safe-area-inset-bottom)`, so an
+action never ends up under the home indicator.
+
+### Gujarati, again
+
+`.kv-label` is an uppercase, letterspaced label — exactly the kind of style that
+breaks Gujarati. It self-neutralises under `:lang(gu)`, as `.chip` does, as
+`.microlabel` and `.eyebrow` already did. **Any new label style needs the same
+override**, and `tests/console-density.test.ts` fails without it.

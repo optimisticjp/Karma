@@ -1,4 +1,4 @@
-import { and, asc, eq, gte } from "drizzle-orm";
+import { and, asc, eq, gte, isNull } from "drizzle-orm";
 import { getDb, schema } from "./index";
 import { demoModeAllowed } from "@/lib/env";
 import { sampleBatches, type BatchRow } from "@/content/courses";
@@ -37,7 +37,12 @@ export async function getUpcomingBatches(opts?: {
     const today = new Date().toISOString().slice(0, 10);
     const conditions = [
       gte(schema.batches.startDate, today),
-      eq(schema.batches.status, "open")
+      eq(schema.batches.status, "open"),
+      /* Archived rows are out of the operational picture, and the public site
+         is the most operational surface there is: a visitor must never be
+         shown a batch the studio has taken out of play. */
+      isNull(schema.batches.archivedAt),
+      isNull(schema.courses.archivedAt)
     ];
     if (opts?.courseSlug) conditions.push(eq(schema.courses.slug, opts.courseSlug));
 

@@ -4,6 +4,8 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import type { CatalogCopy } from "@/lib/admin/courses-copy";
 import { BATCH_STATUSES, COURSE_FAMILIES, type BatchStatus, type CourseFamily } from "@/lib/admin/course-validation";
+/* Pure, dependency-free helpers — safe and cheap to pull into the client bundle. */
+import { SLOT_ROWS, type operationsToForm } from "@/lib/admin/course-operations";
 import {
   createBatchAction,
   createCourseAction,
@@ -23,8 +25,17 @@ export type CourseFormValue = {
   nameGu: string;
   family: CourseFamily;
   durationWeeks: number | null;
+  durationMonths: number | null;
+  software: string | null;
+  feeTotal: number | null;
+  feeAdmission: number | null;
+  feeBalanceDueDays: number | null;
+  termsVersion: number | null;
+  publicVisible: boolean;
   sortOrder: number;
   active: boolean;
+  /** The bounded lists, flattened for the form. */
+  operations: ReturnType<typeof operationsToForm>;
 };
 
 export type BatchFormValue = {
@@ -68,6 +79,7 @@ function SubmitButton({ label, busy }: { label: string; busy: string }) {
 
 export function CourseForm({ value, copy }: { value?: CourseFormValue; copy: CatalogCopy }) {
   const editing = Boolean(value);
+  const id = (name: string) => `course-${name}-${value?.id ?? "new"}`;
   const [state, formAction] = useActionState<CatalogState, FormData>(
     editing ? updateCourseAction : createCourseAction,
     IDLE
@@ -153,15 +165,129 @@ export function CourseForm({ value, copy }: { value?: CourseFormValue; copy: Cat
         </Field>
       </div>
 
-      <label className="choice-chip text-smallmeta w-fit">
-        <input
-          type="checkbox"
-          name="active"
-          className="size-4 accent-vermilion"
-          defaultChecked={value?.active ?? true}
-        />
-        {copy.courseFields.active}
-      </label>
+      <div className="flex flex-wrap gap-3">
+        <label className="choice-chip text-smallmeta w-fit">
+          <input
+            type="checkbox"
+            name="active"
+            className="size-4 accent-vermilion"
+            defaultChecked={value?.active ?? true}
+          />
+          {copy.courseFields.active}
+        </label>
+        <label className="choice-chip text-smallmeta w-fit">
+          <input
+            type="checkbox"
+            name="publicVisible"
+            className="size-4 accent-vermilion"
+            defaultChecked={value?.publicVisible ?? true}
+          />
+          {copy.courseFields.publicVisible}
+        </label>
+      </div>
+
+      {/* ------------------------ operational detail ------------------------
+          Everything below describes how the course actually runs, and is what
+          the public course page and the admission form read. Blank means "not
+          stated" — never a guess. A duration is recorded in MONTHS where the
+          owner has confirmed one; weeks is the older field and is left alone.
+      */}
+      <details className="border border-rule">
+        <summary className="cursor-pointer px-4 py-3 text-smallmeta font-semibold">
+          {copy.operations.title}
+        </summary>
+        <div className="grid gap-5 border-t border-rule p-4">
+          <p className="form-note">{copy.operations.hint}</p>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Field label={copy.operations.durationMonths} htmlFor={id("months")}>
+              <input id={id("months")} name="durationMonths" className="input" type="number" min={1} max={60} defaultValue={value?.durationMonths ?? ""} />
+            </Field>
+            <Field label={copy.operations.software} htmlFor={id("software")}>
+              <input id={id("software")} name="software" className="input" maxLength={80} defaultValue={value?.software ?? ""} />
+            </Field>
+            <Field label={copy.operations.termsVersion} htmlFor={id("terms")}>
+              <input id={id("terms")} name="termsVersion" className="input" type="number" min={1} defaultValue={value?.termsVersion ?? ""} />
+            </Field>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Field label={copy.operations.feeTotal} htmlFor={id("feeTotal")}>
+              <input id={id("feeTotal")} name="feeTotal" className="input" type="number" min={0} defaultValue={value?.feeTotal ?? ""} />
+            </Field>
+            <Field label={copy.operations.feeAdmission} htmlFor={id("feeAdmission")}>
+              <input id={id("feeAdmission")} name="feeAdmission" className="input" type="number" min={0} defaultValue={value?.feeAdmission ?? ""} />
+            </Field>
+            <Field label={copy.operations.feeBalanceDueDays} htmlFor={id("feeDays")}>
+              <input id={id("feeDays")} name="feeBalanceDueDays" className="input" type="number" min={0} max={365} defaultValue={value?.feeBalanceDueDays ?? ""} />
+            </Field>
+          </div>
+
+          <fieldset>
+            <legend className="label">{copy.operations.schedule}</legend>
+            <p className="form-note mb-3">{copy.operations.scheduleHint}</p>
+            <div className="grid gap-2">
+              {slotRows(value?.operations.schedule).map((slot, index) => (
+                <div key={`sched-${index}`} className="grid grid-cols-2 gap-2">
+                  <input aria-label={`${copy.operations.from} ${index + 1}`} name="scheduleStart" className="input" type="time" defaultValue={slot.startTime} />
+                  <input aria-label={`${copy.operations.to} ${index + 1}`} name="scheduleEnd" className="input" type="time" defaultValue={slot.endTime} />
+                </div>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend className="label">{copy.operations.demo}</legend>
+            <p className="form-note mb-3">{copy.operations.demoHint}</p>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Field label={copy.operations.demoDays} htmlFor={id("demoDays")}>
+                <input id={id("demoDays")} name="demoDays" className="input" type="number" min={0} max={31} defaultValue={String(value?.operations.demoDays ?? "")} />
+              </Field>
+              <Field label={copy.operations.demoHours} htmlFor={id("demoHours")}>
+                <input id={id("demoHours")} name="demoHours" className="input" type="number" min={0} max={12} step={0.5} defaultValue={String(value?.operations.demoHours ?? "")} />
+              </Field>
+              <label className="choice-chip text-smallmeta self-end">
+                <input type="checkbox" name="demoFree" className="size-4 accent-vermilion" defaultChecked={value?.operations.demoFree ?? true} />
+                {copy.operations.demoFree}
+              </label>
+            </div>
+            <div className="mt-3 grid gap-2">
+              {slotRows(value?.operations.demoSlots).map((slot, index) => (
+                <div key={`demo-${index}`} className="grid grid-cols-2 gap-2">
+                  <input aria-label={`${copy.operations.demo} ${copy.operations.from} ${index + 1}`} name="demoStart" className="input" type="time" defaultValue={slot.startTime} />
+                  <input aria-label={`${copy.operations.demo} ${copy.operations.to} ${index + 1}`} name="demoEnd" className="input" type="time" defaultValue={slot.endTime} />
+                </div>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend className="label">{copy.operations.curriculum}</legend>
+            <p className="form-note mb-3">{copy.operations.listHint}</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="English" htmlFor={id("curEn")}>
+                <textarea id={id("curEn")} name="curriculumEn" className="input min-h-32" defaultValue={value?.operations.curriculumEn ?? ""} />
+              </Field>
+              <Field label="ગુજરાતી" htmlFor={id("curGu")}>
+                <textarea id={id("curGu")} name="curriculumGu" className="input min-h-32" defaultValue={value?.operations.curriculumGu ?? ""} />
+              </Field>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend className="label">{copy.operations.practical}</legend>
+            <p className="form-note mb-3">{copy.operations.listHint}</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="English" htmlFor={id("pracEn")}>
+                <textarea id={id("pracEn")} name="practicalEn" className="input min-h-24" defaultValue={value?.operations.practicalEn ?? ""} />
+              </Field>
+              <Field label="ગુજરાતી" htmlFor={id("pracGu")}>
+                <textarea id={id("pracGu")} name="practicalGu" className="input min-h-24" defaultValue={value?.operations.practicalGu ?? ""} />
+              </Field>
+            </div>
+          </fieldset>
+        </div>
+      </details>
 
       <div>
         <SubmitButton
@@ -171,6 +297,13 @@ export function CourseForm({ value, copy }: { value?: CourseFormValue; copy: Cat
       </div>
     </form>
   );
+}
+
+/** Always renders the full set of rows; blank ones are ignored on submit. */
+function slotRows<T extends { startTime: string; endTime: string }>(
+  rows: T[] | undefined
+): Array<{ startTime: string; endTime: string }> {
+  return Array.from({ length: SLOT_ROWS }, (_, i) => rows?.[i] ?? { startTime: "", endTime: "" });
 }
 
 export function BatchForm({
