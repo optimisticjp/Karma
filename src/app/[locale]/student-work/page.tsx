@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PageIntro } from "@/components/ui/PageIntro";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 import { WorkLedger } from "@/components/work/WorkLedger";
 import { MachineCases } from "@/components/work/MachineCases";
 import { Link } from "@/i18n/navigation";
@@ -71,9 +72,16 @@ export default async function StudentWorkPage({ params }: { params: Promise<{ lo
         }
       />
 
+      {/* The grid used to sit directly under the page H1, so the piece titles
+          were the next heading on the page and the hierarchy jumped H1 -> H3.
+          A real section heading fixes the outline and gives the gallery the
+          one line of framing it was missing. */}
       <section className="section">
         <div className="container-site">
-          <WorkLedger items={items} />
+          <SectionHeading title={t("galleryTitle")} sub={t("gallerySub")} />
+          <div className="u-section-body">
+            <WorkLedger items={items} />
+          </div>
         </div>
       </section>
 

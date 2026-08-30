@@ -454,7 +454,7 @@ Update this table after every completed/merged phase.
 | 6 | Studio / B2B commercial embroidery | ✅ Complete + merged | PR #17 — `build` + Cloudflare Workers Builds green |
 | 7 | Machine Notes / social-to-search content | ✅ Complete + merged | PR #18 — `build` + Cloudflare Workers Builds green |
 | 8 | Local SEO / structured data / measurement | ✅ Complete + merged | PR #19 — `build` + Cloudflare Workers Builds green |
-| 9 | Accessibility / performance / responsive hardening | ⏳ Pending | |
+| 9 | Accessibility / performance / responsive hardening | ✅ Complete + merged | PR #20 — `build` + Cloudflare Workers Builds green |
 | 10 | Final whole-site creative polish | ⏳ Pending | |
 
 Status values:
@@ -2054,6 +2054,109 @@ Add useful regressions for:
 - route/build integrity
 
 Merge when green; update progress.
+
+## Implementation record
+
+This phase was an audit, so the record is what it **found**. Everything below
+was a real defect on the site before this branch.
+
+### 1. Secondary text failed AA on the sand surface
+Every ratio in the palette was measured against Cotton (#F5F0E6). Raw Silk is
+close enough that the same values still pass on it. **Sand (#DED0B8) is not**,
+and three sections set body copy on it. Measured on the rendered page:
+
+| Token | On sand | Needed |
+| --- | --- | --- |
+| stone | 4.28 | 4.5 |
+| vermilion-deep | 4.16 | 4.5 |
+| needle | 4.48 | 4.5 |
+| zari-deep | 4.31 | 4.5 |
+
+Fixed the way `.on-carbon` already works: the surface re-points the secondary
+tokens, so every utility and component inside it inherits a passing value and
+**not one call site changed**. The `--color-line` hairline was also invisible
+on sand at 1.07:1 and now takes a deeper thread grey.
+
+A test asserts both halves — that the base values fail on sand, and that the
+overrides pass — so the reason stays visible to whoever reads it next.
+
+### 2. Heading hierarchy jumped H1 → H3 on `/student-work`
+The gallery sat directly under the page title, so the first piece's `<h3>` was
+the next heading on the page. Given a real section heading, which the page
+wanted anyway.
+
+### 3. Sixty pixels of horizontal overflow at 200% zoom
+On every page. The header's brand refused to shrink (`shrink-0`), so at 200%
+the language toggle and the menu button were pushed past the edge — a WCAG
+1.4.10 failure, and one a viewport media query cannot catch, because at 200%
+on a 1280 screen the viewport is still 640 CSS px and a `max-width: 379px`
+rule never fires.
+
+Fixed with a **container query** on the header row, which asks the right
+question — is this row short of space? — and, with the threshold in `rem`,
+scales with the user's text size. Verified: tail shown at 390 and 1280, hidden
+at 320 and at 200%, zero overflow in all four.
+
+That fix then squeezed the wordmark against the first nav item at exactly
+1280, where eight nav items leave nothing spare. The nav now yields space
+before the brand does, with a gap the flex row cannot collapse.
+
+### 4. YouTube titles were being silently clipped
+Titles come from the feed and contain handles like `@karma_designstudio` —
+unbreakable tokens that overflowed the card and were cut off by
+`overflow: hidden` at large text sizes. Added `.u-break` for any string the
+studio did not write.
+
+### 5. 36.8KB of font on every page, to draw an arrow and five stars
+The full `@fontsource-variable/noto-sans-gujarati` import ships a `symbols`
+(14.5KB) and a `math` (22.3KB) subset whose `unicode-range` claims
+U+2190–2199 and U+25A0–27BF. Manrope does not cover those codepoints, so the
+browser fell through the stack to Noto and downloaded both files — on English
+pages as well as Gujarati ones — to render `→` and `★★★★★`.
+
+Replaced with a hand-written `@font-face` restricted to the Gujarati block.
+Font requests fell **5 files → 3**; payload **208KB → 172KB** on `/en` and
+**201KB → 134KB** on `/gu`. Gujarati rendering verified against a metric probe
+and by eye. Arrows and stars now fall through to the system font, which has
+had them for thirty years.
+
+### 6. The brief form announced errors by appearing
+`role="alert"` on a node inserted into the DOM is announced by most screen
+readers most of the time; a region already present and then filled is
+announced reliably by all of them. Now a persistent live region, plus
+`aria-busy` and a polite status while submitting.
+
+### Prepared, not yet needed
+`<ManagedPhoto>` gained `priority` and `sizes` so the one true LCP image can
+be marked when the studio shoot lands — with a note that marking several
+defeats the purpose. The file now also records **why it is a bare `<img>` and
+not `next/image`**: Content Desk paths are runtime data, `next/image` needs
+its hosts at build time, and what it would buy is already covered by hand
+(aspect-ratio reserved boxes, lazy below the fold, format chosen at upload).
+
+### Verified clean
+- **Structure:** 15 routes — one `<h1>` each, no heading jumps, one `<main>`,
+  no unlabelled control, no missing `alt`, no empty `href`, no stray `<li>`
+  or `<dt>`.
+- **Contrast:** every rendered text node on six routes in both locales.
+- **Keyboard:** 25 tab stops on the homepage, every one with a visible ring.
+- **Reduced motion:** zero hidden elements, zero running animations.
+- **Responsive:** **209 page/width combinations** — 19 routes × 320, 360, 375,
+  390, 430, 768, 820, 1024, 1280, 1440, 1920 — zero horizontal overflow, zero
+  sub-24px non-inline targets, zero clipped text, no bar covering the footer.
+- **Performance:** LCP 116–928ms against a 2500ms target; CLS 0–0.035;
+  **zero third-party requests** on any page.
+- **Forms:** every field labelled, phone fields on `tel`, live regions present.
+- **Admin:** no public chrome, no tab bar, no bottom padding, no overflow at
+  390 or 1280. Nothing was redesigned.
+
+### Tests (`tests/hardening.test.ts`, 15 new — 270 total)
+Contrast on all three surfaces including the deliberate failure; reduced-motion
+coverage of every animated primitive; no scroll-snap, autoplay, video or audio
+anywhere; `.u-break` present and used; the container query rather than a
+viewport query; the Gujarati font restricted by unicode-range; `font-display:
+swap`; shell CSS scoped away from the console; live regions and `aria-invalid`
+on both forms; and no iframe, GTM, Facebook or Instagram script in the tree.
 
 ---
 

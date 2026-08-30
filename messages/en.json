@@ -567,7 +567,9 @@
     "coursesCta": "See the courses",
     "visitCta": "Visit the studio",
     "meanwhileTitle": "The work is on the machines right now.",
-    "meanwhileBody": "Nothing is published here yet, so come and see the real thing instead. Walk in during studio hours and you can watch a batch working, or message us and we will show you what came off the floor this week."
+    "meanwhileBody": "Nothing is published here yet, so come and see the real thing instead. Walk in during studio hours and you can watch a batch working, or message us and we will show you what came off the floor this week.",
+    "galleryTitle": "Pieces from the studio",
+    "gallerySub": "Each one names the technique, the course it came from, and what it demonstrates."
   },
   "servicesPage": {
     "title": "Design development and production embroidery for garment businesses.",

@@ -1145,11 +1145,31 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
   height: 1.625rem;
   flex: 0 0 auto;
 }
-.site-brand-word { letter-spacing: -0.03em; }
+.site-brand-word { letter-spacing: -0.03em; min-width: 0; }
 .site-brand-name { font-weight: 800; }
 .site-brand-tail { font-weight: 500; color: var(--color-stone); }
-/* Below 380 the tail is what pushes the row into the menu button. */
-@media (max-width: 379px) {
+
+/* The tail drops when the header row runs out of room.
+ *
+ * A viewport media query is the wrong test, and 200% zoom is why: at 200% on
+ * a 1280 screen the viewport is still 640 CSS px, so `max-width: 379px` never
+ * fires — but every rem in the row has doubled, and the brand pushed the
+ * language toggle and the menu button 60px past the edge. WCAG 1.4.10 is
+ * measured in exactly that condition.
+ *
+ * A container query asks the right question — "is this row short of space?" —
+ * and because the threshold is in `rem` it scales with the user's text size.
+ * 22rem is 352px at default size, just under the 354px the row has at a 390px
+ * viewport, so the tail still shows on a phone; at 200% it is 704px, well
+ * above the ~560px available, so the tail drops. */
+.site-header .container-site { container-type: inline-size; }
+/* A gap the flex row cannot collapse. Without it the brand and the first nav
+   item touch at exactly 1280, where eight items leave nothing spare. */
+.site-brand-mark { padding-right: 0.75rem; }
+@media (min-width: 1536px) {
+  .site-brand-mark { padding-right: 1.5rem; }
+}
+@container (max-width: 22rem) {
   .site-brand-tail { display: none; }
 }
 
@@ -2041,3 +2061,30 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
   font-size: 0.8125rem;
   color: var(--color-vermilion);
 }
+
+/* ======================= contrast on the sand surface =====================
+ * Every ratio in the palette was measured against Cotton (#F5F0E6). Raw Silk
+ * (#E9DECD) is close enough that the same values still clear AA on it — Sand
+ * (#DED0B8) is not. Measured on the rendered page, secondary text on sand came
+ * out at:
+ *
+ *   stone           4.28  ·  vermilion-deep  4.16  ·  needle  4.48
+ *
+ * All below the 4.5 floor for normal text. This is a real failure, not a
+ * rounding argument: the machine-proof strip, the studio contact band and the
+ * course-family relation block all set body copy on sand.
+ *
+ * Fixed the same way `.on-carbon` is: the surface re-points the secondary
+ * tokens, so every utility and component inside it inherits a value that
+ * passes without a single call site changing. Carbon on sand is 11.93 and
+ * needs nothing.
+ * ========================================================================= */
+.bg-sand {
+  --color-stone: #5b5951;          /* 4.62 on sand (was 4.28) */
+  --color-vermilion-deep: #9e3624; /* 4.60 on sand (was 4.16) */
+  --color-needle: #286078;         /* 4.55 on sand (was 4.48) */
+  --color-zari-deep: #854b2a;      /* 4.55 on sand (was 4.31) */
+}
+/* The hairline is a UI boundary rather than text, but at 1.13:1 against sand
+   it was invisible. Borders inside this surface take the deeper thread grey. */
+.bg-sand { --color-line: #c3b393; }

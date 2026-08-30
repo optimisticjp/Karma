@@ -130,14 +130,28 @@ export function BriefForm() {
         <input id="brief-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
       <TurnstileWidget onToken={setToken} />
-      {error ? <p role="alert" className="field-error">{error}</p> : null}
+      {/* A persistent live region, not an element that appears on error.
+          `role="alert"` on a node inserted into the DOM is announced by most
+          screen readers most of the time; a region that is already present
+          and then filled is announced reliably by all of them. */}
+      <div role="alert" aria-live="assertive" className="empty:hidden">
+        {error ? <p className="field-error">{error}</p> : null}
+      </div>
       <p className="text-xs text-stone">
         {t("form.privacyNote")}{" "}
         <Link href="/privacy" className="stitch-link font-semibold">{tf("privacy")}</Link>
       </p>
-      <button type="submit" disabled={busy} className="btn btn-primary w-full md:w-auto">
+      <button
+        type="submit"
+        disabled={busy}
+        aria-busy={busy || undefined}
+        className="btn btn-primary w-full md:w-auto"
+      >
         {busy ? t("form.submitting") : t("form.submit")}
       </button>
+      <p aria-live="polite" className="sr-only">
+        {busy ? t("form.submitting") : ""}
+      </p>
     </form>
   );
 }
