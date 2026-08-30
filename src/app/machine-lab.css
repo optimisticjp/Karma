@@ -1805,3 +1805,33 @@
   background: var(--color-card);
   padding: 0.5rem 0.625rem;
 }
+
+/* ------------------------------------------------------------------ *
+ * 26. Loading
+ *
+ * A static stitch mark and one line of text. Nothing here is animated:
+ * a route transition must never wait on decoration, and a spinner that
+ * outlives the content it was covering is worse than no spinner.
+ * ------------------------------------------------------------------ */
+
+.loading-note {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  letter-spacing: var(--text-mono--letter-spacing);
+  text-transform: uppercase;
+  color: var(--color-stone);
+}
+:lang(gu) .loading-note {
+  font-family: var(--font-body);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.8125rem;
+}
+.loading-stitch {
+  width: 3.75rem;
+  flex: none;
+  opacity: 0.75;
+}

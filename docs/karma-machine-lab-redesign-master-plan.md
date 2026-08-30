@@ -1854,7 +1854,7 @@ Claude must execute phases in order, one clean PR at a time unless a smaller spl
 | 6 | Admission + conversion + contact experience | ✅ Complete + merged |
 | 7 | Machine Notes technical archive | ✅ Complete + merged |
 | 8 | B2B Studio/services | ✅ Complete + merged |
-| 9 | About, verify, legal, errors/loading/404, footer + secondary public pages | ⏳ Pending |
+| 9 | About, verify, legal, errors/loading/404, footer + secondary public pages | ✅ Complete + merged |
 | 10 | Karma Console shell + Today at Karma + mobile operational system | ⏳ Pending |
 | 11 | Admissions, Students, Courses/Batches, Fees admin redesign | ⏳ Pending |
 | 12 | Attendance, Certificates, Design Desk, Content, Reports, Team admin redesign | ⏳ Pending |
@@ -2613,6 +2613,63 @@ Rebuild/polish:
 - any remaining public route
 
 Ensure every EN route has GU parity.
+
+## Implementation record — merged 2026-08-30
+
+**Branch:** `redesign/phase-9-secondary` · **PR:** #36
+
+### Two real bugs, found by looking
+
+**The Gujarati 404 listed English course names.** `not-found.tsx` rendered
+`c.nameEn` unconditionally. This is the one page a visitor reaches by accident,
+and it is the worst possible place for the site to forget which language it is
+in. Fixed — and a test now scans every page and component for an English field
+rendered without a Gujarati branch, which is exactly the shape of this bug. A
+`key={x.nameEn}` is excluded, because a React key must NOT change with the
+locale.
+
+**The loading state said "Loading…" in English on every Gujarati route.** It is
+now a client component using the catalogue, saying "Preparing stitch path…" /
+"સ્ટિચ પાથ તૈયાર થાય છે…".
+
+### The states
+
+**404** carries the studio's own words — "The thread ends here." / "This page
+isn't part of the current design path." / "Back to Karma" — and a
+`<BrokenPath>`, the one canonical mark meaning failure. It is the single place
+on the public site where that mark is literally true, and a test checks the
+homepage does not carry one: a broken path on a working page would be claiming
+something failed.
+
+**Loading** is a static stitch mark and one line. Nothing in it animates, and a
+test asserts that: a route transition must never wait on decoration, and a
+spinner that outlives the content it was covering is worse than no spinner.
+
+**Verify** is deliberately the least designed page on the site. Someone here is
+an employer checking whether a certificate is real, and their question is
+binary — so no reveal, no seal animation, no marketing language around the
+result. The restraint is the credibility, and tests keep `Reveal`, `seal-in`,
+`media-unveil` and `stitch-wipe` out of the verify form.
+
+**Terms and privacy** stay low-motion and unindexed-until-approved; tests hold
+both.
+
+### Route parity
+
+Every public page lives under `[locale]`, so no route can exist in English and
+not in Gujarati — asserted structurally rather than by listing paths. The
+console stays deliberately outside that segment (staff type `/admin`, never
+`/en/admin`), which is also asserted so a later session does not "fix" it.
+
+Every **indexable** public page goes through `pageMeta()` for hreflang. The
+per-certificate verify URL is exempt because it is deliberately `noindex` —
+hreflang on a page search engines are told to ignore would be pointless, and an
+unqualified rule would have pushed a later session into adding it.
+
+### Gates
+
+`npm run typecheck`, `npm run lint`, `npm test` (41 files, 575 tests) and
+`npm run build` all green. No dependency added.
 
 ---
 
