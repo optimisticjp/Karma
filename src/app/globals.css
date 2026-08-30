@@ -20,7 +20,38 @@
    loads its italic axis only. Net font payload is smaller than v2. */
 @import "@fontsource-variable/manrope";                        /* EN display + UI */
 @import "@fontsource-variable/playfair-display/wght-italic.css"; /* editorial accent, sparing */
-@import "@fontsource-variable/noto-sans-gujarati";              /* GU everything   */
+
+/*
+ * Noto Sans Gujarati: the Gujarati block ONLY, declared by hand.
+ *
+ * Importing the whole package cost 36.8KB of font on every page, in English
+ * as well as Gujarati, for two subsets nobody asked for. Its `symbols`
+ * (14.5KB) and `math` (22.3KB) faces claim U+2190-2199 and U+25A0-27BF —
+ * which is to say the arrow in "See all courses →" and the stars beside the
+ * Google rating. Manrope does not cover those codepoints, so the browser fell
+ * through the stack to Noto and downloaded both files to draw an arrow.
+ *
+ * Restricting the range to the Gujarati block means Noto is fetched for
+ * Gujarati text and nothing else; arrows and stars fall through to the system
+ * font, which has had them for thirty years. The Gujarati face itself (112KB)
+ * still loads on English pages, and should: the studio's own tagline —
+ * "Skill શીખો, Future બનાવો" — is Gujarati, and it is in the header.
+ *
+ * The range is the package's own, minus the punctuation it does not need to
+ * own: Gujarati block, its Devanagari-shared marks, the ZWNJ/ZWJ joiners
+ * embedded text needs, the rupee sign and the dotted circle.
+ */
+@font-face {
+  font-family: "Noto Sans Gujarati Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  /* `~` marks a module request; a bare specifier is resolved relative to this
+     file by the CSS loader and fails. */
+  src: url("~@fontsource-variable/noto-sans-gujarati/files/noto-sans-gujarati-gujarati-wght-normal.woff2")
+    format("woff2-variations");
+  unicode-range: U+0951-0952, U+0964-0965, U+0A80-0AFF, U+200C-200D, U+20B9, U+25CC, U+A830-A839;
+}
 
 @theme {
   /* ------ palette: restrained neutrals + ONE accent ------ */
@@ -82,6 +113,13 @@
   --text-btn: 0.9375rem;
   --text-btn--line-height: 1.33;
   --text-btn--letter-spacing: 0.01em;
+
+  /* Any string the studio did not write — a YouTube title, a pasted URL, a
+     social handle — may contain a token longer than its container. Inside a
+     box with `overflow: hidden` that is silently clipped rather than
+     scrolled, and it only shows up at large text sizes. Apply to any element
+     rendering third-party or user-supplied text. */
+  --break-anywhere: anywhere;
 
   /* Systematic vertical rhythm. Spacing between related text is a SYSTEM
      value, never a per-component judgment call. This is the single habit
@@ -366,6 +404,9 @@
     color: var(--color-stone);
   }
   .u-actions { margin-top: var(--space-lede-to-action); }
+  /* Third-party or user-supplied text: break anywhere rather than overflow a
+     clipped box. See the --break-anywhere note above. */
+  .u-break { overflow-wrap: var(--break-anywhere); word-break: break-word; }
   /* Section heading block -> the content it introduces. */
   .u-section-body { margin-top: var(--space-heading-to-content); }
 

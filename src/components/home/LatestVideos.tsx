@@ -36,7 +36,12 @@ export async function LatestVideos() {
                       loading="lazy"
                       className="card-img aspect-video w-full object-cover"
                     />
-                    <p className="p-3 text-smallmeta font-semibold md:p-4">{v.title}</p>
+                    {/* Titles come from the YouTube feed, so they contain
+                        handles and hashtags — unbreakable tokens that pushed
+                        past the card at 200% zoom and were silently clipped by
+                        `overflow-hidden`. Any string we did not write gets to
+                        break wherever it must. */}
+                    <p className="u-break p-3 text-smallmeta font-semibold md:p-4">{v.title}</p>
                   </a>
                 </li>
               ))}

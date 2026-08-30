@@ -92,7 +92,7 @@ export function Header() {
       <div className="container-site flex h-full items-center justify-between gap-5">
         <Link
           href="/"
-          className="site-brand-mark flex shrink-0 items-center gap-2 leading-none"
+          className="site-brand-mark flex min-w-0 items-center gap-2 leading-none"
           aria-label="Karma Design Studio: home"
         >
           {/* Karma has no logo file, so the wordmark has to carry the brand on
@@ -112,9 +112,15 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Eight items now that Machine Notes is here. gap-4 at 1280 keeps the
-            brand and the CTA clear of the nav; 2xl gets the roomier spacing. */}
-        <nav className="hidden items-center gap-4 xl:flex 2xl:gap-6" aria-label="Primary">
+        {/* Eight items, so the row is tight at exactly 1280. The nav gives up
+            space before the brand does — `shrink` on the nav plus a gap that
+            cannot collapse means the wordmark is never squeezed into the
+            first nav item, which is what it did at 1280 once the brand became
+            shrinkable for the 200%-zoom fix. */}
+        <nav
+          className="site-nav hidden shrink items-center gap-3.5 xl:flex 2xl:gap-6"
+          aria-label="Primary"
+        >
           {NAV.map((item) => (
             <Link
               key={item.key}
