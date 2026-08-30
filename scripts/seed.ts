@@ -1,7 +1,18 @@
 /**
  * Seeds the verified course catalog and (if empty) a starter set of batches.
  * Usage: npm run db:seed   (needs DATABASE_URL in .env)
- * Idempotent: courses upsert by slug; batches only insert when none exist.
+ *
+ * Idempotent, and — since 2026-08-30 — NON-DESTRUCTIVE about operator data.
+ *
+ * It used to derive a zero-based `sortOrder` and upsert it, while the Karma
+ * Console import derived a one-based one and never touched existing rows. So
+ * the two paths disagreed by one on every course, and re-running the seed on a
+ * live database silently renumbered the catalogue and undid whatever order the
+ * owner had arranged in the console. Both paths now share ONE projection
+ * (`VERIFIED_CATALOG_ROWS`), and a re-seed updates only the editorial fields
+ * that genuinely come from source control (`CATALOG_RESEED_FIELDS`): never
+ * `sort_order`, never `active`, never the fee plan, the timetable or the
+ * archive state.
  *
  * Runs OUTSIDE the Cloudflare request runtime, so it connects directly to
  * Supabase Postgres with DATABASE_URL — never through Hyperdrive.
@@ -11,7 +22,7 @@ import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, sql } from "drizzle-orm";
 import * as schema from "../src/lib/db/schema";
-import { courses as courseContent } from "../src/content/courses";
+import { CATALOG_RESEED_FIELDS, VERIFIED_CATALOG_ROWS, catalogReseedSet } from "../src/lib/admin/catalog-import";
 
 async function main() {
   const url = process.env.DATABASE_URL;
@@ -31,30 +42,16 @@ async function main() {
 async function seed(db: ReturnType<typeof drizzle<typeof schema>>) {
 
   console.log("Seeding courses…");
-  for (const [i, c] of courseContent.entries()) {
+  console.log(`  (a re-seed updates only ${CATALOG_RESEED_FIELDS.join(", ")})`);
+  for (const row of VERIFIED_CATALOG_ROWS) {
     await db
       .insert(schema.courses)
-      .values({
-        slug: c.slug,
-        nameEn: c.nameEn,
-        nameGu: c.nameGu,
-        family: c.family,
-        durationWeeks: c.durationWeeks,
-        modules: c.modules,
-        sortOrder: i
-      })
+      .values(row)
       .onConflictDoUpdate({
         target: schema.courses.slug,
-        set: {
-          nameEn: c.nameEn,
-          nameGu: c.nameGu,
-          family: c.family,
-          durationWeeks: c.durationWeeks,
-          modules: c.modules,
-          sortOrder: i
-        }
+        set: catalogReseedSet(row)
       });
-    console.log("  ✓", c.slug);
+    console.log("  ✓", row.slug);
   }
 
   const existing = await db.select({ n: sql<number>`count(*)` }).from(schema.batches);

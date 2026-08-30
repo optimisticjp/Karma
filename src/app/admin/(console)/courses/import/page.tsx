@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireOwner } from "@/lib/auth/guard";
-import { VERIFIED_CATALOG_ROWS } from "@/lib/admin/catalog-import";
-import { importVerifiedCatalogAction } from "./actions";
+import { VERIFIED_CATALOG_ROWS, VERIFIED_OPERATIONS_ROWS } from "@/lib/admin/catalog-import";
+import { applyVerifiedOperationsAction, importVerifiedCatalogAction } from "./actions";
 
 export default async function ImportCourseCataloguePage({
   searchParams
@@ -59,6 +59,37 @@ export default async function ImportCourseCataloguePage({
           <form action={importVerifiedCatalogAction}>
             <button type="submit" className="btn btn-primary">
               {gu ? "Verified catalogue import કરો" : "Import verified catalogue"}
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <section className="panel mt-6">
+        <div className="panel-head">
+          <h2 className="text-h4">
+            {gu ? "Verified operational facts" : "Verified operational facts"}
+          </h2>
+        </div>
+        <div className="panel-body grid gap-5">
+          <p className="text-smallmeta">
+            {gu
+              ? "Owner એ લેખિતમાં confirm કરેલા operational facts — duration (months), software, fee plan, batch timings, free demo અને curriculum — પહેલેથી import થયેલા course rows પર લખે છે. આ action existing values OVERWRITE કરે છે અને દરેક ફેરફાર audit થાય છે."
+              : "Writes the facts the owner has confirmed in writing — duration in months, the software taught, the fee plan, the batch timings, the free demo and the curriculum — onto course rows that already exist. Unlike the catalogue import this action OVERWRITES, and every course it changes is audited."}
+          </p>
+          <ul className="grid gap-2 text-smallmeta">
+            {VERIFIED_OPERATIONS_ROWS.map((course) => (
+              <li key={course.slug}>
+                <span className="font-semibold">{course.slug}</span>
+                <span className="block form-note">
+                  {course.durationMonths} {gu ? "મહિના" : "months"} · {course.software} · ₹
+                  {course.feeTotal?.toLocaleString("en-IN")}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <form action={applyVerifiedOperationsAction}>
+            <button type="submit" className="btn btn-secondary">
+              {gu ? "Verified operational facts લાગુ કરો" : "Apply verified operational facts"}
             </button>
           </form>
         </div>

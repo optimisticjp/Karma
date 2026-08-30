@@ -85,7 +85,7 @@ describe("notes are discoverable", () => {
     const tags = machineNotes.flatMap((n) => n.tags.map((t) => t.toLowerCase())).join(" | ");
     for (const theme of [
       "emcad classes surat",
-      "wilcom embroidery training surat",
+      "emcad dahao embroidery training surat",
       "machine embroidery training surat",
       "embroidery design classes surat",
       "computerised embroidery design course",
@@ -94,6 +94,23 @@ describe("notes are discoverable", () => {
     ]) {
       expect(tags, theme).toContain(theme);
     }
+  });
+
+  it("never targets or implies Wilcom training", () => {
+    /**
+     * Owner decision, 2026-08-30: Karma teaches EMCAD DAHAO and nothing else,
+     * and it is admission norm #3 that students are not to spend the trainer's
+     * time asking about other packages. A note that ranks for "Wilcom
+     * embroidery training Surat" would bring in exactly the enquiry the
+     * institute has asked not to receive, so the word is banned from the notes
+     * outright — tags, questions, answers and body alike.
+     *
+     * The one place "Wilcom" may legitimately appear in this repository is the
+     * institute's OWN admission norm, quoted verbatim in
+     * src/content/admission-terms.ts.
+     */
+    const everything = JSON.stringify(machineNotes).toLowerCase();
+    expect(everything).not.toContain("wilcom");
   });
 
   it("reaches the notes from the header and the footer", () => {

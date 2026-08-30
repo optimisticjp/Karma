@@ -61,7 +61,18 @@ const nextConfig: NextConfig = {
       { source: "/applique-3d", destination: "/en/courses", permanent: true },
       { source: "/about-us", destination: "/en/about", permanent: true },
       { source: "/contact-us", destination: "/en/contact", permanent: true },
-      { source: "/courses", destination: "/en/courses", permanent: true }
+      { source: "/courses", destination: "/en/courses", permanent: true },
+      /**
+       * The machine note that used to be "emCAD or Wilcom" was rewritten as
+       * "why one software" when the owner confirmed (2026-08-30) that Karma
+       * teaches EMCAD DAHAO only. The old URL had been indexed, so it keeps
+       * working rather than 404ing.
+       */
+      {
+        source: "/:locale(en|gu)/notes/emcad-or-wilcom",
+        destination: "/:locale/notes/why-one-software",
+        permanent: true
+      }
     ];
   },
   images: {

@@ -29,8 +29,8 @@ saying something true instead of guessing.
 | Question | What the site does today | What one answer would change |
 | --- | --- | --- |
 | **Which mobile is answered by a person, and which is WhatsApp-only?** | Publishes both, each labelled by channel; never calls the call number "WhatsApp" | Collapse to one number and simplify every contact surface |
-| Course durations | `durationWeeks: null` on all eleven; the page says "confirm with the studio" | Print a real duration per course, and add `timeRequired` to schema |
-| Fees | No price list anywhere; "shared in person at your demo" | Print a fee range, or keep the deferral deliberately |
+| Course durations — **for the remaining ten** | `durationWeeks: null` / `durationMonths: null`; the page says "confirm with the studio". EMCAD DAHAO is **answered**: 3 months | Print a real duration per course, and let `timeRequired` into schema for it |
+| Fees — **for the remaining ten** | No price list; "shared in person at your demo". EMCAD DAHAO is **answered**: ₹35,000 / ₹25,000 / ₹10,000, published in full | Print a fee plan, or keep the deferral deliberately |
 | Studio turnaround (B2B) | "Depends on technique, quantity and floor load — tell us your deadline" | Publish a realistic range on the services page |
 | Supported machine file formats | "Tell us what your machine takes" | Name the formats the studio actually delivers |
 | Exact opening hours | "Open daily · evening batches till 10:30 pm" | A precise `openingHoursSpecification` per day |
@@ -60,6 +60,45 @@ thing a supervisor tells a new operator — and none names a person, a client or
 an outcome. There is nothing in them for the owner to confirm.
 
 ---
+
+## Answered by the owner on 2026-08-30 — the EMCAD DAHAO admission material
+
+The owner supplied the institute's own printed admission sheet. Everything
+below is now 🟢 VERIFIED **for EMCAD DAHAO Embroidery Designing only**. Do not
+apply any of it to another course: the other ten still have no confirmed
+duration and no published fee.
+
+| Fact | Value | Where it lives |
+| --- | --- | --- |
+| The institute's training-centre line | KARMA DESIGN STUDIO · EMCAD DAHAO Embroidery Training Centre | `src/content/course-operations.ts` |
+| Course name | EMCAD DAHAO Embroidery Designing | `src/content/courses.ts` |
+| Duration | **3 months** — months, never restated as 12 weeks | `courses.durationMonths` |
+| Software | **EMCAD DAHAO only** | `courses.software` |
+| Batch timings | 08:00–12:00 · 12:00–16:00 · 16:00–20:00 (4 h) · 20:00–23:00 (3 h) | `courses.operations.scheduleOptions` |
+| Free demo | 2 days, 2 hours a session; preferred slots 10:00 · 14:00 · 18:00 · 21:00 | `courses.operations.demo` |
+| Fees | ₹35,000 total · ₹25,000 at admission · ₹10,000 within one month of joining | `courses.fee_*` |
+| What is taught | Multi · Sequence (2–12) · Coding · Beads (2–8) · Laser · Looping · Chain Stitch · Towel Work · Boring · Zardoshi · Ribbon Work | `courses.operations.curriculum` |
+| Practical training | 100% live practical machine training · live machine practical · sample making · device connection & setting · machine troubleshooting · production knowledge · practical machine output | `courses.operations.practical` |
+| Admission norms | 15 clauses, Gujarati original + English translation, version 1 | `src/content/admission-terms.ts` |
+| Student declaration | Gujarati original + English translation | same file |
+
+### The Wilcom claims, and what happened to them
+
+The institute states plainly: **માત્ર EMCAD DAHAO Software ની જ તાલીમ આપવામાં
+આવે છે** — only EMCAD DAHAO is taught — and norm #3 asks students not to spend
+the trainer's time asking about other packages. Before 2026-08-30 the site did
+the opposite in four places, all now corrected:
+
+| Where | Was | Now |
+| --- | --- | --- |
+| `src/content/notes.ts` | A note `emcad-or-wilcom` tagged "Wilcom embroidery training Surat" | Rewritten as `why-one-software`, about learning one package properly. The old URL 301s. |
+| `src/content/collections.ts` | FAQ "Which software do you teach — emCAD or Wilcom?" | "Which software do you teach?" → EMCAD DAHAO, and no other |
+| `src/content/courses.ts` | `production.softwareEn/Gu` explained what transfers to Wilcom | Names EMCAD DAHAO and nothing else |
+| `messages/{en,gu}.json` | The notes-index description ended "emCAD and Wilcom" | "…and designing on EMCAD DAHAO" |
+
+`tests/machine-notes.test.ts` now fails if the word reappears in the notes. The
+one place it may legitimately appear is the institute's own rule, quoted
+verbatim in `src/content/admission-terms.ts`.
 
 ## Contact audit (Phase 10)
 

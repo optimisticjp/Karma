@@ -12,7 +12,8 @@ It is written to be read, not skimmed. Read it before significant work.
 | | |
 | --- | --- |
 | **Written** | 2026-08-30 |
-| **Verified against** | `main` @ `5259326f762d70acffc0336e8f5ce6540ddc15ad` ("fix: keep unverified opening hours out of schema", PR #22) |
+| **Verified against** | `main` @ `9ad15e1` ("Vendor the Claude skill library, and give the repo a memory", PR #23), plus the operational work that followed it |
+| **Last substantive update** | 2026-08-30 — the owner's verified EMCAD DAHAO facts, the course operational model and migration `0004` |
 | **Rule** | Where this document and the code disagree, **the code is right.** Fix the document. |
 
 ---
@@ -670,6 +671,9 @@ Four migrations, applied in order:
 | `0001_tricky_malcolm_colcord` | Indexes on hot paths, unique enrolment per (student, batch), seat/time/fee check constraints, `batches.end_date`, the idempotency key |
 | `0002_admin_foundation` | `staff_permissions`; the `karma_staff_invariants` trigger + advisory lock; **RLS enabled with no policies and all grants revoked from `anon`/`authenticated`** on the then-18 app tables |
 | `0003_content_desk` | `content_items`, with its own RLS lockdown |
+| `0004_course_operations` | The course operational model: duration in months, software, the fee plan, the terms version, public visibility, the validated `operations` JSONB and archive columns on `courses`; the commercial-agreement snapshot on `enrollments`; father/reference/guardian-relation, preferred schedule, demo slot and terms fields on `applications`; father/reference fields on `students`; and `archived_at`/`archived_by` on `courses`, `batches`, `students` and `applications`. **Purely additive — no new tables, so migrations `0002`/`0003`'s RLS lockdown covers every new column automatically.** |
+
+⚠ **Migration `0004` must be applied to the Supabase database** (`npm run db:migrate` with a direct `DATABASE_URL`) before the console can write a fee plan, a timetable or an archive state. Code merged ahead of it degrades rather than crashing — reads of the new columns simply come back empty — but the operational features do not work until it runs.
 
 Migrations have been **additive only** so far. Dropping the deprecated
 `students.pin` and `applications.message` columns is deliberately deferred to a
@@ -936,16 +940,108 @@ Every table has RLS enabled with **no policies** and **no grants** for
 Two implementation rules that are easy to break:
 
 1. **New courses are appended, never inserted.** `VERIFIED_CATALOG_ROWS` derives
-   `sortOrder` from array position and the owner's Console import upserts with
-   `onConflictDoNothing`, so reordering this file would leave already-imported
-   rows on stale sort positions that collide with new ones. **Display order is a
+   `sortOrder` from array position (one-based) and the owner's Console import
+   upserts with `onConflictDoNothing`, so reordering this file would leave
+   already-imported rows on stale sort positions that collide with new ones.
+   **`scripts/seed.ts` used to disagree with that** — it derived a *zero*-based
+   `sortOrder` and upserted it, so running `npm run db:seed` against a live
+   database silently renumbered every course and undid whatever order the owner
+   had arranged in the console. Both paths now share the one projection, and a
+   re-seed updates only `CATALOG_RESEED_FIELDS` (`nameEn`, `nameGu`, `family`,
+   `modules`) — never `sortOrder`, `active`, `publicVisible`, the fee plan, the
+   timetable or the archive state, all of which belong to the operator once a
+   row exists. `tests/course-operations.test.ts` pins it. **Display order is a
    separate concern**: it lives in `COURSE_DISPLAY_ORDER` / `coursesByFamily`,
    and Zardosi leads by explicit owner decision (2026-08-29). To re-rank the
    catalogue, edit that one list — nothing else. Tests assert both the exact
    storage slug order and the display order.
-2. **`durationWeeks` is `null` on all eleven.** Durations are unconfirmed
-   (§39, Q1). The course page says "confirm with the studio" rather than
-   guessing, and `timeRequired` is deliberately absent from `Course` schema.
+2. **`durationWeeks` is `null` on all eleven, and `durationMonths` is set on
+   exactly one.** On 2026-08-30 the owner confirmed in writing that **EMCAD
+   DAHAO Embroidery Designing runs for three MONTHS**, so that course carries
+   `durationMonths: 3` and emits `timeRequired: "P3M"` in `Course` schema. The
+   other ten are still unconfirmed (§39, Q1) and their pages still say "confirm
+   with the studio". **Months is not weeks:** the institute said three months,
+   and restating that as "12 weeks" would be this repository putting a business
+   fact into a shape the business did not choose.
+
+### The course operational model (2026-08-30)
+
+The `courses` table became the operational source of truth for how a course is
+timetabled, what it teaches and what it costs. The model is deliberately split
+across two storage strategies (`src/lib/admin/course-operations.ts` explains it
+in full):
+
+| Half | What | Why |
+| --- | --- | --- |
+| **Columns** | `duration_months`, `software`, `fee_total`, `fee_admission`, `fee_balance_due_days`, `terms_version`, `public_visible`, `archived_at`/`archived_by` | Constrained (`chk_course_fees`, `chk_course_duration_months`), queried, and snapshotted onto an enrolment. A number that decides what a student owes does not belong in a blob. |
+| **`operations` JSONB** | schedule options, the demo policy, the curriculum, the practical points | Four bounded per-course lists, always read whole with the course, never joined or aggregated. Four child tables would buy nothing but joins on a free-tier database. |
+
+The payload is validated by `parseCourseOperations()` **before every write and
+after every read** — never trusted merely because it came back from Postgres,
+the same rule Content Desk follows. A payload that fails validation renders as
+an empty timetable and logs, rather than 500-ing a staff page.
+
+**A SCHEDULE OPTION IS NOT A BATCH.** A schedule option says "this course is
+taught 08:00–12:00"; a `batches` row says "this group starts on the 4th, has ten
+seats and a trainer". Do not create dated batch rows to represent standard
+timetable slots, and do not delete the distinction to simplify a form.
+
+**The commercial agreement is snapshotted onto the enrolment.** `enrollments`
+carries `agreed_fee_total`, `agreed_admission_amount`, `agreed_balance_due_on`,
+`agreed_duration_months`, `agreed_course_name`, `terms_version` and
+`terms_accepted_at`. Editing a course to ₹40,000 next year must not reprice a
+student who joined at ₹35,000; their ledger is what they signed. Changing an
+existing agreement is a deliberate, audited act on that row, with a reason.
+
+### The verified EMCAD DAHAO facts
+
+Supplied by the owner on the institute's own printed admission material,
+2026-08-30. They live in `src/content/course-operations.ts` and apply to
+**that one course**:
+
+| Fact | Value |
+| --- | --- |
+| Duration | **3 months** |
+| Software | **EMCAD DAHAO only** — not Wilcom, not anything else |
+| Batch timings | 08:00–12:00 · 12:00–16:00 · 16:00–20:00 (4 hours) · 20:00–23:00 (3 hours) |
+| Free demo | 2 days, 2 hours a session; preferred slots 10:00 · 14:00 · 18:00 · 21:00 |
+| Fees | ₹35,000 total · ₹25,000 at admission · ₹10,000 within one month of joining |
+| Taught | Multi · Sequence (2–12) · Coding · Beads (2–8) · Laser · Looping · Chain Stitch · Towel Work · Boring · Zardoshi · Ribbon Work |
+| Practical | 100% live practical machine training · live machine practical · sample making · device connection & setting · machine troubleshooting · production knowledge · practical machine output |
+
+The demo slots are **preferences, not inventory.** Karma keeps no per-date demo
+capacity, and building a booking system on top of these would have the site
+promise a seat nobody reserved.
+
+### Karma teaches EMCAD DAHAO, and only EMCAD DAHAO
+
+Owner decision, 2026-08-30, and the institute's own admission norms #1 and #3.
+Before it, the site targeted "Wilcom embroidery training Surat" as a search
+theme, ran a machine note called `emcad-or-wilcom`, and carried a course FAQ
+and a `production.software` line that were careful about what "transfers to
+Wilcom". All of it was removed or rewritten:
+
+- the note is now `why-one-software`, and `/notes/emcad-or-wilcom` **301s** to
+  it in `next.config.ts` because the old URL was indexed;
+- `tests/machine-notes.test.ts` asserts the word appears nowhere in the notes;
+- the one legitimate occurrence in the repository is the institute's own rule,
+  quoted verbatim in `src/content/admission-terms.ts`.
+
+### Versioned admission norms
+
+`src/content/admission-terms.ts` holds the fifteen clauses the institute prints,
+Gujarati original plus a working English translation, with the student
+declaration and a short consent label. Version 1 is active from 2026-08-30.
+
+**A published version is immutable.** A rule change is a new version, because an
+admission record points at a version number and editing one in place would
+rewrite what past students agreed to — the same class of mistake as editing a
+course fee and changing an existing ledger. They live in git rather than in a
+console-editable table for that reason, and because the wording is
+legal-commercial text the owner reviews, not a field to type between enquiries.
+If the owner later wants console editing, the upgrade path is a small
+`admission_terms` table seeded from this file; the version number is already the
+join key.
 
 ### Batches
 
@@ -1159,8 +1255,8 @@ Emitted types: `LocalBusiness` + `EducationalOrganization` (one node, stable
 | --- | --- |
 | `Review`, `AggregateRating`, `ratingValue`, review counts | No verified aggregate. The owner-provided 4.8 is not an audited rating (§37). |
 | `Person` for trainers | Every trainer profile on the site is sample. Schema is a claim about a real human being. |
-| `offers` / `price` | Fees are offline; there is no gateway. |
-| `timeRequired` | Course durations are unconfirmed (`durationWeeks: null`). |
+| `offers` / `price` | Karma takes no payment online. The EMCAD DAHAO fee is published in full on its course page, but an `offers` node invites a buy-now rich result for something that cannot be bought here. |
+| `timeRequired` **except on one course** | Ten of eleven durations are still unconfirmed. EMCAD DAHAO Embroidery Designing emits `P3M` because the owner confirmed it in writing on 2026-08-30; `tests/structured-data.test.ts` asserts exactly one course emits it, and that the value is `P3M` and not `P12W`. |
 | `openingHoursSpecification` | Exact day-by-day hours are owner-confirmation-needed. |
 | Student outcomes, pass rates, placement figures, student counts | Unverified. |
 
@@ -1524,7 +1620,7 @@ The register lives in `docs/content-checklist.md` (16 numbered questions) and
 
 | # | Question |
 | --- | --- |
-| Q1 (half) | **Course durations** per course, and whether the draft module topics are right. All eleven are `durationWeeks: null`. |
+| Q1 (mostly) | **Course durations** for the remaining **ten** courses, and whether the draft module topics are right. EMCAD DAHAO Embroidery Designing was answered on 2026-08-30 (3 months); the other ten stay `durationWeeks: null` / `durationMonths: null`. |
 | Q3 (half) | **Which mobile is answered by a person, and which is WhatsApp-only** (§37). |
 | Q4 | Exact **day-by-day opening hours** (would restore `openingHoursSpecification`). |
 | Q5 | **Default site language** — English (current) or Gujarati? One line in `src/i18n/routing.ts`. |
@@ -1534,7 +1630,7 @@ The register lives in `docs/content-checklist.md` (16 numbered questions) and
 | Q9 | **Verify the public numbers** — 500+ students? Google rating 4.8 or 4.9? Years running? `verifiedFacts` stays `false` until confirmed in writing. |
 | Q10 | **Real batches** — current live batches, seats, morning/evening times. |
 | Q11 | **Certificate** issuing name, signatory, historical numbering to migrate. |
-| Q12 | Fee-policy language; any registration fee. |
+| Q12 (half) | Fee-policy language, and any registration fee, **for the other ten courses**. EMCAD DAHAO's plan is confirmed and published (§21). |
 | Q13 | **B2B**: confirm the service list, typical minimums, and the machine file formats actually delivered. |
 | Q15 | Attendance rule for certificates — 75% shipped as a draft. Correct? Correction window? Who approves? |
 | Q16 | Who receives notifications beyond `karmadesignclasses@gmail.com`. |
@@ -1653,9 +1749,12 @@ Things that have cost time before, or would.
   `tests/csp.test.ts` will tell you.
 - **The Supabase "Invite user" email template is not optional** (§10). With the
   stock template every invitation dead-ends.
-- **`durationWeeks` is `null` for a reason.** Filling it in "to make the page
-  look finished" publishes an unverified fact and re-opens `timeRequired` in
-  schema.
+- **`durationWeeks` is `null` for a reason, and `durationMonths` is set on
+  exactly one course.** Filling either in "to make the page look finished"
+  publishes an unverified fact and puts a fabricated `timeRequired` into schema.
+  EMCAD DAHAO is three MONTHS because the owner said so in writing; converting
+  that to weeks, or copying it onto another course, are both regressions with
+  tests against them.
 - **Debugging production:** `npx wrangler tail`. Log prefixes: `[auth]`,
   `[team]`, `[login]`, `[dashboard]`, `[admission]`, `[brief]`, `[turnstile]`,
   `[email]`. None of them ever prints a secret — keep it that way.
@@ -1746,10 +1845,15 @@ being. They are load-bearing.
 - **The locale layout's title template is `%s`**, so `pageMeta` titles render
   verbatim and several already include "| Karma Design Studio". Adding a
   template suffix would double it.
-- **Admin module copy lives in `src/lib/admin/*-copy.ts`, not in
-  `messages/{en,gu}.json`** — so the mechanical i18n parity test does **not**
-  cover it. EN/GU parity there is held only by
-  `satisfies Record<AdminLocale, …Copy>`.
+- **Console copy lives in TWO places, and only one of them is parity-tested.**
+  The shell, navigation, team screens and permission editor read
+  `messages/{en,gu}.json` under the `admin` namespace via `getAdminT()`, so
+  `tests/i18n-parity.test.ts` covers them. The per-module copy — admissions,
+  students, fees, attendance, certificates, design, content, courses, reports —
+  lives in `src/lib/admin/*-copy.ts` and is **not** covered by that test; parity
+  there is held only by `satisfies Record<AdminLocale, …Copy>`, which catches a
+  missing key but not an untranslated one. (An earlier revision of this file
+  claimed the `*-copy.ts` modules were the only home; they are not.)
 - **`dashboard.view` and `settings.view` exist in `PERMISSIONS` but are never
   checked anywhere.** `/admin` requires only `requireAdmin()`. Removing them
   breaks the permission editor and the message catalogues; adding a real gate
@@ -1813,10 +1917,16 @@ code to delete on sight** — each was built for a use that has not arrived.
 - `.accent-italic` and `.section-major` in `globals.css`, both applied on zero
   screens. The hero uses its own rhythm deliberately — a full major top pad
   pushed the headline 215px down.
-- `/admin/courses/import` — the **route** is intentionally kept and still
-  owner-guarded; only the "Import verified catalogue" **button** was removed at
-  the owner's request (2026-08-30). Restoring the button is a few lines. Do not
-  delete the route as dead code.
+- ~~`/admin/courses/import` — only the "Import verified catalogue" button was
+  removed.~~ **This was never true of the code on `main`**, and it was corrected
+  on 2026-08-30 by reading the page rather than the note: the owner-guarded
+  route renders the import button, and now a second owner-only button as well —
+  "Apply verified operational facts", which pushes the confirmed duration, fee
+  plan, timetable, demo policy and curriculum onto course rows that already
+  exist. The two are deliberately separate: the catalogue import only ever
+  INSERTS (`onConflictDoNothing`), because overwriting a course the owner has
+  edited is exactly the failure `scripts/seed.ts` used to have; the operational
+  apply OVERWRITES, so it is its own button and audits every course it changes.
 - `DESIGN_AUDIT_ACTIONS.fileDownloaded` — declared, no call site, waiting on R2.
 - `certificates.pdf_key` and `service_files.r2_key` columns, and `src/lib/r2.ts`
   — all written ahead of the R2 binding.
@@ -1833,7 +1943,7 @@ scope for a documentation change. **Do not treat these as invisible.**
 | --- | --- |
 | **`content_items` is not in `scripts/backup.ts`'s `TABLES` list** (18 entries, written before migration `0003`). | Every Content Desk row is outside the weekly CSV backup. A one-line fix, but it widens what the PII-bearing artifact contains. |
 | **The certificate print page hard-codes the `workers.dev` verify origin** instead of deriving it from `site.url`. | It will keep pointing at `workers.dev` after the domain cutover — exactly what `docs/launch-checklist.md` §2 says never to do. |
-| **`public/llms.txt` hard-codes `karmadesignstudio.in` URLs** while everything else derives from `NEXT_PUBLIC_SITE_URL`, **and it lists only eight courses**. | Two problems in one served file: it disagrees with every other canonical today, and it advertises a stale catalogue to crawlers and to any LLM that reads it. The catalogue has been eleven since 2026-08-29. |
+| ~~**`public/llms.txt` hard-codes `karmadesignstudio.in` URLs** and lists only eight courses.~~ **FIXED 2026-08-30.** | It is now generated at `src/app/llms.txt/route.ts`: URLs derive from `site.url`, the catalogue derives from `src/content/courses.ts`, and the EMCAD DAHAO facts derive from `src/content/course-operations.ts`. The static file is deleted. Both problems had the same cause — it was the one public surface that derived from nothing. |
 | **The CSV export route writes no audit row.** | Exporting student, fee and design data is the one sensitive operation that leaves no trace beyond the Worker log. There is no audit action constant for `exports.run`. |
 | **Reference and receipt years are derived inconsistently** — students use IST (`kolkataDate`), but the admissions reference and fee `receiptNo` use the Worker's UTC year. | Between 00:00 and 05:30 IST on 1 January they produce the previous year. |
 | **Migration `0002` revokes on tables only, not on the 18 tables' identity sequences.** Only `0003` revokes a sequence. | An inconsistency in the Data API lockdown, not a known hole. |
@@ -1873,22 +1983,39 @@ most expensive thing a future session can do here.
     confirms; the call number is never labelled WhatsApp.
 15. **Analytics collects no PII** and makes no network request.
 16. **Courses are appended, never reordered in storage**; display order lives in
-    `COURSE_DISPLAY_ORDER`.
-17. **Team administration is owner-only with no permission key.**
-18. **Operational records are archived, never hard-deleted.**
-19. **`/admin` stays outside the `[locale]` segment**; public URLs stay
+    `COURSE_DISPLAY_ORDER`. The seed and the console import share one
+    projection and a re-seed never rewrites operator-managed fields.
+17. **Karma teaches EMCAD DAHAO and only EMCAD DAHAO.** Do not reintroduce a
+    Wilcom training claim, a Wilcom search target, or a "which software should
+    you learn" comparison that implies Karma teaches more than one.
+18. **The EMCAD DAHAO facts belong to that one course.** Three months, ₹35,000 /
+    ₹25,000 / ₹10,000, four timings, a two-day free demo. Do not apply them to
+    another course, and do not restate the duration in weeks.
+19. **A published admission-terms version is immutable.** A rule change is a new
+    version, never an edit to the old one.
+20. **The enrolment agreement is a snapshot, not a view of the course.** Editing
+    a course never reprices an existing student.
+21. **Team administration is owner-only with no permission key.**
+22. **Operational records are archived by default.** ⚠ The owner replaced the
+    older *blanket* "never hard-deleted" rule on 2026-08-30: permanent deletion
+    now exists, Owner-only, behind a dependency preflight, a typed confirmation
+    and an audit tombstone written before the row disappears. Archive remains
+    the ordinary path; deletion is the deliberate exception. Audit history and
+    the single Owner identity stay undeletable. See
+    `docs/admin-architecture.md`.
+23. **`/admin` stays outside the `[locale]` segment**; public URLs stay
     always-prefixed with no browser-language auto-redirect.
-20. **The design system is Screen to Stitch (v3)** — not a generic system, and
+24. **The design system is Screen to Stitch (v3)** — not a generic system, and
     not the one belonging to the vendored skill template.
-21. **`premium.css` stays unlayered**, and design token *names* stay frozen —
+25. **`premium.css` stays unlayered**, and design token *names* stay frozen —
     `globals.css` is shared with Karma Console.
-22. **`staff_role` enum values stay in order**, `uq_staff_console_email` keeps
+26. **`staff_role` enum values stay in order**, `uq_staff_console_email` keeps
     its `role <> 'trainer'` predicate, and `staff.auth_user_id` stays
     `varchar(64)`.
-23. **`writeAudit()` keeps never throwing**, and the `karma_staff_invariants`
+27. **`writeAudit()` keeps never throwing**, and the `karma_staff_invariants`
     trigger is never dropped to make a migration easier — the trigger is the
     guarantee; the application checks are only the message.
-24. **The mobile bar stays two actions, not navigation**, and its 1280px
+28. **The mobile bar stays two actions, not navigation**, and its 1280px
     breakpoint stays paired with the header's.
 
 ---

@@ -26,6 +26,32 @@ Provider limits change: treat this table as a prompt to check, not as fact.
   confirm the admin list matches who should actually have access — a
   deactivated admin frees a seat, so this is also how you find a wasted one.
 
+## Applying a schema change
+`npm run db:migrate` runs the SQL in `drizzle/` against the direct
+`DATABASE_URL` — never through Hyperdrive, which is a Worker-only path. Review
+the generated SQL before running it; migrations here are additive by rule.
+
+**`0004_course_operations` (2026-08-30) has not been applied by any automation.**
+It adds the course operational model (duration in months, software, the fee
+plan, the terms version, the validated `operations` payload, archive columns),
+the enrolment agreement snapshot and the new admission fields. It is purely
+additive and adds no new tables, so the RLS lockdown from `0002`/`0003` covers
+every new column. Until it runs, the console reads the new columns as empty
+rather than failing.
+
+## Seeding is non-destructive about operator data
+`npm run db:seed` inserts missing courses and, on a course that already exists,
+updates **only** `nameEn`, `nameGu`, `family` and `modules`. It does **not**
+touch `sort_order`, `active`, `public_visible`, the fee plan, the timetable or
+the archive state — those belong to whoever has been managing the catalogue in
+Karma Console.
+
+This is a behaviour change. The seed used to write a zero-based `sort_order` and
+upsert it, while the console import wrote a one-based one, so a re-seed silently
+renumbered the whole catalogue and undid the owner's arrangement. Both paths now
+share one projection (`VERIFIED_CATALOG_ROWS`), and
+`tests/course-operations.test.ts` fails if they drift apart again.
+
 ## Debugging in production
 ```bash
 npx wrangler tail            # live logs from the deployed worker

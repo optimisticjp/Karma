@@ -15,6 +15,8 @@ import { TrackedLink } from "@/components/site/TrackedLink";
 import { TrackView } from "@/components/site/TrackView";
 import { JsonLd } from "@/components/site/JsonLd";
 import { courseBySlug, coursesByFamily, coursesInFamily, families } from "@/content/courses";
+import { verifiedOperationsFor } from "@/content/course-operations";
+import { CourseOperations } from "@/components/course/CourseOperations";
 import { notesForCourse } from "@/content/notes";
 import { faqs, trainers } from "@/content/collections";
 import { site, waLink } from "@/lib/site";
@@ -73,8 +75,9 @@ export default async function CourseDetailPage({
   const course = courseBySlug(slug);
   if (!course) notFound();
 
-  const [t, tc, tn, l] = await Promise.all([
+  const [t, to, tc, tn, l] = await Promise.all([
     getTranslations("courseDetail"),
+    getTranslations("courseOps"),
     getTranslations("common"),
     getTranslations("notesPage"),
     getLocale()
@@ -113,16 +116,26 @@ export default async function CourseDetailPage({
     [name, `/courses/${course.slug}`]
   ]);
 
-  /* No offers, no timeRequired, no rating — see src/lib/schema.ts. */
+  /* No offers, no price, no rating — see src/lib/schema.ts. `timeRequired`
+     appears only where the owner has confirmed a duration in writing. */
   const courseLd = courseSchema(course, gu ? "gu" : "en");
+
+  /* Verified operational facts, where the owner has supplied them. Today that
+     is EMCAD DAHAO Embroidery Designing and nothing else; every other course
+     keeps the honest "ask at your demo" fee and duration copy below. */
+  const verified = verifiedOperationsFor(course.slug);
 
   const waCourse = `Hi Karma Design Studio! 👑 મને "${name}" કોર્સનો ફ્રી ડેમો બુક કરવો છે. નામ: ____ | ટાઇમ: સવાર/સાંજ`;
 
+  const durationFact = course.durationMonths
+    ? to("durationValue", { months: course.durationMonths })
+    : course.durationWeeks
+      ? t("weeks", { count: course.durationWeeks })
+      : t("confirmDuration");
+
   const facts: Array<[string, string]> = [
-    [
-      t("durationLabel"),
-      course.durationWeeks ? t("weeks", { count: course.durationWeeks }) : t("confirmDuration")
-    ],
+    [t("durationLabel"), durationFact],
+    ...(verified ? ([[t("softwareTitle"), verified.software]] as Array<[string, string]>) : []),
     [t("levelLabel"), t("levelValue")],
     [t("langLabel"), t("langValue")]
   ];
@@ -196,6 +209,43 @@ export default async function CourseDetailPage({
           </div>
         </div>
       </section>
+
+      {/* 2b. The facts the institute publishes about this course: duration,
+             software, batch timings, the free demo, what is taught, and the
+             complete fee plan. Rendered only where the owner has confirmed
+             them in writing — see src/content/course-operations.ts. */}
+      {verified ? (
+        <CourseOperations
+          verified={verified}
+          locale={gu ? "gu" : "en"}
+          copy={{
+            factsTitle: to("factsTitle"),
+            durationLabel: to("durationLabel"),
+            durationValue: to("durationValue", { months: verified.durationMonths }),
+            softwareLabel: to("softwareLabel"),
+            softwareNote: to("softwareNote"),
+            demoLabel: to("demoLabel"),
+            demoValue: to("demoValue", {
+              days: verified.operations.demo?.days ?? 0,
+              hours: verified.operations.demo?.hours ?? 0
+            }),
+            batchTitle: to("batchTitle"),
+            batchSub: to("batchSub"),
+            hours: (n: number) => to("hours", { hours: n }),
+            demoTitle: to("demoTitle"),
+            demoSub: to("demoSub"),
+            teachTitle: to("teachTitle"),
+            teachSub: to("teachSub"),
+            practicalTitle: to("practicalTitle"),
+            feeTitle: to("feeTitle"),
+            feeTotal: to("feeTotal"),
+            feeAdmission: to("feeAdmission"),
+            feeBalance: to("feeBalance"),
+            feeBalanceNote: to("feeBalanceNote"),
+            feeOffline: to("feeOffline")
+          }}
+        />
+      ) : null}
 
       {/* 3. The production problems this technique's training exists to fix.
              Named faults, not adjectives: an operator who recognises one of
@@ -299,7 +349,12 @@ export default async function CourseDetailPage({
           <div>
             <h2 className="text-h3 font-display">{t("feeTitle")}</h2>
             <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-            <p className="prose-measure mt-5 text-stone">{t("feeBody")}</p>
+            {/* A course with a published, owner-verified fee plan states it in
+                full above; repeating "there is no public price list" underneath
+                would contradict the block a reader has just read. */}
+            <p className="prose-measure mt-5 text-stone">
+              {verified ? to("feeOffline") : t("feeBody")}
+            </p>
             <p className="mt-4 text-smallmeta text-stone">{t("feeNote")}</p>
           </div>
           <div className="surface surface-feature">

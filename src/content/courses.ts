@@ -16,9 +16,18 @@
  * rows holding stale sort positions and collide with the new ones. Public
  * surfaces group by family for display instead.
  *
- * ⚠️ CONFIRM-WITH-OWNER (Q1): durations and module topics are drafts.
- * Content here is the Phase 1 source of truth; Phase 2 moves it to the DB
- * (seed script mirrors this file).
+ * ⚠️ CONFIRM-WITH-OWNER (Q1): durations and module topics are drafts for every
+ * course EXCEPT emcad-embroidery-design, whose duration, fee plan, timetable,
+ * free-demo policy and curriculum the owner confirmed in writing on
+ * 2026-08-30. Those verified facts live in `src/content/course-operations.ts`
+ * and must NOT be copied onto any other course.
+ *
+ * ⚠️ KARMA TEACHES EMCAD DAHAO, AND ONLY EMCAD DAHAO. It does not teach
+ * Wilcom, and nothing on this site may imply that it does or invite the
+ * question. Owner decision, 2026-08-30; it is also admission norm #1 and #3.
+ *
+ * Content here is the editorial source of truth; the `courses` table is the
+ * operational one (seed and Karma Console import both project from this file).
  */
 
 export type CourseModule = {
@@ -40,6 +49,13 @@ export type Course = {
   outcomesEn: string[];
   outcomesGu: string[];
   durationWeeks: number | null; // null = confirm with owner
+  /**
+   * Months, where the owner has confirmed a duration. Kept separate from weeks
+   * on purpose: the institute says "3 Months", and silently rendering that as
+   * "12 weeks" would be this repository restating a business fact in a shape
+   * the business did not choose.
+   */
+  durationMonths: number | null;
   photoLabel: string; // shoot-list label for the PhotoSlot
   modules: CourseModule[];
   production: CourseProduction;
@@ -55,8 +71,8 @@ export type Course = {
  *
  * `software` is optional and deliberately so: only the design course teaches a
  * digitising package, and claiming otherwise would be a false statement about
- * what a course covers. Where it is set, it names emCAD as what is taught and
- * is careful about what transfers to Wilcom rather than implying both are.
+ * what a course covers. Where it is set, it names EMCAD DAHAO — the one package
+ * Karma teaches — and names nothing else.
  */
 export type CourseProduction = {
   /** One sentence: what this technique physically produces. */
@@ -102,10 +118,10 @@ export const families = {
     nameEn: "Design Software",
     nameGu: "ડિઝાઇન સોફ્ટવેર",
     introEn:
-      "emCAD embroidery design: create the designs the machines stitch. The skill that turns an operator into a designer.",
+      "EMCAD DAHAO embroidery designing: create the designs the machines stitch, and prove every one of them on the machine. The skill that turns an operator into a designer.",
     introGu:
-      "emCAD એમ્બ્રોઇડરી ડિઝાઇન: મશીન જે સીવે છે એ ડિઝાઇન તમે બનાવો. ઓપરેટરમાંથી ડિઝાઇનર બનાવતી સ્કિલ.",
-    photoLabel: "emCAD screen with visible stitch paths"
+      "EMCAD DAHAO એમ્બ્રોઇડરી ડિઝાઇનિંગ: મશીન જે સીવે છે એ ડિઝાઇન તમે બનાવો, અને દરેક ડિઝાઇન મશીન પર જ સાબિત કરો. ઓપરેટરમાંથી ડિઝાઇનર બનાવતી સ્કિલ.",
+    photoLabel: "EMCAD DAHAO screen with visible stitch paths"
   }
 } as const;
 
@@ -193,6 +209,7 @@ export const courses: Course[] = [
       "કોસ્ટિંગ, સ્પીડ અને ક્વોલિટીના માપદંડ સમજો"
     ],
     durationWeeks: null,
+    durationMonths: null,
     photoLabel: "Zardosi machine with gold thread work in progress",
     production: {
       producesEn: "Raised metallic work — zari, dabka and kasab laid in relief on bridal lehengas, dupattas, sherwanis and heavy blouse panels.",
@@ -248,6 +265,7 @@ export const courses: Course[] = [
       "આખા પ્રોડક્શન રનમાં એકસરખી ફિનિશ આપો"
     ],
     durationWeeks: null,
+    durationMonths: null,
     photoLabel: "Beads catching light on the 4-beads machine",
     production: {
       producesEn: "Bead and stone embellishment laid at production speed — all-over scatter, borders and motif fills on fashion and festive wear.",
@@ -303,6 +321,7 @@ export const courses: Course[] = [
       "ફેસ્ટિવ અને બ્રાઇડલ ઓર્ડર માર્કેટ સ્ટાન્ડર્ડ પ્રમાણે પૂરા કરો"
     ],
     durationWeeks: null,
+    durationMonths: null,
     photoLabel: "Sequence work shimmer, macro shot",
     production: {
       producesEn: "Sequin work with a consistent lie and light — the shimmer Surat's fashion units order by the metre, in scatter, border and filled motif.",
@@ -358,6 +377,7 @@ export const courses: Course[] = [
       "મશીનની જાળવણી અને નાની ખામી જાતે ઉકેલો"
     ],
     durationWeeks: null,
+    durationMonths: null,
     photoLabel: "Cording machine laying dori along a curve",
     production: {
       producesEn: "Corded outline and raised line work — the drawn, rope-like line that defines borders, monograms and structured motifs.",
@@ -413,6 +433,7 @@ export const courses: Course[] = [
       "બધા હેડ પર આઉટપુટની ક્વોલિટી ચેક કરો"
     ],
     durationWeeks: null,
+    durationMonths: null,
     photoLabel: "Multi-head machine floor, all heads running",
     production: {
       producesEn: "Chain-stitch fill and outline, and multi-head running of the same design across several panels at once.",
@@ -468,6 +489,7 @@ export const courses: Course[] = [
       "લેસર વર્કને પ્રીમિયમ સર્વિસ તરીકે વેચતા શીખો"
     ],
     durationWeeks: null,
+    durationMonths: null,
     photoLabel: "Laser machine cutting pattern into fabric",
     production: {
       producesEn: "Laser cutting and etching on fabric and leather — cut-work panels, perforated patterns and sealed edges that need no hemming.",
@@ -523,6 +545,7 @@ export const courses: Course[] = [
       "ટફ્ટિંગમાંથી ખરેખર વેચાય એવી પ્રોડક્ટ બનાવો"
     ],
     durationWeeks: null,
+    durationMonths: null,
     photoLabel: "Tufting gun mid-stroke on stretched cloth",
     production: {
       producesEn: "Tufted pile work — rugs, wall pieces and textured panels built by punching yarn into a stretched backing.",
@@ -557,28 +580,32 @@ export const courses: Course[] = [
   {
     slug: "emcad-embroidery-design",
     family: "software",
-    nameEn: "emCAD Embroidery Design",
-    nameGu: "emCAD એમ્બ્રોઇડરી ડિઝાઇન",
+    nameEn: "EMCAD DAHAO Embroidery Designing",
+    nameGu: "EMCAD DAHAO એમ્બ્રોઇડરી ડિઝાઇનિંગ",
     leadEn:
-      "Design on screen what the machines will stitch: punching, pathing and machine-ready files in emCAD.",
+      "Three months on EMCAD DAHAO: design on screen what the machines will stitch, then run it on a live machine in the same session. Multi, sequence, coding, beads, laser, looping, chain, towel, boring, zardoshi and ribbon work.",
     leadGu:
-      "મશીન જે સીવશે એ સ્ક્રીન પર ડિઝાઇન કરો: emCADમાં પંચિંગ, પાથિંગ અને મશીન-રેડી ફાઇલ.",
+      "EMCAD DAHAO પર ત્રણ મહિના: મશીન જે સીવશે એ સ્ક્રીન પર ડિઝાઇન કરો, અને એ જ સેશનમાં લાઇવ મશીન પર ચલાવો. મલ્ટી, સિકવન્સ, કોડિંગ, બીડ્સ, લેસર, લૂપિંગ, ચેઇન, ટોવેલ, બોરિંગ, ઝરદોશી અને રિબન વર્ક.",
     whoEn:
       "For operators becoming designers, and for anyone who wants the best-paid seat in the embroidery workflow.",
     whoGu:
       "ઓપરેટરમાંથી ડિઝાઇનર બનવા માંગતા, અને એમ્બ્રોઇડરી વર્કફ્લોની સૌથી સારા પગારવાળી સીટ જોઈતી હોય એ દરેક માટે.",
     outcomesEn: [
-      "Build clean, machine-ready designs in emCAD",
+      "Build clean, machine-ready designs in EMCAD DAHAO",
       "Understand stitch types, density and pathing",
-      "Take a client brief from artwork to production file"
+      "Connect and set the device, and read a machine that is misbehaving",
+      "Take a client brief from artwork to production file, and prove it on the machine"
     ],
     outcomesGu: [
-      "emCADમાં ચોખ્ખી, મશીન-રેડી ડિઝાઇન બનાવો",
+      "EMCAD DAHAO માં ચોખ્ખી, મશીન-રેડી ડિઝાઇન બનાવો",
       "સ્ટિચ ટાઇપ, ડેન્સિટી અને પાથિંગ સમજો",
-      "ક્લાયન્ટના આર્ટવર્કથી પ્રોડક્શન ફાઇલ સુધી કામ કરો"
+      "ડિવાઇસ કનેક્ટ અને સેટ કરો, અને મશીન ખોટું ચાલે ત્યારે વાંચી શકો",
+      "ક્લાયન્ટના આર્ટવર્કથી પ્રોડક્શન ફાઇલ સુધી કામ કરો, અને મશીન પર સાબિત કરો"
     ],
+    /* Weeks stays null: the institute states this course in MONTHS. */
     durationWeeks: null,
-    photoLabel: "Student at emCAD screen, stitch paths visible",
+    durationMonths: 3,
+    photoLabel: "Student at EMCAD DAHAO screen, stitch paths visible",
     production: {
       producesEn: "Machine-ready embroidery files — the digitised design that decides, before a single stitch is run, whether the job comes out right.",
       producesGu: "મશીન-રેડી એમ્બ્રોઇડરી ફાઇલ — ડિજિટાઇઝ કરેલી એ ડિઝાઇન, જે એક પણ ટાંકો પડ્યા પહેલાં નક્કી કરી દે છે કે જોબ સારો આવશે કે નહીં.",
@@ -592,12 +619,12 @@ export const courses: Course[] = [
         "સ્ટિચ કાઉન્ટ અને કલર ચેન્જના કારણે જોબ એટલો ધીમો કે પોસાય નહીં",
         "દરેક મશીન પર મોકલતાં ફરીથી સુધારવી પડતી ફાઇલો"
       ],
-      machineEn: "Design workstations, with stitch-outs run on the studio's machines.",
-      machineGu: "ડિઝાઇન વર્કસ્ટેશન, અને સ્ટિચ-આઉટ સ્ટુડિયોની મશીન પર.",
-      softwareEn: "Taught on emCAD, the package the studio digitises production files on. The decisions transfer: underlay, density, stitch types, pull compensation and travel order are the same in any digitising software, including Wilcom, so the thinking is not locked to one product.",
-      softwareGu: "emCAD પર શીખવાય છે, જેના પર સ્ટુડિયો પ્રોડક્શન ફાઇલ ડિજિટાઇઝ કરે છે. નિર્ણયો બધે કામ લાગે છે: અન્ડરલે, ડેન્સિટી, સ્ટિચ ટાઇપ, પુલ કોમ્પેન્સેશન અને ટ્રાવેલ ઓર્ડર દરેક ડિજિટાઇઝિંગ સોફ્ટવેરમાં — Wilcom સહિત — એકસરખા છે, એટલે સમજણ એક પ્રોડક્ટ પૂરતી સીમિત નથી રહેતી.",
-      practiceEn: "Digitise a design, run it on a machine, read the sample, and correct the file. The loop is the course: a file is not finished until it has stitched out.",
-      practiceGu: "ડિઝાઇન ડિજિટાઇઝ કરો, મશીન પર ચલાવો, સેમ્પલ વાંચો, અને ફાઇલ સુધારો. આ લૂપ જ કોર્સ છે: ફાઇલ સ્ટિચ-આઉટ થાય નહીં ત્યાં સુધી પૂરી ન કહેવાય.",
+      machineEn: "Design workstations, with every design stitched out on the studio's live production machines.",
+      machineGu: "ડિઝાઇન વર્કસ્ટેશન, અને દરેક ડિઝાઇન સ્ટુડિયોની લાઇવ પ્રોડક્શન મશીન પર સ્ટિચ-આઉટ.",
+      softwareEn: "EMCAD DAHAO, and only EMCAD DAHAO. It is the package the studio digitises production files on, so what a student learns here is exactly what the floor runs — one package, taught properly, on the machines it drives.",
+      softwareGu: "EMCAD DAHAO, અને માત્ર EMCAD DAHAO. સ્ટુડિયો પ્રોડક્શન ફાઇલ એના પર જ ડિજિટાઇઝ કરે છે, એટલે સ્ટુડન્ટ જે શીખે છે એ જ ફ્લોર પર ચાલે છે — એક જ સોફ્ટવેર, બરાબર શીખવેલું, જે મશીન ચલાવે છે એની ઉપર જ.",
+      practiceEn: "Digitise a design, run it on a machine, read the sample, and correct the file. The loop is the course: a file is not finished until it has stitched out. Device connection and setting, machine troubleshooting and production knowledge are part of it, not an extra.",
+      practiceGu: "ડિઝાઇન ડિજિટાઇઝ કરો, મશીન પર ચલાવો, સેમ્પલ વાંચો, અને ફાઇલ સુધારો. આ લૂપ જ કોર્સ છે: ફાઇલ સ્ટિચ-આઉટ થાય નહીં ત્યાં સુધી પૂરી ન કહેવાય. ડિવાઇસ કનેક્શન અને સેટિંગ, મશીન ટ્રબલશૂટિંગ અને પ્રોડક્શન નોલેજ પણ એનો જ ભાગ છે, અલગ નહીં.",
       outputsEn: [
         "Digitising job work for units and boutiques",
         "Production files for your own machines",
@@ -609,7 +636,7 @@ export const courses: Course[] = [
         "બલ્ક રન પહેલાં સેમ્પલિંગ અને કરેક્શન"
       ]
     },
-    modules: draftModules("emCAD design", "emCAD ડિઝાઇન")
+    modules: draftModules("EMCAD DAHAO design", "EMCAD DAHAO ડિઝાઇન")
   },
   {
     slug: "flat-embroidery",
@@ -635,6 +662,7 @@ export const courses: Course[] = [
       "મશીન પર કામ જાતે સેટ કરો, શરૂઆતથી અંત સુધી"
     ],
     durationWeeks: null,
+    durationMonths: null,
     photoLabel: "Flat embroidery running on the machine, multi-colour design",
     production: {
       producesEn: "Flat surface embroidery — satin, fill and outline. The foundation every other machine technique is built on.",
@@ -690,6 +718,7 @@ export const courses: Course[] = [
       "કઈ ડિઝાઇન એપ્લિક માટે છે, કઈ ફોમ માટે, અને કઈ બેમાંથી એકેય માટે નહીં એ સમજો"
     ],
     durationWeeks: null,
+    durationMonths: null,
     photoLabel: "Appliqué panel with satin edge beside a 3D foam motif",
     production: {
       producesEn: "Applied fabric shapes and raised foam work — patches, cut-away appliqué and the 3D lettering used on caps, jackets and stage wear.",
@@ -745,6 +774,7 @@ export const courses: Course[] = [
       "પ્રોડક્શન ટાઇમલાઇન સાચવીને હાથના કામ જેવો દેખાવ લાવો"
     ],
     durationWeeks: null,
+    durationMonths: null,
     photoLabel: "Cross stitch panel on a kurti, close-up of the grid",
     production: {
       producesEn: "Counted cross-stitch worked on the machine — the grid-based motif and border work used on home textiles and traditional garment panels.",
