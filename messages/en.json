@@ -774,10 +774,13 @@
     "asideBody": "Anyone can check a Karma certificate here — no account, no login. If the number does not resolve, call the studio before drawing a conclusion."
   },
   "notFound": {
+    "eyebrow": "Page not found",
     "title": "This page slipped a stitch.",
-    "body": "The link is broken or the page moved. The courses and the free demo are one tap away.",
+    "body": "The link is broken or the page moved. Everything the site actually has is one tap away.",
     "homeCta": "Go home",
-    "coursesCta": "See courses"
+    "demoCta": "Book a demo",
+    "popularTitle": "Most people wanted",
+    "catalogueTitle": "Or start from the catalogue"
   },
   "footer": {
     "descriptor": "Embroidery Academy & Design Lab, Surat",
@@ -801,9 +804,11 @@
     "landlineFor": "— studio landline"
   },
   "errorPage": {
-    "title": "Something went wrong.",
-    "body": "The page hit an error. Try again; if it repeats, WhatsApp us and we'll help you directly.",
-    "retry": "Try again"
+    "eyebrow": "Something broke",
+    "title": "That page hit an error.",
+    "body": "Not your fault. Try again — and if it happens twice, call the studio and we will sort it out directly rather than leaving you on a broken page.",
+    "retry": "Try again",
+    "callCta": "Call the studio"
   },
   "admin": {
     "brand": "Karma Console",

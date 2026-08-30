@@ -382,3 +382,86 @@ here invents a mark the owner never approved.
 The spine — *From screen to stitch. / Design on screen. Prove it on the
 machine.* — closes **every** page from the footer, not just the home hero. It
 is the promise the whole site is built to keep, so it is chrome, not content.
+
+
+---
+
+# v3 additions from the hardening and polish passes
+
+## Surfaces carry their own text colours
+
+There are four page surfaces, and **the palette was measured against only one
+of them**. Cotton (#F5F0E6) and Raw Silk (#E9DECD) are close enough that the
+same secondary tokens clear AA on both. Sand (#DED0B8) is not:
+
+| Token | Cotton | Raw Silk | Sand (base) | Sand (override) |
+| --- | --- | --- | --- | --- |
+| `stone` | 5.72 | 4.89 | **4.28** ✗ | `#5b5951` → 4.62 |
+| `vermilion-deep` | 5.57 | 4.76 | **4.16** ✗ | `#9e3624` → 4.60 |
+| `needle` | 5.99 | 5.12 | **4.48** ✗ | `#286078` → 4.55 |
+| `zari-deep` | 5.77 | 4.93 | **4.31** ✗ | `#854b2a` → 4.55 |
+
+`.bg-sand` re-points those four tokens, the same mechanism `.on-carbon` uses.
+**A surface owns the text colours that work on it** — no component and no call
+site has to know which band it is sitting in.
+
+The rule this establishes: *adding a surface means measuring every secondary
+token against it before using it behind body copy.* `tests/hardening.test.ts`
+holds the numbers, including the deliberate assertion that the base values
+fail on sand, so the reason stays legible.
+
+## Container queries for "is there room", media queries for "what device"
+
+The header brand tail drops on a container query, not a viewport one, and the
+difference is not academic: **at 200% zoom on a 1280 screen the viewport is
+still 640 CSS px**, so a `max-width: 379px` rule never fires — while every
+`rem` in the row has doubled and the row is genuinely out of space. That was a
+60px horizontal overflow on every page and a WCAG 1.4.10 failure.
+
+If the question is "does this fit", ask the container. Use `rem` thresholds so
+the answer scales with the reader's text size.
+
+## `.u-break` for text the studio did not write
+
+Any string from a feed, an API or a person — a YouTube title, a pasted URL, a
+social handle — can contain a token longer than its box. Inside
+`overflow: hidden` that is silently clipped, and it only shows at large text
+sizes. Third-party text gets `.u-break`.
+
+## Fonts: import the subset, not the family
+
+The full `@fontsource-variable/noto-sans-gujarati` import shipped a `symbols`
+and a `math` subset — 36.8KB — on **English** pages, because their
+`unicode-range` claims `→` (U+2192) and `★` (U+2605) and Manrope does not
+cover them. The browser fell through the stack and fetched both to draw an
+arrow.
+
+Noto is now declared by hand, restricted to the Gujarati block. Five font
+files became three; 208KB became 172KB on `/en` and 134KB on `/gu`.
+
+The rule: **when a font stack has a fallback face for another script, that
+face will be asked for punctuation too.** Restrict its range, or the browser
+downloads a whole subset to render a dash.
+
+## Compositions are left-aligned, including the ones nobody plans to see
+
+The 404 and error pages were the only centred slabs on the site, which made
+the page a visitor reaches by accident look like it came from a different
+site. Both now use the same `PageIntro` and `reading-shell` as every other
+interior page — and the 404 spends its space on what the visitor was probably
+looking for rather than on an apology.
+
+## Measurement is part of the system
+
+`src/lib/analytics.ts` names eight events and admits six context keys, all
+slugs or enums from our own data. **No `string` escape hatch**, and `track()`
+strips anything unrecognised even if a cast gets past the compiler. Nothing a
+visitor types can reach it, and there is no third-party script on any page.
+
+## Structured data has exactly one door
+
+`src/lib/schema.ts` builds every piece of JSON-LD on the site, and a test
+asserts no other file under `src/app` or `src/components` contains
+`"@context"`. Schema is where a labelled placeholder would silently become a
+fact a search engine repeats, so it is the one thing that is not allowed to be
+written twice.

@@ -1,7 +1,90 @@
 # Content checklist — what only the owner can unblock
 
-Code is not the launch bottleneck. These answers and photos are. Everything
-below maps to a ⚠ CONFIRM-WITH-OWNER marker in the code.
+> **Read this first.** Everything on the public site falls into exactly one of
+> three buckets. The rule that matters: **anything not VERIFIED is kept out of
+> structured data**, so no search engine ever repeats a claim the studio has
+> not made. `tests/structured-data.test.ts` and
+> `tests/proof-sample-policy.test.ts` enforce that mechanically.
+
+## The three buckets, at a glance
+
+### 🔴 SAMPLE — replace before the domain launch
+Visible on the site, carrying a visible `⚠ Sample` tag, and marked
+`sample: true` in source. Shown deliberately: the owner asked to review the
+complete visual system rather than a set of empty frames. **None of it reaches
+schema, and none of it may be quoted as fact.**
+
+| What | Count | Where | Replace with |
+| --- | --- | --- | --- |
+| Reviews | 7 | `sampleReviews` in `src/content/collections.ts` | Real Google reviews, with the reviewer's consent |
+| Student stories | 6 | `stories` in the same file | Real, consented outcomes — the six archetypes are the shapes to fill |
+| Trainer profiles | 3 | `trainers` in the same file | Owner-confirmed names, roles and specialities, with consent |
+| Gallery entries | 6 | `galleryItems` in the same file | Real student and studio work, with consent |
+| Studio project types | 3 | `studioProjects` in the same file | Real commissions, only with the client's written permission |
+
+### 🟡 OWNER CONFIRMATION NEEDED — a sentence unblocks each one
+Not shown as fact anywhere. The site currently works around each of these by
+saying something true instead of guessing.
+
+| Question | What the site does today | What one answer would change |
+| --- | --- | --- |
+| **Which mobile is answered by a person, and which is WhatsApp-only?** | Publishes both, each labelled by channel; never calls the call number "WhatsApp" | Collapse to one number and simplify every contact surface |
+| Course durations | `durationWeeks: null` on all eleven; the page says "confirm with the studio" | Print a real duration per course, and add `timeRequired` to schema |
+| Fees | No price list anywhere; "shared in person at your demo" | Print a fee range, or keep the deferral deliberately |
+| Studio turnaround (B2B) | "Depends on technique, quantity and floor load — tell us your deadline" | Publish a realistic range on the services page |
+| Supported machine file formats | "Tell us what your machine takes" | Name the formats the studio actually delivers |
+| Exact opening hours | "Open daily · evening batches till 10:30 pm" | A precise `openingHoursSpecification` per day |
+| Module topics per course | The shared `draftModules` template, labelled a draft | Real syllabus per technique |
+| Google rating as *verified* | Shown as owner-provided, attributed to Google, linked to the listing | Flip `verifiedFacts.googleRating48` and state it as verified |
+| Trainer identities | Three sample profiles, tagged | Real people, with consent |
+| Terms page | `noIndex: true`, marked "draft: remove after owner review" | Owner approves the wording; remove the flag |
+
+### 🟢 VERIFIED — safe to state, and safe in schema
+Corroborated by at least two of: the studio's Google Business pin, its own
+social profiles, its JustDial listing, or the owner directly.
+
+- Legal name **Karma Design Studio & Classes**
+- Address: 302, Middle Point, Maruti Nandan Society, Mahadev Chowk, Mota
+  Varachha, Surat, Gujarat 394101
+- Landmark: near Dhara Arcade, opposite Krishna Township Road
+- Three phone numbers (roles unconfirmed — see above, but the numbers are real)
+- Email, Maps URL, Instagram, Facebook, YouTube, Threads
+- The eleven-course catalogue and its slugs
+- Evening batches running until 10:30 pm
+- Teaching in Gujarati and Hindi
+- That every course is taught on live machines
+
+**Also verified, and not sample:** the four machine case notes and the eight
+Machine Notes. Every claim in them is ordinary trade knowledge — the same
+thing a supervisor tells a new operator — and none names a person, a client or
+an outcome. There is nothing in them for the owner to confirm.
+
+---
+
+## Contact audit (Phase 10)
+
+Checked for consistency across every surface that shows contact details —
+header, footer, hero, course pages, services, contact page, visit block,
+verify page, and `LocalBusiness` schema.
+
+| Detail | Value | Consistent everywhere? |
+| --- | --- | --- |
+| Call for a demo | +91 81605 17429 | Yes — every explicit call action, never labelled WhatsApp |
+| WhatsApp | +91 99043 76340 | Yes — every WhatsApp action, and offered as a call alternative |
+| Landline | +91 261 4521383 | Yes |
+| Address | 302, Middle Point… 394101 | Yes, from `site.addressEn` / `addressGu` |
+| Landmark | Near Dhara Arcade, opposite Krishna Township Road | Yes — and inside `streetAddress` in schema |
+| Maps URL | The owner's own pin (`ftid` from their shared link) | Yes, single source in `site.mapsUrl` |
+| Email | karmadesignclasses@gmail.com | Yes |
+| Socials | Instagram, YouTube, Facebook, Threads | Yes, single source in `site.socials` |
+
+**The one unresolved item stays documented rather than guessed**: which of the
+two mobiles a person answers. Both are published, each labelled by channel, so
+nothing on the site contradicts anything else — and
+`tests/mobile-conversion.test.ts` blocks any `wa.me` link from ever using the
+call number.
+
+---
 
 ## A. The 16 owner questions (plan §18, condensed)
 | # | Question | Where the answer goes |
