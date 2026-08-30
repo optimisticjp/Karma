@@ -1,8 +1,10 @@
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { Ledger, LedgerLink } from "@/components/ui/Ledger";
 import { Icon } from "@/components/ui/Icon";
+import { MonoNote } from "@/components/ui/MonoNote";
+import { BrokenPath } from "@/components/ui/StitchMark";
 import { coursesByFamily } from "@/content/courses";
 
 /**
@@ -16,10 +18,20 @@ import { coursesByFamily } from "@/content/courses";
  * It now uses the same `PageIntro` as every other interior page and spends
  * the rest of the room on the four things someone who mistyped a URL was
  * probably looking for.
+ *
+ * The mark is a **broken path** — the one canonical mark that means "failure /
+ * production problem". It is the single place on the public site where that
+ * mark is exactly literal: the thread ends here.
+ *
+ * The course list underneath rendered `c.nameEn` unconditionally, so the
+ * Gujarati 404 listed English course names. Fixed: this is the one page a
+ * visitor reaches by accident, and it is the worst place for the site to
+ * forget which language it is in.
  */
 export default function NotFound() {
   const t = useTranslations("notFound");
   const tn = useTranslations("nav");
+  const gu = useLocale() === "gu";
   const links = [
     { href: "/courses", label: tn("courses") },
     { href: "/admissions", label: tn("admissions") },
@@ -45,7 +57,10 @@ export default function NotFound() {
         }
         aside={
           <>
-            <p className="microlabel !text-vermilion-deep">{t("popularTitle")}</p>
+            <BrokenPath width={140} tone="vermilion" className="mb-5" />
+            <MonoNote as="p" tone="vermilion">
+              {t("popularTitle")}
+            </MonoNote>
             <Ledger className="mt-4">
               {links.map((l) => (
                 <LedgerLink key={l.href} href={l.href} title={l.label} />
@@ -55,16 +70,16 @@ export default function NotFound() {
         }
       />
 
-      <section className="section-compact">
+      <section className="section-compact band-info">
         <div className="container-site">
-          <p className="microlabel">{t("catalogueTitle")}</p>
+          <MonoNote as="p">{t("catalogueTitle")}</MonoNote>
           <Ledger className="u-section-body">
             {coursesByFamily.slice(0, 6).map((c, i) => (
               <LedgerLink
                 key={c.slug}
                 href={`/courses/${c.slug}`}
                 index={String(i + 1).padStart(2, "0")}
-                title={c.nameEn}
+                title={gu ? c.nameGu : c.nameEn}
               />
             ))}
           </Ledger>
