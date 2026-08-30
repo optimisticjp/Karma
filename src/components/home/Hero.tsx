@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { Reveal } from "@/components/ui/Reveal";
 import { Icon } from "@/components/ui/Icon";
 import { TechniquePlate, type PlateVariant } from "@/components/ui/TechniquePlate";
+import { TrackedLink } from "@/components/site/TrackedLink";
 import { techniqueChips } from "@/content/collections";
 import { site, ownerProvidedFacts } from "@/lib/site";
 
@@ -66,18 +67,26 @@ export function Hero() {
                 {t("ctaDemo")} <Icon name="arrow" size={18} className="arrow" />
               </Link>
               {/* Call is a first-class action here, not a footnote: this
-                  audience decides on the phone, in Gujarati, in one call. */}
-              <a href={`tel:+${site.whatsapp}`} className="btn btn-secondary">
+                  audience decides on the phone, in Gujarati, in one call.
+                  Dials `callPhone`, never the WhatsApp number — the two roles
+                  are unconfirmed and must not be merged. */}
+              <TrackedLink
+                href={`tel:+${site.callPhone}`}
+                event="call_demo_click"
+                props={{ surface: "hero" }}
+                className="btn btn-secondary"
+              >
                 <Icon name="phone" size={17} /> {t("ctaCall")}
-              </a>
-              <a
+              </TrackedLink>
+              <TrackedLink
                 href={site.mapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                event="directions_click"
+                props={{ surface: "hero" }}
+                external
                 className="cta-tertiary"
               >
                 <Icon name="pin" size={16} /> {tc("directions")}
-              </a>
+              </TrackedLink>
             </div>
           </Reveal>
         </div>

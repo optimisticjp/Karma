@@ -43,8 +43,22 @@ export function VisitStudio() {
               <dt className="ledger-title">{tcp("hoursLabel")}</dt>
               <dd className="ledger-note">{gu ? site.hoursGu : site.hoursEn}</dd>
             </div>
+            {/* Each number named by its channel rather than pooled under
+                "Phone": which one answers what is unconfirmed, and a pooled
+                list is exactly the contradictory label to avoid. */}
             <div className="ledger-row is-labelled">
-              <dt className="ledger-title">{t("phoneLabel")}</dt>
+              <dt className="ledger-title">{t("callLabel")}</dt>
+              <dd className="ledger-note">
+                <a
+                  href={`tel:+${site.callPhone}`}
+                  className="stitch-link inline-flex min-h-8 items-center font-semibold text-carbon"
+                >
+                  {site.callPhoneDisplay}
+                </a>
+              </dd>
+            </div>
+            <div className="ledger-row is-labelled">
+              <dt className="ledger-title">{t("waLabel")}</dt>
               <dd className="ledger-note flex flex-wrap gap-x-5">
                 <a
                   href={`tel:+${site.whatsapp}`}

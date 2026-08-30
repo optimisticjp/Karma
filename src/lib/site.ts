@@ -23,9 +23,30 @@ export const site = {
   tagline: "Skill શીખો, Future બનાવો",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://karmadesignstudio.in",
 
-  /** Verified: the number the studio publishes for WhatsApp and mobile calls. */
+  /**
+   * ⚠️ TWO NUMBERS, TWO ROLES, NOT YET RECONCILED.
+   *
+   * `whatsapp` is the number the studio publishes for WhatsApp and has been
+   * in this repo since the start. `callPhone` is the number the owner listed
+   * on the studio's Facebook page and supplied directly in
+   * `docs/screen-to-stitch-progress.md`.
+   *
+   * The owner has NOT confirmed which number answers what, so the two roles
+   * are kept apart rather than merged:
+   *
+   *  - a "Call for demo" action dials `callPhone`;
+   *  - a WhatsApp action opens `whatsapp`, and `callPhone` is never labelled
+   *    as WhatsApp anywhere;
+   *  - pages that list contact details show both, each labelled with the
+   *    channel it is for, so nothing on the site contradicts anything else.
+   *
+   * Tracked in docs/content-checklist.md. Collapse to one number only when
+   * the owner says which is which.
+   */
   whatsapp: process.env.STUDIO_WHATSAPP ?? "919904376340",
   phoneDisplay: "+91 99043 76340",
+  callPhone: process.env.STUDIO_CALL_PHONE ?? "918160517429",
+  callPhoneDisplay: "+91 81605 17429",
   /** Verified: `tel:+912614521383` on the studio's own site header and contact page. */
   landline: "912614521383",
   landlineDisplay: "+91 261 4521383",
