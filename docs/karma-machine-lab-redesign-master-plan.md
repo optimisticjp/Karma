@@ -1846,7 +1846,7 @@ Claude must execute phases in order, one clean PR at a time unless a smaller spl
 
 | Phase | Scope | Status |
 | --- | --- | --- |
-| 1 | Audit + Design System v4 “Machine Lab” foundation | ⏳ Pending |
+| 1 | Audit + Design System v4 “Machine Lab” foundation | ✅ Complete + merged |
 | 2 | Global shell + hero + signature Screen-to-Stitch interaction | ⏳ Pending |
 | 3 | Homepage full rebuild | ⏳ Pending |
 | 4 | 11-course Machine Index + all course pages | ⏳ Pending |
@@ -1891,6 +1891,93 @@ Use relevant frontend-design, UI/UX, accessibility, design-system and code-revie
 - Gujarati overrides correct
 - reduced motion correct
 - no new heavy dependency
+
+## Implementation record — merged 2026-08-30
+
+**Branch:** `redesign/phase-1-machine-lab-foundation` · **PR:** #28
+
+### Audit findings that shaped the work
+
+- `globals.css` is **shared with Karma Console**, so no v3 token could be
+  renamed or retuned. Every v4 token is additive.
+- `premium.css` is deliberately **unlayered** and therefore outranks every
+  `@layer` in `globals.css`. A v4 primitive placed in `globals.css` would have
+  lost silently to a v3 rule touching the same property. So v4 primitives live
+  in a third stylesheet, `src/app/machine-lab.css`, also unlayered and imported
+  **after** `premium.css` in both root layouts. A test asserts that order.
+- `<PhotoSlot>` took a free-text label per call site. Two pages could describe
+  the same shot differently, and a frame built for 3:2 would jump when a 4:5
+  photograph arrived. Replaced by a typed manifest.
+- `UnveilWatcher` already owned self-registering reveal for `.media-unveil` and
+  `.stitch-wipe`; technique signatures joined it rather than growing a second
+  observer.
+
+### Components changed or added
+
+| File | What |
+| --- | --- |
+| `src/content/photo-manifest.ts` | **New.** All 32 slots: id, group, intrinsic dimensions, shoot brief, alt guidance, course slug for the eight photographed courses. |
+| `src/components/ui/Icon.tsx` | Extended from 15 to 43 icons: production, technique, digitising and troubleshooting groups, plus the deliberately ordinary universal actions. `ICON_NAMES` and `ICON_GROUPS` exported for tests. |
+| `src/components/ui/TechniqueSignature.tsx` | **New.** Eleven signatures keyed by course slug. |
+| `src/components/ui/StitchMark.tsx` | **New.** `<KnotPoint>`, `<RegistrationPoint>`, `<BrokenPath>`, `<ThreadTail>` + `STITCH_SEMANTICS`. |
+| `src/components/ui/MonoNote.tsx` | **New.** `<MonoNote>` and `<StepIndex>`. |
+| `src/components/ui/PhotoSlot.tsx` | Added `<ManifestPhoto>`; the free-text `<PhotoSlot>` stays so no existing page broke. |
+| `src/app/machine-lab.css` | **New.** Notation, textures, glass, machine light, motion levels, signature motion, stitch marks, photo frames, reduced motion. |
+| `src/app/globals.css` | `@theme` additions only: `--font-mono`, `--text-mono*`, `--dur-l1`…`--dur-l4`, `--ease-machine`, `--texture-ink`, `--texture-strength`. |
+| `src/components/ui/Reveal.tsx` | Watcher now also observes `.sig-play`. |
+| `vitest.config.ts` | `oxc.jsx.runtime = "automatic"` and a `.test.tsx` include, so a test may import and render a component. |
+
+### Design decisions worth keeping
+
+- **Branded concepts get niche icons; universal actions keep universal ones.**
+  `pencil`, `trash`, `printer`, `search`, `arrow`, `phone`, `map` are ordinary
+  on purpose, and a test forbids a branded icon standing in for one of them.
+- **A stitched path cannot draw with `stroke-dashoffset`** — the dash pattern
+  *is* the stitch, so animating the offset slides stitches along the seam
+  instead of laying them down. Stitched signature elements wipe with
+  `clip-path`; unstitched ones use `pathLength="100"` and a dash offset.
+- **One glass treatment, no card variant.** Wanting a second frosted panel on a
+  screen is the signal the first has stopped meaning anything.
+- **No new font.** Machine notation uses the platform monospace stack; the
+  project still imports exactly two `@fontsource` families, and that is tested.
+- **Signatures build once and stop.** A catalogue page carries eleven of them,
+  which would otherwise be eleven perpetual loops nobody asked for.
+- **Nothing drawn carries a number.** No RPM, density, GSM, ratio, coordinate,
+  model or head count in any icon or signature geometry.
+
+### Tests added
+
+`tests/machine-lab-system.test.tsx` — 36 assertions covering: the 32-slot
+manifest (count, per-group counts, unique ids, real dimensions, briefs, the
+eight course stations resolving to real courses, no photograph shared by two
+courses, unknown ids throwing); photography honesty (no remote/stock host
+anywhere, the no-stock rule stated where the next session reads it); the icon
+family (all four groups present, 15–30 branded icons, universal actions kept
+universal and never branded, no manufacturer named); the eleven signatures
+(exactly the catalogue's slugs, each described and rendering, no invented
+specification, no infinite animation, every hidden start state `.js`-gated);
+stitch semantics (six distinct meanings, 9/6 geometry identical); and the v4
+foundation (no v3 token renamed, no new font, Gujarati overrides that actually
+undo uppercase and letterspacing, four motion levels and no fifth,
+reduced-motion showing the finished state, glass restricted to one treatment,
+texture strength inside 2–5%, machine light steel-and-vermilion with no SaaS
+purple, stylesheet import order, and no new runtime dependency).
+
+Policy assertions strip comments before matching, so a comment explaining
+"no RPM, ever" cannot fail the test that bans RPM — otherwise the next session
+would be taught to delete the explanation rather than keep the rule.
+
+Because Phase 1 ships no finished page, nothing else would catch a primitive
+that throws, so the file also renders every icon, every signature, every stitch
+mark, every manifest frame and the notation components to static markup — and
+checks each signature is fluid (a `viewBox` and no fixed `width`), so it holds
+at 320, 390, 768 and 1440 alike.
+
+### Gates
+
+`npm run typecheck`, `npm run lint`, `npm test` (33 files, 430 tests) and
+`npm run build` all green. No dependency added, so the Worker bundle is
+unchanged.
 
 ---
 

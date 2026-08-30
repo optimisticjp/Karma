@@ -14,6 +14,7 @@ import { site } from "@/lib/site";
 import { studioSchema } from "@/lib/schema";
 import "../globals.css";
 import "../premium.css";
+import "../machine-lab.css";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

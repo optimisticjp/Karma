@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "../globals.css";
 import "../premium.css";
+import "../machine-lab.css";
 
 /**
  * Root layout for the Karma Console.

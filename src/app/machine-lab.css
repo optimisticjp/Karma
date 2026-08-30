@@ -1,0 +1,503 @@
+/*
+ * Design system v4 — "Machine Lab" primitives.
+ *
+ * WHY THIS IS A THIRD STYLESHEET AND NOT MORE OF globals.css
+ * ----------------------------------------------------------
+ * globals.css owns the tokens and the v3 base, and it is SHARED with Karma
+ * Console: renaming or retuning anything in it silently restyles the admin.
+ * premium.css is deliberately unlayered, so it outranks every @layer in
+ * globals.css. A v4 primitive added to globals.css would therefore lose to a
+ * v3 rule in premium.css that happened to touch the same property.
+ *
+ * So the v4 layer is its own file, imported AFTER premium.css in both root
+ * layouts, and likewise unlayered. Cascade order, lowest to highest:
+ *
+ *     globals.css (@layer base, components)  →  premium.css  →  machine-lab.css
+ *
+ * Nothing here renames a token. Everything here is additive.
+ *
+ * WHAT LIVES HERE
+ * ---------------
+ *   1. machine notation (the monospace utility)
+ *   2. material textures
+ *   3. glass + machine light, with their restrictions
+ *   4. the motion-level scale
+ *   5. technique signatures
+ *   6. canonical stitch marks
+ *   7. photo-manifest frames
+ *   8. reduced motion
+ */
+
+/* ------------------------------------------------------------------ *
+ * 1. Machine notation
+ *
+ * `01 DESIGN`, `EMCAD / PATH`, note indexes, course indexes. Not body
+ * copy, not navigation, not buttons, and never a wall of invented
+ * specifications — monospace here means "this is a machine label", and
+ * it stops meaning that the moment it is used for prose.
+ * ------------------------------------------------------------------ */
+
+.mono-note {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  line-height: var(--text-mono--line-height);
+  letter-spacing: var(--text-mono--letter-spacing);
+  text-transform: uppercase;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-stone);
+}
+
+.mono-index {
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+/* Gujarati is never uppercased and never letterspaced. It also does not
+   belong in a Latin monospace face, so it falls back to the body stack. */
+:lang(gu) .mono-note,
+.mono-note:lang(gu) {
+  font-family: var(--font-body);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.8125rem;
+}
+/* A bare index (`01`) is digits only, so it keeps the mono face in Gujarati:
+   tabular alignment is the whole reason it exists. */
+:lang(gu) .mono-index,
+.mono-index:lang(gu) {
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+}
+
+/* ------------------------------------------------------------------ *
+ * 2. Material textures
+ *
+ * 2-5% strength. A texture that is consciously noticed is too strong;
+ * the target is "this surface has a material" felt half a second before
+ * it is seen. All of them derive their ink and strength from tokens, so
+ * the whole system dials up or down in one place.
+ * ------------------------------------------------------------------ */
+
+.tx-cotton {
+  background-image:
+    repeating-linear-gradient(
+      37deg,
+      rgb(var(--texture-ink) / var(--texture-strength)) 0 1px,
+      transparent 1px 4px
+    ),
+    repeating-linear-gradient(
+      -53deg,
+      rgb(var(--texture-ink) / calc(var(--texture-strength) * 0.7)) 0 1px,
+      transparent 1px 5px
+    );
+}
+
+.tx-weave {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgb(var(--texture-ink) / var(--texture-strength)) 0 1px,
+      transparent 1px 5px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgb(var(--texture-ink) / var(--texture-strength)) 0 1px,
+      transparent 1px 5px
+    );
+}
+
+/* A satin field runs one direction only — that is what makes it satin. */
+.tx-satin {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgb(var(--texture-ink) / var(--texture-strength)) 0 1px,
+    transparent 1px 4px
+  );
+}
+
+.tx-cross {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgb(var(--texture-ink) / var(--texture-strength)) 0 1px,
+      transparent 1px 9px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgb(var(--texture-ink) / var(--texture-strength)) 0 1px,
+      transparent 1px 9px
+    );
+}
+
+.tx-density {
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgb(var(--texture-ink) / var(--texture-strength)) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+/* The laser grid is a reference grid, so it is steel rather than ink. */
+.tx-laser {
+  background-image:
+    repeating-linear-gradient(0deg, rgb(23 43 53 / 0.05) 0 1px, transparent 1px 22px),
+    repeating-linear-gradient(90deg, rgb(23 43 53 / 0.05) 0 1px, transparent 1px 22px);
+}
+
+/* On a dark surface the same textures have to be light, not darker still. */
+.on-dark.tx-cotton,
+.on-dark.tx-weave,
+.on-dark.tx-satin,
+.on-dark.tx-cross,
+.on-dark.tx-density {
+  --texture-ink: 245 240 230;
+  --texture-strength: 0.05;
+}
+
+/* ------------------------------------------------------------------ *
+ * 3. Glass and machine light
+ *
+ * GOOD GLASS is ONE translucent software panel layered over real machine
+ * imagery — an EMCAD overlay reading DESIGN / MACHINE / OUTPUT.
+ * BAD GLASS is every card frosted and every section floating. There is
+ * deliberately no `.lab-glass--card`: if a second frosted panel is ever
+ * wanted on a screen, that is the signal that the first one has stopped
+ * meaning anything.
+ * ------------------------------------------------------------------ */
+
+.lab-glass {
+  position: relative;
+  border-radius: 12px;
+  border: 1px solid rgb(245 240 230 / 0.16);
+  background: rgb(23 43 53 / 0.62);
+  color: var(--color-ivory);
+  backdrop-filter: blur(10px) saturate(1.06);
+  -webkit-backdrop-filter: blur(10px) saturate(1.06);
+}
+
+/* Without backdrop-filter the panel must still be readable, so it becomes
+   an opaque steel plate rather than a washed-out translucent one. */
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .lab-glass {
+    background: rgb(23 43 53 / 0.94);
+  }
+}
+
+.lab-glass-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  letter-spacing: var(--text-mono--letter-spacing);
+  text-transform: uppercase;
+  color: rgb(245 240 230 / 0.72);
+}
+:lang(gu) .lab-glass-label {
+  font-family: var(--font-body);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/*
+ * Machine light: the reflection off steel under a work lamp. Steel-blue with
+ * one vermilion edge, low alpha, behind ONE technical composition per page.
+ * Not a purple-blue SaaS aurora, and never behind body copy.
+ */
+.machine-light {
+  position: relative;
+  isolation: isolate;
+}
+.machine-light::before {
+  content: "";
+  position: absolute;
+  inset: -10% -6% auto -6%;
+  height: 70%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 70% at 22% 18%, rgb(41 97 122 / 0.22), transparent 68%),
+    radial-gradient(46% 58% at 82% 6%, rgb(197 72 50 / 0.13), transparent 70%);
+  filter: blur(6px);
+}
+
+/* ------------------------------------------------------------------ *
+ * 4. Motion levels (redesign plan §10)
+ *
+ * 0 none · 1 functional feedback · 2 niche microinteraction ·
+ * 3 section storytelling · 4 the one signature moment per page.
+ *
+ * These set duration and easing only. What moves is the component's
+ * business; how long it may take is the system's.
+ * ------------------------------------------------------------------ */
+
+.m-l1 {
+  transition-duration: var(--dur-l1);
+  transition-timing-function: var(--ease-out-soft);
+}
+.m-l2 {
+  transition-duration: var(--dur-l2);
+  transition-timing-function: var(--ease-machine);
+}
+.m-l3 {
+  transition-duration: var(--dur-l3);
+  transition-timing-function: var(--ease-machine);
+}
+.m-l4 {
+  transition-duration: var(--dur-l4);
+  transition-timing-function: var(--ease-machine);
+}
+
+/* ------------------------------------------------------------------ *
+ * 5. Technique signatures
+ *
+ * Each signature builds ITSELF ONCE, on first reveal, then stops. There
+ * is no infinite animation anywhere in this block — a perpetual
+ * decorative loop is a hard ban, and a catalogue page carries eleven of
+ * these, which is eleven loops nobody asked for.
+ *
+ * Every hidden starting state below is `.js`-gated, so with JavaScript
+ * off the finished signature is simply present.
+ * ------------------------------------------------------------------ */
+
+.tech-sig {
+  display: block;
+  width: 100%;
+}
+.tech-sig svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.tech-sig .sig-el {
+  fill: none;
+  stroke: var(--sig-accent, var(--color-needle));
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* Ground lines are the construction the technique sits on, not the technique itself. */
+.tech-sig .sig-el--ground {
+  stroke: var(--color-line);
+  stroke-width: 1.4;
+}
+.tech-sig .sig-el--accent {
+  stroke: var(--sig-accent, var(--color-vermilion));
+  stroke-width: 2.6;
+}
+.tech-sig .sig-el--cord {
+  stroke-width: 2.4;
+}
+/* Vector handles render as thin neutral lines, exactly as a CAD tool draws
+   them. They are reference geometry, never the accent. */
+.tech-sig .sig-el--handle {
+  stroke: var(--color-stone);
+  stroke-width: 1.2;
+}
+/* The brand's running stitch: 9 on the surface, 6 off it. */
+.tech-sig .sig-el--stitched {
+  stroke-dasharray: 9 6;
+  stroke-linecap: butt;
+}
+.tech-sig .sig-el--sheen {
+  stroke: var(--color-ivory);
+  stroke-width: 3;
+  opacity: 0.85;
+}
+
+/* ---- build-once motion, staggered by --sig-i ---- */
+
+.js .sig-play .sig-el--draw:not(.sig-el--stitched) {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+}
+.js .sig-play.is-in .sig-el--draw:not(.sig-el--stitched) {
+  animation: sig-draw var(--dur-l3) var(--ease-machine) both;
+  animation-delay: calc(var(--sig-i, 0) * 80ms);
+}
+
+/*
+ * A stitched path cannot draw with stroke-dashoffset: the dash pattern IS the
+ * stitch, and animating the offset slides the stitches along the seam instead
+ * of laying them down. It wipes instead — the same decision StitchPath made.
+ */
+.js .sig-play .sig-el--stitched {
+  clip-path: inset(-25% 100% -25% -25%);
+}
+.js .sig-play.is-in .sig-el--stitched {
+  animation: sig-wipe var(--dur-l3) var(--ease-machine) both;
+  animation-delay: calc(var(--sig-i, 0) * 80ms);
+}
+
+.js .sig-play .sig-el--attach,
+.js .sig-play .sig-el--settle,
+.js .sig-play .sig-el--rise,
+.js .sig-play .sig-el--sheen {
+  opacity: 0;
+}
+.js .sig-play.is-in .sig-el--attach {
+  animation: sig-attach var(--dur-l2) var(--ease-machine) both;
+  animation-delay: calc(var(--sig-i, 0) * 90ms);
+}
+.js .sig-play.is-in .sig-el--settle {
+  animation: sig-settle var(--dur-l2) var(--ease-machine) both;
+  animation-delay: calc(var(--sig-i, 0) * 70ms);
+}
+.js .sig-play.is-in .sig-el--rise {
+  animation: sig-rise var(--dur-l2) var(--ease-machine) both;
+  animation-delay: calc(var(--sig-i, 0) * 80ms);
+}
+.js .sig-play.is-in .sig-el--sheen {
+  animation: sig-sheen var(--dur-l3) var(--ease-machine) both;
+  animation-delay: calc(var(--sig-i, 0) * 70ms);
+}
+
+.tech-sig .sig-el--attach,
+.tech-sig .sig-el--settle,
+.tech-sig .sig-el--rise {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+/* Loops grow up off the baseline, so they scale from their feet. */
+.tech-sig .sig-el--rise {
+  transform-origin: bottom;
+}
+
+@keyframes sig-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes sig-wipe {
+  to {
+    clip-path: inset(-25% -25% -25% -25%);
+  }
+}
+@keyframes sig-attach {
+  from {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes sig-settle {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sig-rise {
+  from {
+    opacity: 0;
+    transform: scaleY(0.15);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sig-sheen {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  60% {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 0.5;
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * 6. Canonical stitch marks
+ * ------------------------------------------------------------------ */
+
+.stitch-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  line-height: 0;
+  color: var(--mark-color, currentColor);
+}
+.stitch-mark--broken,
+.stitch-mark--tail {
+  display: block;
+  max-width: 100%;
+}
+.stitch-mark--broken svg {
+  width: 100%;
+  height: 12px;
+}
+.stitch-mark--tail svg {
+  width: 100%;
+  height: 16px;
+}
+
+/* ------------------------------------------------------------------ *
+ * 7. Photo-manifest frames
+ *
+ * The frame reserves the photograph's exact ratio, so swapping the real
+ * file in moves nothing. The placeholder is deliberately plain and
+ * obviously unfinished: an empty labelled frame is honest, and a stock
+ * photograph standing in for Karma's work is not.
+ * ------------------------------------------------------------------ */
+
+.photo-slot {
+  position: relative;
+  isolation: isolate;
+}
+.photo-slot::after {
+  /* A faint woven ground so an empty frame still reads as fabric rather than
+     as a broken image box. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg, rgb(32 33 30 / 0.03) 0 1px, transparent 1px 6px),
+    repeating-linear-gradient(90deg, rgb(32 33 30 / 0.03) 0 1px, transparent 1px 6px);
+}
+
+/* ------------------------------------------------------------------ *
+ * 8. Reduced motion
+ *
+ * The rule is "show the final state immediately, lose nothing". So the
+ * signatures are not merely un-animated: their hidden starting states
+ * are unwound, including the dash offset and the clip wipe.
+ * ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  .tech-sig .sig-el,
+  .js .sig-play .sig-el,
+  .js .sig-play.is-in .sig-el {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+  .js .sig-play .sig-el--draw:not(.sig-el--stitched),
+  .js .sig-play.is-in .sig-el--draw:not(.sig-el--stitched) {
+    stroke-dashoffset: 0 !important;
+  }
+  .tech-sig .sig-el--sheen {
+    opacity: 0.5 !important;
+  }
+  .m-l1,
+  .m-l2,
+  .m-l3,
+  .m-l4 {
+    transition-duration: 0.001s !important;
+  }
+}

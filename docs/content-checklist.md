@@ -181,6 +181,15 @@ call number.
 **Status:** the real photographs are expected in roughly two days from
 2026-08-30.
 
+**The list is now code.** `src/content/photo-manifest.ts` holds all 32 slots —
+id, group, intrinsic dimensions, the shoot brief shown on the placeholder, and
+guidance for the alt text once a real photograph exists. Frames render through
+`<ManifestPhoto id="…">`, which reserves the photograph's exact aspect ratio so
+the real file drops in with zero layout shift.
+`tests/machine-lab-system.test.tsx` asserts the count, the per-group counts, the
+uniqueness of every id, and that no photograph is assigned to two courses. When
+the files arrive, the work is to add the images — not to re-lay out the pages.
+
 ### ⚠ Do not fill the gap
 
 Until the real files arrive, every visual stays a drawn device or a named

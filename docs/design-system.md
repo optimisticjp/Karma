@@ -509,3 +509,198 @@ action never ends up under the home indicator.
 breaks Gujarati. It self-neutralises under `:lang(gu)`, as `.chip` does, as
 `.microlabel` and `.eyebrow` already did. **Any new label style needs the same
 override**, and `tests/console-density.test.ts` fails without it.
+
+---
+
+# v4 — "Machine Lab" (2026-08-30)
+
+The owner's full-product redesign brief
+(`docs/karma-machine-lab-redesign-master-plan.md`) keeps the Screen to Stitch
+promise and sharpens the position: **a machine-led commercial embroidery
+learning studio**, not a coaching centre, not a fashion school, not a software
+reseller. The governing creative rule for everything below is:
+
+> **Don't decorate the interface with embroidery. Make the interface behave
+> like embroidery.**
+
+v4 is an **extension of v3, not a replacement.** Not one v3 token was renamed
+or retuned. That restraint is not politeness: `globals.css` is shared with
+Karma Console, so renaming a token silently restyles the admin.
+
+## Where a v4 rule goes, and why
+
+```
+globals.css (@layer base, components)  →  premium.css  →  machine-lab.css
+```
+
+`premium.css` is deliberately unlayered, so it beats every `@layer` in
+`globals.css`. That means a new v4 primitive added to `globals.css` would lose
+to any v3 rule in `premium.css` that touched the same property — silently, and
+only on some screens. So:
+
+- **Tokens** go in the `globals.css` `@theme` block (they are just values, and
+  Tailwind needs them there to mint utilities).
+- **Primitives** go in `src/app/machine-lab.css`, which is unlayered and
+  imported *after* `premium.css` in both root layouts.
+
+`tests/machine-lab-system.test.tsx` fails if that import order is ever reversed.
+
+## Machine notation
+
+`.mono-note` / `<MonoNote>` / `<StepIndex>`, on `--font-mono`.
+
+Two hard limits. **No new font** — this is the platform monospace stack, because
+`01 DESIGN` is not worth 30KB on a Surat mobile connection, and a test asserts
+the project still imports exactly two `@fontsource` families. And **not for
+prose**: monospace here means "this is a machine label". Used for body copy,
+navigation or buttons it stops meaning that and starts meaning "someone wanted
+to look technical".
+
+Legitimate uses: `01 DESIGN` · `02 MACHINE` · `03 OUTPUT` · `EMCAD / PATH` ·
+Machine Note indexes · course indexes.
+
+Gujarati falls back to the body stack with no uppercase and no letterspacing,
+in the stylesheet rather than at the call site.
+
+## The Karma Stitch icon family
+
+`src/components/ui/Icon.tsx`, one stroke width (1.5), `currentColor`, 24×24.
+
+| Group | Icons |
+| --- | --- |
+| Production | `needle` `needle-down` `cone` `bobbin` `hoop` `machine` `machine-head` `multi-head` |
+| Technique | `bead` `sequence` `cording` `chain` `laser` `tuft` `satin` `applique` `cross-stitch` |
+| Digitising | `node` `handles` `density` `direction` `registration` |
+| Troubleshooting | `thread-break` `misregistration` `density-problem` `correction` |
+| **Universal — deliberately ordinary** | `pencil` `trash` `printer` `search` `arrow` `phone` `map` `check` `plus` |
+
+**The rule that decides which list an icon joins:** branded concepts get niche
+icons; universal actions keep universal icons. A visitor must never decode a
+clever embroidery symbol to find "Edit". `ICON_GROUPS` is exported and tested,
+including an assertion that no branded icon is used for a universal action.
+
+No icon names a manufacturer or a model. An icon is a symbol for a technique,
+not a claim about a machine Karma owns.
+
+## Eleven technique signatures
+
+`<TechniqueSignature slug="…" />`, one per course, keyed by course slug. The key
+set is asserted equal to the catalogue, so a new course cannot ship without one.
+
+They exist because the catalogue has eleven courses and, today, zero
+photographs. The honest options were an empty grid, stock photography (banned),
+or a drawn mark that describes the *structure* of the technique without
+pretending to be a photograph of Karma's work. For the eight photographed
+courses the signature becomes the secondary mark; for the three the shoot does
+not cover, it stays the primary one.
+
+| Course | Signature |
+| --- | --- |
+| Zardosi | tight parallel metallic satin field, one restrained zari highlight |
+| Flat Embroidery | precise running field, clean direction changes |
+| 4-Beads | bead nodes attaching sequentially to a path |
+| Sequence Work | overlapping perforated discs, one reflective shift |
+| Coding / Cording | a thicker cord following one curved Bezier path |
+| Chain & Multi | linked loop construction over a second line of rhythm |
+| Appliqué & 3D | raised border over a cut edge |
+| Cross Stitch | a restrained crossing-stitch lattice |
+| Laser Work | a precise trace, then one clean cut edge — no sparks |
+| Tufting | loops rising from a baseline |
+| EMCAD | vector nodes → handles → the stitch path they produce |
+
+**A signature may never carry a number.** No RPM, density, GSM, coordinate or
+machine model. A drawing that invents a specification is the same lie as a
+stock photograph, only harder to spot — and there is a test for it.
+
+## One canonical stitch language
+
+Six marks, six meanings, and no seventh. Before this, the site improvised: a
+dot here, a crosshair there, a dashed border somewhere else. Scattered
+technical marks read as decoration.
+
+| Mark | Meaning | Component |
+| --- | --- | --- |
+| Running stitch | progress / connection | `<StitchRule>` `<StitchPath>` |
+| Thread path | process / transformation | `<StitchPath preset="hook">` |
+| Knot point | decision / completion | `<KnotPoint>` |
+| Registration point | precision / reference | `<RegistrationPoint>` |
+| Broken path | failure / production problem | `<BrokenPath>` |
+| Thread tail | editorial finish, sparing | `<ThreadTail>` |
+
+Use a mark because it *means* that thing. A registration mark beside a phone
+number is noise; beside "the design lands where the design said it would" it is
+the brand speaking. `STITCH_SEMANTICS` is exported so the meanings are testable
+rather than merely documented. The 9-on / 6-off running stitch geometry is
+identical everywhere and asserted.
+
+## Material texture
+
+2–5% strength — felt before it is consciously noticed. All derive from
+`--texture-ink` and `--texture-strength`, so the whole system dials in one
+place, and the cap is enforced by test.
+
+`.tx-cotton` `.tx-weave` `.tx-satin` `.tx-cross` `.tx-density` `.tx-laser`.
+Add `.on-dark` alongside any of them on a dark surface: the texture has to
+become light, not darker still.
+
+## Glass and machine light — the restrictions ARE the feature
+
+**Good glass** is ONE translucent software panel layered over real machine
+imagery: an EMCAD overlay reading DESIGN / MACHINE / OUTPUT. **Bad glass** is
+every card frosted and every section floating.
+
+There is deliberately no `.lab-glass--card`. If a second frosted panel is ever
+wanted on a screen, that is the signal the first one has stopped meaning
+anything. Where `backdrop-filter` is unavailable the panel becomes an opaque
+steel plate rather than a washed-out translucent one.
+
+`.machine-light` is the reflection off steel under a work lamp: steel-blue with
+one vermilion edge, low alpha, behind **one** technical composition per page,
+never behind body copy. It is not a purple-blue SaaS aurora, and a test checks
+the colours.
+
+## Motion levels
+
+| Level | For | Token |
+| --- | --- | --- |
+| 0 | long copy, terms, dense forms, tables, most admin surfaces | — |
+| 1 | hover/press, accordions, validation, filters, active rows | `--dur-l1` |
+| 2 | a bead attaches, a disc shifts, a stitch underline completes | `--dur-l2` |
+| 3 | section storytelling: stitch progress, problem → correction | `--dur-l3` |
+| 4 | the hero Screen-to-Stitch moment — **max one per page** | `--dur-l4` |
+
+`.m-l1`–`.m-l4` set duration and easing only. *What* moves is the component's
+business; *how long it may take* is the system's. Level 2+ uses
+`--ease-machine`: a fast, weighted start that settles — a needle bar, not a
+bouncing ball.
+
+**Hard bans:** cursor-following coordinates, scroll hijacking, parallax for its
+own sake, a viewport needle following the user, autoplay sound, confetti,
+perpetual decorative loops, fake machine dashboards.
+
+Every hidden starting state is `.js`-gated, so with JavaScript off the finished
+state is simply present — and under `prefers-reduced-motion` the final state
+shows immediately, with the dash offsets and clip wipes unwound rather than
+merely un-animated. Both are tested.
+
+## The 32-photograph manifest
+
+`src/content/photo-manifest.ts` types every shot on the owner's final brief with
+its intrinsic dimensions; `<ManifestPhoto id="…">` reserves that exact aspect
+ratio. When the real files arrive they drop in with **zero layout shift**, and
+no layout has to be restructured.
+
+A slot with no photograph renders as an honest, named, obviously unfinished
+frame. It is **never** filled with stock photography, a generated image,
+another institute's work, or another course's photograph. A labelled empty
+frame is a visible work-in-progress; a borrowed photo is a false claim about
+this business that would outlive the fix. See `docs/content-checklist.md` §B.
+
+## The calibration target
+
+55% real photography · 20% typography and editorial layout · 12% niche visual
+language · 8% motion · 5% material finish.
+
+Until the photographs arrive, the 55% is represented by honest named frames and
+technique signatures — not fake imagery. **If the finished interface is 40%
+animation and vector decoration, it has failed.**

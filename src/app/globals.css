@@ -130,6 +130,36 @@
   --space-heading-to-content: clamp(1.5rem, 1.2rem + 1.1vw, 2.5rem);
 
   --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ---------------- design system v4 "Machine Lab" additions ----------------
+   * ADDITIVE ONLY. Karma Console shares this stylesheet, so no v3 token was
+   * renamed or retuned here: everything below is new, and every v3 name still
+   * resolves to exactly what it resolved to before. The v4 component
+   * primitives that use these tokens live in src/app/machine-lab.css.
+   */
+
+  /* Machine notation. The platform monospace stack — no new font is loaded for
+     this. `01 DESIGN` is not worth 30KB on a Surat mobile connection. */
+  --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", "Roboto Mono",
+    Menlo, Consolas, monospace;
+  --text-mono: 0.75rem;
+  --text-mono--line-height: 1.4;
+  --text-mono--letter-spacing: 0.1em;
+
+  /* Motion levels (redesign plan §10). Level 1 is functional feedback, 2 is a
+     niche microinteraction, 3 is section storytelling, 4 is the ONE signature
+     moment a page is allowed. There is no level 5, and nothing here loops. */
+  --dur-l1: 140ms;
+  --dur-l2: 320ms;
+  --dur-l3: 560ms;
+  --dur-l4: 900ms;
+  /* Machine easing: a fast, weighted start that settles — a needle bar, not a
+     bouncing ball. Used for level 2+ only; level 1 stays on --ease-out-soft. */
+  --ease-machine: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Material finish. Textures sit at 2-5% strength: felt before noticed. */
+  --texture-strength: 0.035;
+  --texture-ink: 32 33 30;
 }
 
 /* ---------------------------------- base ---------------------------------- */
