@@ -83,8 +83,12 @@ describe("the print CSS is built for paper", () => {
     expect(css).toContain("@page {");
     expect(css).toContain("size: A4 portrait");
     expect(css).toContain("margin: 14mm 13mm");
-    // Rosters and registers are columns, so they say so themselves.
+    // Rosters and registers are columns, so they say so themselves — and the
+    // named page is actually APPLIED. Declaring `@page landscape` without a
+    // `page:` property pointing at it does nothing, and the register prints
+    // portrait with its right-hand columns cut off.
     expect(css).toContain("size: A4 landscape");
+    expect(css).toContain("page: landscape;");
   });
 
   it("repeats table headings across pages and never splits a row", () => {

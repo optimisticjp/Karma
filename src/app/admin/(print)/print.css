@@ -21,9 +21,17 @@
   margin: 14mm 13mm;
 }
 
-/* Landscape sheets say so themselves — a roster or a register is columns. */
+/* Landscape sheets say so themselves — a roster or a register is columns.
+ *
+ * A NAMED page, applied by `.sheet.is-landscape { page: landscape; }` below.
+ * Declaring `@page landscape` alone does nothing: without the `page` property
+ * pointing at it, the roster and the register print portrait and lose their
+ * right-hand columns. Named-page support is good in Chromium and partial
+ * elsewhere, so the toolbar also states the orientation — a printer dialog set
+ * by hand is a fallback, a silently cropped register is not. */
 @page landscape {
   size: A4 landscape;
+  margin: 12mm 10mm;
 }
 
 .sheet-root {
@@ -46,7 +54,10 @@
   padding: 8mm 0;
   background: #fff;
 }
-.sheet.is-landscape { max-width: 271mm; }
+.sheet.is-landscape {
+  max-width: 271mm;
+  page: landscape;
+}
 
 /* ------------------------------- the header ------------------------------ */
 
