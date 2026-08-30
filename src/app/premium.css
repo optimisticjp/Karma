@@ -807,10 +807,14 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
   .stage-tab { transition: none; }
 }
 
-/* ========================= mobile bottom navigation =======================
- * Replaces three competing systems: the hamburger-only menu, the sticky
- * course CTA bar, and the floating WhatsApp button. Five fixed destinations,
- * booking in the middle under the thumb.
+/* =========================== mobile action bar ===========================
+ * Two actions: call, and directions. Nothing else.
+ *
+ * This replaced a five-tab navigation bar, which itself replaced three
+ * competing systems. Five tabs were an improvement on the mess but still the
+ * wrong answer — a visitor arriving from a reel is not browsing a site map,
+ * they are deciding whether to phone. The header menu is what navigation is
+ * for; the bottom of a phone screen is worth more than that.
  * ========================================================================= */
 
 .tabbar {
@@ -848,43 +852,54 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
   height: 1.5rem;
 }
 .tabbar-label {
-  font-size: 0.6875rem;
-  font-weight: 650;
-  line-height: 1.1;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.15;
   text-align: center;
   letter-spacing: 0.01em;
 }
-:lang(gu) .tabbar-label { font-size: 0.625rem; letter-spacing: 0; }
+:lang(gu) .tabbar-label { font-size: 0.8125rem; letter-spacing: 0; }
+/* Below 340px "Call for demo" and "Directions" both wrap; drop a size rather
+   than truncate, because a truncated action is a guess. */
+@media (max-width: 339px) {
+  .tabbar-label { font-size: 0.8125rem; }
+  .tabbar-item { gap: 0.375rem; }
+}
 
-/* Active state has to be readable at a glance, so it is colour AND a mark —
-   never colour alone. */
-.tabbar-item[aria-current="page"] { color: var(--color-vermilion-deep); }
-.tabbar-item[aria-current="page"]::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 50%;
-  translate: -50% 0;
-  width: 1.75rem;
-  height: 2px;
-  border-radius: 0 0 2px 2px;
-  background: var(--color-vermilion);
+/* Two actions, so they sit side by side as full-width targets rather than as
+   icons with captions. Both are actions, not destinations, so there is no
+   "current page" state to mark. */
+.tabbar-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.tabbar-item {
+  flex-direction: row;
+  gap: 0.5rem;
+  /* Comfortably past the 48px primary-control floor the brief asks for. */
+  min-height: 3.5rem;
+  padding-inline: 0.5rem;
+  font-weight: 700;
+}
+.tabbar-item + .tabbar-item,
+.tabbar-list > li + li .tabbar-item { border-left: var(--hairline); }
+/* On a tablet two half-width buttons are ~500px each, which reads as a
+   toolbar rather than as a thumb action. Cap and centre. */
+@media (min-width: 640px) {
+  .tabbar-list {
+    max-width: 34rem;
+    margin-inline: auto;
+    border-inline: var(--hairline);
+  }
 }
 .tabbar-item:focus-visible { outline-offset: -3px; }
 
-/* The booking action: a filled disc that lifts slightly out of the bar. */
-.tabbar-item.is-primary { color: var(--color-carbon); }
-.tabbar-item.is-primary .tabbar-icon {
-  width: 2.75rem;
-  height: 2.75rem;
-  margin-top: -0.9375rem;
-  border-radius: 999px;
+/* Call is the action the whole page is built to produce, so it is the filled
+   one. Directions is the alternative for someone who would rather just come. */
+.tabbar-item.is-primary {
   background: var(--color-vermilion);
   color: var(--color-card);
-  border: 3px solid var(--color-card);
-  box-shadow: 0 2px 6px rgb(32 33 30 / 0.16);
 }
-.tabbar-item.is-primary[aria-current="page"] { color: var(--color-vermilion-deep); }
+.tabbar-item.is-primary:active { background: var(--color-vermilion-deep); }
 
 /* Content must never end underneath the bar. Scoped to `.site-body`: the bar
    is public-only, and an unscoped `body` rule was also reserving 64px at the
@@ -892,10 +907,9 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
 @media (max-width: 1279px) {
   .site-body { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
 }
-/* The bar runs to 1280, not 1024: seven nav items, the language toggle and the
-   booking CTA only fit in the header from 1280 up, so between 1024 and 1279 the
-   bar is the only visible primary navigation rather than a phone affordance
-   left switched on by accident. */
+/* The bar runs to 1280, not 1024. The header's nav only fits from 1280 up, so
+   below that the hamburger carries navigation and this bar carries the two
+   actions — which is the division of labour the whole design rests on. */
 @media (min-width: 1280px) {
   .tabbar { display: none; }
 }

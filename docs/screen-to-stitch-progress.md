@@ -450,7 +450,7 @@ Update this table after every completed/merged phase.
 | 2 | Homepage / 30-second decision | ✅ Complete + merged | PR #13 — `build` + Cloudflare Workers Builds green |
 | 3 | Courses / production-led detail pages | ✅ Complete + merged | PR #14 — `build` + Cloudflare Workers Builds green |
 | 4 | Proof ecosystem: work, stories, reviews, trainers | ✅ Complete + merged | PR #15 — `build` + Cloudflare Workers Builds green |
-| 5 | Mobile conversion / call / directions / demo | ⏳ Pending | |
+| 5 | Mobile conversion / call / directions / demo | 🚧 In progress | branch `phase-5/mobile-conversion` |
 | 6 | Studio / B2B commercial embroidery | ⏳ Pending | |
 | 7 | Machine Notes / social-to-search content | ⏳ Pending | |
 | 8 | Local SEO / structured data / measurement | ⏳ Pending | |
@@ -1299,6 +1299,95 @@ Do not send PII.
 No paid analytics dependency required.
 
 Merge when green; update progress.
+
+## Implementation record
+
+### The bottom bar is now two actions
+The five-tab navigation bar is gone. It was an improvement on the three
+competing systems it replaced — hamburger, sticky CTA and floating WhatsApp
+all fighting for one corner — but still the wrong answer: a visitor arriving
+from a reel is not browsing a site map, they are deciding whether to phone.
+
+**CALL FOR DEMO | DIRECTIONS.** Both are the actual conversion, both are one
+thumb-reach away, and neither needs a page load to pay off. Navigation moved
+entirely to the header menu, which already covers every width below 1280.
+Measured at 56px tall — past the 48px floor the brief asks for — full width
+at 320-639px and capped at 34rem from 640px so a tablet does not get a
+500px-wide button.
+
+### The phone discrepancy, handled rather than resolved
+Two numbers are published and the owner has not said which answers what, so
+the roles are kept apart:
+
+| Number | Source | Used for |
+| --- | --- | --- |
+| +91 81605 17429 | The owner's Facebook listing, supplied in this file | Every explicit "Call for a demo" action |
+| +91 99043 76340 | In the repo from the start | WhatsApp, and a call alternative to it |
+| +91 261 4521383 | The studio's own site | The landline |
+
+The call number is **never** labelled WhatsApp. The WhatsApp configuration is
+untouched. Pages listing contact details show all three, each named by its
+channel, so nothing contradicts anything else — and all three appear in the
+`LocalBusiness` `telephone` array rather than one being promoted.
+
+### The demo funnel now asks the cheapest question first
+Steps were: you → course → details → review. They are now **course → you →
+details → review**. A visitor will tell you what they want to learn before
+they will hand over a phone number, and asking in that order is what turns a
+form into a conversation. The preselected-course banner moved to step 2, where
+it confirms the choice instead of describing one the visitor cannot see.
+
+The payload shape is unchanged, so backend validation and CRM ingestion are
+untouched — only the order of the questions moved.
+
+Mobile input polish: `type="tel"` on both phone fields (`inputMode` alone
+leaves a text keyboard on some Android browsers), `inputMode="email"` on
+email, `autoComplete="tel"` on the guardian field, and `enterKeyHint` so the
+phone's Enter key says "next" or "done" rather than "go".
+
+### Measurement without a dependency
+`src/lib/analytics.ts` is not an analytics library. It is the six named
+moments plus a function that emits them as a DOM CustomEvent and a small
+in-page queue. **No network request, no cookie, no third-party script, no
+consent banner** — and nothing to remove later if the owner picks a different
+tool. Attaching one is a single listener:
+
+```js
+window.addEventListener("karma:event", (e) => provider.track(e.detail));
+```
+
+**The PII rule is enforced by construction, not by discipline.** `EventProps`
+admits four keys — `course`, `surface`, `locale`, `step` — all slugs, enums or
+counts, with no `string` escape hatch, and `track()` strips anything else even
+if a cast gets past the type system. Nothing a visitor types can reach it.
+
+Wired through `<TrackedLink>` and `<TrackView>`, two client leaves, so no page
+had to become a client component to report a click.
+
+### Tests (`tests/mobile-conversion.test.ts`, 11 new — 219 total)
+- the two mobile numbers are different and both published;
+- no `wa.me` link uses the call number, anywhere;
+- every call-for-demo action dials it;
+- both appear in structured data;
+- the bar contains no route links and no `usePathname`;
+- safe-area inset and body padding are present;
+- analytics allows only the four enumerable keys and names no PII field;
+- analytics makes no network request and injects no script;
+- no `track()` call in the admission form mentions a typed field;
+- step one validates course and timing, step two identity;
+- phone fields carry tel type, inputmode and autofill.
+
+One of those tests caught my own over-broad assertion again: "script" appears
+in the module's comment explaining that it loads none, so the check is now for
+script *injection* rather than for the word.
+
+### Verification
+`npm run typecheck`, `npm run lint`, `npm test` (**219 passing**) and
+`npm run build` all clean. Audited at 320, 360, 375, 390, 430, 768, 820, 1024,
+1280 and 1440 in both locales across `/`, `/admission` and `/contact`: bar
+present and 56px through 1024, hidden from 1280, body padding correct at every
+width, **zero horizontal overflow and zero sub-24px non-inline targets**.
+Gujarati labels fit without truncation at 320px.
 
 ---
 

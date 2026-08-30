@@ -1,67 +1,59 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { Link, usePathname } from "@/i18n/navigation";
-import { Icon, type IconName } from "@/components/ui/Icon";
-import { cn } from "@/lib/utils";
+import { useTranslations, useLocale } from "next-intl";
+import { site } from "@/lib/site";
+import { track } from "@/lib/analytics";
+import { Icon } from "@/components/ui/Icon";
 
 /**
- * Persistent mobile navigation.
+ * The permanent mobile action bar: two actions, and nothing else.
  *
- * This audience is phone-first and one-handed, and the old mobile design put
- * every destination behind a hamburger while a separate sticky CTA bar and a
- * floating WhatsApp button fought for the same corner. Three competing systems.
- * This replaces all of them: five fixed destinations, the booking action in the
- * middle where the thumb rests, and nothing else docked to the bottom.
+ * This replaced a five-tab navigation bar, which replaced three competing
+ * systems before it. The five tabs were an improvement on the mess but still
+ * the wrong answer: a visitor arriving from an Instagram reel is not browsing
+ * a site map, they are deciding whether to phone. Navigation is what the
+ * header menu is for; the bottom of a phone screen is worth more than that.
  *
- * Deliberately not app-chrome-for-its-own-sake — it is hairlines and the same
- * type as the rest of the site, so it reads as part of the studio's identity
- * rather than a bolted-on tab bar.
+ * So: call, or get directions. Both are the actual conversion, both are one
+ * thumb-reach away, and neither needs a page load to pay off.
+ *
+ * The call dials `site.callPhone` — the number the owner published on
+ * Facebook — and is never labelled WhatsApp, because which number answers
+ * what has not been confirmed. See the note in `src/lib/site.ts`.
  */
-
-type Tab = {
-  href: string;
-  key: "home" | "courses" | "book" | "work" | "contact";
-  icon: IconName;
-  /** The booking action is the reason this bar exists. */
-  primary?: boolean;
-};
-
-const TABS: Tab[] = [
-  { href: "/", key: "home", icon: "hoop" },
-  { href: "/courses", key: "courses", icon: "layers" },
-  { href: "/admission", key: "book", icon: "needle", primary: true },
-  { href: "/student-work", key: "work", icon: "sequin" },
-  { href: "/contact", key: "contact", icon: "pin" }
-];
-
 export function MobileTabBar() {
   const t = useTranslations("tabbar");
-  const pathname = usePathname();
-
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const locale = useLocale();
 
   return (
     <nav className="tabbar xl:hidden" aria-label={t("label")}>
       <ul className="tabbar-list">
-        {TABS.map((tab) => {
-          const active = isActive(tab.href);
-          return (
-            <li key={tab.key}>
-              <Link
-                href={tab.href}
-                aria-current={active ? "page" : undefined}
-                className={cn("tabbar-item", tab.primary && "is-primary")}
-              >
-                <span className="tabbar-icon" aria-hidden="true">
-                  <Icon name={tab.icon} size={tab.primary ? 21 : 20} />
-                </span>
-                <span className="tabbar-label">{t(tab.key)}</span>
-              </Link>
-            </li>
-          );
-        })}
+        <li>
+          <a
+            href={`tel:+${site.callPhone}`}
+            className="tabbar-item is-primary"
+            onClick={() => track("call_demo_click", { surface: "tabbar", locale })}
+          >
+            <span className="tabbar-icon" aria-hidden="true">
+              <Icon name="phone" size={20} />
+            </span>
+            <span className="tabbar-label">{t("call")}</span>
+          </a>
+        </li>
+        <li>
+          <a
+            href={site.mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tabbar-item"
+            onClick={() => track("directions_click", { surface: "tabbar", locale })}
+          >
+            <span className="tabbar-icon" aria-hidden="true">
+              <Icon name="pin" size={20} />
+            </span>
+            <span className="tabbar-label">{t("directions")}</span>
+          </a>
+        </li>
       </ul>
     </nav>
   );

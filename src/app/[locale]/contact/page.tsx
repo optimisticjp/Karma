@@ -54,6 +54,18 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
       note: t("landlineNote"),
       primary: false
     },
+    /* Two mobile numbers, two roles, kept apart. The owner has not confirmed
+       which answers what, so each row names its channel and nothing on the
+       site labels the call number as WhatsApp. See src/lib/site.ts. */
+    {
+      href: `tel:+${site.callPhone}`,
+      external: false,
+      icon: "phone" as const,
+      label: t("demoCallLabel"),
+      value: site.callPhoneDisplay,
+      note: t("demoCallNote"),
+      primary: false
+    },
     {
       href: `tel:+${site.whatsapp}`,
       external: false,

@@ -69,9 +69,26 @@ export function Footer() {
                 {locale === "gu" ? site.landmarkGu : site.landmarkEn}
               </p>
               <p>{locale === "gu" ? site.hoursGu : site.hoursEn}</p>
-              <p className="flex flex-wrap gap-x-4">
-                <a className="stitch-link font-semibold text-carbon" href={`tel:+${site.whatsapp}`}>{site.phoneDisplay}</a>
-                <a className="stitch-link font-semibold text-carbon" href={`tel:+${site.landline}`}>{site.landlineDisplay}</a>
+              {/* Both mobile numbers, each named by the channel it is for.
+                  Which one answers what is unconfirmed, so they are listed
+                  rather than merged — see src/lib/site.ts. */}
+              <p>
+                <a className="stitch-link font-semibold text-carbon" href={`tel:+${site.callPhone}`}>
+                  {site.callPhoneDisplay}
+                </a>{" "}
+                <span className="text-stone">{t("callFor")}</span>
+              </p>
+              <p>
+                <a className="stitch-link font-semibold text-carbon" href={`tel:+${site.whatsapp}`}>
+                  {site.phoneDisplay}
+                </a>{" "}
+                <span className="text-stone">{t("waFor")}</span>
+              </p>
+              <p>
+                <a className="stitch-link font-semibold text-carbon" href={`tel:+${site.landline}`}>
+                  {site.landlineDisplay}
+                </a>{" "}
+                <span className="text-stone">{t("landlineFor")}</span>
               </p>
               <p><a className="stitch-link break-all" href={`mailto:${site.email}`}>{site.email}</a></p>
               <p><Link className="stitch-link" href="/services">{t("briefLink")}</Link></p>

@@ -11,6 +11,8 @@ import { TechniquePlate } from "@/components/ui/TechniquePlate";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { StitchRule } from "@/components/ui/StitchPath";
 import { SampleTag } from "@/components/ui/SampleTag";
+import { TrackedLink } from "@/components/site/TrackedLink";
+import { TrackView } from "@/components/site/TrackView";
 import { JsonLd } from "@/components/site/JsonLd";
 import { courseBySlug, coursesByFamily, coursesInFamily, families } from "@/content/courses";
 import { faqs, trainers } from "@/content/collections";
@@ -138,6 +140,7 @@ export default async function CourseDetailPage({
     <>
       <JsonLd data={courseLd} />
       <JsonLd data={crumbs} />
+      <TrackView event="course_view" props={{ course: course.slug }} />
 
       {/* 1. What this technique produces. It is the lede, because it is the
              only sentence that answers "is this the work I want to do?" */}
@@ -153,9 +156,14 @@ export default async function CourseDetailPage({
             >
               {t("demoCta")} <Icon name="arrow" size={18} className="arrow" />
             </Link>
-            <a href={`tel:+${site.whatsapp}`} className="btn btn-secondary">
+            <TrackedLink
+              href={`tel:+${site.callPhone}`}
+              event="call_demo_click"
+              props={{ surface: "course", course: course.slug }}
+              className="btn btn-secondary"
+            >
               <Icon name="phone" size={17} /> {t("callCta")}
-            </a>
+            </TrackedLink>
           </>
         }
         aside={
@@ -313,14 +321,15 @@ export default async function CourseDetailPage({
               >
                 {t("demoCta")} <Icon name="arrow" size={18} className="arrow" />
               </Link>
-              <a
+              <TrackedLink
                 href={waLink(waCourse)}
-                target="_blank"
-                rel="noopener noreferrer"
+                event="whatsapp_click"
+                props={{ surface: "course", course: course.slug }}
+                external
                 className="btn btn-secondary"
               >
                 <Icon name="whatsapp" size={18} /> {tc("whatsapp")}
-              </a>
+              </TrackedLink>
             </div>
           </div>
         </div>

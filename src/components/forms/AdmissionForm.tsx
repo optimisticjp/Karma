@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { TurnstileWidget } from "./TurnstileWidget";
 import { site, waLink } from "@/lib/site";
+import { track } from "@/lib/analytics";
 import { cleanIndianMobile } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
@@ -164,13 +165,17 @@ export function AdmissionForm({
 
   const validate = (s: number): Record<string, string> => {
     const e: Record<string, string> = {};
+    /* Course first, then who you are. The cheapest question goes first: a
+       visitor will tell you what they want to learn before they will hand
+       over a phone number, and asking in that order is what turns a form into
+       a conversation. */
     if (s === 0) {
-      if (data.fullName.trim().length < 2) e.fullName = t("errors.required");
-      if (!MOBILE.test(cleanIndianMobile(data.whatsapp))) e.whatsapp = t("errors.phone");
-    }
-    if (s === 1) {
       if (!data.courseSlug) e.courseSlug = t("errors.required");
       if (!data.preferredTiming) e.preferredTiming = t("errors.required");
+    }
+    if (s === 1) {
+      if (data.fullName.trim().length < 2) e.fullName = t("errors.required");
+      if (!MOBILE.test(cleanIndianMobile(data.whatsapp))) e.whatsapp = t("errors.phone");
     }
     if (s === 2) {
       if (!data.ageBand) e.ageBand = t("errors.required");
@@ -193,7 +198,16 @@ export function AdmissionForm({
     el?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
+  /* Fired once, when the visitor commits to the form by leaving step 1.
+     Mounting the page is not a start — arriving and bouncing is the case this
+     event exists to distinguish. */
+  const started = useRef(false);
+
   const go = (next: number) => {
+    if (!started.current && next > 0) {
+      started.current = true;
+      track("demo_start", { course: data.courseSlug || undefined, locale: uiLocale });
+    }
     setStep(next);
     setRestored(false);
     requestAnimationFrame(() => stepHeading.current?.focus());
@@ -235,6 +249,9 @@ export function AdmissionForm({
       const out = (await res.json()) as { ok: boolean; reference?: string; waUrl?: string };
       if (!res.ok || !out.ok || !out.reference) throw new Error("submit failed");
       const waUrl = out.waUrl ?? waLink(t("success.waMessage", { ref: out.reference }));
+      /* Funnel end. The course slug is an enumerable value from our own
+         catalogue; nothing the visitor typed is included. */
+      track("demo_complete", { course: data.courseSlug || undefined, locale: uiLocale });
       setDone({ reference: out.reference, waUrl });
       try {
         localStorage.removeItem(DRAFT_KEY);
@@ -290,7 +307,14 @@ export function AdmissionForm({
   const textField = (
     key: keyof Data,
     label: string,
-    opts?: { placeholder?: string; type?: string; inputMode?: "numeric"; autoComplete?: string }
+    opts?: {
+      placeholder?: string;
+      type?: string;
+      inputMode?: "numeric" | "tel" | "email";
+      autoComplete?: string;
+      /** What the phone's Enter key should say. */
+      enterKeyHint?: "next" | "done";
+    }
   ) => (
     <div>
       <label className="label" htmlFor={`adm-${key}`}>
@@ -305,6 +329,7 @@ export function AdmissionForm({
         onChange={(e) => set(key, e.target.value as never)}
         inputMode={opts?.inputMode}
         autoComplete={opts?.autoComplete}
+        enterKeyHint={opts?.enterKeyHint}
         aria-invalid={errors[key] ? true : undefined}
         aria-describedby={errors[key] ? errId(key) : undefined}
       />
@@ -369,7 +394,7 @@ export function AdmissionForm({
         />
       </div>
 
-      {fromContext && contextCourse && step === 0 ? (
+      {fromContext && contextCourse && step === 1 ? (
         <p className="mt-4 flex flex-wrap items-center gap-2 rounded-lg bg-ivory-2 px-4 py-2 text-smallmeta font-semibold">
           {t("contextApplying")}{" "}
           <span className="text-vermilion-deep">
@@ -377,7 +402,7 @@ export function AdmissionForm({
           </span>
           <button
             type="button"
-            onClick={() => go(1)}
+            onClick={() => go(0)}
             className="stitch-link ml-auto text-xs font-bold text-stone"
           >
             {t("contextChange")}
@@ -414,41 +439,8 @@ export function AdmissionForm({
       ) : null}
 
       <div key={step} className="step-in mt-8 space-y-6">
-        {/* ------------------------------ STEP 1 ------------------------------ */}
+        {/* ---------------------- STEP 1 · WHAT YOU WANT ---------------------- */}
         {step === 0 ? (
-          <>
-            <fieldset>
-              <legend className="label">{t("fields.language")}</legend>
-              <div className="flex gap-3">
-                {(["gu", "en"] as const).map((l) => (
-                  <label key={l} className="choice-chip">
-                    <input
-                      type="radio"
-                      name="locale"
-                      className="sr-only"
-                      checked={data.locale === l}
-                      onChange={() => set("locale", l)}
-                    />
-                    {l === "gu" ? "ગુજરાતી" : "English"}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-            {textField("fullName", t("fields.fullName"), {
-              placeholder: t("fields.fullNamePh"),
-              autoComplete: "name"
-            })}
-            {textField("whatsapp", t("fields.whatsapp"), {
-              placeholder: t("fields.whatsappPh"),
-              inputMode: "numeric",
-              autoComplete: "tel"
-            })}
-            {textField("email", t("fields.email"), { type: "email", autoComplete: "email" })}
-          </>
-        ) : null}
-
-        {/* ------------------------------ STEP 2 ------------------------------ */}
-        {step === 1 ? (
           <>
             <fieldset aria-describedby={errors.courseSlug ? errId("courseSlug") : undefined}>
               <legend id="adm-course-legend" tabIndex={-1} className="label outline-none">
@@ -498,7 +490,48 @@ export function AdmissionForm({
           </>
         ) : null}
 
-        {/* ------------------------------ STEP 3 ------------------------------ */}
+        {/* ------------------------- STEP 2 · YOU ---------------------------- */}
+        {step === 1 ? (
+          <>
+            <fieldset>
+              <legend className="label">{t("fields.language")}</legend>
+              <div className="flex gap-3">
+                {(["gu", "en"] as const).map((l) => (
+                  <label key={l} className="choice-chip">
+                    <input
+                      type="radio"
+                      name="locale"
+                      className="sr-only"
+                      checked={data.locale === l}
+                      onChange={() => set("locale", l)}
+                    />
+                    {l === "gu" ? "ગુજરાતી" : "English"}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            {textField("fullName", t("fields.fullName"), {
+              placeholder: t("fields.fullNamePh"),
+              autoComplete: "name",
+              enterKeyHint: "next"
+            })}
+            {textField("whatsapp", t("fields.whatsapp"), {
+              placeholder: t("fields.whatsappPh"),
+              type: "tel",
+              inputMode: "tel",
+              autoComplete: "tel",
+              enterKeyHint: "next"
+            })}
+            {textField("email", t("fields.email"), {
+              type: "email",
+              inputMode: "email",
+              autoComplete: "email",
+              enterKeyHint: "done"
+            })}
+          </>
+        ) : null}
+
+        {/* ---------------------- STEP 3 · CONTEXT ---------------------------- */}
         {step === 2 ? (
           <>
             {selectField("ageBand", t("fields.ageBand"), [
@@ -510,7 +543,12 @@ export function AdmissionForm({
             {data.ageBand === "under18" ? (
               <div className="grid gap-5 rounded-xl border border-dashed border-vermilion bg-ivory-2 p-4 sm:grid-cols-2">
                 {textField("guardianName", t("fields.guardianName"))}
-                {textField("guardianPhone", t("fields.guardianPhone"), { inputMode: "numeric" })}
+                {textField("guardianPhone", t("fields.guardianPhone"), {
+                  type: "tel",
+                  inputMode: "tel",
+                  autoComplete: "tel",
+                  enterKeyHint: "done"
+                })}
               </div>
             ) : null}
             {selectField("occupation", t("fields.occupation"), [
@@ -549,27 +587,27 @@ export function AdmissionForm({
           </>
         ) : null}
 
-        {/* ------------------------------ STEP 4 ------------------------------ */}
+        {/* --------------------- STEP 4 · REVIEW ------------------------------ */}
         {step === 3 ? (
           <>
             <h3 className="text-h4 font-display">{t("review.title")}</h3>
             <dl className="space-y-3 text-smallmeta">
               {(
                 [
-                  [t("fields.fullName"), data.fullName, 0],
-                  [t("fields.whatsapp"), data.whatsapp, 0],
                   [
                     t("fields.course"),
                     contextCourse?.[uiLocale === "gu" ? "nameGu" : "nameEn"] ?? "",
-                    1
+                    0
                   ],
                   [
                     t("fields.timing"),
                     data.preferredTiming === "morning"
                       ? t("options.timingMorning")
                       : t("options.timingEvening"),
-                    1
+                    0
                   ],
+                  [t("fields.fullName"), data.fullName, 1],
+                  [t("fields.whatsapp"), data.whatsapp, 1],
                   [t("fields.area"), data.area, 2]
                 ] as Array<[string, string, number]>
               ).map(([label, value, s]) => (

@@ -64,7 +64,9 @@ export default async function LocaleLayout({
     alternateName: site.name,
     description: locale === "gu" ? site.descriptorGu : site.descriptorEn,
     url: site.url,
-    telephone: [`+${site.whatsapp}`, `+${site.landline}`],
+    /* All three published numbers. Which mobile answers what is unconfirmed,
+       so both are listed rather than one being promoted to "the" number. */
+    telephone: [`+${site.callPhone}`, `+${site.whatsapp}`, `+${site.landline}`],
     email: site.email,
     address: {
       "@type": "PostalAddress",

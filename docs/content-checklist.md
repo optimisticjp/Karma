@@ -199,11 +199,30 @@ whether the owner has told us it is the rating on their listing.
   answers and the fees section now say "ask at the demo" rather than guessing,
   so nothing is blocked — but a real duration per course is better copy than
   an honest deferral.
-- **Phone vs WhatsApp roles.** The owner's Facebook number
-  (+91 81605 17429) and the repo's published number (+91 99043 76340) have not
-  been reconciled. "Call for current batch" in the hero currently dials the
-  repo number. Phase 5 owns this decision; the two roles must not be silently
-  merged before then.
+- **Phone vs WhatsApp roles — still open, now handled explicitly.**
+  Two numbers are published and the owner has not said which answers what:
+
+  | Number | Source | Used on the site for |
+  | --- | --- | --- |
+  | +91 81605 17429 | The owner's own Facebook listing, supplied in `docs/screen-to-stitch-progress.md` | Every explicit "Call for a demo" action: the mobile bar, the hero, course pages |
+  | +91 99043 76340 | In this repo from the start | WhatsApp, and a call alternative to WhatsApp |
+  | +91 261 4521383 | The studio's own site | The studio landline |
+
+  Rules being followed until the owner confirms:
+  - the call number is **never** labelled WhatsApp anywhere;
+  - the WhatsApp configuration is untouched and still uses its own number;
+  - pages that list contact details show all three, each named by the channel
+    it is for, so nothing on the site contradicts anything else;
+  - all three appear in the `LocalBusiness` `telephone` array rather than one
+    being promoted to "the" number.
+
+  `tests/mobile-conversion.test.ts` holds this: the numbers must differ, no
+  `wa.me` link may use the call number, and every call-for-demo action must
+  dial it.
+
+  **The one question to ask the owner:** which of the two mobiles is answered
+  by a person during batch hours, and which is WhatsApp-only? One sentence
+  collapses this to a single number.
 - **Real photography.** Every visual on the site is drawn or a named
   placeholder — technique swatches, the workflow, the four production-proof
   panels, and the `<PhotoSlot>` entries that name the shot they are waiting

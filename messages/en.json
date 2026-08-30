@@ -257,7 +257,9 @@
           "t": "You leave without deciding",
           "d": "We go through the fee and the batch timings. Deciding the same day is not expected."
         }
-      ]
+      ],
+      "callLabel": "Call for a demo",
+      "waLabel": "WhatsApp and landline"
     },
     "faq": {
       "h2": "The questions people ask before they come.",
@@ -455,8 +457,8 @@
     "sub": "Four short steps. Your draft saves on this device, so nothing is lost.",
     "stepLabel": "Step {current} of {total}",
     "steps": [
-      "You",
       "Course",
+      "You",
       "Details",
       "Review"
     ],
@@ -687,7 +689,7 @@
     "reachTitle": "How to reach us",
     "reachSub": "Ranked by how fast you will get an answer.",
     "waNote": "Fastest reply, day or evening",
-    "callNote": "Same number as WhatsApp",
+    "callNote": "The same number as WhatsApp above, if you would rather talk than type.",
     "emailLabel": "Email",
     "emailNote": "For business briefs and documents",
     "visitTitle": "Visit us",
@@ -698,9 +700,11 @@
     "demoNote": "The free demo class is the best first visit: book it and just come.",
     "landlineLabel": "Call the studio",
     "landlineNote": "Landline, best during studio hours",
-    "mobileLabel": "Call the mobile",
+    "mobileLabel": "WhatsApp number, by call",
     "directionsTitle": "Finding the door",
-    "directionsBody": "Middle Point is on Mahadev Chowk. Come to the third floor — unit 302. If you are close and cannot spot it, send a WhatsApp and someone will come down."
+    "directionsBody": "Middle Point is on Mahadev Chowk. Come to the third floor — unit 302. If you are close and cannot spot it, send a WhatsApp and someone will come down.",
+    "demoCallLabel": "Call for a demo",
+    "demoCallNote": "The number the studio lists on Facebook. Ask for the current batch and fee."
   },
   "verifyPage": {
     "title": "Verify a certificate",
@@ -747,7 +751,10 @@
     "privacy": "Privacy",
     "terms": "Terms",
     "dataRequest": "Data request",
-    "rights": "© {year} Karma Design Studio, Surat. All rights reserved."
+    "rights": "© {year} Karma Design Studio, Surat. All rights reserved.",
+    "callFor": "— call for a demo",
+    "waFor": "— WhatsApp",
+    "landlineFor": "— studio landline"
   },
   "errorPage": {
     "title": "Something went wrong.",
@@ -968,12 +975,9 @@
     }
   },
   "tabbar": {
-    "label": "Main",
-    "home": "Home",
-    "courses": "Courses",
-    "book": "Book demo",
-    "work": "Work",
-    "contact": "Contact"
+    "label": "Quick actions",
+    "call": "Call for demo",
+    "directions": "Directions"
   },
   "proof": {
     "cases": {
