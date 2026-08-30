@@ -74,21 +74,25 @@ export function Reveal({
 }
 
 /**
- * Self-registering watcher for `.media-unveil` elements (Interaction 3).
+ * Self-registering watcher for elements that hide themselves until `is-in`
+ * lands: `.media-unveil` (photo unveil) and `.stitch-wipe` (a stitch laying
+ * itself down).
  *
- * Why this exists: the unveil hides its element via clip-path until `is-in`
- * lands. Anything relying on a <Reveal> ancestor would stay invisible
- * forever if that ancestor were missing, so nothing is trusted to wrap it:
- * this observes every `.media-unveil` on the page directly, and re-scans
- * after client navigation. A failed animation must never cost a photo.
+ * Why this exists: both hide via clip-path. Anything relying on a <Reveal>
+ * ancestor would stay invisible forever if that ancestor were missing, so
+ * nothing is trusted to wrap them: this observes every such element on the
+ * page directly, and re-scans after client navigation. A failed animation
+ * must never cost a photo — or a section's only visible divider.
  */
+const SELF_REVEAL = ".media-unveil:not(.is-in), .stitch-wipe:not(.is-in)";
+
 export function UnveilWatcher() {
   useEffect(() => {
     const io = getObserver();
     if (!io) return;
 
     const scan = () => {
-      document.querySelectorAll<HTMLElement>(".media-unveil:not(.is-in)").forEach((el) => {
+      document.querySelectorAll<HTMLElement>(SELF_REVEAL).forEach((el) => {
         if (callbacks.has(el)) return;
         callbacks.set(el, () => el.classList.add("is-in"));
         io.observe(el);
@@ -102,7 +106,7 @@ export function UnveilWatcher() {
 
     // Absolute failsafe: if anything above went wrong, reveal everything.
     const failsafe = window.setTimeout(() => {
-      document.querySelectorAll<HTMLElement>(".media-unveil").forEach((el) => {
+      document.querySelectorAll<HTMLElement>(".media-unveil, .stitch-wipe").forEach((el) => {
         const r = el.getBoundingClientRect();
         if (r.top < window.innerHeight) el.classList.add("is-in");
       });

@@ -446,7 +446,7 @@ Update this table after every completed/merged phase.
 
 | Phase | Scope | Status | PR / merge notes |
 | --- | --- | --- | --- |
-| 1 | Brand system + design foundations | ⏳ Pending | |
+| 1 | Brand system + design foundations | ✅ Complete + merged | PR #12 — `build` + Cloudflare Workers Builds green |
 | 2 | Homepage / 30-second decision | ⏳ Pending | |
 | 3 | Courses / production-led detail pages | ⏳ Pending | |
 | 4 | Proof ecosystem: work, stories, reviews, trainers | ⏳ Pending | |
@@ -508,6 +508,74 @@ Research current premium commercial embroidery / digitising / machine-training b
 ## Completion
 
 Run all checks, open PR, get GitHub + Cloudflare green, merge, then mark Phase 1 complete here.
+
+## Implementation record
+
+### Research inputs
+Ricoma, Wilcom and Melco product/marketing sites plus Hand & Lock. The pattern
+that decided the direction: the entire commercial-embroidery reference set is
+sans-serif, leads with numerical specificity, positions problem→solution, and
+shows machines mid-operation rather than lifestyle. Colour restraint is what
+signals "industrial" in this category. Patterns extracted; no identity copied.
+
+### Decisions
+
+1. **Manrope carries display and UI; Fraunces and Noto Serif Gujarati are
+   removed.** v2's editorial serif read as craft blog, not machine floor.
+   Playfair Display is added but loads its **italic axis only**
+   (`wght-italic.css`), so the net font payload is *smaller* than v2 despite
+   gaining an accent face. Playfair is used in exactly one primitive
+   (`.pull-quote`) and falls back for Gujarati, which does not use italic.
+2. **Token names are unchanged; only values were retuned and new tokens
+   added.** `globals.css` is shared with Karma Console, so a rename would have
+   silently restyled the admin. Palette moved to Cotton / Raw Silk / Machine
+   Black / Steel Indigo per the palette-direction table, and `needle`,
+   `needle-light`, `zari-deep` and `steel` were added.
+3. **Every contrast ratio in the palette was measured, not estimated**, and
+   the results are recorded as comments in the CSS and as a table in
+   `docs/design-system.md`. Zari copper (4.09:1) is restricted to large and
+   editorial use; `zari-deep` (5.77:1) exists for when copper must be text.
+4. **The straight stitch rule is drawn in CSS, not SVG.** A stretched SVG maps
+   a fixed viewBox onto an arbitrary width, which squashes the 9/6 stitch and
+   slides the needle dots off the stitch heads — at 144px wide the spec
+   geometry came out as 4.3px stitches with dots every 7.2px. `<StitchPath>`
+   keeps the SVG for shaped connectors, where the aspect is fixed.
+5. **The reveal for a stitch is a `clip-path` wipe, never
+   `stroke-dashoffset`.** Animating the offset slides the stitches along the
+   seam instead of laying them down. The wipe is opt-in, `.js`-gated, and
+   self-registers through `<UnveilWatcher>` (now watching `.stitch-wipe` as
+   well as `.media-unveil`) so it never depends on a `<Reveal>` ancestor.
+6. **The spine closes every page.** "From screen to stitch. / Design on
+   screen. Prove it on the machine." now lives in the footer in both locales,
+   because it is the promise the whole site is built to keep — chrome, not
+   homepage content.
+7. **`body`-scoped public CSS was moved to `.site-body`.** The mobile tab
+   bar's `padding-bottom: calc(4rem + safe-area)` targeted bare `body`, so it
+   was also reserving 64px at the bottom of every Karma Console screen for a
+   bar the console does not have. Verified fixed: admin `padding-bottom` is
+   now `0px`.
+
+### Admin impact (checked, deliberate)
+`/admin/login` renders correctly, has no `.site-body` styles, no horizontal
+overflow, and `padding-bottom: 0px`. Console headings now render in Manrope
+rather than Fraunces — a shared-token consequence of the retune, and the right
+one: Manrope was already the console's body face, so a staff tool is now set
+in a single family. No admin layout, component or route was touched.
+
+### New files
+- `src/components/ui/StitchPath.tsx` — `<StitchPath>` (5 presets + custom
+  geometry) and `<StitchRule>`.
+- `src/components/ui/Surface.tsx` — `<Surface>` (4 tones) and `<SeamNote>`.
+- `src/components/ui/PullQuote.tsx` — the editorial accent, with the
+  `sample` flag that keeps unverified quotes out of structured data.
+
+### Verification
+`npm ci`, `npm run typecheck`, `npm run lint`, `npm test` (196 passing) and
+`npm run build` all clean. Responsive audit run in Chromium at 320, 360, 375,
+390, 430, 768, 820, 1024, 1280, 1440 and 1728 across `/en`, `/gu`,
+`/en/courses`, `/en/about`, `/en/student-work` and `/en/contact`: **zero
+horizontal overflow, zero sub-24px non-inline targets** (the only flag is the
+`sr-only` skip link, which is full size on focus).
 
 ---
 

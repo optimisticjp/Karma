@@ -1,26 +1,46 @@
 /*
- * Karma Design Studio design system v2: "The Digital Thread".
- * Single vermilion accent, editorial scale, borders over shadows.
+ * Karma Design Studio design system v3: "Screen to Stitch / The Machine Floor".
  * Full spec: docs/design-system.md. Tailwind v4: @theme tokens = utilities.
+ *
+ * v2 was an editorial serif system. Commercial embroidery is a machine trade,
+ * and the reference set (Wilcom, Ricoma, Melco) is uniformly sans-serif with
+ * numeric specificity — a serif display read as craft-blog rather than
+ * machine floor. Manrope now carries display and UI; Playfair italic survives
+ * only as a rare editorial accent.
+ *
+ * Token NAMES are deliberately unchanged from v2 where they exist: Karma
+ * Console shares this stylesheet, and renaming would silently restyle the
+ * admin. Values are retuned, new tokens are additive.
  */
 
 @import "tailwindcss";
 
-/* Self-hosted fonts (npm-served, same-origin) */
-@import "@fontsource-variable/fraunces/soft.css";          /* EN display, wght+SOFT only (payload trim) */
-@import "@fontsource-variable/noto-serif-gujarati";        /* GU display serif      */
-@import "@fontsource-variable/manrope";                    /* EN body / UI          */
-@import "@fontsource-variable/noto-sans-gujarati";         /* GU body / UI          */
+/* Self-hosted fonts (npm-served, same-origin). Manrope covers display + UI,
+   so the Fraunces and Noto Serif Gujarati faces v2 loaded are gone; Playfair
+   loads its italic axis only. Net font payload is smaller than v2. */
+@import "@fontsource-variable/manrope";                        /* EN display + UI */
+@import "@fontsource-variable/playfair-display/wght-italic.css"; /* editorial accent, sparing */
+@import "@fontsource-variable/noto-sans-gujarati";              /* GU everything   */
 
 @theme {
   /* ------ palette: restrained neutrals + ONE accent ------ */
-  --color-ivory: #faf7f0;        /* page background            */
-  --color-ivory-2: #efe7d7;      /* alternating section band   */
-  --color-sand: #e6dbc6;         /* third surface: warmer, for punctuation */
-  --color-card: #fffdf8;         /* soft white surfaces        */
-  --color-line: #d6cfc0;         /* thread grey borders        */
-  --color-carbon: #1f201d;       /* primary text               */
-  --color-stone: #605e56;        /* secondary text (AA on every surface) */
+  /* Surfaces. Contrast ratios in comments are measured against this palette,
+     not estimated — see the Phase 1 notes in docs/design-system.md. */
+  --color-ivory: #f5f0e6;        /* Cotton — page background        */
+  --color-ivory-2: #e9decd;      /* Raw Silk — alternating band     */
+  --color-sand: #ded0b8;         /* deeper warm surface, punctuation */
+  --color-card: #fffdf8;         /* Worktable — reading surface     */
+  --color-line: #d5cab6;         /* thread grey borders             */
+  --color-carbon: #111716;       /* Machine Black — 15.97:1 on Cotton */
+  --color-steel: #172b35;        /* Steel Indigo — secondary dark   */
+  --color-stone: #605e56;        /* secondary text — 5.72:1 on Cotton */
+
+  /* Technical accents. Vermilion stays THE action colour; needle blue is the
+     technical/link cue; zari copper is material detail, never body text. */
+  --color-needle: #29617a;       /* 5.99:1 on Cotton — safe for links */
+  --color-needle-light: #7fb3c9; /* 7.94:1 on Machine Black          */
+  --color-zari: #aa6239;         /* 4.09:1 — large/editorial only    */
+  --color-zari-deep: #8a4e2c;    /* 5.77:1 — when copper must be text */
   --color-vermilion: #c54832;    /* THE accent: fills, stitch lines, large text */
   --color-vermilion-deep: #a93a27; /* small-text links + hovers (AA on ivory)   */
   --color-success: #2f7d46;      /* status only */
@@ -28,25 +48,27 @@
   --color-error: #b3261e;        /* status only */
 
   /* ------ fonts ------ */
-  --font-display: "Fraunces Variable", "Noto Serif Gujarati Variable", Georgia, serif;
+  --font-display: "Manrope Variable", "Noto Sans Gujarati Variable", system-ui, sans-serif;
   --font-body: "Manrope Variable", "Noto Sans Gujarati Variable", system-ui, sans-serif;
+  /* Used for a handful of editorial pull-quotes and nothing else. */
+  --font-accent: "Playfair Display Variable", Georgia, serif;
 
   /* ------ editorial type scale (desktop endpoints per spec) ------ */
   --text-display-xl: clamp(2.75rem, 1.95rem + 3.9vw, 4.75rem);
   --text-display-xl--line-height: 1.05;
-  --text-display-xl--letter-spacing: -0.02em;
+  --text-display-xl--letter-spacing: -0.035em;
   --text-display: clamp(2.5rem, 1.85rem + 3.1vw, 4rem);
   --text-display--line-height: 1.06;
-  --text-display--letter-spacing: -0.02em;
+  --text-display--letter-spacing: -0.032em;
   --text-h1: clamp(2.25rem, 1.75rem + 2.4vw, 3.5rem);
   --text-h1--line-height: 1.1;
-  --text-h1--letter-spacing: -0.02em;
+  --text-h1--letter-spacing: -0.03em;
   --text-h2: clamp(1.875rem, 1.45rem + 2vw, 2.875rem);
   --text-h2--line-height: 1.17;
-  --text-h2--letter-spacing: -0.015em;
+  --text-h2--letter-spacing: -0.025em;
   --text-h3: clamp(1.5rem, 1.32rem + 0.85vw, 2rem);
   --text-h3--line-height: 1.25;
-  --text-h3--letter-spacing: -0.01em;
+  --text-h3--letter-spacing: -0.02em;
   --text-h4: clamp(1.25rem, 1.2rem + 0.25vw, 1.5rem);
   --text-h4--line-height: 1.33;
   --text-lead: clamp(1.125rem, 1.06rem + 0.3vw, 1.25rem);
@@ -84,30 +106,41 @@
     line-height: 1.625;
     -webkit-font-smoothing: antialiased;
   }
+  /* Manrope headings: heavy, tight, technical. "SOFT" was a Fraunces axis and
+     is gone with it. */
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     font-optical-sizing: auto;
-    font-variation-settings: "SOFT" 60;
     text-wrap: balance;
     color: var(--color-carbon);
   }
-  h1 { font-weight: 560; }
-  h2 { font-weight: 540; }
-  h3 { font-weight: 520; }
-  h4 { font-weight: 500; }
+  h1 { font-weight: 800; }
+  h2 { font-weight: 800; }
+  h3 { font-weight: 700; }
+  h4 { font-weight: 700; }
 
-  /* Gujarati: Noto Serif headings, Noto Sans body, taller rhythm.
-     NEVER uppercase or letterspace Gujarati. */
+  /* Editorial accent, used deliberately and rarely. */
+  .accent-italic {
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+  /* Playfair has no Gujarati; fall back rather than render tofu. */
+  :lang(gu) .accent-italic { font-family: var(--font-body); font-style: normal; }
+
+  /* Gujarati: Noto Sans throughout, taller rhythm, and NEVER uppercased or
+     letterspaced. Text stays selectable — no glyphs baked into images. */
   :lang(gu) { line-height: 1.8; }
   :lang(gu) body, :lang(gu) p, :lang(gu) li, :lang(gu) label,
   :lang(gu) input, :lang(gu) select, :lang(gu) textarea, :lang(gu) button {
     font-family: "Noto Sans Gujarati Variable", "Manrope Variable", system-ui, sans-serif;
   }
   :lang(gu) h1, :lang(gu) h2, :lang(gu) h3, :lang(gu) h4 {
-    font-family: "Noto Serif Gujarati Variable", "Fraunces Variable", serif;
+    font-family: "Noto Sans Gujarati Variable", "Manrope Variable", system-ui, sans-serif;
     letter-spacing: 0;
-    font-variation-settings: normal;
-    line-height: 1.3;
+    font-weight: 700;
+    line-height: 1.45;
   }
 
   /* Prevents single-word orphans on the last line of paragraphs. */
