@@ -76,6 +76,7 @@ export async function signInAction(
   }
 
   // Sign-in only proves identity. The guard on the destination decides whether
-  // this person has a staff record, is active, and has cleared MFA.
+  // this person has a staff record, is active, holds a console role and has
+  // the permission the page requires.
   redirect(safeNextPath(formData.get("next")));
 }

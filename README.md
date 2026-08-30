@@ -2,9 +2,9 @@
 
 Bilingual (English + ગુજરાતી) site for an embroidery academy and design lab in
 Surat: live-machine courses, a 4-step admission flow with WhatsApp handoff, a
-B2B design-brief pipeline with private file storage — plus **Karma Console**,
-the staff operations desk at `/admin` (invitation-only accounts, mandatory
-TOTP, one Owner and up to five Admins with explicit permissions).
+B2B design-brief pipeline — plus **Karma Console**, the staff operations desk
+at `/admin` (invitation-only accounts, **password-only** sign-in, one Owner and
+up to five Admins with explicit permissions).
 
 Built with Next.js 15, Tailwind v4, next-intl, and Drizzle over **Supabase
 Postgres** (through Cloudflare Hyperdrive in production), with **Supabase Auth**
@@ -23,7 +23,7 @@ as samples, form submissions return demo references). To go live:
 ```bash
 # 1. Create a project at https://supabase.com, copy the DIRECT connection
 #    string into .env as DATABASE_URL (see docs/admin-architecture.md §17)
-npm run db:migrate          # creates all 18 tables + account invariants
+npm run db:migrate          # creates all 19 tables + account invariants
 npm run db:seed             # verified course catalog + starter batches
 npm run dev                 # batches now come from Supabase
 ```
@@ -36,33 +36,38 @@ single Owner account once, then invite admins from the console:
 npm run admin:bootstrap -- --dry-run   # checks; changes nothing
 npm run admin:bootstrap                # invites and links the Owner
 ```
-Every console session requires a TOTP code. Full setup — Supabase Auth
-settings, Cloudflare build variables, the Hyperdrive binding — is in
-**docs/admin-architecture.md**.
+Sign-in is **password-only**: there is no MFA/TOTP step, by explicit owner
+decision. Full setup — Supabase Auth settings, Cloudflare build variables, the
+Hyperdrive binding — is in **docs/admin-architecture.md**.
 
 ## Deploy
 Full walkthrough in **docs/deployment.md** (Supabase → Hyperdrive → Resend →
-R2 bucket → Cloudflare build). CI, weekly DB backups and the daily digest email
-run from `.github/workflows/`. The custom domain is a launch step and is not
-connected yet; the live URL is
+Cloudflare build). CI, weekly DB backups and the daily digest email run from
+`.github/workflows/`. R2 and Turnstile are deliberately deferred, and the
+custom domain is a launch step that is **not** connected yet; the live URL is
 `https://karma-design-studio.essanciaonline.workers.dev`.
 
 ## Production readiness, in one glance
-In production the site **fails closed**: without a database, Supabase Auth,
-`TURNSTILE_SECRET_KEY` or (for file uploads) the R2 binding, the APIs return
-503 and the UI routes people to WhatsApp instead of pretending. `/api/health`
-returns 503 until everything is configured: point your uptime monitor at it.
+In production the site **fails closed**: without a database, Supabase Auth or
+`TURNSTILE_SECRET_KEY`, the APIs return 503 and the UI routes people to
+WhatsApp instead of pretending. `/api/health` returns 503 until everything is
+configured: point your uptime monitor at it. Turnstile is not configured yet,
+so a 503 there is the expected state, not a fault.
 Sample data and demo form responses exist only in dev (`ALLOW_DEMO_MODE=true`
 enables them on a staging deploy, never production). The console shows an
 honest "not configured" state rather than a plausible zero. Run `npm test`
-(86 tests: EN/GU catalog parity, permissions, account invariants, the auth
-guard's six states, invitation validation and audit) before committing: CI
+(271 tests across 26 files: EN/GU catalog parity, permissions, account
+invariants, the auth guard's six states, invitation validation, audit hygiene,
+the sample-content policy and structured-data discipline) before committing: CI
 enforces it.
 
 ## Read next
 - `CLAUDE.md` — rules for every Claude Code session (start here)
+- `docs/project-context.md` — **the durable project memory**: architecture,
+  every major decision and its reasoning, what is deliberately deferred, which
+  facts are verified and which are not. Read it before significant work.
 - `docs/admin-architecture.md` — the canonical Karma Console reference:
-  architecture, roles, permissions, MFA, invariants, and the manual setup
+  architecture, roles, permissions, invariants, and the manual setup
   checklist the owner still has to work through
 - `docs/karma-master-plan-final.md` — the full strategy this implements
 - `docs/phase-prompts.md` — paste-ready prompts for phases 2-5
@@ -76,5 +81,5 @@ enforces it.
 | `typecheck` / `lint` | `tsc --noEmit` / ESLint |
 | `db:generate` / `db:migrate` / `db:seed` / `db:backup` / `db:studio` | Drizzle + Supabase Postgres |
 | `admin:bootstrap` | Create the single Owner account (invitation-only) |
-| `preview` / `deploy` | OpenNext build + Cloudflare preview / deploy |
+| `preview` / `deploy` / `upload` | OpenNext's delegated path — **local experimentation only.** Production deploys from Git with `OPEN_NEXT_DEPLOY=true npx wrangler deploy --keep-vars`; see docs/deployment.md §6 |
 | `cf-typegen` | Generate Cloudflare env types |

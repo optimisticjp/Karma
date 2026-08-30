@@ -122,8 +122,9 @@ async function main() {
     }
 
     // Supabase Auth owns the credential. We invite; the owner sets their own
-    // password from the emailed link and then enrols an authenticator. This
-    // script never generates or transmits a password.
+    // password from the emailed link. Karma Console is password-only, so that
+    // is the whole of onboarding. This script never generates or transmits a
+    // password.
     const supabase = createClient(supabaseUrl, secretKey, {
       auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
     });
@@ -237,8 +238,7 @@ async function main() {
     console.log("Next steps for the owner:");
     console.log("  1. Open the invitation email and follow the link.");
     console.log("  2. Set a password (12+ characters).");
-    console.log("  3. Scan the authenticator QR code and enter the six-digit code.");
-    console.log("  4. Karma Console opens. Invite the first admin from /admin/team.");
+    console.log("  3. Karma Console opens. Invite the first admin from /admin/team.");
   } finally {
     await pool.end();
   }

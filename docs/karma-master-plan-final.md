@@ -1,9 +1,20 @@
-> **Superseded in part (Phase 2).** Section 12's hosting/database choices and
-> the auth assumptions in section 10.8 have moved on: the database is Supabase
-> Postgres via Cloudflare Hyperdrive, and staff auth is Supabase Auth with
-> mandatory TOTP MFA. The account model is now explicit — one Owner plus at
-> most five Admins with per-key permissions. Everything else in this plan
-> still stands. Current architecture: `docs/admin-architecture.md`.
+> **HISTORICAL — this is the original strategy, not current state.** It is
+> kept intact as the record of the thinking. Several things have moved on:
+>
+> - the database is **Supabase Postgres via Cloudflare Hyperdrive** (§12's
+>   hosting/database choices are superseded);
+> - staff auth is **Supabase Auth**, and **Karma Console is password-only**.
+>   An earlier version of this note said "mandatory TOTP MFA", and §10.8,
+>   §15.2 and the Phase-2 prompt below still describe one. **That requirement
+>   was removed in PR #5 and must not be reintroduced** (`CLAUDE.md` §17);
+> - the account model is one Owner plus at most five Admins with per-key
+>   permissions;
+> - the catalogue is **11 courses**, not the eight this document counts;
+> - the directory layout is `drizzle/` + `scripts/`, not the `/supabase`
+>   directory this plan describes.
+>
+> For current state read **`docs/project-context.md`**; for the console
+> architecture read **`docs/admin-architecture.md`**.
 
 > **Design revision v2 (July 2026).** The visual direction in sections 4-7
 > of this plan (zari gold + maroon palette, Mukta Vaani/Rasa type) has been
@@ -659,7 +670,7 @@ The platform holds personal data of students, including minors, so India's DPDP 
 
 ### 15.2 Security controls
 
-RLS on every private table with a test proving it; roles admin/trainer/student/guardian enforced server-side; admin MFA (Supabase TOTP); private storage buckets with short-lived signed URLs for B2B files, ID cards and certificates; upload type/size validation; rate limiting + Turnstile validated server-side on all public forms; zod validation on every route; secrets only in host env vars; separate dev and prod Supabase projects; weekly automated backups (12.2); audit logs on sensitive tables; no student PII in the GitHub repo, seeds or fixtures; HTTPS + HSTS.
+RLS on every private table with a test proving it; roles admin/trainer/student/guardian enforced server-side; admin MFA (Supabase TOTP) [HISTORICAL — not shipped; Karma Console is password-only, see docs/project-context.md §10]; private storage buckets with short-lived signed URLs for B2B files, ID cards and certificates; upload type/size validation; rate limiting + Turnstile validated server-side on all public forms; zod validation on every route; secrets only in host env vars; separate dev and prod Supabase projects; weekly automated backups (12.2); audit logs on sensitive tables; no student PII in the GitHub repo, seeds or fixtures; HTTPS + HSTS.
 
 ### 15.3 Accessibility (WCAG 2.2 AA)
 
@@ -810,7 +821,8 @@ grep build output for "lorem|validtheme|edfix|yourhandle" must return empty.
 ### 19.2 Phase 2 prompt (condensed)
 
 ```
-Add /admin (Supabase Auth email OTP + TOTP MFA; roles via staff table; RLS
+Add /admin (Supabase Auth email+password, invite-only — the TOTP MFA this line
+once specified was NOT shipped and must not be added; roles via staff table; RLS
 tests). Screens: Admissions CRM kanban with statuses from plan 10.2, overdue
 flag after 1 working day, duplicate warnings, notes/followups, wa.me deep
 links, filters, CSV export; Enrolled = 2-step convert (student + enrollment

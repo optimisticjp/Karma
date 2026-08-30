@@ -31,8 +31,8 @@ function directive(policy: string, name: string): string[] {
 
 describe("content security policy", () => {
   it("lets the browser reach Supabase Auth", async () => {
-    // Without this the console cannot sign in or enrol TOTP: Chrome blocks
-    // /auth/v1/user and /auth/v1/factors on connect-src.
+    // Without this the console cannot sign in at all: Chrome blocks the
+    // browser auth client's calls to /auth/v1/* on connect-src.
     expect(directive(await csp(), "connect-src")).toContain(SUPABASE_ORIGIN);
   });
 

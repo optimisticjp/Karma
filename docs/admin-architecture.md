@@ -137,8 +137,10 @@ middleware can be reasoned around, and the real decision needs the database.
 
 The publishable key is public. Without this, anyone holding it could read
 students, applications and design briefs through PostgREST. Migration
-`0002_admin_foundation.sql` therefore applies two independent locks to all
-eighteen application tables:
+`0002_admin_foundation.sql` therefore applies two independent locks to the
+eighteen application tables that existed at the time, and migration
+`0003_content_desk.sql` applies the same two locks to `content_items` — so all
+**nineteen** app tables are locked today:
 
 - `ENABLE ROW LEVEL SECURITY` with **no policies** — deny by default;
 - `REVOKE ALL … FROM anon, authenticated` — no grants for the Data API roles.
@@ -345,7 +347,7 @@ can never quietly re-assert itself later.
 
 ## 7. The access decision
 
-Seven conditions, evaluated in a fixed order by `evaluateAccess`
+Six conditions, evaluated in a fixed order by `evaluateAccess`
 (`src/lib/auth/access.ts` — pure, and unit-tested for every state):
 
 1. a verified Supabase user
@@ -598,18 +600,23 @@ rather than removed: an audit row must keep pointing at a real staff record.
 | Today at Karma | shipped (real counts only) |
 | Team (owner-only) | shipped |
 | Account & security | shipped |
-| Admissions CRM | later phase |
-| Student 360 | later phase |
-| Courses & batches editor | later phase |
-| Attendance | later phase |
-| Certificates | later phase |
-| Design Desk | later phase |
-| Content desk | later phase |
-| Offline fee ledger | later phase, owner opt-in |
-| Reports & exports | later phase |
+| Admissions CRM | shipped (PR #8) |
+| Student 360 | shipped (PR #9) |
+| Courses & batches editor | shipped (PR #6) |
+| Attendance | shipped (PR #9) |
+| Certificates | shipped (PR #9) |
+| Design Desk | shipped (PR #9) — file upload/download waits on R2 (§14) |
+| Content desk | shipped (PR #10) |
+| Offline fee ledger | shipped (PR #9) |
+| Reports & exports | shipped (PR #10) — `students`, `admissions`, `attendance`, `fees`, `design` |
 
-Unshipped modules appear in the navigation, marked plainly unavailable. They do
-not open screens of invented rows.
+**Every console module has shipped.** What remains inside them is content and
+polish, not construction — see `docs/project-context.md` §§22-29 for what each
+one does and what it still defers.
+
+A module the caller lacks permission for appears in the navigation marked
+plainly unavailable. It does not open a screen of invented rows, and the hidden
+link is UX only: the page and every server action re-check server-side.
 
 **Today at Karma** counts only what the current schema actually holds: new
 applications, follow-ups due, applications this week, running and upcoming
@@ -646,12 +653,18 @@ outside the `[locale]` segment on purpose: staff type `/admin`, not `/en/admin`.
 
 R2 stays **private**. No public buckets, no unauthenticated object URLs.
 
+**R2 is not bound.** The `r2_buckets` block in `wrangler.jsonc` is commented
+out, no bucket has been created, and the brief form's file-upload field has been
+removed until one exists — with no binding an attached file would fail in
+production and be dropped in demo mode. Everything in this table is planned, not
+live. Do not activate R2 as a side effect of other work (`CLAUDE.md` §18).
+
 | Use | State |
 | --- | --- |
-| B2B brief files (`karma-brief-files`) | in use by the public brief form |
-| Design Desk assets (`.dst .emb .pes .jef .pdf .ai .zip`) | later phase |
-| Certificate PDFs | later phase |
-| Encrypted database backups (`karma-db-backups`) | later phase |
+| B2B brief files (`karma-brief-files`) | **deferred** — API route, size and magic-byte guards written; upload field removed |
+| Design Desk assets (`.dst .emb .pes .jef .pdf .ai .zip`) | deferred — `service_files.r2_key` column exists |
+| Certificate PDFs | deferred — `certificates.pdf_key` column exists; today it is browser Print / Save as PDF |
+| Encrypted database backups (`karma-db-backups`) | deferred — the interim mechanism is weekly CSV artifacts in GitHub Actions |
 
 Authenticated downloads will flow through authorised server routes or
 short-lived signed access, gated on `design.view` / `certificates.view`. The
@@ -705,7 +718,9 @@ Nothing below can be done from the repository. Work top to bottom.
 4. Authentication → Sign In / Providers → **Email**: enable email + password.
 5. Authentication → Sign In / Providers → **disable public sign-ups**. Karma is
    invitation-only; this is not optional.
-6. Authentication → Multi-Factor → enable **TOTP**.
+6. Authentication → Multi-Factor: **nothing to do.** Karma Console is
+   password-only (§8). Do not enable TOTP as an access requirement, and do not
+   treat Supabase's MFA capability as part of the sign-in flow.
 7. Authentication → URL Configuration → **Site URL**:
    `https://karma-design-studio.essanciaonline.workers.dev`
 8. Same screen → **Redirect URLs**, add:
@@ -757,15 +772,15 @@ Settings → Variables → Build)
 **Database migration** (only after reviewing the SQL)
 
 15. Locally, with `DATABASE_URL` set to the direct Supabase connection:
-    `npm run db:migrate` — applies `0000`, `0001` and `0002`.
+    `npm run db:migrate` — applies `0000`, `0001`, `0002` and `0003`.
 16. Optional: `npm run db:seed` for the verified course catalog.
 
 **First owner**
 
 17. Set `INITIAL_OWNER_EMAIL` (and `INITIAL_OWNER_NAME`) in `.env`.
 18. `npm run admin:bootstrap -- --dry-run`, then `npm run admin:bootstrap`.
-19. Open the invitation email, set a password, scan the authenticator QR, enter
-    the six-digit code.
+19. Open the invitation email and set a password. That is the whole of
+    onboarding — there is no authenticator to enrol (§8).
 20. Sign in at `/admin/login`, then invite the first admin from `/admin/team`.
 
 **Still outstanding, on purpose**

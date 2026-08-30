@@ -11,7 +11,7 @@ import { AUDIT_ACTIONS, auditValues } from "@/lib/admin/audit";
  * Karma's `staff` row is the authority on what an account may do. Until this
  * transition commits, the person stays in onboarding-only state and cannot
  * reach console data — so a caller must NOT treat a failure here as success
- * and walk them onward to MFA. `setPasswordAction` therefore surfaces
+ * and walk them onward into the console. `setPasswordAction` therefore surfaces
  * `"failed"` as a recoverable error instead of redirecting.
  *
  * The row update and the audit row go in ONE transaction: an activation that

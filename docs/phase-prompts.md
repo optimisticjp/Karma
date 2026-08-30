@@ -1,5 +1,24 @@
 # Phase prompts for Claude Code
 
+> ## ⚠ HISTORICAL — do not execute these prompts
+>
+> **Phases 2 through 7 have all shipped.** Certificates, the B2B Design Desk,
+> Content Desk, reports, exports and audit are in the repository; the public
+> site was subsequently rebuilt entirely by the ten-phase Screen to Stitch
+> programme (PRs #12–#21). This file is kept as the record of how the work was
+> scoped, **not as a queue of work to do**.
+>
+> Read it as history only. Several prompts below instruct an agent to build
+> things that are **deliberately deferred** and must not be activated as a side
+> effect of anything: storing certificate PDFs in **R2**, streaming design-job
+> file downloads from **R2**, enabling the **R2 incremental cache**, and wiring
+> **GA4**. R2 is not bound, and Karma's analytics is a deliberate no-network,
+> no-PII abstraction with no third-party provider. See
+> `docs/project-context.md` §40 and `CLAUDE.md` §18.
+>
+> For what to actually do next, read **`docs/project-context.md`** and
+> **`docs/content-checklist.md`**.
+
 Paste each block into Claude Code when starting that phase. Do them in order.
 Every prompt assumes CLAUDE.md has been read; its rules override convenience.
 

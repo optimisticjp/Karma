@@ -1,10 +1,19 @@
-> **Superseded in part (Phase 2, this repository's admin foundation).** This
-> document is a record of the audit response as it stood, and is left intact as
-> history. Two items have since changed direction: the database is **Supabase
-> Postgres** (reached through Cloudflare Hyperdrive in the Worker), not Neon;
-> and staff authentication is **Supabase Auth with mandatory TOTP MFA**, not
-> Better Auth. The deferred "Admin/trainer portals, auth" row is now partly
-> delivered. See `docs/admin-architecture.md` for the current architecture.
+> **HISTORICAL — kept as a record, not as current state.** This document
+> captures the audit response as it stood at the time and is left intact
+> deliberately. Several things have since changed direction:
+>
+> - the database is **Supabase Postgres**, reached through Cloudflare
+>   Hyperdrive in the Worker — not Neon;
+> - staff authentication is **Supabase Auth**, not Better Auth, and Karma
+>   Console is **password-only**. An earlier version of this note said
+>   "mandatory TOTP MFA"; that requirement was removed in PR #5 and **must not
+>   be reintroduced**;
+> - the deferred "Admin/trainer portals, auth" row is now largely delivered;
+> - the test-suite and table counts quoted below are from that time and are
+>   long superseded (271 tests, 19 tables today).
+>
+> For current state read `docs/project-context.md`; for the console
+> architecture read `docs/admin-architecture.md`.
 
 # Audit response — what changed, what's deferred, and why
 

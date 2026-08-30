@@ -1,8 +1,19 @@
 # Owner decisions that gate the platform build
 
-The audit is right: these are product decisions, not code decisions. Phase 2+
-starts after they're answered. Recommendations included so the conversation
-is fast.
+> **PARTLY HISTORICAL.** This list was written before the platform was built,
+> so its framing ("Phase 2+ starts after they're answered") no longer holds —
+> the console shipped, and the code works around each unanswered question by
+> saying something true instead of guessing. Several items here are now
+> settled: the launch scope (Q1), the eleven-course catalogue and its display
+> order, and Karma Console being password-only.
+>
+> The **live** register of what is still open — and what the site does in the
+> meantime — is `docs/content-checklist.md`, summarised in
+> `docs/project-context.md` §39. Read that first; keep this for the
+> recommendations, which still stand.
+
+The audit is right: these are product decisions, not code decisions.
+Recommendations included so the conversation is fast.
 
 1. **Launch scope.** Public site now, admin next, portals later? *Recommend:
    ship public site; build admin (Phase 2) immediately after; student portal

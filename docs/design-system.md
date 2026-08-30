@@ -190,10 +190,10 @@ nothing feels major.
 
 The system above stands. This pass answers one problem it could not: **the
 studio has no photography yet**, and the site was leading with empty photo
-frames — three in the hero, eight on the courses index, one per trainer card,
-one per story. Rival institutes in Surat fill that gap with stock images of
+frames — three in the hero, one per course on the courses index, one per
+trainer card, one per story. Rival institutes in Surat fill that gap with stock images of
 smiling women at sewing machines. We do the opposite: make the *substance* the
-visual. The eight real techniques, the real batch schedule, the real syllabus,
+visual. The eleven real techniques, the real batch schedule, the real syllabus,
 the real machine wall — set like a workshop's own wall chart.
 
 Everything here lives in `src/app/premium.css` and degrades *upward*: when the

@@ -2,7 +2,7 @@
  * Privacy-conscious event hooks.
  *
  * This is deliberately not an analytics library. It is a named list of the
- * six moments that matter on this site, and a function that emits them as a
+ * eight moments that matter on this site, and a function that emits them as a
  * DOM CustomEvent plus a small in-page queue. No network request, no cookie,
  * no third-party script, no consent banner needed — and no dependency to
  * remove later if the owner picks a different tool.

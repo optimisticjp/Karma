@@ -22,8 +22,8 @@ import {
  * Team — OWNER ONLY.
  *
  * `requireOwner()` is the control. An ordinary admin who types this URL is
- * redirected, and every server action behind the buttons re-checks owner + AAL2
- * independently, so hiding the nav link is the least of what stops them.
+ * redirected, and every server action behind the buttons re-checks the owner
+ * role independently, so hiding the nav link is the least of what stops them.
  *
  * There is no delete button anywhere on this page. Accounts are deactivated,
  * never removed: admin history matters, and audit rows must keep pointing at a
