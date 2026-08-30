@@ -21,14 +21,18 @@
  * values — rather than by asking callers to remember.
  */
 
-/** The six moments worth counting. Adding a seventh is a deliberate act. */
+/** The moments worth counting. Adding one is a deliberate act. */
 export type KarmaEvent =
   | "call_demo_click"
   | "directions_click"
   | "whatsapp_click"
   | "demo_start"
   | "demo_complete"
-  | "course_view";
+  | "course_view"
+  /** Outbound to Instagram, Facebook, YouTube or Threads. */
+  | "social_click"
+  /** A machine note sending a reader to the course that teaches it. */
+  | "note_course_click";
 
 /**
  * Allowed context. Every field is a slug, an enum or a count — never anything
@@ -43,9 +47,13 @@ export type EventProps = {
   locale?: string;
   /** Which step of the demo form, for funnel drop-off. */
   step?: number;
+  /** Platform slug for an outbound social click: "instagram", "youtube". */
+  channel?: string;
+  /** Machine-note slug. Our own, from src/content/notes.ts. */
+  note?: string;
 };
 
-const ALLOWED = ["course", "surface", "locale", "step"] as const;
+const ALLOWED = ["course", "surface", "locale", "step", "channel", "note"] as const;
 
 /** Last 50 events, for debugging and for a provider attached after load. */
 declare global {

@@ -11,6 +11,7 @@ import { Icon } from "@/components/ui/Icon";
 import { getPublicFaqs } from "@/lib/content/public";
 import { site, waLink } from "@/lib/site";
 import { pageMeta } from "@/lib/seo";
+import { faqSchema } from "@/lib/schema";
 
 export const dynamic = "force-dynamic";
 
@@ -37,15 +38,12 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ loc
   const steps = t.raw("steps") as Array<{ t: string; d: string }>;
   const handbook = t.raw("handbook") as string[];
 
-  const faqLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqs.map((f) => ({
-      "@type": "Question",
-      name: gu ? f.qGu : f.qEn,
-      acceptedAnswer: { "@type": "Answer", text: gu ? f.aGu : f.aEn }
-    }))
-  };
+  /* FAQ answers are the studio's own, carry no sample flag and name no
+     person, so they are safe as schema. Built through the shared module so
+     the fact discipline stays in one place. */
+  const faqLd = faqSchema(
+    faqs.map((f) => ({ q: gu ? f.qGu : f.qEn, a: gu ? f.aGu : f.aEn }))
+  );
 
   return (
     <>

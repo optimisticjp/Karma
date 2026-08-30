@@ -453,7 +453,7 @@ Update this table after every completed/merged phase.
 | 5 | Mobile conversion / call / directions / demo | ✅ Complete + merged | PR #16 — `build` + Cloudflare Workers Builds green |
 | 6 | Studio / B2B commercial embroidery | ✅ Complete + merged | PR #17 — `build` + Cloudflare Workers Builds green |
 | 7 | Machine Notes / social-to-search content | ✅ Complete + merged | PR #18 — `build` + Cloudflare Workers Builds green |
-| 8 | Local SEO / structured data / measurement | ⏳ Pending | |
+| 8 | Local SEO / structured data / measurement | ✅ Complete + merged | PR #19 — `build` + Cloudflare Workers Builds green |
 | 9 | Accessibility / performance / responsive hardening | ⏳ Pending | |
 | 10 | Final whole-site creative polish | ⏳ Pending | |
 
@@ -1841,6 +1841,93 @@ Document, but do not execute:
 - Google Business Profile website URL update
 
 Merge when green; update progress.
+
+## Implementation record
+
+### One module for all structured data
+Schema was being built inline on four pages. It is now built in
+`src/lib/schema.ts`, and **a test asserts no other file in `src/app` or
+`src/components` contains `"@context"` at all**.
+
+That is the point of the phase. Schema is the one place where an unverified
+claim stops being a labelled placeholder and becomes a fact a search engine
+repeats. A visitor can see that a review card says "sample"; a rich result
+cannot say that, and by the time anyone notices it has been cached,
+syndicated and quoted back at the business. So the discipline is not "be
+careful when adding schema" — it is that schema has one door, and the door is
+guarded.
+
+### What may never appear, now enforced
+`aggregateRating` · `ratingValue` · `reviewCount` · `Review` · `Person` ·
+`author` · `offers` · `price` · `timeRequired` · any sample identity · and the
+string `4.8` itself. Verified against the **rendered HTML** of five routes in
+both locales, not only against source.
+
+The owner-provided 4.8 is still shown in the interface, attributed to Google
+and linked to the live listing — the distinction the whole phase rests on is
+between *showing an attributed number* and *asserting it as an audited fact*.
+
+### What was improved, factually
+- `LocalBusiness` + `EducationalOrganization` on one `@id`, so courses,
+  articles and breadcrumbs all point at one studio node rather than repeating
+  it.
+- All three published numbers, none promoted.
+- The **landmark inside `streetAddress`** — "near Dhara Arcade, opposite
+  Krishna Township Road" is what actually gets a first-timer to the door in
+  Mota Varachha, and a PIN code never has.
+- `Course` gained `courseMode: "onsite"` and a `CourseInstance` with the
+  studio's locality. Both are true and both matter for local course results.
+- `TechArticle` for machine notes, with `publisher` and no `author`.
+- `knowsLanguage` alongside `availableLanguage`.
+
+### Course SEO
+Every course already had a unique name and a unique `produces` line. The
+metadata description now appends the locality — *"Taught on live machines in
+Mota Varachha, Surat."* — because people search for the work and the city
+together. A test asserts all eleven descriptions are distinct.
+
+### Sitemap and robots
+64 URLs: 32 paths × 2 locales, covering the homepage, course index, all eleven
+courses, admissions, the demo form, student work, stories, services, about,
+Machine Notes index, all eight notes, contact, verify and the legal pages.
+
+`robots.txt` now disallows `/admin` as well as `/api/`. The console already
+sets `noindex` in its metadata, but a crawler has to fetch a page to read
+that — the two together mean a missed header on one route cannot leak a staff
+screen into an index.
+
+### Measurement, expanded to eight events
+Added `social_click` (with a `channel`) and `note_course_click` (with a `note`
+and a `course`). The note→course hop is the conversion the whole Machine Notes
+system exists to produce, so it is the one that is counted.
+
+`EventProps` grew from four keys to six — `channel` and `note`, both slugs
+from our own data. Still no `string` escape hatch, still nothing a visitor
+types.
+
+### Launch documentation — written, not executed
+`docs/launch-checklist.md`. The cutover is **one environment variable**:
+`NEXT_PUBLIC_SITE_URL`, from which `pageMeta()`, the sitemap, `robots.txt` and
+every `@id` derive. A test asserts `site.url` still reads from the environment
+rather than being hardcoded, so the switch stays a deployment change and never
+becomes a code change.
+
+Documented and deliberately not done: the domain add in Cloudflare, Search
+Console domain-property verification, sitemap submission, and the Google
+Business Profile URL update.
+
+### Three existing tests were updated, not deleted
+Moving schema into one module broke three assertions that read page source for
+strings now living in `schema.ts`. The behaviour did not change; the
+assertions follow the code. That is the correct response to a test failing
+because of a refactor — updating what it reads, not what it checks.
+
+### Verification
+`npm run typecheck`, `npm run lint`, `npm test` (**255 passing**, 16 new) and
+`npm run build` all clean. Rendered JSON-LD inspected on `/en`, `/gu`,
+a course page, a note page and `/en/admissions`: correct types, correct
+`@id` graph, **no forbidden term on any of them**. Sitemap 64 URLs, robots
+correct, all thirteen sampled routes 200, responsive audit unchanged.
 
 ---
 

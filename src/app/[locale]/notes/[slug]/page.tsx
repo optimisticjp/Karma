@@ -13,6 +13,7 @@ import { machineNotes, noteBySlug } from "@/content/notes";
 import { courseBySlug, coursesByFamily } from "@/content/courses";
 import { routing } from "@/i18n/routing";
 import { site } from "@/lib/site";
+import { breadcrumbSchema, noteSchema } from "@/lib/schema";
 import { pageMeta } from "@/lib/seo";
 
 export function generateStaticParams() {
@@ -73,26 +74,18 @@ export default async function NotePage({
   const question = gu ? note.questionGu : note.questionEn;
   const answer = gu ? note.answerGu : note.answerEn;
 
-  const articleLd = {
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
+  const articleLd = noteSchema({
+    slug: note.slug,
     headline: note.questionEn,
     description: note.answerEn,
-    inLanguage: gu ? "gu" : "en",
-    // The studio is the author. No invented person.
-    publisher: { "@id": `${site.url}/#studio` },
-    about: course ? { "@type": "Course", name: course.nameEn } : undefined
-  };
+    locale: gu ? "gu" : "en",
+    courseName: course?.nameEn
+  });
 
-  const crumbs = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: `${site.url}/${l}` },
-      { "@type": "ListItem", position: 2, name: "Machine Notes", item: `${site.url}/${l}/notes` },
-      { "@type": "ListItem", position: 3, name: note.questionEn, item: `${site.url}/${l}/notes/${note.slug}` }
-    ]
-  };
+  const crumbs = breadcrumbSchema(gu ? "gu" : "en", [
+    ["Machine Notes", "/notes"],
+    [note.questionEn, `/notes/${note.slug}`]
+  ]);
 
   return (
     <>
@@ -129,13 +122,17 @@ export default async function NotePage({
               <p className="mt-2 text-smallmeta text-stone">
                 {gu ? course.production.producesGu : course.production.producesEn}
               </p>
+              {/* The note-to-course hop is the conversion this whole content
+                  system exists to produce, so it is the one that is counted. */}
               <p className="u-actions">
-                <Link
-                  href={`/courses/${course.slug}`}
+                <TrackedLink
+                  href={`/${l}/courses/${course.slug}`}
+                  event="note_course_click"
+                  props={{ note: note.slug, course: course.slug, surface: "note" }}
                   className="stitch-link inline-flex min-h-8 items-center gap-1.5 font-semibold text-vermilion-deep"
                 >
                   {t("courseCta")} <Icon name="arrow" size={15} className="arrow" />
-                </Link>
+                </TrackedLink>
               </p>
             </>
           ) : null

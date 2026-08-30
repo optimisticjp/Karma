@@ -18,6 +18,7 @@ import { courseBySlug, coursesByFamily, coursesInFamily, families } from "@/cont
 import { notesForCourse } from "@/content/notes";
 import { faqs, trainers } from "@/content/collections";
 import { site, waLink } from "@/lib/site";
+import { breadcrumbSchema, courseSchema } from "@/lib/schema";
 import { Icon } from "@/components/ui/Icon";
 import { pageMeta } from "@/lib/seo";
 
@@ -37,9 +38,13 @@ export async function generateMetadata({
     locale,
     path: `/courses/${slug}`,
     title: `${gu ? course.nameGu : course.nameEn} | Karma Design Studio`,
-    // What the technique produces is a better search snippet than a course
-    // blurb: people search for the work, not for the class.
-    description: gu ? course.production.producesGu : course.production.producesEn
+    /* What the technique produces, plus where it is taught. People search for
+       the work and the city together — "zardosi class Surat" — so the snippet
+       has to carry both, and every course's is different because every
+       `produces` line is different. */
+    description: `${gu ? course.production.producesGu : course.production.producesEn} ${
+      gu ? "મોટા વરાછા, સુરતમાં મશીન પર શીખો." : "Taught on live machines in Mota Varachha, Surat."
+    }`
   });
 }
 
@@ -103,35 +108,13 @@ export default async function CourseDetailPage({
      teaching goes deeper than the syllabus page. */
   const notes = notesForCourse(course.slug);
 
-  const crumbs = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: `${site.url}/${l}` },
-      { "@type": "ListItem", position: 2, name: gu ? "કોર્સિસ" : "Courses", item: `${site.url}/${l}/courses` },
-      { "@type": "ListItem", position: 3, name, item: `${site.url}/${l}/courses/${course.slug}` }
-    ]
-  };
+  const crumbs = breadcrumbSchema(gu ? "gu" : "en", [
+    [gu ? "કોર્સિસ" : "Courses", "/courses"],
+    [name, `/courses/${course.slug}`]
+  ]);
 
-  /**
-   * `Course` schema only. No `offers` (fees are discussed offline and there is
-   * no gateway), no `timeRequired` (durations are unconfirmed), and no
-   * `aggregateRating` (nothing has been collected). An empty or invented value
-   * in any of those is worse than its absence.
-   */
-  const courseLd = {
-    "@context": "https://schema.org",
-    "@type": "Course",
-    name: course.nameEn,
-    description: p.producesEn,
-    inLanguage: ["gu", "en"],
-    teaches: course.outcomesEn,
-    provider: {
-      "@type": "Organization",
-      name: "Karma Design Studio & Classes",
-      sameAs: site.url
-    }
-  };
+  /* No offers, no timeRequired, no rating — see src/lib/schema.ts. */
+  const courseLd = courseSchema(course, gu ? "gu" : "en");
 
   const waCourse = `Hi Karma Design Studio! 👑 મને "${name}" કોર્સનો ફ્રી ડેમો બુક કરવો છે. નામ: ____ | ટાઇમ: સવાર/સાંજ`;
 

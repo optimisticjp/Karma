@@ -64,11 +64,13 @@ describe("notes claim nothing about a person", () => {
   });
 
   it("emits TechArticle with no fabricated author or date", () => {
-    const page = read("src/app/[locale]/notes/[slug]/page.tsx");
-    expect(page).toContain('"@type": "TechArticle"');
-    expect(page).not.toContain('"@type": "Person"');
-    expect(page).not.toContain("datePublished");
-    expect(page).not.toContain("author:");
+    // Built in src/lib/schema.ts since Phase 8; the page hands it the note.
+    const schema = read("src/lib/schema.ts");
+    expect(schema).toContain('"@type": "TechArticle"');
+    expect(schema).not.toContain('"@type": "Person"');
+    expect(schema).not.toContain("datePublished");
+    expect(schema).not.toContain("author:");
+    expect(read("src/app/[locale]/notes/[slug]/page.tsx")).toContain("noteSchema(");
   });
 });
 
