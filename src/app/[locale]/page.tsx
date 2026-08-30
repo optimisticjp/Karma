@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Hero } from "@/components/home/Hero";
+import { TrustRail } from "@/components/home/TrustRail";
+import { ProductionRailSection } from "@/components/home/ProductionRailSection";
 import { HomepageStats } from "@/components/home/HomepageStats";
 import { CourseCatalogue } from "@/components/home/CourseCatalogue";
 import { ProductionWorkflow } from "@/components/home/ProductionWorkflow";
@@ -44,19 +46,20 @@ export async function generateMetadata({
  * order below is the order that answers their questions as they actually ask
  * them, rather than the order a brochure would use:
  *
- *   1. What is this, and what do I do?     Hero (offer, 3 actions, trust rail)
- *   2. What does the work actually involve? Workflow 01→06
- *   3. What can I learn, and when?          Catalogue (11) · Batches
- *   4. Will it fix my problem?              Problems we teach you to solve
- *   5. Prove it.                            File → failed → correction → stitch
- *   6. Watch it change.                     Screen-to-stitch slider
- *   7. Who says so?                         Work · Trainers · Channel · Reviews
- *   8. What will it cost, where is it?      Fees · Visit
- *   9. Still unsure?                        FAQ
- *  10. Not a student?                       Business door
- *  11. Close.                               CTA
+ *   1. What is this, and what do I do?     Hero (offer, 3 actions, machine facts)
+ *   2. Does anyone else rate it?            Trust rail
+ *   3. Show me the claim.                   01 DESIGN → 02 MACHINE → 03 RESULT
+ *   4. What does the work actually involve? Workflow 01→06
+ *   5. What can I learn, and when?          Catalogue (11) · Batches
+ *   6. Will it fix my problem?              Problems we teach you to solve
+ *   7. Prove it.                            File → failed → correction → stitch
+ *   8. Who says so?                         Work · Trainers · Channel · Reviews
+ *   9. What will it cost, where is it?      Fees · Visit
+ *  10. Still unsure?                        FAQ
+ *  11. Not a student?                       Business door
+ *  12. Close.                               CTA
  *
- * Steps 4 and 5 are the ones no competing institute has. Naming five real
+ * Steps 6 and 7 are the ones no competing institute has. Naming five real
  * production faults and then showing a stitch-out that failed, with the file
  * change that fixes it, is worth more than any adjective on the page.
  *
@@ -66,10 +69,14 @@ export async function generateMetadata({
  * 800px of desktop to say the same thing twice. The component stays for a
  * course detail page, where the interaction has room to earn its place.
  *
- * Exactly two dark bands punctuate the run — the audience switch and the
- * close. The machine-proof strip earns its emphasis from `bg-sand` and from
- * the contrast inside its own panels; a third dark band would turn
- * punctuation into decoration.
+ * Dark bands are punctuation: the hero (the machine floor), the production
+ * rail directly under it, the audience switch and the close. Each is followed
+ * by a light band, because a dark surface stops being punctuation the moment
+ * two of them run together.
+ *
+ * Phase 3 of the Machine Lab redesign rebuilds this composition in full; this
+ * order is the Phase 2 state, with the hero, trust rail and production rail
+ * already in their final places.
  */
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -78,6 +85,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <>
       <Hero />
+      <TrustRail />
+      <ProductionRailSection />
 
       <ProductionWorkflow />
 

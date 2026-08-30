@@ -1,75 +1,114 @@
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Reveal } from "@/components/ui/Reveal";
 import { Icon } from "@/components/ui/Icon";
-import { TechniquePlate, type PlateVariant } from "@/components/ui/TechniquePlate";
+import { ManifestPhoto } from "@/components/ui/PhotoSlot";
+import { MonoNote, StepIndex } from "@/components/ui/MonoNote";
+import { StitchRail } from "@/components/ui/StitchPath";
 import { TrackedLink } from "@/components/site/TrackedLink";
-import { techniqueChips } from "@/content/collections";
-import { site, ownerProvidedFacts } from "@/lib/site";
+import { site } from "@/lib/site";
 
 /**
- * Hero — the 30-second decision.
+ * The hero — and the site's one Level-4 moment.
  *
- * The audience arrives from an Instagram reel on a phone. In one viewport they
- * have to learn what Karma is, that it is commercial machine work rather than
- * a hobby class, that it is in Mota Varachha, and what to do next. Everything
- * here serves that and nothing else.
+ * A visitor arrives from an Instagram reel, on a phone, on mobile data. In one
+ * viewport they have to learn four things: the software is EMCAD DAHAO, the
+ * teaching happens on live machines, the studio is in Mota Varachha, and the
+ * first step is a free two-day demo. Everything here serves that and nothing
+ * else, and all of it is legible before a single photograph exists.
  *
- * The right side is a material wall: six drawn technique plates, labelled.
- * The studio has no photography, stock imagery is off the table, and empty
- * frames are worse than nothing — so the first viewport shows the actual
- * materials the trade runs on, drawn at thread scale. It is honest, it is
- * unmistakably this business, and it upgrades to photography without a
- * layout change when the shoot lands.
+ * THE COMPOSITION
+ * ---------------
+ * The right side is the promise drawn literally: one continuous thread that
+ * begins on the EMCAD screen (H1), passes into the machine (H2), and exits
+ * into the finished textile (H3). Three frames, one thread, in that order.
+ *
+ * It is ONE markup tree at every width, not a desktop collage plus a mobile
+ * copy. On a laptop the frames stagger and the thread runs diagonally between
+ * them; on a phone the same three frames become the vertical story the brief
+ * asks for — `01 SCREEN`, `02 MACHINE`, `03 RESULT` — which is simpler and
+ * clearer than a miniaturised collage, and costs nothing extra to ship.
+ *
+ * THE SURFACE
+ * -----------
+ * The hero is the page's one MACHINE band: dark, technical, textured. It is
+ * `.on-carbon`, which re-points every palette token rather than restyling
+ * anything by hand, so the frames, rules, eyebrow and secondary button invert
+ * correctly without a single dark-mode override at a call site. A warm ivory
+ * hero read as a coaching centre; a steel one reads as the floor the work
+ * actually happens on. The band immediately below it is light, because a dark
+ * surface is punctuation and stops being punctuation the moment it repeats.
+ *
+ * THE FACTS
+ * ---------
+ * Four, and every one of them verified. "3 Months" is labelled as the **EMCAD
+ * DAHAO course's** duration rather than floated as a site-wide fact, because
+ * it belongs to that course alone (see `src/content/course-operations.ts`);
+ * the other ten courses have no confirmed duration and must not inherit one by
+ * standing next to it. The Google/Instagram/Facebook figures the studio
+ * supplied are not here — they are social proof, they belong to the trust rail
+ * below, and they would dilute a row whose whole job is machine facts.
  */
-
-/** Six techniques that between them cover all three course families. */
-const WALL: Array<{ key: string; variant: PlateVariant; seed: number }> = [
-  { key: "zardosi", variant: "machine", seed: 0 },
-  { key: "flat", variant: "machine", seed: 1 },
-  { key: "sequence", variant: "machine", seed: 2 },
-  { key: "applique", variant: "modern", seed: 3 },
-  { key: "tufting", variant: "modern", seed: 0 },
-  { key: "emcad", variant: "software", seed: 1 }
-];
-
 export function Hero() {
   const t = useTranslations("home.hero");
   const tc = useTranslations("common");
-  const locale = useLocale();
-  const gu = locale === "gu";
 
-  /* Owner-provided, attributed to its source, and deliberately rounded. None
-     of this reaches structured data — see `ownerProvidedFacts` in lib/site. */
-  const trust: Array<[string, string]> = [
-    [t("trustGoogle"), ownerProvidedFacts.googleRating],
-    [t("trustInstagram"), ownerProvidedFacts.instagramFollowers],
-    [t("trustFacebook"), ownerProvidedFacts.facebookFollowers],
-    [t("trustWhereLabel"), t("trustWhereValue")],
-    [t("trustTeachingLabel"), t("trustTeachingValue")]
+  /* Verified, and each labelled with the thing it is actually true of. */
+  const facts: Array<[string, string]> = [
+    [t("factSoftwareLabel"), t("factSoftwareValue")],
+    [t("factDurationLabel"), t("factDurationValue")],
+    [t("factPracticalLabel"), t("factPracticalValue")],
+    [t("factWhereLabel"), t("factWhereValue")]
+  ];
+
+  const frames: Array<{ id: string; step: string }> = [
+    { id: "H1_EMCAD_SCREEN", step: t("step1") },
+    { id: "H2_MACHINE_STITCHING", step: t("step2") },
+    { id: "H3_FINISHED_PIECE", step: t("step3") }
   ];
 
   return (
-    <section className="hero bg-grid">
+    <section className="hero hero-lab on-carbon band-machine machine-light tx-density">
       <div className="container-site hero-grid">
         <div>
           <Reveal>
             <p className="eyebrow">{t("eyebrow")}</p>
             <h1 className="hero-title">{t("h1")}</h1>
-            <p className="hero-promise">{t("promise")}</p>
+            <p className="hero-promise">
+              {t.rich("promise", {
+                em: (chunks) => <em className="hero-promise-em">{chunks}</em>
+              })}
+            </p>
           </Reveal>
+
           <Reveal delay={80}>
             <p className="u-lede">{t("sub")}</p>
           </Reveal>
+
+          {/* The machine facts, as a spec row rather than prose: this is the
+              part a visitor scans before they read anything. */}
+          <Reveal delay={110}>
+            <dl className="hero-facts">
+              {facts.map(([label, value]) => (
+                <div key={label}>
+                  <dt>
+                    <MonoNote>{label}</MonoNote>
+                  </dt>
+                  <dd className="hero-fact-value">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </Reveal>
+
           <Reveal delay={140}>
             <div className="u-actions action-row">
-              <Link href="/admission" className="btn btn-primary">
+              <Link href="/admission" className="btn btn-primary btn-stitch">
                 {t("ctaDemo")} <Icon name="arrow" size={18} className="arrow" />
               </Link>
-              {/* Call is a first-class action here, not a footnote: this
-                  audience decides on the phone, in Gujarati, in one call.
-                  Dials `callPhone`, never the WhatsApp number — the two roles
-                  are unconfirmed and must not be merged. */}
+              {/* Call is a first-class action, not a footnote: this audience
+                  decides on the phone, in Gujarati, in one call. Dials
+                  `callPhone`, never the WhatsApp number — the two roles are
+                  unconfirmed and must not be merged. */}
               <TrackedLink
                 href={`tel:+${site.callPhone}`}
                 event="call_demo_click"
@@ -85,46 +124,41 @@ export function Hero() {
                 external
                 className="cta-tertiary"
               >
-                <Icon name="pin" size={16} /> {tc("directions")}
+                <Icon name="map" size={16} /> {tc("directions")}
               </TrackedLink>
             </div>
           </Reveal>
         </div>
 
-        <Reveal delay={120}>
-          <figure className="hero-wall">
-            <div className="hero-wall-grid">
-              {WALL.map((p) => (
-                <div key={p.key} className="hero-plate">
-                  <TechniquePlate variant={p.variant} seed={p.seed} />
-                  <span className="hero-plate-label">
-                    {gu ? techniqueChips[p.key]?.labelGu : techniqueChips[p.key]?.labelEn}
-                  </span>
-                </div>
+        {/* Screen → machine → stitch, as ONE thread through three frames.
+            The rail spans the whole track and the frames sit on it, so it is
+            literally one continuous thread rather than three connectors that
+            happen to line up. Laying it down is the page's single Level-4
+            moment; nothing else on the homepage may claim one. */}
+        <Reveal delay={120} as="figure" className="hero-thread">
+          <div className="hero-thread-track">
+            <StitchRail tone="vermilion" draw className="hero-thread-rail" />
+            <ol className="hero-thread-list">
+              {frames.map((frame, i) => (
+                <li key={frame.id} className={`hero-frame hero-frame--${i + 1}`}>
+                  <p className="hero-frame-step">
+                    <span className="hero-frame-knot" aria-hidden="true" />
+                    <StepIndex n={i + 1} />
+                    <MonoNote className="hero-frame-label">{frame.step}</MonoNote>
+                  </p>
+                  <ManifestPhoto id={frame.id} editorial className="hero-frame-media" />
+                </li>
               ))}
-            </div>
-            <figcaption className="hero-wall-foot">
-              <span>{t("wallCaption")}</span>
-              <Link href="/courses" className="stitch-link font-semibold text-vermilion-deep">
-                {t("wallCta")} <Icon name="arrow" size={15} className="arrow" />
-              </Link>
-            </figcaption>
-          </figure>
+            </ol>
+          </div>
+          <figcaption className="hero-thread-foot">
+            <span>{t("threadCaption")}</span>
+            <Link href="/courses" className="stitch-link font-semibold text-vermilion-deep">
+              {t("threadCta")} <Icon name="arrow" size={15} className="arrow" />
+            </Link>
+          </figcaption>
         </Reveal>
       </div>
-
-      {/* Owner-provided trust facts, attributed. Edge to edge: kept inside the
-          left column they left a stranded half-row under the panel. */}
-      <Reveal className="container-site mt-8 lg:mt-10">
-        <dl className="fact-rail">
-          {trust.map(([label, value]) => (
-            <div key={label}>
-              <dt className="fact-label">{label}</dt>
-              <dd className="fact-value">{value}</dd>
-            </div>
-          ))}
-        </dl>
-      </Reveal>
     </section>
   );
 }

@@ -1847,7 +1847,7 @@ Claude must execute phases in order, one clean PR at a time unless a smaller spl
 | Phase | Scope | Status |
 | --- | --- | --- |
 | 1 | Audit + Design System v4 “Machine Lab” foundation | ✅ Complete + merged |
-| 2 | Global shell + hero + signature Screen-to-Stitch interaction | ⏳ Pending |
+| 2 | Global shell + hero + signature Screen-to-Stitch interaction | ✅ Complete + merged |
 | 3 | Homepage full rebuild | ⏳ Pending |
 | 4 | 11-course Machine Index + all course pages | ⏳ Pending |
 | 5 | Proof ecosystem: student work, stories, trainers, studio/machines | ⏳ Pending |
@@ -1999,6 +1999,99 @@ unchanged.
 ## Acceptance
 
 A visitor can understand EMCAD + machine + Surat + demo from the first screen without photography.
+
+## Implementation record — merged 2026-08-30
+
+**Branch:** `redesign/phase-2-shell-and-hero` · **PR:** #29
+
+### The hero
+
+The right side is the promise drawn literally: **one continuous thread** that
+starts on the EMCAD screen (H1), passes into the machine (H2) and exits into
+the finished textile (H3). It is one rail spanning the whole track with the
+frames hanging off it — not three connectors that happen to line up — which is
+why `<StitchRail>` was added to `StitchPath.tsx`: the same 9-on / 6-off stitch
+with a penetration dot at every head, turned through 90°, at exact CSS-pixel
+scale and any height. Laying it down is the page's **single Level-4 moment**,
+and a test asserts nothing else on the homepage claims one.
+
+**One markup tree at every width.** On a phone the three frames are the
+vertical story the brief asks for (`01 SCREEN` / `02 MACHINE` / `03 RESULT`);
+on a laptop the same list staggers beside the copy. There is no desktop collage
+plus a mobile copy, and a test fails if breakpoint-gated visibility classes ever
+wrap a whole composition in this file.
+
+**The hero is now the page's MACHINE band** — dark, technical, textured — via
+`.on-carbon`, which already re-points every palette token, so the frames,
+rules, eyebrow and secondary button invert without a single dark-mode override
+at a call site. A warm ivory hero read as a coaching centre.
+
+### Facts, and the line that separates two kinds of claim
+
+The hero carries four verified machine facts: EMCAD DAHAO · 3 months · live
+machine practical · Mota Varachha, Surat. **"3 months" is labelled as the EMCAD
+DAHAO course's own duration**, not floated as a site fact, because the other ten
+courses have no confirmed duration and would inherit one just by standing next
+to it. A test asserts the label carries that scope in both languages, and that
+the hero quotes no fee and never restates three months as twelve weeks.
+
+The Google rating and the Instagram/Facebook follower counts **moved out of the
+hero** into `<TrustRail>`, one band below. Social proof and verified operational
+facts are different kinds of claim, and mixing them in one row made the machine
+facts read as marketing. The trust band attributes the numbers to the studio's
+own pages and says in copy that they are not a verified review score.
+
+### The Screen-to-Stitch rail
+
+`<ProductionRail>` (`src/components/ui/ProductionRail.tsx`) is generic — the
+stages are a prop, so the longer B2B chain (SCREEN → SAMPLE → PROBLEM →
+CORRECTION → OUTPUT) reuses it rather than forking it. `01 DESIGN → 02 MACHINE
+→ 03 RESULT` on the homepage supplies the copy and the P1/P2/P3 manifest slots.
+
+The interaction decision worth keeping: **every stage's media is always visible
+at every width, and the tabs drive one detail panel and nothing else.** That
+single choice removes the usual tab/accordion problem — on a phone the rail is
+just a vertical story with nothing hidden behind a gesture a thumb has to
+discover, and on a laptop the same markup is a row with one stage explained
+underneath. No autoplay, no drag requirement, no duplicated DOM, and tests
+enforce all three.
+
+### Page rhythm
+
+`.band-machine` / `.band-material` / `.band-human` / `.band-info` in
+`machine-lab.css`. The dark bands deliberately do **not** re-point the palette
+themselves — `.on-carbon` owns that inversion, and a second dark-surface
+implementation would drift from it within two phases. A test asserts no band
+class declares a palette token.
+
+### Buttons
+
+`.btn-stitch` draws exactly three 9/6 stitches under the primary label on hover
+and focus — 39px, the brand's own gesture at the size of a gesture. No glow
+halo: a glow would be the only decorative light on the page. Reduced motion
+shows the finished state.
+
+### Files
+
+| File | What |
+| --- | --- |
+| `src/components/home/Hero.tsx` | Rebuilt: machine facts, one thread, three manifest frames, dark band. |
+| `src/components/home/TrustRail.tsx` | **New.** Social proof, attributed, on its own light band. |
+| `src/components/ui/ProductionRail.tsx` | **New.** The reusable rail. |
+| `src/components/home/ProductionRailSection.tsx` | **New.** Its homepage copy and slots. |
+| `src/components/ui/StitchPath.tsx` | Added `<StitchRail>`. |
+| `src/components/site/Header.tsx` | Mobile menu index is machine notation (`<StepIndex>`). |
+| `src/components/site/Footer.tsx` | HUMAN band, machine notation on the column labels. |
+| `src/app/machine-lab.css` | Sections 9–14: bands, hero, rail, buttons, trust band, vertical stitch. |
+| `messages/{en,gu}.json` | `home.hero` rewritten, `home.trust` and `home.rail` added, both languages. |
+
+The mobile conversion bar is untouched and still exactly two actions; a test
+now fails if a third appears.
+
+### Gates
+
+`npm run typecheck`, `npm run lint`, `npm test` (34 files, 456 tests) and
+`npm run build` all green. No dependency added.
 
 ---
 
