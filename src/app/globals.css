@@ -372,15 +372,21 @@
   /* ============ INTERACTION 1: section rule draws on scroll ============
      Every section heading gets the brand thread drawing beneath it.
      Reuses the existing IntersectionObserver: no new JS. */
+  /* Same geometry as <StitchRule>: 9px stitch, 6px gap, needle penetration at
+     each stitch head. Two rules that both mean "stitch" must not be drawn two
+     different ways. */
   .rule-stitch {
     position: relative;
     display: block;
-    height: 2px;
+    height: 5px;
     width: 4.5rem;
     margin-top: 1.25rem;
-    background-image: repeating-linear-gradient(
-      90deg, var(--color-vermilion) 0 8px, transparent 8px 14px
-    );
+    background-image:
+      radial-gradient(circle 1.75px at 1.75px 50%, var(--color-vermilion) 99%, transparent 100%),
+      linear-gradient(90deg, var(--color-vermilion) 0 9px, transparent 9px 15px);
+    background-size: 15px 5px, 15px 2px;
+    background-repeat: repeat-x, repeat-x;
+    background-position: 0 50%, 0 50%;
     transform-origin: left;
   }
   .js .rule-stitch { transform: scaleX(0); transition: transform 450ms var(--ease-out-soft); }

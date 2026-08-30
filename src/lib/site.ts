@@ -75,6 +75,32 @@ export const site = {
 } as const;
 
 /**
+ * Owner-provided trust facts.
+ *
+ * These come from the owner directly, in `docs/screen-to-stitch-progress.md`:
+ * "These follower counts and rating may be used as owner-provided trust
+ * content during this pre-domain visual-development stage. Do **not** claim
+ * they were independently verified if they were not."
+ *
+ * So they are a third category, sitting between `verifiedFacts` (corroborated
+ * by two independent sources) and sample content (invented for prototyping).
+ * The rules that follow from that:
+ *
+ *  - They may be shown, rounded, in the trust rail.
+ *  - The UI must attribute them to their source (Google, Instagram, Facebook)
+ *    rather than presenting them as Karma's own audited claims.
+ *  - **The 4.8 rating must never enter `AggregateRating` structured data.**
+ *    Schema.org ratings assert a review count and a verified aggregate; we
+ *    have neither, and emitting one would be a fabricated rich result.
+ *  - Counts are stated as "39K+" / "10K+", never as a precise 39,300.
+ */
+export const ownerProvidedFacts = {
+  googleRating: "4.8",
+  instagramFollowers: "39K+",
+  facebookFollowers: "10K+"
+} as const;
+
+/**
  * Public numeric claims stay OFF until the owner verifies each one
  * (docs/content-checklist.md Q9). Flip to true only with written confirmation.
  *
