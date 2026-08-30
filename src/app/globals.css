@@ -645,6 +645,9 @@
   }
   .status-active { color: var(--color-success); }
   .status-pending { color: var(--color-warn); }
+  /* Red is a STATUS colour, never decoration: an overdue balance, a revoked
+     certificate. Do not reach for it to make something look urgent. */
+  .status-error { color: var(--color-error); }
   .status-off { color: var(--color-stone); }
 
   /* Empty states are a feature here: never a blank box, never invented rows. */

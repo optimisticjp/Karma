@@ -50,7 +50,9 @@ export const ATTENDANCE_AUDIT_ACTIONS = {
 } as const;
 
 export const FEE_AUDIT_ACTIONS = {
-  recordCreated: "fees.record.created"
+  recordCreated: "fees.record.created",
+  /** A deliberate change to what an existing student agreed to pay. */
+  agreementUpdated: "fees.agreement.updated"
 } as const;
 
 export const CERTIFICATE_AUDIT_ACTIONS = {

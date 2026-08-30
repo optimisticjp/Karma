@@ -98,6 +98,8 @@ Cloudflare production deployment currently uses the dashboard command `OPEN_NEXT
 ## Karma Console product rules
 - Staff language is institute language, not ERP language: enquiry, walk-in, follow-up, batch, fees, receipt, હાજરી, certificate, design job, WhatsApp.
 - Website forms are never a prerequisite. Authorized staff can manually add enquiries, direct admissions/students, fee entries and design jobs for walk-ins, calls or WhatsApp.
+- **A parent/guardian mobile is required on the public admission form and on a console direct admission**, and deliberately optional on the student edit form and the manual enquiry. The asymmetry is tested; read `docs/project-context.md` §22 before changing it.
+- **An enrolment snapshots the fee agreement** it was created under. Editing a course never reprices an existing student. Fee status is derived from the ledger — never store a paid/unpaid flag.
 - Navigation and Today at Karma are role/permission-aware. A hidden link is UX only; server guards remain authoritative.
 - No hard-delete UI for operational records. Archive/deactivate/lifecycle transitions preserve history.
 - Dates that mean "today" to staff are pinned to `Asia/Kolkata`.

@@ -5,6 +5,7 @@ import { and, eq, inArray, lt, ne, sql } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { authorizeAction } from "@/lib/auth/guard";
 import { auditValues, STUDENT_AUDIT_ACTIONS } from "@/lib/admin/audit";
+import { agreementAuditValues, agreementForBatch } from "@/lib/admin/enrollment-agreement";
 import { pad } from "@/lib/utils";
 import {
   positiveId,
@@ -96,6 +97,9 @@ export async function directAdmissionAction(
           area: d.area,
           languagePref: d.languagePref,
           isMinor: d.isMinor,
+          fatherName: d.fatherName,
+          referenceName: d.referenceName,
+          referencePhone: d.referencePhone,
           photoConsent: d.photoConsent,
           photoConsentAt: d.photoConsent ? new Date() : null,
           notes: d.notes
@@ -107,18 +111,26 @@ export async function directAdmissionAction(
       const admissionNo = `KDS-${year}-${pad(studentId)}`;
       await tx.update(schema.students).set({ admissionNo }).where(eq(schema.students.id, studentId));
 
-      if (d.isMinor && d.guardianName && d.guardianPhone) {
+      /* Every formal admission records a parent/guardian contact (owner
+         decision, 2026-08-30). `validateDirectAdmission` has already required
+         the phone; the NAME is only asked of under-18 applicants, so it falls
+         back to a plain label rather than blocking the admission. */
+      if (d.guardianPhone) {
         await tx.insert(schema.guardians).values({
           studentId,
-          name: d.guardianName,
+          name: d.guardianName ?? "Parent / guardian",
           phone: d.guardianPhone,
           relation: d.guardianRelation
         });
       }
 
+      /* The commercial agreement is captured HERE, once. Editing the course
+         later must never reprice this student. */
+      const joinDate = d.joinedOn ?? kolkataDate();
+      const agreement = await agreementForBatch(tx, d.batchId, joinDate);
       const enrollment = await tx
         .insert(schema.enrollments)
-        .values({ studentId, batchId: d.batchId, status: "active", joinedOn: d.joinedOn ?? kolkataDate() })
+        .values({ studentId, batchId: d.batchId, status: "active", joinedOn: joinDate, ...agreement })
         .returning({ id: schema.enrollments.id });
       const enrollmentId = enrollment[0]?.id;
       if (!enrollmentId) throw new Error("enrollment insert returned no id");
@@ -141,7 +153,7 @@ export async function directAdmissionAction(
           action: STUDENT_AUDIT_ACTIONS.enrollmentCreated,
           entity: "enrollment",
           entityId: enrollmentId,
-          newValue: { studentId, batchId: d.batchId, status: "active" },
+          newValue: { studentId, batchId: d.batchId, status: "active", ...agreementAuditValues(agreement) },
           reason: "direct admission enrollment"
         })
       ]);
@@ -180,8 +192,12 @@ export async function convertApplicationAction(
         area: schema.applications.area,
         goal: schema.applications.goal,
         ageBand: schema.applications.ageBand,
+        fatherName: schema.applications.fatherName,
         guardianName: schema.applications.guardianName,
         guardianPhone: schema.applications.guardianPhone,
+        guardianRelation: schema.applications.guardianRelation,
+        referenceName: schema.applications.referenceName,
+        referencePhone: schema.applications.referencePhone,
         status: schema.applications.status
       })
       .from(schema.applications)
@@ -217,6 +233,9 @@ export async function convertApplicationAction(
           area: app.area,
           languagePref: app.locale,
           isMinor: app.ageBand === "under18",
+          fatherName: app.fatherName,
+          referenceName: app.referenceName,
+          referencePhone: app.referencePhone,
           notes: app.goal
         })
         .returning({ id: schema.students.id });
@@ -226,19 +245,23 @@ export async function convertApplicationAction(
       const admissionNo = `KDS-${date.slice(0, 4)}-${pad(studentId)}`;
       await tx.update(schema.students).set({ admissionNo }).where(eq(schema.students.id, studentId));
 
-      if (app.ageBand === "under18" && app.guardianName && app.guardianPhone) {
+      /* Applications taken since 2026-08-30 always carry a guardian phone;
+         older ones may not, so the row is written only when one exists rather
+         than blocking a conversion staff need to complete. */
+      if (app.guardianPhone) {
         await tx.insert(schema.guardians).values({
           studentId,
           applicationId,
-          name: app.guardianName,
+          name: app.guardianName ?? "Parent / guardian",
           phone: app.guardianPhone,
-          relation: "Guardian"
+          relation: app.guardianRelation ?? "Guardian"
         });
       }
 
+      const agreement = await agreementForBatch(tx, batchId, date);
       const enrollmentRows = await tx
         .insert(schema.enrollments)
-        .values({ studentId, batchId, status: "active", joinedOn: date })
+        .values({ studentId, batchId, status: "active", joinedOn: date, ...agreement })
         .returning({ id: schema.enrollments.id });
       const enrollmentId = enrollmentRows[0]?.id;
       if (!enrollmentId) throw new Error("converted enrollment insert returned no id");
@@ -277,7 +300,7 @@ export async function convertApplicationAction(
           action: STUDENT_AUDIT_ACTIONS.enrollmentCreated,
           entity: "enrollment",
           entityId: enrollmentId,
-          newValue: { studentId, batchId, status: "active" },
+          newValue: { studentId, batchId, status: "active", ...agreementAuditValues(agreement) },
           reason: "enquiry conversion enrollment"
         })
       ]);
@@ -315,6 +338,9 @@ export async function updateStudentAction(
         area: schema.students.area,
         languagePref: schema.students.languagePref,
         isMinor: schema.students.isMinor,
+        fatherName: schema.students.fatherName,
+        referenceName: schema.students.referenceName,
+        referencePhone: schema.students.referencePhone,
         photoConsent: schema.students.photoConsent,
         photoConsentAt: schema.students.photoConsentAt,
         notes: schema.students.notes
@@ -334,22 +360,25 @@ export async function updateStudentAction(
         area: d.area,
         languagePref: d.languagePref,
         isMinor: d.isMinor,
+        fatherName: d.fatherName,
+        referenceName: d.referenceName,
+        referencePhone: d.referencePhone,
         photoConsent: d.photoConsent,
         photoConsentAt: d.photoConsent && !before[0].photoConsent ? new Date() : before[0].photoConsentAt,
         notes: d.notes
       };
       await tx.update(schema.students).set(next).where(eq(schema.students.id, studentId));
 
-      if (d.isMinor && d.guardianName && d.guardianPhone) {
+      if (d.guardianPhone) {
         const existing = await tx
           .select({ id: schema.guardians.id })
           .from(schema.guardians)
           .where(eq(schema.guardians.studentId, studentId))
           .limit(1);
         if (existing[0]) {
-          await tx.update(schema.guardians).set({ name: d.guardianName, phone: d.guardianPhone, relation: d.guardianRelation }).where(eq(schema.guardians.id, existing[0].id));
+          await tx.update(schema.guardians).set({ name: d.guardianName ?? "Parent / guardian", phone: d.guardianPhone, relation: d.guardianRelation }).where(eq(schema.guardians.id, existing[0].id));
         } else {
-          await tx.insert(schema.guardians).values({ studentId, name: d.guardianName, phone: d.guardianPhone, relation: d.guardianRelation });
+          await tx.insert(schema.guardians).values({ studentId, name: d.guardianName ?? "Parent / guardian", phone: d.guardianPhone, relation: d.guardianRelation });
         }
       }
 
@@ -395,9 +424,11 @@ export async function addEnrollmentAction(
         .where(and(eq(schema.batches.id, d.batchId), lt(schema.batches.seatsTaken, schema.batches.seats), inArray(schema.batches.status, ["open", "started"])))
         .returning({ id: schema.batches.id, seats: schema.batches.seats, seatsTaken: schema.batches.seatsTaken, status: schema.batches.status });
       if (!seat[0]) throw new SeatUnavailableError();
+      const joinDate = d.joinedOn ?? kolkataDate();
+      const agreement = await agreementForBatch(tx, d.batchId, joinDate);
       const rows = await tx
         .insert(schema.enrollments)
-        .values({ studentId: d.studentId, batchId: d.batchId, status: "active", joinedOn: d.joinedOn ?? kolkataDate() })
+        .values({ studentId: d.studentId, batchId: d.batchId, status: "active", joinedOn: joinDate, ...agreement })
         .returning({ id: schema.enrollments.id });
       const enrollmentId = rows[0]?.id;
       if (!enrollmentId) throw new Error("enrollment insert returned no id");
@@ -409,7 +440,7 @@ export async function addEnrollmentAction(
         action: STUDENT_AUDIT_ACTIONS.enrollmentCreated,
         entity: "enrollment",
         entityId: enrollmentId,
-        newValue: { studentId: d.studentId, batchId: d.batchId, status: "active" },
+        newValue: { studentId: d.studentId, batchId: d.batchId, status: "active", ...agreementAuditValues(agreement) },
         reason: "additional enrollment"
       }));
     });

@@ -28,9 +28,12 @@ export type StudentEditValue = {
   isMinor: boolean;
   photoConsent: boolean;
   notes: string | null;
+  fatherName: string | null;
   guardianName: string | null;
   guardianPhone: string | null;
   guardianRelation: string | null;
+  referenceName: string | null;
+  referencePhone: string | null;
 };
 
 function Message({ state, copy }: { state: StudentsState; copy: StudentsCopy }) {
@@ -45,7 +48,25 @@ function Submit({ label, busy }: { label: string; busy: string }) {
   return <button type="submit" className="btn btn-primary" disabled={pending}>{pending ? busy : label}</button>;
 }
 
-function PersonFields({ copy, value }: { copy: StudentsCopy; value?: StudentEditValue }) {
+/**
+ * The person half of the formal admission record, matching the institute's own
+ * printed form: student, father, guardian, reference.
+ *
+ * `requireGuardian` is set on a NEW formal admission (owner decision,
+ * 2026-08-30) and left off when editing an existing student, because the edit
+ * form also has to be able to correct a record admitted before the rule
+ * existed. The server applies exactly the same distinction — this attribute is
+ * a courtesy to the operator, not the enforcement.
+ */
+function PersonFields({
+  copy,
+  value,
+  requireGuardian = false
+}: {
+  copy: StudentsCopy;
+  value?: StudentEditValue;
+  requireGuardian?: boolean;
+}) {
   return (
     <>
       <div className="grid gap-4 md:grid-cols-3">
@@ -77,10 +98,16 @@ function PersonFields({ copy, value }: { copy: StudentsCopy; value?: StudentEdit
         <label className="choice-chip text-smallmeta"><input type="checkbox" name="photoConsent" className="size-4 accent-vermilion" defaultChecked={value?.photoConsent ?? false} />{copy.photoConsent}</label>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
+        <Field label={copy.fatherName} htmlFor={`father-name-${value?.id ?? "new"}`}><input id={`father-name-${value?.id ?? "new"}`} name="fatherName" className="input" maxLength={160} defaultValue={value?.fatherName ?? ""} /></Field>
         <Field label={copy.guardianName} htmlFor={`guardian-name-${value?.id ?? "new"}`}><input id={`guardian-name-${value?.id ?? "new"}`} name="guardianName" className="input" maxLength={160} defaultValue={value?.guardianName ?? ""} /></Field>
-        <Field label={copy.guardianPhone} htmlFor={`guardian-phone-${value?.id ?? "new"}`}><input id={`guardian-phone-${value?.id ?? "new"}`} name="guardianPhone" className="input" inputMode="tel" maxLength={20} defaultValue={value?.guardianPhone ?? ""} /></Field>
         <Field label={copy.guardianRelation} htmlFor={`guardian-relation-${value?.id ?? "new"}`}><input id={`guardian-relation-${value?.id ?? "new"}`} name="guardianRelation" className="input" maxLength={60} defaultValue={value?.guardianRelation ?? ""} placeholder="Mother / Father" /></Field>
       </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <Field label={copy.guardianPhone} htmlFor={`guardian-phone-${value?.id ?? "new"}`}><input id={`guardian-phone-${value?.id ?? "new"}`} name="guardianPhone" className="input" required={requireGuardian} inputMode="tel" maxLength={20} defaultValue={value?.guardianPhone ?? ""} /></Field>
+        <Field label={copy.referenceName} htmlFor={`reference-name-${value?.id ?? "new"}`}><input id={`reference-name-${value?.id ?? "new"}`} name="referenceName" className="input" maxLength={160} defaultValue={value?.referenceName ?? ""} /></Field>
+        <Field label={copy.referencePhone} htmlFor={`reference-phone-${value?.id ?? "new"}`}><input id={`reference-phone-${value?.id ?? "new"}`} name="referencePhone" className="input" inputMode="tel" maxLength={20} defaultValue={value?.referencePhone ?? ""} /></Field>
+      </div>
+      <p className="form-note">{requireGuardian ? copy.guardianRequiredHint : copy.referenceHint}</p>
       <Field label={copy.notes} htmlFor={`student-notes-${value?.id ?? "new"}`}><textarea id={`student-notes-${value?.id ?? "new"}`} name="notes" className="input min-h-24" maxLength={2000} defaultValue={value?.notes ?? ""} /></Field>
     </>
   );
@@ -91,7 +118,7 @@ export function DirectAdmissionForm({ batches, copy }: { batches: BatchOption[];
   return (
     <form action={action} className="grid gap-5">
       <Message state={state} copy={copy} />
-      <PersonFields copy={copy} />
+      <PersonFields copy={copy} requireGuardian />
       <div className="grid gap-4 md:grid-cols-2">
         <BatchField batches={batches} copy={copy} id="direct-batch" />
         <Field label={copy.joinedOn} htmlFor="direct-joined"><input id="direct-joined" name="joinedOn" type="date" className="input" /></Field>

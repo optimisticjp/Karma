@@ -24,6 +24,10 @@ export type AdmissionsCopy = {
   ageChoose: string;
   guardianName: string;
   guardianPhone: string;
+  fatherName: string;
+  referenceName: string;
+  referencePhone: string;
+  guardianEnquiryHint: string;
   enquiryNote: string;
   enquiryNotePlaceholder: string;
   createEnquiry: string;
@@ -86,8 +90,13 @@ const COPY = {
     area: "Area / locality",
     ageBand: "Age group",
     ageChoose: "Not recorded",
-    guardianName: "Guardian name (under 18)",
-    guardianPhone: "Guardian mobile (under 18)",
+    guardianName: "Parent / guardian name",
+    guardianPhone: "Parent / guardian mobile",
+    fatherName: "Father's name",
+    referenceName: "Reference name",
+    referencePhone: "Reference mobile",
+    guardianEnquiryHint:
+      "Record a parent or guardian number whenever you have it. It becomes required at admission, so asking now saves a call later. Reference details are optional.",
     enquiryNote: "What are they looking for?",
     enquiryNotePlaceholder: "Example: wants machine practice, will visit on Sunday, asked about evening batch",
     createEnquiry: "Save enquiry",
@@ -176,8 +185,13 @@ const COPY = {
     area: "Area / locality",
     ageBand: "ઉંમર group",
     ageChoose: "નોંધ્યું નથી",
-    guardianName: "Guardianનું નામ (18થી નાના માટે)",
-    guardianPhone: "Guardian mobile (18થી નાના માટે)",
+    guardianName: "માતા-પિતા / વાલીનું નામ",
+    guardianPhone: "માતા-પિતા / વાલીનો મોબાઇલ",
+    fatherName: "પિતાનું નામ",
+    referenceName: "રેફરન્સનું નામ",
+    referencePhone: "રેફરન્સનો મોબાઇલ",
+    guardianEnquiryHint:
+      "માતા-પિતા કે વાલીનો નંબર મળે ત્યારે નોંધી લો. એડમિશન વખતે એ ફરજિયાત છે, એટલે અત્યારે પૂછી લેવાથી પછી એક કૉલ બચે છે. રેફરન્સની વિગત વૈકલ્પિક છે.",
     enquiryNote: "શું શીખવું / કરવું છે?",
     enquiryNotePlaceholder: "ઉદાહરણ: machine practice જોઈએ, Sunday visit કરશે, evening batch વિશે પૂછ્યું",
     createEnquiry: "Enquiry Save કરો",

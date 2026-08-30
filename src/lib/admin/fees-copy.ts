@@ -1,4 +1,5 @@
 import type { FeeMethod } from "./fees";
+import type { FeeStatus } from "./fee-status";
 
 export type FeesCopy = ReturnType<typeof en>;
 
@@ -26,17 +27,30 @@ const en = () => ({
   saving: "Saving…",
   paid: "Paid",
   due: "Due",
+  balance: "Balance",
+  statuses: { unpaid: "Unpaid", partial: "Part paid", paid: "Paid" } satisfies Record<FeeStatus, string>,
+  overdue: "The balance is past its due date.",
+  admissionShort: "Less has been received than the amount due at admission:",
+  editAgreement: "Change the agreed fee",
+  agreementHint:
+    "This is what THIS student agreed to pay. It was captured when they joined and is not affected by later changes to the course fee. Changing it needs a reason, and the change is recorded in the audit log.",
+  agreedFeeTotal: "Agreed total fee",
+  agreedAdmissionAmount: "Due at admission",
+  agreedBalanceDueOn: "Balance due on",
+  agreementReason: "Reason for the change",
+  saveAgreement: "Save the agreement",
   noLedger: "Fee terms not entered yet.",
   history: "Payment history",
   receipt: "Receipt",
   methods: { cash: "Cash", upi: "UPI received", bank: "Bank transfer", other: "Other" } satisfies Record<FeeMethod, string>,
   viewOnly: "You can view fee status. Recording money requires Fees manage permission.",
-  success: { saved: "Fee entry recorded." },
+  success: { saved: "Fee entry recorded.", agreementSaved: "The agreed fee has been updated." },
   errors: {
     denied: "You do not have permission for this action.",
     invalid: "Check the fee amounts and try again.",
     missing: "That enrollment could not be found.",
     overpaid: "Received amount would be more than the agreed net fee. Check the amounts first.",
+    belowReceived: "The agreed total cannot be less than the money already received.",
     generic: "Could not save the fee entry right now. Please try again."
   }
 });
@@ -65,17 +79,30 @@ const gu = () => ({
   saving: "Save થઈ રહ્યું છે…",
   paid: "મળ્યું",
   due: "બાકી",
+  balance: "બાકી",
+  statuses: { unpaid: "ભરેલી નથી", partial: "થોડી ભરાઈ", paid: "પૂરી ભરાઈ" } satisfies Record<FeeStatus, string>,
+  overdue: "બાકી રકમની તારીખ વીતી ગઈ છે.",
+  admissionShort: "એડમિશન વખતે ભરવાની રકમ કરતાં ઓછું મળ્યું છે:",
+  editAgreement: "નક્કી થયેલી fee બદલો",
+  agreementHint:
+    "આ student એ જે fee ભરવાનું નક્કી કર્યું હતું એ. જોડાયા ત્યારે નોંધાઈ હતી, અને પછી course ની fee બદલાય તો પણ આ બદલાતી નથી. બદલવા માટે કારણ જરૂરી છે, અને ફેરફાર audit log માં નોંધાય છે.",
+  agreedFeeTotal: "નક્કી થયેલી કુલ fee",
+  agreedAdmissionAmount: "એડમિશન વખતે ભરવાની",
+  agreedBalanceDueOn: "બાકી રકમની તારીખ",
+  agreementReason: "ફેરફારનું કારણ",
+  saveAgreement: "Agreement સાચવો",
   noLedger: "Feesની માહિતી હજી નાખેલી નથી.",
   history: "Payment history",
   receipt: "Receipt",
   methods: { cash: "Cash", upi: "UPI મળ્યું", bank: "Bank transfer", other: "Other" } satisfies Record<FeeMethod, string>,
   viewOnly: "તમે fees status જોઈ શકો છો. રકમ નોંધવા Fees manage permission જોઈએ.",
-  success: { saved: "Fee entry record થઈ ગઈ." },
+  success: { saved: "Fee entry record થઈ ગઈ.", agreementSaved: "નક્કી થયેલી fee અપડેટ થઈ ગઈ." },
   errors: {
     denied: "આ કામ કરવાની permission નથી.",
     invalid: "Fee amounts ચેક કરીને ફરી try કરો.",
     missing: "આ enrollment મળ્યું નથી.",
     overpaid: "મળેલ રકમ net fee કરતાં વધારે થઈ જાય છે. Amounts ચેક કરો.",
+    belowReceived: "નક્કી થયેલી કુલ રકમ, અત્યાર સુધી મળેલી રકમ કરતાં ઓછી ન હોઈ શકે.",
     generic: "હમણાં fee entry save થઈ શકી નથી. ફરી try કરો."
   }
 });

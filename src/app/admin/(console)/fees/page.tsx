@@ -4,7 +4,8 @@ import { getDb, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
 import { hasPermission } from "@/lib/auth/access";
 import { feesCopy } from "@/lib/admin/fees-copy";
-import { FeeEntryForm } from "./FeeForm";
+import { isOverdue, summariseFees, type FeeStatus } from "@/lib/admin/fee-status";
+import { AgreementForm, FeeEntryForm } from "./FeeForm";
 
 type Props = { searchParams: Promise<{ q?: string; pending?: string }> };
 
@@ -37,6 +38,11 @@ export default async function FeesPage({ searchParams }: Props) {
     db.select({
       enrollmentId: schema.enrollments.id,
       enrollmentStatus: schema.enrollments.status,
+      joinedOn: schema.enrollments.joinedOn,
+      agreedFeeTotal: schema.enrollments.agreedFeeTotal,
+      agreedAdmissionAmount: schema.enrollments.agreedAdmissionAmount,
+      agreedBalanceDueOn: schema.enrollments.agreedBalanceDueOn,
+      agreedCourseName: schema.enrollments.agreedCourseName,
       studentId: schema.students.id,
       admissionNo: schema.students.admissionNo,
       fullName: schema.students.fullName,
@@ -71,24 +77,33 @@ export default async function FeesPage({ searchParams }: Props) {
     byEnrollment.set(row.enrollmentId, rows);
   }
 
+  /**
+   * Every number below is DERIVED from the enrolment's agreement snapshot plus
+   * the ledger. Nothing stores a "paid" flag: a status column would be a second
+   * source of truth for a number that is already in the ledger, and the two
+   * would disagree the first time a receipt was corrected.
+   */
+  const today = kolkataToday();
   const cards = enrollments.map((enrollment) => {
     const rows = byEnrollment.get(enrollment.enrollmentId) ?? [];
-    const latest = rows[0] ?? null;
-    const received = rows.reduce((sum, row) => sum + row.received, 0);
-    const courseFee = latest?.courseFee ?? 0;
-    const discount = latest?.discount ?? 0;
-    const net = Math.max(0, courseFee - discount);
-    const due = Math.max(0, net - received);
-    return { ...enrollment, rows, latest, courseFee, discount, net, received, due };
+    const summary = summariseFees(
+      {
+        agreedFeeTotal: enrollment.agreedFeeTotal,
+        agreedAdmissionAmount: enrollment.agreedAdmissionAmount,
+        agreedBalanceDueOn: enrollment.agreedBalanceDueOn
+      },
+      rows
+    );
+    return { ...enrollment, rows, latest: rows[0] ?? null, summary, overdue: isOverdue(summary, today) };
   }).filter((card) => {
-    if (pendingOnly && card.due <= 0) return false;
+    if (pendingOnly && card.summary.balance <= 0) return false;
     if (!q) return true;
     return [card.fullName, card.admissionNo, card.phone, card.whatsapp ?? "", card.batchLabel].some((value) => value.toLowerCase().includes(q));
   });
 
-  const totalNet = cards.reduce((sum, card) => sum + card.net, 0);
-  const totalReceived = cards.reduce((sum, card) => sum + card.received, 0);
-  const totalDue = cards.reduce((sum, card) => sum + card.due, 0);
+  const totalNet = cards.reduce((sum, card) => sum + card.summary.net, 0);
+  const totalReceived = cards.reduce((sum, card) => sum + card.summary.received, 0);
+  const totalDue = cards.reduce((sum, card) => sum + card.summary.balance, 0);
 
   return (
     <div className="max-w-[80rem]">
@@ -115,15 +130,28 @@ export default async function FeesPage({ searchParams }: Props) {
                 <h2 className="text-h4 mt-1">{card.fullName}</h2>
                 <p className="form-note mt-1">{session.staff.adminLocale === "gu" ? card.courseNameGu : card.courseNameEn} · {card.batchLabel} · <a href={`https://wa.me/91${card.whatsapp ?? card.phone}`}>WhatsApp</a></p>
               </div>
-              <span className={`status ${card.due > 0 ? "status-pending" : card.net > 0 ? "status-active" : "status-off"}`}>{card.due > 0 ? `${copy.due} ${money(card.due)}` : card.net > 0 ? copy.paid : copy.noLedger}</span>
+              <span className={`status ${statusClass(card.summary.status, card.overdue)}`}>
+                {card.summary.unset ? copy.noLedger : copy.statuses[card.summary.status]}
+                {card.summary.balance > 0 ? ` · ${money(card.summary.balance)}` : ""}
+              </span>
             </div>
             <div className="panel-body grid gap-6">
-              <dl className="grid gap-4 sm:grid-cols-4">
-                <Fact label={copy.courseFee} value={card.latest ? money(card.courseFee) : "—"} />
-                <Fact label={copy.discount} value={card.latest ? money(card.discount) : "—"} />
-                <Fact label={copy.paid} value={money(card.received)} />
-                <Fact label={copy.dueDate} value={card.latest?.dueDate ? formatDate(card.latest.dueDate, session.staff.adminLocale) : "—"} />
+              <dl className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
+                <Fact label={copy.courseFee} value={card.summary.agreed != null ? money(card.summary.agreed) : "—"} />
+                <Fact label={copy.discount} value={card.summary.discount > 0 ? money(card.summary.discount) : "—"} />
+                <Fact label={copy.totalReceived} value={money(card.summary.received)} />
+                <Fact label={copy.balance} value={money(card.summary.balance)} />
+                <Fact
+                  label={copy.dueDate}
+                  value={card.summary.nextDueOn ? formatDate(card.summary.nextDueOn, session.staff.adminLocale) : "—"}
+                />
               </dl>
+              {card.summary.admissionExpected != null && !card.summary.admissionMet ? (
+                <p className="alert alert-warn">
+                  {copy.admissionShort} {money(card.summary.admissionExpected)}
+                </p>
+              ) : null}
+              {card.overdue ? <p className="alert alert-error">{copy.overdue}</p> : null}
 
               {card.rows.length ? (
                 <details className="border-t border-rule pt-5">
@@ -137,7 +165,23 @@ export default async function FeesPage({ searchParams }: Props) {
               {canManage ? (
                 <details className="border-t border-rule pt-5">
                   <summary className="cursor-pointer font-semibold">{copy.recordPayment}</summary>
-                  <div className="mt-5"><FeeEntryForm enrollmentId={card.enrollmentId} courseFee={card.courseFee} discount={card.discount} dueDate={card.latest?.dueDate ?? null} copy={copy} /></div>
+                  <div className="mt-5"><FeeEntryForm enrollmentId={card.enrollmentId} courseFee={card.summary.agreed ?? 0} discount={card.summary.discount} dueDate={card.summary.nextDueOn} copy={copy} /></div>
+                </details>
+              ) : null}
+
+              {canManage ? (
+                <details className="border-t border-rule pt-5">
+                  <summary className="cursor-pointer font-semibold">{copy.editAgreement}</summary>
+                  <div className="mt-5">
+                    <p className="form-note mb-4">{copy.agreementHint}</p>
+                    <AgreementForm
+                      enrollmentId={card.enrollmentId}
+                      agreedFeeTotal={card.agreedFeeTotal}
+                      agreedAdmissionAmount={card.agreedAdmissionAmount}
+                      agreedBalanceDueOn={card.agreedBalanceDueOn}
+                      copy={copy}
+                    />
+                  </div>
                 </details>
               ) : null}
             </div>
@@ -152,6 +196,14 @@ function Heading({ title, lede }: { title: string; lede: string }) { return <div
 function Metric({ label, value }: { label: string; value: string }) { return <div className="panel panel-body"><p className="microlabel">{label}</p><p className="text-h3 mt-2">{value}</p></div>; }
 function Fact({ label, value }: { label: string; value: string }) { return <div><dt className="microlabel">{label}</dt><dd className="text-smallmeta mt-1">{value}</dd></div>; }
 function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) { return <div><label className="label" htmlFor={htmlFor}>{label}</label>{children}</div>; }
+/** "Today" for a member of staff standing in Surat, not the Worker's UTC clock. */
+function kolkataToday() {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
+}
+function statusClass(status: FeeStatus, overdue: boolean) {
+  if (overdue) return "status-error";
+  return status === "paid" ? "status-active" : status === "partial" ? "status-pending" : "status-off";
+}
 function money(value: number) { return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value); }
 function formatDate(value: string, locale: "en" | "gu") { return new Intl.DateTimeFormat(locale === "gu" ? "gu-IN" : "en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kolkata" }).format(new Date(`${value}T00:00:00+05:30`)); }
 function formatDateTime(value: Date, locale: "en" | "gu") { return new Intl.DateTimeFormat(locale === "gu" ? "gu-IN" : "en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" }).format(value); }

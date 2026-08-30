@@ -56,3 +56,50 @@ export function validateFeeRecord(input: Record<string, unknown>): { ok: true; v
     }
   };
 }
+
+/* --------------------------- the agreement -------------------------------- */
+
+export type AgreementUpdateInput = {
+  enrollmentId: number;
+  agreedFeeTotal: number | null;
+  agreedAdmissionAmount: number | null;
+  agreedBalanceDueOn: string | null;
+  /** Required. Changing what a student owes is never an unexplained edit. */
+  reason: string;
+};
+
+/**
+ * Validates a deliberate change to an existing student's commercial agreement.
+ *
+ * The agreement is normally a snapshot taken at joining and never touched
+ * again — that is the whole point of storing it on the enrolment rather than
+ * reading the course. This is the one supported way to change it, and it
+ * carries a mandatory reason so the audit row says WHY a student's fee moved.
+ */
+export function validateAgreementUpdate(input: Record<string, unknown>):
+  | { ok: true; value: AgreementUpdateInput }
+  | { ok: false } {
+  const enrollmentId = positiveId(input.enrollmentId);
+  const blankTotal = input.agreedFeeTotal == null || input.agreedFeeTotal === "";
+  const blankAdmission = input.agreedAdmissionAmount == null || input.agreedAdmissionAmount === "";
+  const agreedFeeTotal = blankTotal ? null : amount(input.agreedFeeTotal);
+  const agreedAdmissionAmount = blankAdmission ? null : amount(input.agreedAdmissionAmount);
+  const agreedBalanceDueOn = optionalDate(input.agreedBalanceDueOn);
+  const reason = optionalText(input.reason, 300);
+
+  if (!enrollmentId || !reason || reason.length < 3) return { ok: false };
+  if (!blankTotal && agreedFeeTotal == null) return { ok: false };
+  if (!blankAdmission && agreedAdmissionAmount == null) return { ok: false };
+  if (agreedBalanceDueOn === "invalid") return { ok: false };
+  /* Mirrors chk_enrollment_agreement: an admission amount without a total, or
+     larger than the total, is not an agreement anyone could honour. */
+  if (agreedAdmissionAmount != null && agreedFeeTotal == null) return { ok: false };
+  if (agreedAdmissionAmount != null && agreedFeeTotal != null && agreedAdmissionAmount > agreedFeeTotal) {
+    return { ok: false };
+  }
+
+  return {
+    ok: true,
+    value: { enrollmentId, agreedFeeTotal, agreedAdmissionAmount, agreedBalanceDueOn, reason }
+  };
+}

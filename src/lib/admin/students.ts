@@ -40,14 +40,33 @@ export type StudentInput = {
   isMinor: boolean;
   photoConsent: boolean;
   notes: string | null;
+  /** From the institute's printed admission form. Distinct from a guardian. */
+  fatherName: string | null;
   guardianName: string | null;
   guardianPhone: string | null;
   guardianRelation: string | null;
+  /** Who referred this student. Optional: nobody invents one. */
+  referenceName: string | null;
+  referencePhone: string | null;
 };
 
-export function validateStudentInput(input: Record<string, unknown>):
-  | { ok: true; value: StudentInput }
-  | { ok: false } {
+/**
+ * Where the guardian rule bites, and where it deliberately does not.
+ *
+ * Owner decision (2026-08-30): a parent/guardian mobile is required on every
+ * admission. `requireGuardian` turns that on for a FORMAL admission — the
+ * direct-admission and conversion forms that produce a student record and a
+ * printed sheet — and leaves it off for `validateStudentInput` used on its own,
+ * because that also edits students admitted before the rule existed, and a
+ * validator that refuses to save an old record is a validator that stops staff
+ * correcting a typo.
+ */
+export type StudentValidationOptions = { requireGuardian?: boolean };
+
+export function validateStudentInput(
+  input: Record<string, unknown>,
+  options: StudentValidationOptions = {}
+): { ok: true; value: StudentInput } | { ok: false } {
   const fullName = text(input.fullName, 160);
   const rawPhone = text(input.phone, 30);
   const phone = cleanIndianMobile(rawPhone);
@@ -62,11 +81,19 @@ export function validateStudentInput(input: Record<string, unknown>):
   const rawGuardianPhone = text(input.guardianPhone, 30);
   const guardianPhone = rawGuardianPhone ? cleanIndianMobile(rawGuardianPhone) : null;
   const guardianRelation = optionalText(input.guardianRelation, 60);
+  const fatherName = optionalText(input.fatherName, 160);
+  const referenceName = optionalText(input.referenceName, 160);
+  const rawReferencePhone = text(input.referencePhone, 30);
+  const referencePhone = rawReferencePhone ? cleanIndianMobile(rawReferencePhone) : null;
 
   if (fullName.length < 2 || !isIndianMobile(phone) || parsedEmail === "invalid") return { ok: false };
   if (whatsapp && !isIndianMobile(whatsapp)) return { ok: false };
   if (isMinor && (!guardianName || !guardianPhone || !isIndianMobile(guardianPhone))) return { ok: false };
   if (guardianPhone && !isIndianMobile(guardianPhone)) return { ok: false };
+  if (referencePhone && !isIndianMobile(referencePhone)) return { ok: false };
+  if (options.requireGuardian && (!guardianPhone || !isIndianMobile(guardianPhone))) return { ok: false };
+  /* A guardian number identical to the student's own is not a second contact. */
+  if (guardianPhone && guardianPhone === phone) return { ok: false };
 
   return {
     ok: true,
@@ -80,9 +107,12 @@ export function validateStudentInput(input: Record<string, unknown>):
       isMinor,
       photoConsent,
       notes: optionalText(input.notes, 2000),
+      fatherName,
       guardianName,
       guardianPhone,
-      guardianRelation
+      guardianRelation,
+      referenceName,
+      referencePhone
     }
   };
 }
@@ -92,10 +122,15 @@ export type DirectAdmissionInput = StudentInput & {
   joinedOn: string | null;
 };
 
+/**
+ * A formal admission. The guardian mobile is required here (owner decision,
+ * 2026-08-30): this is the path that produces a student record, an enrolment,
+ * a fee agreement and a printed admission sheet.
+ */
 export function validateDirectAdmission(input: Record<string, unknown>):
   | { ok: true; value: DirectAdmissionInput }
   | { ok: false } {
-  const student = validateStudentInput(input);
+  const student = validateStudentInput(input, { requireGuardian: true });
   const batchId = positiveId(input.batchId);
   const joinedOn = optionalDate(input.joinedOn);
   if (!student.ok || !batchId || joinedOn === "invalid") return { ok: false };

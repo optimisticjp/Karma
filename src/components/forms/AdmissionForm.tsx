@@ -9,7 +9,19 @@ import { cleanIndianMobile } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
 
-export type CourseOption = { slug: string; nameEn: string; nameGu: string; family: string };
+/**
+ * A course as the form needs it: identity, plus the timetable and free-demo
+ * slots the institute actually runs. Both lists come from
+ * `getPublicCourseConfigs()`, the same resolver the API route validates
+ * against, so the form can never offer a slot the server rejects.
+ */
+export type CourseOption = {
+  slug: string;
+  nameEn: string;
+  nameGu: string;
+  scheduleOptions: Array<{ key: string; startTime: string; endTime: string; partOfDay: string }>;
+  demoSlots: Array<{ key: string; startTime: string; endTime: string }>;
+};
 export type AdmissionContext = { course?: string; timing?: "morning" | "evening"; src?: string };
 
 type Data = {
@@ -19,9 +31,14 @@ type Data = {
   email: string;
   courseSlug: string;
   preferredTiming: "" | "morning" | "evening";
+  preferredSchedule: string;
+  demoSlot: string;
   ageBand: "" | "under18" | "18-25" | "26-40" | "40plus";
+  fatherName: string;
   guardianName: string;
   guardianPhone: string;
+  referenceName: string;
+  referencePhone: string;
   occupation: string;
   experience: string;
   area: string;
@@ -29,6 +46,7 @@ type Data = {
   goal: string;
   privacy: boolean;
   comms: boolean;
+  terms: boolean;
 };
 
 const DRAFT_KEY = "kds-admission-draft";
@@ -41,16 +59,22 @@ const empty = (locale: "en" | "gu"): Data => ({
   email: "",
   courseSlug: "",
   preferredTiming: "",
+  preferredSchedule: "",
+  demoSlot: "",
   ageBand: "",
+  fatherName: "",
   guardianName: "",
   guardianPhone: "",
+  referenceName: "",
+  referencePhone: "",
   occupation: "",
   experience: "",
   area: "",
   heardFrom: "",
   goal: "",
   privacy: false,
-  comms: false
+  comms: false,
+  terms: false
 });
 
 /** Focus targets for each error key (error summary + auto-focus). */
@@ -59,13 +83,16 @@ const FOCUS_ID: Record<string, string> = {
   whatsapp: "adm-whatsapp",
   courseSlug: "adm-course-legend",
   preferredTiming: "adm-timing-legend",
+  preferredSchedule: "adm-schedule-legend",
   ageBand: "adm-ageBand",
   guardianName: "adm-guardianName",
   guardianPhone: "adm-guardianPhone",
+  referencePhone: "adm-referencePhone",
   occupation: "adm-occupation",
   experience: "adm-experience",
   area: "adm-area",
-  consent: "adm-privacy"
+  consent: "adm-privacy",
+  terms: "adm-terms"
 };
 
 /**
@@ -76,10 +103,16 @@ const FOCUS_ID: Record<string, string> = {
  */
 export function AdmissionForm({
   courses,
-  context
+  context,
+  termsVersion,
+  normsHref
 }: {
   courses: CourseOption[];
   context?: AdmissionContext;
+  /** The admission-norms version this submission is recorded against. */
+  termsVersion: number;
+  /** Anchor to the full norms, rendered on the page rather than in this bundle. */
+  normsHref: string;
 }) {
   const t = useTranslations("admissionForm");
   const uiLocale = useLocale() as "en" | "gu";
@@ -163,6 +196,21 @@ export function AdmissionForm({
     });
   };
 
+  const selectedCourse = courses.find((c) => c.slug === data.courseSlug);
+  const selectedSchedule = selectedCourse?.scheduleOptions ?? [];
+  const selectedDemoSlots = selectedCourse?.demoSlots ?? [];
+
+  /**
+   * `preferredTiming` predates the timetable and is still read by console
+   * filters and by the course-page CTAs, so it keeps working — derived from the
+   * chosen slot rather than asked a second time.
+   */
+  const timingFor = (scheduleKey: string): "" | "morning" | "evening" => {
+    const slot = selectedSchedule.find((o) => o.key === scheduleKey);
+    if (!slot) return "";
+    return slot.partOfDay === "morning" || slot.partOfDay === "afternoon" ? "morning" : "evening";
+  };
+
   const validate = (s: number): Record<string, string> => {
     const e: Record<string, string> = {};
     /* Course first, then who you are. The cheapest question goes first: a
@@ -171,24 +219,43 @@ export function AdmissionForm({
        a conversation. */
     if (s === 0) {
       if (!data.courseSlug) e.courseSlug = t("errors.required");
-      if (!data.preferredTiming) e.preferredTiming = t("errors.required");
+      /* A course with a published timetable asks for a real slot; one without
+         still asks the old morning/evening question, because inventing slots
+         for the other ten courses would publish an unconfirmed fact. */
+      if (selectedSchedule.length > 0) {
+        if (!data.preferredSchedule) e.preferredSchedule = t("errors.required");
+      } else if (!data.preferredTiming) {
+        e.preferredTiming = t("errors.required");
+      }
     }
     if (s === 1) {
       if (data.fullName.trim().length < 2) e.fullName = t("errors.required");
       if (!MOBILE.test(cleanIndianMobile(data.whatsapp))) e.whatsapp = t("errors.phone");
+      /* Owner decision, 2026-08-30: a parent/guardian contact on EVERY
+         admission, not only for under-18s. */
+      if (!MOBILE.test(cleanIndianMobile(data.guardianPhone))) {
+        e.guardianPhone = t("errors.phone");
+      } else if (cleanIndianMobile(data.guardianPhone) === cleanIndianMobile(data.whatsapp)) {
+        e.guardianPhone = t("errors.guardianSame");
+      }
     }
     if (s === 2) {
       if (!data.ageBand) e.ageBand = t("errors.required");
-      if (data.ageBand === "under18") {
-        if (data.guardianName.trim().length < 2) e.guardianName = t("errors.required");
-        if (!MOBILE.test(cleanIndianMobile(data.guardianPhone))) e.guardianPhone = t("errors.phone");
+      if (data.ageBand === "under18" && data.guardianName.trim().length < 2) {
+        e.guardianName = t("errors.required");
       }
       if (!data.occupation) e.occupation = t("errors.required");
       if (!data.experience) e.experience = t("errors.required");
       if (!data.area.trim()) e.area = t("errors.required");
+      if (data.referencePhone.trim() && !MOBILE.test(cleanIndianMobile(data.referencePhone))) {
+        e.referencePhone = t("errors.phone");
+      }
       // heardFrom is optional (audit: attribution must not block admission)
     }
-    if (s === 3 && (!data.privacy || !data.comms)) e.consent = t("errors.consent");
+    if (s === 3) {
+      if (!data.privacy || !data.comms) e.consent = t("errors.consent");
+      if (!data.terms) e.terms = t("errors.terms");
+    }
     return e;
   };
 
@@ -237,7 +304,14 @@ export function AdmissionForm({
         body: JSON.stringify({
           ...data,
           whatsapp: cleanIndianMobile(data.whatsapp),
-          guardianPhone: data.guardianPhone ? cleanIndianMobile(data.guardianPhone) : "",
+          guardianPhone: cleanIndianMobile(data.guardianPhone),
+          referencePhone: data.referencePhone ? cleanIndianMobile(data.referencePhone) : "",
+          /* Derived, never asked twice: a course with a timetable answers the
+             legacy morning/evening question from the slot the visitor picked. */
+          preferredTiming: data.preferredSchedule
+            ? timingFor(data.preferredSchedule)
+            : data.preferredTiming,
+          termsVersion,
           startedAt: startedAt.current,
           turnstileToken: token,
           idempotencyKey: idemKey.current,
@@ -294,6 +368,16 @@ export function AdmissionForm({
 
   /* ------------------------------ field bits ------------------------------ */
   const stepNames = t.raw("steps") as string[];
+  const chosenSlot = selectedSchedule.find((o) => o.key === data.preferredSchedule);
+  const scheduleLabel = chosenSlot
+    ? `${chosenSlot.startTime} – ${chosenSlot.endTime}`
+    : data.preferredTiming === "morning"
+      ? t("options.timingMorning")
+      : data.preferredTiming === "evening"
+        ? t("options.timingEvening")
+        : "";
+  const chosenDemo = selectedDemoSlots.find((o) => o.key === data.demoSlot);
+  const demoLabel = chosenDemo ? `${chosenDemo.startTime} – ${chosenDemo.endTime}` : "";
   const errKeys = Object.keys(errors);
   const errId = (k: string) => `adm-${k}-err`;
 
@@ -454,7 +538,24 @@ export function AdmissionForm({
                       name="courseSlug"
                       className="sr-only"
                       checked={data.courseSlug === c.slug}
-                      onChange={() => set("courseSlug", c.slug)}
+                      onChange={() => {
+                        /* A slot key belongs to one course. Switching course
+                           must drop it, or the form would submit a key the
+                           new course does not have and the server would
+                           reject a form that looked complete. */
+                        setData((d) => ({
+                          ...d,
+                          courseSlug: c.slug,
+                          preferredSchedule: "",
+                          demoSlot: ""
+                        }));
+                        setErrors((e) => {
+                          const next = { ...e };
+                          delete next.courseSlug;
+                          delete next.preferredSchedule;
+                          return next;
+                        });
+                      }}
                     />
                     <span>{uiLocale === "gu" ? c.nameGu : c.nameEn}</span>
                   </label>
@@ -462,31 +563,84 @@ export function AdmissionForm({
               </div>
               {err("courseSlug")}
             </fieldset>
-            <fieldset aria-describedby={errors.preferredTiming ? errId("preferredTiming") : undefined}>
-              <legend id="adm-timing-legend" tabIndex={-1} className="label outline-none">
-                {t("fields.timing")}
-              </legend>
-              <div className="flex flex-wrap gap-3">
-                {(
-                  [
-                    { v: "morning", label: t("options.timingMorning") },
-                    { v: "evening", label: t("options.timingEvening") }
-                  ] as const
-                ).map((o) => (
-                  <label key={o.v} className="choice-chip">
-                    <input
-                      type="radio"
-                      name="preferredTiming"
-                      className="sr-only"
-                      checked={data.preferredTiming === o.v}
-                      onChange={() => set("preferredTiming", o.v)}
-                    />
-                    {o.label}
-                  </label>
-                ))}
-              </div>
-              {err("preferredTiming")}
-            </fieldset>
+            {selectedSchedule.length > 0 ? (
+              <fieldset
+                aria-describedby={errors.preferredSchedule ? errId("preferredSchedule") : undefined}
+              >
+                <legend id="adm-schedule-legend" tabIndex={-1} className="label outline-none">
+                  {t("fields.preferredSchedule")}
+                </legend>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {selectedSchedule.map((o) => (
+                    <label key={o.key} className="choice-chip !justify-start">
+                      <input
+                        type="radio"
+                        name="preferredSchedule"
+                        className="sr-only"
+                        checked={data.preferredSchedule === o.key}
+                        onChange={() => set("preferredSchedule", o.key)}
+                      />
+                      <span>
+                        {o.startTime} – {o.endTime}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+                {err("preferredSchedule")}
+              </fieldset>
+            ) : (
+              <fieldset aria-describedby={errors.preferredTiming ? errId("preferredTiming") : undefined}>
+                <legend id="adm-timing-legend" tabIndex={-1} className="label outline-none">
+                  {t("fields.timing")}
+                </legend>
+                <div className="flex flex-wrap gap-3">
+                  {(
+                    [
+                      { v: "morning", label: t("options.timingMorning") },
+                      { v: "evening", label: t("options.timingEvening") }
+                    ] as const
+                  ).map((o) => (
+                    <label key={o.v} className="choice-chip">
+                      <input
+                        type="radio"
+                        name="preferredTiming"
+                        className="sr-only"
+                        checked={data.preferredTiming === o.v}
+                        onChange={() => set("preferredTiming", o.v)}
+                      />
+                      {o.label}
+                    </label>
+                  ))}
+                </div>
+                {err("preferredTiming")}
+              </fieldset>
+            )}
+
+            {/* A free-demo time is a PREFERENCE, not a booking. Karma keeps no
+                per-date demo capacity, and a form that implied otherwise would
+                promise a seat nobody had reserved. */}
+            {selectedDemoSlots.length > 0 ? (
+              <fieldset>
+                <legend className="label">{t("fields.demoSlot")}</legend>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {selectedDemoSlots.map((o) => (
+                    <label key={o.key} className="choice-chip !justify-start">
+                      <input
+                        type="radio"
+                        name="demoSlot"
+                        className="sr-only"
+                        checked={data.demoSlot === o.key}
+                        onChange={() => set("demoSlot", o.key)}
+                      />
+                      <span>
+                        {o.startTime} – {o.endTime}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+                <p className="form-note mt-2">{t("fields.demoSlotHint")}</p>
+              </fieldset>
+            ) : null}
           </>
         ) : null}
 
@@ -526,8 +680,19 @@ export function AdmissionForm({
               type: "email",
               inputMode: "email",
               autoComplete: "email",
-              enterKeyHint: "done"
+              enterKeyHint: "next"
             })}
+            {/* Required for every applicant, not only under-18s (owner
+                decision, 2026-08-30). The studio wants a second person it can
+                reach about a student's course. */}
+            <div className="rounded-xl border border-dashed border-vermilion bg-ivory-2 p-4">
+              {textField("guardianPhone", t("fields.guardianPhone"), {
+                type: "tel",
+                inputMode: "tel",
+                enterKeyHint: "done"
+              })}
+              <p className="form-note mt-2">{t("fields.guardianPhoneHint")}</p>
+            </div>
           </>
         ) : null}
 
@@ -541,16 +706,11 @@ export function AdmissionForm({
               { v: "40plus", label: t("options.age4") }
             ])}
             {data.ageBand === "under18" ? (
-              <div className="grid gap-5 rounded-xl border border-dashed border-vermilion bg-ivory-2 p-4 sm:grid-cols-2">
+              <div className="rounded-xl border border-dashed border-vermilion bg-ivory-2 p-4">
                 {textField("guardianName", t("fields.guardianName"))}
-                {textField("guardianPhone", t("fields.guardianPhone"), {
-                  type: "tel",
-                  inputMode: "tel",
-                  autoComplete: "tel",
-                  enterKeyHint: "done"
-                })}
               </div>
             ) : null}
+            {textField("fatherName", t("fields.fatherName"))}
             {selectField("occupation", t("fields.occupation"), [
               { v: "student", label: t("options.occ1") },
               { v: "homemaker", label: t("options.occ2") },
@@ -564,6 +724,15 @@ export function AdmissionForm({
               { v: "operator", label: t("options.exp3") }
             ])}
             {textField("area", t("fields.area"), { placeholder: t("fields.areaPh") })}
+            {/* Optional on purpose: nobody is asked to invent a reference. */}
+            <div className="grid gap-5 sm:grid-cols-2">
+              {textField("referenceName", t("fields.referenceName"))}
+              {textField("referencePhone", t("fields.referencePhone"), {
+                type: "tel",
+                inputMode: "tel"
+              })}
+            </div>
+            <p className="form-note -mt-2">{t("fields.referenceHint")}</p>
             {selectField("heardFrom", t("fields.heardFrom"), [
               { v: "instagram", label: t("options.heard1") },
               { v: "youtube", label: t("options.heard2") },
@@ -600,14 +769,16 @@ export function AdmissionForm({
                     0
                   ],
                   [
-                    t("fields.timing"),
-                    data.preferredTiming === "morning"
-                      ? t("options.timingMorning")
-                      : t("options.timingEvening"),
+                    data.preferredSchedule ? t("fields.preferredSchedule") : t("fields.timing"),
+                    scheduleLabel,
                     0
                   ],
+                  ...(demoLabel
+                    ? ([[t("fields.demoSlot"), demoLabel, 0]] as Array<[string, string, number]>)
+                    : []),
                   [t("fields.fullName"), data.fullName, 1],
                   [t("fields.whatsapp"), data.whatsapp, 1],
+                  [t("fields.guardianPhone"), data.guardianPhone, 1],
                   [t("fields.area"), data.area, 2]
                 ] as Array<[string, string, number]>
               ).map(([label, value, s]) => (
@@ -654,6 +825,31 @@ export function AdmissionForm({
                 <span>{t("consents.comms")}</span>
               </label>
               {err("consent")}
+            </div>
+
+            {/* The admission norms are a separate acceptance from the privacy
+                and contact consents: they are the institute's own rules, they
+                are versioned, and the version accepted is stored with the
+                application. The full text is on the page rather than in this
+                bundle — fifteen clauses in two languages is not a checkbox. */}
+            <div aria-describedby={errors.terms ? errId("terms") : undefined}>
+              <label className="flex items-start gap-3 text-smallmeta">
+                <input
+                  id="adm-terms"
+                  type="checkbox"
+                  checked={data.terms}
+                  onChange={(e) => set("terms", e.target.checked)}
+                  className="mt-1 h-4 w-4 accent-vermilion"
+                  aria-invalid={errors.terms ? true : undefined}
+                />
+                <span>
+                  {t("consents.terms")}{" "}
+                  <a className="stitch-link font-semibold" href={normsHref}>
+                    {t("consents.termsLink")}
+                  </a>
+                </span>
+              </label>
+              {err("terms")}
             </div>
 
             {/* Honeypot */}

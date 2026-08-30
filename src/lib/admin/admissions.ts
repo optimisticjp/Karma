@@ -101,8 +101,11 @@ export type ManualEnquiryInput = {
   goal: string | null;
   heardFrom: ManualEnquirySource;
   ageBand: string | null;
+  fatherName: string | null;
   guardianName: string | null;
   guardianPhone: string | null;
+  referenceName: string | null;
+  referencePhone: string | null;
   assignedTo: number | null;
   nextFollowUp: string | null;
 };
@@ -118,9 +121,13 @@ export function validateManualEnquiry(input: Record<string, unknown>):
   const area = optionalText(input.area, 160);
   const goal = optionalText(input.goal, 2000);
   const ageBand = optionalText(input.ageBand, 20);
+  const fatherName = optionalText(input.fatherName, 160);
   const guardianName = optionalText(input.guardianName, 160);
   const rawGuardianPhone = optionalText(input.guardianPhone, 30);
   const guardianPhone = rawGuardianPhone ? cleanIndianMobile(rawGuardianPhone) : null;
+  const referenceName = optionalText(input.referenceName, 160);
+  const rawReferencePhone = optionalText(input.referencePhone, 30);
+  const referencePhone = rawReferencePhone ? cleanIndianMobile(rawReferencePhone) : null;
   const assignedTo = optionalPositiveId(input.assignedTo);
   const nextFollowUp = optionalDate(input.nextFollowUp);
   const heardFrom = input.heardFrom;
@@ -130,6 +137,7 @@ export function validateManualEnquiry(input: Record<string, unknown>):
   if (assignedTo === undefined || nextFollowUp === undefined) return { ok: false };
   if (typeof heardFrom !== "string" || !SOURCE_SET.has(heardFrom)) return { ok: false };
   if (guardianPhone && !isIndianMobile(guardianPhone)) return { ok: false };
+  if (referencePhone && !isIndianMobile(referencePhone)) return { ok: false };
   if (ageBand === "under18" && (!guardianName || !guardianPhone)) return { ok: false };
 
   return {
@@ -145,8 +153,23 @@ export function validateManualEnquiry(input: Record<string, unknown>):
       goal,
       heardFrom: heardFrom as ManualEnquirySource,
       ageBand,
-      guardianName: ageBand === "under18" ? guardianName : null,
-      guardianPhone: ageBand === "under18" ? guardianPhone : null,
+      fatherName,
+      /**
+       * A staff-entered enquiry KEEPS whatever guardian details staff have,
+       * regardless of age — the previous code discarded them unless the caller
+       * was under 18, so a parent's number given on the phone was thrown away.
+       *
+       * It is not *required* here, unlike the public form and a formal
+       * admission. This surface is a member of staff writing down a call that
+       * is happening right now; refusing to save a lead because the caller has
+       * not yet given a second number would lose the lead, which is the exact
+       * opposite of what the rule is for. The requirement bites where the
+       * commitment is made — see `validateDirectAdmission`.
+       */
+      guardianName,
+      guardianPhone,
+      referenceName,
+      referencePhone,
       assignedTo,
       nextFollowUp
     }

@@ -78,8 +78,11 @@ export async function createManualEnquiryAction(
     goal: formData.get("goal"),
     heardFrom: formData.get("heardFrom"),
     ageBand: formData.get("ageBand"),
+    fatherName: formData.get("fatherName"),
     guardianName: formData.get("guardianName"),
     guardianPhone: formData.get("guardianPhone"),
+    referenceName: formData.get("referenceName"),
+    referencePhone: formData.get("referencePhone"),
     assignedTo: formData.get("assignedTo"),
     nextFollowUp: formData.get("nextFollowUp")
   });
@@ -123,8 +126,11 @@ export async function createManualEnquiryAction(
           goal: d.goal,
           heardFrom: d.heardFrom,
           ageBand: d.ageBand,
+          fatherName: d.fatherName,
           guardianName: d.guardianName,
           guardianPhone: d.guardianPhone,
+          referenceName: d.referenceName,
+          referencePhone: d.referencePhone,
           duplicateOfPhone: previous.length > 0,
           status: "new",
           assignedTo: d.assignedTo,

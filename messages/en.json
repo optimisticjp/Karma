@@ -501,14 +501,22 @@
       "timing": "Preferred timing",
       "ageBand": "Your age",
       "guardianName": "Parent / guardian name",
-      "guardianPhone": "Parent / guardian phone",
+      "guardianPhone": "Parent / guardian mobile",
       "occupation": "You are currently",
       "experience": "Machine experience",
       "area": "Your area in Surat",
       "areaPh": "e.g. Mota Varachha",
       "heardFrom": "How did you hear about us? (optional)",
       "goal": "Anything you want to tell or ask us? (optional)",
-      "website": "Website"
+      "website": "Website",
+      "preferredSchedule": "Which batch time suits you?",
+      "demoSlot": "Preferred free-demo time",
+      "demoSlotHint": "A preference, not a booking — we confirm the day and time with you on WhatsApp.",
+      "fatherName": "Father's name (optional)",
+      "guardianPhoneHint": "A parent or guardian's number is required for every admission. It must be different from your own.",
+      "referenceName": "Reference name (optional)",
+      "referencePhone": "Reference mobile (optional)",
+      "referenceHint": "If someone from Karma referred you. Leave blank if nobody did."
     },
     "options": {
       "timingMorning": "Morning / day",
@@ -534,7 +542,9 @@
     },
     "consents": {
       "privacy": "I agree to the privacy policy: my details are used only to contact me about admission.",
-      "comms": "The studio may contact me on WhatsApp or by call about my application."
+      "comms": "The studio may contact me on WhatsApp or by call about my application.",
+      "terms": "I have read and accept Karma Design Studio's admission norms.",
+      "termsLink": "Read the admission norms"
     },
     "review": {
       "title": "Check your details",
@@ -545,7 +555,9 @@
       "phone": "Please enter a valid 10-digit mobile number",
       "consent": "Please tick both boxes to continue",
       "generic": "Something went wrong. Please try again, or WhatsApp us directly.",
-      "summaryTitle": "Please fix the following:"
+      "summaryTitle": "Please fix the following:",
+      "guardianSame": "The parent / guardian number must be different from your own",
+      "terms": "Please read and accept the admission norms to continue"
     },
     "buttons": {
       "next": "Next",
@@ -573,7 +585,13 @@
       "No payment on this website, and no fee to book a demo",
       "About two minutes, in Gujarati or English",
       "A person from the studio replies on WhatsApp"
-    ]
+    ],
+    "norms": {
+      "title": "Admission norms",
+      "intro": "The rules every student at Karma agrees to. Read them before you apply — they are short, and each one exists because it affects the training on the floor.",
+      "languageNote": "The Gujarati wording is the institute's own. This English text is a working translation; where the two could be read differently, the Gujarati governs.",
+      "declarationLabel": "What you sign at admission"
+    }
   },
   "workPage": {
     "title": "Made in class. Built with real skills.",

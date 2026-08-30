@@ -607,12 +607,52 @@ rather than removed: an audit row must keep pointing at a real staff record.
 | Certificates | shipped (PR #9) |
 | Design Desk | shipped (PR #9) — file upload/download waits on R2 (§14) |
 | Content desk | shipped (PR #10) |
-| Offline fee ledger | shipped (PR #9) |
+| Offline fee ledger | shipped (PR #9); agreement snapshot + derived status added 2026-08-30 |
 | Reports & exports | shipped (PR #10) — `students`, `admissions`, `attendance`, `fees`, `design` |
 
 **Every console module has shipped.** What remains inside them is content and
 polish, not construction — see `docs/project-context.md` §§22-29 for what each
 one does and what it still defers.
+
+### Admissions and students: the formal admission record (2026-08-30)
+
+The console record now matches the institute's own printed admission form:
+student, **father**, **parent/guardian** (name, mobile, relation), **reference**
+(name, mobile), course, batch, joining date, fee agreement and the
+admission-norms version.
+
+**The guardian mobile is required where the commitment is made** — the public
+`/admission` form and the console's **direct admission** — and deliberately
+optional on the student **edit** form (which must be able to correct records
+created before the rule existed) and on the **manual enquiry** (a member of
+staff writing down a call in progress; refusing to save a lead for a missing
+second number loses the lead). The manual enquiry now *keeps* a guardian number
+at any age; it used to discard one unless the caller was under 18.
+`tests/admission-flow.test.ts` pins all four behaviours.
+
+A guardian row is written for every formal admission, not only for minors. When
+the name was never asked — because the applicant is an adult — it falls back to
+a plain "Parent / guardian" label rather than blocking the admission.
+
+### Fees: the agreement, and the status nobody can lie about
+
+`enrollments` carries the agreement the student joined under
+(`agreed_fee_total`, `agreed_admission_amount`, `agreed_balance_due_on`,
+`agreed_duration_months`, `agreed_course_name`, `terms_version`,
+`terms_accepted_at`), captured once by `agreementForBatch()` on **every** path
+that creates an enrolment: direct admission, enquiry conversion, and an
+additional enrolment. Editing a course never reprices an existing student.
+
+Changing an existing agreement is `updateAgreementAction`: `fees.manage`, a
+**mandatory reason**, a before/after audit row, and a refusal to set an agreed
+total below money already received.
+
+The fee **status** is derived by `summariseFees()` and is never stored — a
+status column would be a second source of truth for a number already in the
+ledger, and would drift the first time a receipt was corrected. The ledger shows
+agreed total, discount, received, balance, next due date and status, warns when
+less than the admission amount has been received, and marks an overdue balance
+against `Asia/Kolkata` today.
 
 ### Courses: the operational model (2026-08-30)
 
