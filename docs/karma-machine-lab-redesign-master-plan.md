@@ -1,0 +1,2272 @@
+# KARMA — Screen-to-Stitch Machine Lab
+## Full product redesign master plan
+
+**Status:** AUTHORITATIVE OWNER-DIRECTED PLAN — planned, not yet implemented  
+**Created:** 2026-08-30  
+**Repository:** `optimisticjp/Karma`  
+**Current baseline:** `main` after PRs #24–#27 (`1ab9e12609c46b706ffe5cc4ee0678c0ed17f398`)  
+**Database baseline:** Drizzle migration `0004_course_operations` has been applied to the connected Supabase project and the Drizzle migration ledger was synchronized on 2026-08-30. Verify before any future migration work.  
+
+This document is the implementation source of truth for the next full redesign round. It supersedes earlier **visual/polish direction** where there is a conflict, but it does **not** supersede the architectural, security, factual-data, deployment, auth, RLS, migration, privacy or infrastructure rules in `CLAUDE.md` and `docs/project-context.md`.
+
+The goal is not to make Karma look “more designed.” The goal is to make the entire public site and Karma Console feel like the digital expression of a real commercial embroidery training studio in Surat.
+
+---
+
+# 0. Read this before touching code
+
+Every implementation session must read, in this order:
+
+1. `CLAUDE.md`
+2. `docs/project-context.md`
+3. this file, completely
+4. `docs/design-system.md`
+5. `docs/content-checklist.md`
+6. `docs/admin-architecture.md`
+7. `docs/security.md`
+8. `docs/deployment.md`
+9. `docs/operations.md`
+10. `src/content/course-operations.ts`
+11. `src/content/admission-terms.ts`
+12. the actual current code for the phase being implemented
+
+Current code wins over stale documentation. New owner decisions in this plan win over older aesthetic direction. If implementation reveals a stale doc, correct it in the same PR.
+
+Use the vendored `.claude/skills/` library **selectively**, not ceremonially. Particularly useful categories for this project include frontend design, UI/UX, accessibility, humanized copy, SEO, testing/TDD, code review, context engineering, security and Spec Kit for genuinely complex subsystems. Karma-specific rules always outrank generic skill advice.
+
+Do **not** initialize shadcn/ui, install a generic admin kit, add a chart library, or import the design system from the skills template.
+
+---
+
+# 1. Permanent brand position
+
+## Core positioning
+
+**Karma is Surat’s machine-led commercial embroidery learning studio.**
+
+Not a generic creative-course provider.  
+Not a fashion school.  
+Not a craft blog.  
+Not a bridal catalogue.  
+Not a machine manufacturer.  
+Not a software reseller.  
+Not a stock-photo college.  
+Not a loud local coaching ad.
+
+## Permanent brand promise
+
+# FROM SCREEN TO STITCH.
+
+**Design on screen. Prove it on the machine.**
+
+## Creative thesis
+
+**Digital precision, stitched with Surat richness.**
+
+## Final product idea
+
+**KARMA: SCREEN-TO-STITCH MACHINE LAB**
+
+The site should feel like:
+
+> EMCAD DAHAO precision + industrial embroidery machinery + real fabric + real production + Surat textile richness.
+
+## Personality
+
+- Expert, not academic
+- Ambitious, not flashy
+- Technical, not cold
+- Local, not provincial
+- Premium, not luxury-for-luxury’s-sake
+- Direct, not corporate
+- Commercially aware, not hobby-led
+- Human, not sterile
+
+---
+
+# 2. The governing creative rule
+
+> **Don’t decorate the interface with embroidery. Make the interface behave like embroidery.**
+
+Every visual decision belongs to one of three layers.
+
+## Layer 1 — real content, dominant
+
+Real machines.  
+Real trainers.  
+Real students.  
+Real stitched output.  
+Real course schedules.  
+Real fees.  
+Real studio.  
+Real production problems.
+
+This is always the strongest layer.
+
+## Layer 2 — niche interface language
+
+Stitch paths.  
+Needle points.  
+Thread tension.  
+Vector nodes.  
+Hoop/register marks.  
+Sequence disks.  
+Beads.  
+Machine heads.  
+Fabric edges.  
+Thread cones.  
+Production notation.
+
+## Layer 3 — selective motion
+
+The interface occasionally:
+
+- stitches
+- traces
+- threads
+- registers
+- corrects
+- reveals a material transition
+
+It must never become an animation showcase.
+
+---
+
+# 3. What success feels like
+
+A visitor arrives from an Instagram Reel.
+
+### Within 3 seconds
+
+**EMCAD DAHAO. REAL MACHINE. SURAT.**
+
+### Within 10 seconds
+
+“I understand that they do not only teach software.”
+
+### Within 20 seconds
+
+“I can see what they teach and what students physically produce.”
+
+### Within 30 seconds
+
+“I know it is 3 months, ₹35,000, has a 2-day free demo, and I can call or visit.”
+
+### After browsing
+
+“These people actually understand machine embroidery production.”
+
+### The visual memory
+
+A thread begins on a computer screen, passes through a real embroidery machine, and ends as finished fabric.
+
+**Screen → path → machine → stitch → proof.**
+
+---
+
+# 4. Audience and buying questions
+
+## Primary
+
+Aspiring commercial embroidery designers, roughly 18–30, Surat/Gujarat, mobile-first, Gujarati/Hindi comfortable, looking for a practical job skill or route into paid design work/small business.
+
+They need fast answers to:
+
+- Can a complete beginner learn?
+- Will I use a real machine?
+- What exactly is EMCAD DAHAO?
+- What effects/design types will I learn?
+- What can I physically make after training?
+- What does the course cost?
+- How long is it?
+- What batch timings exist?
+- Can I try before admission?
+- Can I call or visit now?
+
+## Secondary
+
+Working designers, machine operators and factory owners.
+
+Their question is:
+
+> **Will this solve the production problem I face?**
+
+## Third
+
+Boutiques, textile businesses and manufacturers needing the Studio/B2B side: digitising, machine-ready design, sample reconstruction, correction and specialised embroidery work.
+
+Training remains the primary funnel.
+
+---
+
+# 5. Final visual identity
+
+Evolve the existing Screen-to-Stitch v3 system. Do **not** discard it and do not rename existing shared token names casually because `globals.css` is shared with Karma Console.
+
+## Core surfaces
+
+### Machine Black
+Existing `carbon` range around `#111716`.
+
+Use for:
+- hero authority
+- footer
+- machine-proof moments
+- final CTA
+- selected technical sections
+
+### Steel Indigo
+Existing `steel` range around `#172B35`.
+
+Use for:
+- EMCAD/software context
+- technical overlays
+- secondary dark surfaces
+
+### Cotton / Raw Linen
+Existing warm `ivory` / `ivory-2` family.
+
+Use for:
+- reading surfaces
+- human sections
+- material-led sections
+
+### Worktable White
+Existing `card` family.
+
+Use for:
+- clean information
+- paper-like operational moments
+- finished embroidery presentation
+
+## Brand/action colours
+
+### Thread Vermilion
+The primary interface accent.
+
+Use for:
+- primary CTA
+- active stitch
+- current production stage
+- key path/progress
+
+Never turn every heading red.
+
+### Needle Blue
+Use for:
+- EMCAD/software
+- technical cues
+- links where appropriate
+- CAD/registration notation
+
+### Zari Copper
+Use as a restrained material accent.
+
+It is not a second CTA colour.
+
+### Sequence Silver / Pearl
+Add only if it can be implemented as an extremely restrained material token or CSS treatment with adequate contrast. It should never become a general UI accent.
+
+## Principle
+
+**The photographs provide most of the colour. The UI stays disciplined.**
+
+---
+
+# 6. Typography
+
+Keep the current core stack.
+
+## Main display
+
+**Manrope 700/800**
+
+Industrial clarity, strong mobile readability.
+
+## Body / UI
+
+**Manrope 400–700**
+
+## Editorial interruption
+
+**Playfair Display Italic**, very sparingly.
+
+Potential words only:
+
+- *prove it*
+- *finished*
+- *precision*
+
+Never use it as a generic heading face.
+
+## Gujarati
+
+**Noto Sans Gujarati 500–700**
+
+Never uppercase Gujarati.  
+Never letterspace Gujarati.  
+Never render Gujarati as an image.  
+Preserve comfortable Gujarati line height.
+
+## New selective machine notation
+
+A small monospace utility treatment may be introduced **without adding a large new font dependency** if the existing system/native monospace stack is sufficient.
+
+Use only for notation such as:
+
+- `01 DESIGN`
+- `02 MACHINE`
+- `03 OUTPUT`
+- `EMCAD / PATH`
+- Machine Note indexes
+- course indexes
+
+Do not use monospace for body copy, navigation, buttons or giant spec-sheet layouts.
+
+---
+
+# 7. The Karma Stitch Icon system
+
+Build a coherent reusable SVG icon family, roughly 15–20 branded icons, using the existing custom icon architecture where possible.
+
+## Production
+
+- needle
+- needle-down
+- thread cone
+- bobbin
+- hoop/frame
+- machine head
+- multi-head bed
+
+## Technique
+
+- bead
+- sequence
+- cording
+- chain
+- laser
+- tuft
+- zardosi/satin
+- appliqué edge
+- cross stitch
+
+## Digitising
+
+- vector node
+- Bezier handles
+- stitch density
+- path direction
+- registration mark
+
+## Troubleshooting
+
+- thread break
+- misregistration
+- density problem
+- correction/pass
+
+### Usability rule
+
+**Branded concepts get niche icons. Universal actions keep universal icons.**
+
+Keep:
+
+- edit = pencil
+- delete = trash
+- print = printer
+- search = magnifier
+- back = arrow
+- call = phone
+- directions = map/navigation
+
+Never make a visitor decode a clever embroidery symbol just to find Edit.
+
+---
+
+# 8. Eleven technique signatures
+
+Every course gets a restrained, reusable visual/motion grammar. These signatures solve missing photography gracefully and make the catalogue coherent.
+
+| Course | Signature |
+| --- | --- |
+| Zardosi Machine Embroidery | tight parallel metallic satin field with one restrained zari highlight |
+| Flat Embroidery | precise running/satin field, clean direction changes |
+| 4-Beads Machine Work | bead nodes attaching sequentially to a path |
+| Sequence Work | overlapping perforated discs with one subtle reflective movement |
+| Coding / Cording | thicker cord following a curved Bezier path |
+| Chain & Multi | linked loop construction / multi-line rhythm |
+| Appliqué & 3D | raised border + cut/edge construction |
+| Cross Stitch | restrained crossing stitch lattice |
+| Laser Work | precise trace followed by a clean cut edge; no sparks/fireworks |
+| Tufting | loops rising from a baseline |
+| EMCAD Embroidery Design | vector nodes → handles → stitch path |
+
+Technique motion happens once on first meaningful reveal or interaction. No endless loops.
+
+---
+
+# 9. One canonical stitch language
+
+Define shared primitives with consistent meaning.
+
+## Running stitch
+
+A fine dashed construction/progress rule with visible needle-penetration points.
+
+**Meaning:** progress / connection.
+
+## Thread path
+
+A curved path connecting production stages.
+
+**Meaning:** process / transformation.
+
+## Knot point
+
+A stronger node.
+
+**Meaning:** decision / completion.
+
+## Registration point
+
+A crosshair or target mark.
+
+**Meaning:** precision / reference.
+
+## Broken path
+
+A visually interrupted stitch path.
+
+**Meaning:** failure / production problem.
+
+## Thread tail
+
+A short loose terminal line.
+
+**Meaning:** editorial finish, used sparingly.
+
+Do not scatter crosshairs, dots and stitch borders everywhere without semantic purpose.
+
+---
+
+# 10. Motion hierarchy
+
+Animation must have a strict hierarchy.
+
+## Level 0 — none
+
+Use no animation for:
+
+- long copy
+- terms
+- legal pages
+- dense forms
+- tables
+- most admin surfaces
+
+## Level 1 — functional feedback
+
+- hover/press
+- accordions
+- validation
+- filters
+- action sheets
+- active rows
+
+## Level 2 — niche microinteraction
+
+- bead attaches
+- sequence disc shifts/reflects
+- thread advances
+- stitch underline completes
+
+## Level 3 — section storytelling
+
+- stitch path progress
+- problem → correction
+- design → machine
+
+## Level 4 — signature moment
+
+Hero / main Screen-to-Stitch interaction.
+
+**Maximum one Level-4 experience per page.**
+
+### Hard bans
+
+- cursor-following coordinates
+- scroll hijacking
+- parallax for its own sake
+- full-page viewport needle following the user
+- autoplay sound
+- confetti
+- perpetual decorative loops
+- fake machine dashboards
+
+`prefers-reduced-motion` must show the final state immediately without loss of content.
+
+---
+
+# 11. Glass, aurora and surface texture
+
+## Good glass
+
+A translucent EMCAD/software panel layered over real machine imagery.
+
+A small digital overlay such as:
+
+- DESIGN
+- MACHINE
+- OUTPUT
+- EMCAD
+- CORRECTION
+- FINAL
+
+## Bad glass
+
+Every card frosted. Every section floating. Generic glassmorphism.
+
+## Aurora/glow
+
+A restrained steel-blue/vermilion machine-light reflection may appear behind one technical hero or CAD panel.
+
+No purple-blue SaaS blobs.
+
+## Texture
+
+At approximately 2–5% visual strength:
+
+- cotton grain
+- fine woven grid
+- satin stitch field
+- cross-stitch field
+- thread density pattern
+- laser grid
+
+Texture should be felt before it is consciously noticed.
+
+---
+
+# 12. Explicitly rejected visual ideas
+
+Do not implement any of the following unless the institute later supplies the real underlying fact:
+
+- fake RPM
+- fake stitch density
+- fake GSM
+- fake machine ratios
+- fake CAD coordinates
+- cursor-following coordinate readouts
+- invented machine model/specification
+- invented production capacity
+- invented student earnings
+- invented years of experience
+- invented placement rates
+- unsupported “premier”, “#1”, “best” or “world-class” claims
+
+Also reject:
+
+- an 8-course architecture
+- WhatsApp as the only conversion path
+- photo-upload instructions in the public footer
+- heavy monospace everywhere
+- Bodoni/Cinzel/Syne replacement identity
+- constant viewport needle animation
+- crosshairs on every card
+- giant rigid technical grid on every page
+- random dark inversion on hover
+- machine-manufacturer-style visual identity
+- stock photos
+- generated fake studio photography
+
+Karma must **show actual technical expertise**, not simulate technicality.
+
+---
+
+# 13. Photography placeholder architecture — FINAL 32-photo spec
+
+Real photographs are expected after this redesign starts. Build the redesign around named photo slots now, but **do not use stock or generated substitutes**.
+
+All media slots must support:
+
+- known aspect ratio
+- explicit width/height or aspect-ratio reservation
+- crop-safe center framing
+- responsive art direction
+- descriptive placeholder label
+- eventual `alt` content field
+- eventual focal-point/object-position override if required
+- no layout shift when real media replaces the placeholder
+
+## Shoot rules
+
+- subject/machine centered
+- breathing/crop-safe space around subject
+- natural light where appropriate
+- sharp, not blurry
+- originals transferred without WhatsApp image compression
+
+## Hero — 3 × 1600×1200 horizontal
+
+- `H1_EMCAD_SCREEN` — EMCAD screen with stitch design visible
+- `H2_MACHINE_STITCHING` — needle working on fabric, hands may be visible
+- `H3_FINISHED_PIECE` — clean final embroidery, ideally the same project as H1/H2
+
+## Course media — 8 × 1600×1200 horizontal
+
+The final photo brief explicitly covers these eight courses/stations:
+
+1. Zardosi
+2. 4-Beads
+3. Sequence
+4. Coding/Cording
+5. Chain & Multi
+6. Laser
+7. Tufting
+8. EMCAD station
+
+Therefore the three catalogue courses with **no dedicated course photograph in this shoot** are:
+
+- Flat Embroidery
+- Appliqué & 3D
+- Cross Stitch
+
+Do **not** reuse another course’s image. Do **not** drop those courses. Their technique signature is their primary visual until a real photograph is supplied later.
+
+## Student work — 6
+
+- `G1` Bridal Zardosi panel — 900×1125 vertical
+- `G2` Sequence dupatta — 1000×1000 square
+- `G3` EMCAD design + final result — 1200×800 horizontal
+- `G4` 4-Beads border close-up — 900×1125 vertical
+- `G5` colourful tufted piece — 1000×1000 square
+- `G6` laser-cut appliqué — 900×1125 vertical
+
+Do not normalize these into identical card crops. The mixed aspect ratios are an asset.
+
+## Trainers — 3 × 800×1000 vertical
+
+- `T1_MAIN_TRAINER`
+- `T2_EMCAD_TRAINER`
+- `T3_FOUNDER`
+
+All require consent.
+
+## Studio / machines — 6
+
+- `A1_MACHINE_FLOOR` — 1200×1500 vertical
+- `A2_ENTRANCE_SIGNBOARD` — 1200×675 horizontal
+- `A3_ZARDOSI_MACHINE` — 800×800 square
+- `A4_BEADS_MACHINE` — 800×800 square
+- `A5_LASER_MACHINE` — 800×800 square
+- `A6_TUFTING_MACHINE` — 800×800 square
+
+## Student stories — 2 × 800×1000 vertical
+
+- `S1_STUDENT_STORY`
+- `S2_STUDENT_STORY`
+
+Capture “BEFORE → NOW” copy with consent when the real stories arrive.
+
+## Screen-to-Stitch — 3 × 1200×675 horizontal
+
+The exact same project across all three:
+
+- `P1_DESIGN` — EMCAD
+- `P2_MACHINE` — stitching
+- `P3_RESULT` — finished embroidery
+
+## Studio floor wide — 1 × 1280×720
+
+- `F1_STUDIO_FLOOR_WIDE`
+
+**Total = 32 real photographs.**
+
+R2 is not activated for this. Public-media asset strategy is decided only after the actual files arrive.
+
+---
+
+# 14. Signature hero
+
+The hero is the strongest visual moment on the site.
+
+## Desktop
+
+### Left
+
+**FROM SCREEN TO STITCH.**
+
+Design on screen.  
+*Prove it* on the machine.
+
+Compact verified facts:
+
+- EMCAD DAHAO
+- 3 Months
+- Live Machine Practical
+- Mota Varachha, Surat
+
+Primary CTA:
+
+**Book 2-Day Free Demo**
+
+Secondary:
+
+**Call for current batch**
+
+Directions remains immediately accessible.
+
+### Right
+
+Use H1/H2/H3 as a connected production composition.
+
+One continuous thread:
+
+1. begins on the EMCAD screen
+2. follows the digitised path
+3. passes into the machine photo
+4. reaches the needle
+5. exits into the finished textile
+
+Until photographs arrive, use named PhotoSlots in the exact composition.
+
+## Mobile
+
+Do not miniaturize the desktop collage.
+
+Use a vertical story:
+
+`01 SCREEN`  
+H1
+
+stitched connector
+
+`02 MACHINE`  
+H2
+
+stitched connector
+
+`03 RESULT`  
+H3
+
+The mobile experience must be simpler and clearer than desktop.
+
+---
+
+# 15. Screen-to-Stitch signature interaction
+
+Create one reusable production rail.
+
+## Desktop
+
+`01 DESIGN → 02 MACHINE → 03 RESULT`
+
+User may click or drag between stages.
+
+No autoplay required.
+
+The interaction should work with placeholders now and real P1/P2/P3 media later.
+
+## Mobile
+
+Vertical sequence. No horizontal drag requirement. Every stage reachable naturally through scrolling.
+
+## Future reuse
+
+The same component pattern may support:
+
+`SCREEN → SAMPLE → PROBLEM → CORRECTION → OUTPUT`
+
+This is stronger than a generic before/after slider because it expresses Karma’s actual production workflow.
+
+---
+
+# 16. Page rhythm: HUMAN / MACHINE / MATERIAL
+
+Use this alternation to prevent long pages feeling monotonous.
+
+- Hero — MACHINE + SCREEN — dark/technical
+- Course decision — INFORMATION — warm/light
+- Machine proof — MACHINE — technical
+- Student work — MATERIAL — bright/editorial
+- Production problems — TECHNICAL — structured
+- Trainers — HUMAN — warm
+- Studio — MACHINE — photography-led
+- Stories — HUMAN/OUTCOME
+- Final CTA — dark/authoritative
+
+Dark surfaces are punctuation, not wallpaper.
+
+---
+
+# 17. Homepage architecture
+
+Rebuild the homepage around a 30-second decision.
+
+## 1. Hero
+
+See §14.
+
+## 2. Trust rail
+
+Compact, source-attributed, no fake schema claims.
+
+Potential owner-provided trust markers already in project context:
+
+- Google rating owner-provided
+- ~39K+ Instagram
+- ~10K+ Facebook
+- Mota Varachha, Surat
+- Live machine training
+
+Respect current verified/owner-provided distinctions.
+
+## 3. How Karma teaches
+
+A production rail:
+
+`DESIGN → DIGITISE → SET → TEST → CORRECT → STITCH`
+
+## 4. Machine index / course decision
+
+All 11 courses. No repetitive 11-card wall.
+
+Use a dense scalable index/ledger. Photography leads where available; technique signature leads where not.
+
+## 5. The problems we teach you to solve
+
+Examples based on real production knowledge:
+
+- thread breaking
+- design good on screen, bad on fabric
+- sequence registration
+- bad digitising forcing operator compensation
+- density/pathing
+- machine setup
+
+## 6. EMCAD DAHAO decision block
+
+Verified facts in one clear area:
+
+- 3 months
+- 4 batch-time options
+- 2-day free demo
+- 2-hour demo sessions
+- ₹35,000 total
+- ₹25,000 at admission
+- ₹10,000 within one month
+- 100% live practical machine training
+
+No payment CTA.
+
+## 7. Proof from the machine
+
+Build the structure for:
+
+`SCREEN → SAMPLE → CORRECTION → FINAL`
+
+Use technical cases that are already factual; never invent a student/client claim.
+
+## 8. Student work
+
+Editorial mixed-ratio textile wall using G1–G6 placeholders now.
+
+## 9. People on the machine floor
+
+Not “Master Faculty.”
+
+Use a phrase such as:
+
+**Meet the people on the machine floor**
+
+or simply:
+
+**Your trainers**
+
+Use T1–T3 placeholders until real people/content arrive.
+
+## 10. Where you actually learn
+
+Studio/machine evidence using A1–A6/F1 placeholders.
+
+No invented machine specs.
+
+## 11. Student stories
+
+Use the `BEFORE → LEARNED → NOW` structure.
+
+## 12. B2B studio bridge
+
+“Already know what you need? We can produce it too.”
+
+Keep Studio credible without diluting training conversion.
+
+## 13. Visit / Maps / contact
+
+Call, Directions, address, landmark, real studio context.
+
+## 14. FAQ
+
+Questions should sound like real prospects, especially Gujarati/Gujlish.
+
+## 15. Final CTA
+
+**Your design should not stop at the screen. Come prove it on the machine.**
+
+---
+
+# 18. Course catalogue — the Machine Index
+
+The catalogue has **11 courses** and must remain scalable.
+
+Do not build around the eight photographed courses.
+
+Use a dense Machine Index / ledger with:
+
+- index number
+- course name
+- family
+- concise production outcome
+- real verified duration/fee only where known
+- live-practical cue
+- technique signature
+- photo if supplied for that course
+- clear “View course” action
+
+Example structure:
+
+```
+01
+ZARDOSI
+Metallic machine embroidery
+[photo or stitch signature]
+LIVE PRACTICAL
+View course →
+```
+
+The result should scan like a workshop catalogue, not a university prospectus.
+
+---
+
+# 19. Course detail pages
+
+Every course page should feel specific even before all facts/photos exist.
+
+## Required hierarchy
+
+1. What this technique produces
+2. Who it is for
+3. Technique signature
+4. What production problems it solves
+5. Machine/software relationship
+6. Real live-practical explanation
+7. Curriculum / skills
+8. Samples / proof slots
+9. Trainer slot where applicable
+10. Current schedule/batch data
+11. Fee data only when verified
+12. Demo CTA
+13. FAQ
+14. Related Machine Notes
+15. Related courses
+
+## EMCAD page
+
+This is the most complete factual page and should become the reference quality bar.
+
+Show prominently:
+
+- EMCAD DAHAO only
+- 3 months
+- batch options
+- demo options
+- curriculum
+- practical training list
+- ₹35,000 / ₹25,000 / ₹10,000 within one month
+- no online payment
+- admission norms access
+
+## Other 10 courses
+
+Do not copy EMCAD facts onto them. Use honest “confirm with studio” where needed.
+
+---
+
+# 20. Student work — material archive
+
+The gallery should not be six identical cards.
+
+Use the supplied mixed aspect ratios as an editorial textile wall.
+
+For each real item later show only verified fields:
+
+- technique
+- course
+- student name only with consent
+- short production note
+- optional “Designed in EMCAD · stitched on machine” only where true
+
+Registration marks/crosshairs may frame selected media, but never every image.
+
+---
+
+# 21. Student stories — BEFORE → NOW
+
+Use a factual case-study grammar:
+
+### BEFORE
+What the student did before.
+
+### LEARNED
+What was actually learned at Karma.
+
+### NOW
+What they do now.
+
+Connected by a stitch path.
+
+No generic “great institute” quotes as the main proof. No invented income or placement claims.
+
+Until real consented stories arrive, preserve the current sample/placeholder truth policy from the actual code.
+
+---
+
+# 22. Trainers — people who run the floor
+
+Avoid academic titles such as “Master Faculty.”
+
+Use real operational credibility:
+
+- role
+- production specialty
+- machine focus
+- EMCAD focus if applicable
+- teaching focus
+- selected real work later
+
+Do not invent years of experience.
+
+T1/T2/T3 placeholders remain until real photography and owner-approved profiles arrive.
+
+---
+
+# 23. Studio / machines — evidence, not inventory marketing
+
+Use A1–A6 and F1 as proof of a real place.
+
+Message:
+
+**WHERE YOU ACTUALLY LEARN**
+
+- REAL MACHINE FLOOR
+- LIVE PRACTICE
+- MOTA VARACHHA, SURAT
+
+Do not emulate machine-dealer pages.
+
+If the institute later supplies real machine models, counts, head counts or production specs, add them as verified data then — not before.
+
+---
+
+# 24. Machine Notes — technical archive
+
+This is where the “technical archive” aesthetic belongs most strongly.
+
+A note may look like:
+
+```
+MACHINE NOTE / 018
+SEQUENCE
+WHY THIS SAMPLE SHIFTED
+────────────────────
+ISSUE
+Registration
+
+CHECK
+Design path
+Machine setup
+Material
+```
+
+Use:
+
+- small mono notation
+- registration marks
+- CAD nodes
+- stitch diagrams
+- technical hierarchy
+
+Keep the body readable in Manrope/Noto Sans Gujarati.
+
+Do not make the entire website look like this section.
+
+All content must reinforce the current truth: Karma teaches **EMCAD DAHAO only**.
+
+---
+
+# 25. Admission experience
+
+The admission form is functional already; redesign the experience without weakening its security or data model.
+
+## Stitch progress
+
+Use a meaningful progress line, for example:
+
+`01 COURSE ━━━ 02 DETAILS ┅┅┅ 03 TERMS ┅┅┅ 04 DONE`
+
+Completed = stitched.  
+Current = needle penetration point.  
+Future = faint construction line.
+
+## Preserve current requirements
+
+- course
+- preferred timetable / demo slot
+- student details
+- required parent/guardian mobile
+- age/context
+- optional reference
+- admission norms acceptance/version
+- privacy/comms consent
+- honeypot
+- min-fill time
+- idempotency
+- rate limiting
+- Turnstile-ready but not activated
+- no PII analytics
+
+Do not turn the public form into the entire paper admission sheet.
+
+No animation on terms text or validation-heavy sections.
+
+---
+
+# 26. Buttons and conversion
+
+## Primary CTA
+
+**Book 2-Day Free Demo**
+
+Vermilion.
+
+Hover/focus may draw three tiny stitches under the label.
+
+No glow halo.
+
+## Secondary course CTA
+
+**See EMCAD course** / relevant course action.
+
+A thread/path may move subtly toward the arrow.
+
+## Call
+
+Standard phone icon.
+
+## Directions
+
+Standard map/navigation icon.
+
+Utility stays obvious.
+
+## Mobile fixed actions
+
+Preserve the deliberate two-action model:
+
+**CALL FOR DEMO** | **DIRECTIONS**
+
+Do not reintroduce a five-tab app nav.
+
+---
+
+# 27. About page
+
+The About page should feel like a real production studio story, not institutional boilerplate.
+
+Structure around:
+
+- why Karma exists
+- what “Screen to Stitch” means here
+- real studio environment
+- founder/trainer placeholders now
+- machine-floor operating philosophy
+- EMCAD DAHAO specialization
+- practical/live-machine teaching
+- Surat context
+
+Do not invent founding-year history until supplied.
+
+---
+
+# 28. B2B Studio / services
+
+Keep the Studio side problem-led.
+
+Use:
+
+`REFERENCE → DIGITISING → SAMPLE → CORRECTION → MACHINE-READY`
+
+Potential confirmed service vocabulary may include current B2B operations, but verify against current code/content before publishing.
+
+No R2 activation. No fake uploads. No invented turnaround time or file formats.
+
+The B2B visual system may use darker technical surfaces than course pages, but it must remain part of the same brand.
+
+---
+
+# 29. Contact / visit
+
+Design around an actual visit decision.
+
+Include:
+
+- address
+- landmark
+- Call for demo
+- WhatsApp as its separately configured channel
+- landline
+- Directions
+- Maps listing
+- social channels
+- entrance/signboard placeholder A2
+- studio context
+
+Do not resolve the two-mobile role discrepancy by guessing.
+
+---
+
+# 30. Verify / certificates
+
+Public verification should feel trustworthy and restrained.
+
+Use:
+
+- clear certificate status
+- verification ID
+- name/course facts already stored
+- print/verification language
+- no decorative animation beyond a restrained seal/stitch completion if useful
+
+Do not make security/verification look like marketing.
+
+---
+
+# 31. Legal / terms / privacy
+
+Keep these highly readable and low-motion.
+
+The privacy page must reflect the current admission reality, including parent/guardian mobile collection, subject to owner/legal review already recorded in project context.
+
+No visual gimmicks that interfere with legal comprehension.
+
+---
+
+# 32. Loading, empty, error and 404 states
+
+Build niche-specific but restrained states.
+
+## Loading
+
+Small running-stitch motif.
+
+Possible copy:
+
+**Preparing stitch path…**
+
+Do not block page render waiting for decorative animation.
+
+## 404
+
+Broken thread.
+
+Headline:
+
+**The thread ends here.**
+
+Supporting:
+
+**This page isn’t part of the current design path.**
+
+CTA:
+
+**Back to Karma**
+
+## Empty states
+
+Use truthful operational language, not cute illustrations.
+
+---
+
+# 33. Public footer
+
+Keep it customer-facing.
+
+Include:
+
+- Karma identity
+- EMCAD DAHAO training
+- From Screen to Stitch
+- address
+- phone channels
+- directions
+- courses
+- demo
+- social channels
+- language
+- legal
+
+Never include internal asset instructions such as “Send photos as Document.”
+
+---
+
+# 34. Karma Console — Machine Console direction
+
+The admin should not copy the public site visually.
+
+It should use the niche through **operational logic**, not decoration.
+
+Think:
+
+- compact merchant/operations app efficiency
+- dense rows
+- status lights
+- numbered queues
+- quick actions
+- concise machine-floor language
+- thumb-friendly mobile controls
+
+Do not copy Swiggy branding or visual IP. Borrow the UX principle: useful density and action proximity.
+
+## Example information density
+
+```
+BATCH 02                         RUNNING ●
+EMCAD DAHAO
+12:00–04:00
+18 students · ₹40,000 due · 2 absent today
+Attendance     Fees     More
+```
+
+## Admin visual restrictions
+
+- no hero animation
+- no giant textile backgrounds
+- no frosted-glass dashboard
+- no public-site aurora decoration
+- no technique animations competing with work
+- no generic SaaS admin template
+
+---
+
+# 35. Console shell redesign
+
+Audit and redesign the shell for desktop + 360/390/430 mobile.
+
+## Desktop
+
+- dense but readable sidebar/navigation
+- clear current location
+- sticky operational context where useful
+- compact page headers
+- search/filter/action proximity
+- high information density without visual noise
+
+## Mobile
+
+- first-class layout, not collapsed desktop
+- no squeezed desktop tables
+- record cards/rows designed for narrow screens
+- action sheets for secondary actions
+- safe-area support
+- ≥44–48px functional tap targets inside visually compact rows
+- no horizontal overflow
+
+Preserve permission-aware navigation and server-side guards.
+
+---
+
+# 36. Today at Karma
+
+Turn Today at Karma into the best operational screen in the product.
+
+Prioritize actual work:
+
+- new enquiries
+- demos/follow-ups due
+- today’s batches
+- attendance status
+- fee balances/due items
+- design jobs needing attention
+- certificates/tasks
+
+Use queues and compact ledgers, not a wall of metric cards.
+
+Do not add charts merely because dashboards “usually have charts.”
+
+---
+
+# 37. Admissions console
+
+Redesign around quick lead handling:
+
+- compact enquiry rows
+- status
+- course
+- demo slot
+- student + guardian contact
+- next follow-up
+- assigned person
+- notes/activity
+- archive/restore/delete policy from current record-actions architecture
+
+Direct admission must remain available for walk-ins/phone/WhatsApp.
+
+---
+
+# 38. Students / Student 360
+
+Design one compact operational identity for a student:
+
+- identity/contact
+- guardian
+- enrolments
+- fee agreement + balance
+- attendance
+- certificates
+- notes/history
+- print actions
+
+Important information should be visible without five separate giant cards.
+
+---
+
+# 39. Courses & batches console
+
+Make the operational model introduced by PR #24 visually excellent.
+
+Course editor must clearly separate:
+
+- public identity/content
+- operational facts
+- duration
+- software
+- fee agreement defaults
+- timetable options
+- demo rules
+- curriculum/practical
+- terms version
+- visibility
+- archive state
+
+Batches remain actual dated running batches, distinct from standing course schedule options.
+
+Preserve Add/Edit/Archive/Restore/Permanent Delete rules.
+
+---
+
+# 40. Fees console
+
+This is manual money tracking, not payments.
+
+Make each enrolment easy to read:
+
+- agreed total
+- discount
+- received
+- balance
+- next due
+- unpaid/partial/paid derived status
+- receipt history
+- overdue/short-admission indicators
+
+Do not add online payment.
+
+Prioritize receipt and statement printing.
+
+---
+
+# 41. Attendance console
+
+Optimize for speed during a real class.
+
+- batch context obvious
+- student rows compact
+- mark attendance quickly
+- locked state unmistakable
+- correction workflow clear
+- mobile usable
+- print register easy to reach
+
+Do not add decorative animation.
+
+---
+
+# 42. Certificates console
+
+Focus on:
+
+- eligibility context
+- issue action
+- status
+- verification
+- A4 print
+- revoke/history
+
+No PDF/R2 workflow until R2 is explicitly activated.
+
+---
+
+# 43. Design Desk
+
+Use production-job language:
+
+- new
+- review
+- info needed
+- quote prepared/sent
+- approved
+- in progress
+- sample shared
+- revision
+- finalised
+- delivered
+- closed
+
+Compact job rows, status timeline, client contact, production notes and print brief.
+
+No fake file workflow while R2 is deferred.
+
+---
+
+# 44. Content Desk
+
+Keep Content Desk a typed CMS, not a page builder.
+
+Improve usability for:
+
+- FAQs
+- student work
+- testimonials/stories
+- homepage proof
+
+Make consent and owner-verification states extremely clear.
+
+When real photos/content arrive, Content Desk should make replacing placeholders straightforward without letting staff dismantle the design system.
+
+---
+
+# 45. Reports / exports / audit
+
+Design for scanning and operational accountability.
+
+- compact filters
+- export actions
+- audit events
+- clear actor/action/time/entity
+- no PII exposed beyond permissioned need
+
+Permanent deletion tombstones remain durable.
+
+Do not turn reports into a BI dashboard.
+
+---
+
+# 46. Team / permissions / account
+
+Preserve:
+
+- exactly one Owner
+- at most five Admin seats
+- explicit admin grants
+- Owner bypass
+- password-only access
+- no MFA/TOTP gate
+- Owner-only team administration
+
+Improve clarity and mobile ergonomics only.
+
+Do not alter auth architecture for design reasons.
+
+---
+
+# 47. A4 print system
+
+Nine print surfaces already exist. Redesign/polish them only where needed, preserving the independent permission checks.
+
+- filled admission form
+- blank admission form
+- fee receipt
+- fee statement
+- student record
+- batch roster
+- attendance register
+- design brief
+- certificate
+
+Requirements:
+
+- A4 portrait/landscape intentional
+- black/white-friendly
+- Gujarati typography correct
+- repeating table headings
+- no clipped columns
+- signature blocks unsplittable
+- no console navigation/actions
+- practical office-printer margins
+
+Do not prioritize decorative brand devices over legibility on paper.
+
+---
+
+# 48. Backend/data redesign principles
+
+“Full redesign” does **not** mean replacing a working architecture.
+
+Preserve:
+
+- Supabase Postgres
+- Drizzle
+- Hyperdrive runtime path
+- Supabase Auth
+- current RLS lockdown
+- current permission guards
+- OpenNext/Cloudflare Worker deployment
+
+## Audit opportunities during redesign
+
+- N+1 queries
+- over-fetching
+- unbounded lists
+- repeated queries per admin page
+- missing pagination
+- missing relevant indexes proven by query patterns
+- duplicated derived state
+- unnecessary client-side fetching
+- expensive always-on animation JS
+- server/client boundary mistakes
+
+## Free-tier discipline
+
+Prefer:
+
+- server rendering where appropriate
+- compact query shapes
+- pagination
+- indexed operational filters
+- derived status instead of duplicated truth
+- current JSONB only for bounded structured configuration
+- Postgres for structured operational history, not blobs
+
+Do not store photos/media in Supabase Postgres.
+
+Do not create migrations merely to make UI code easier.
+
+Migration `0004_course_operations` is already applied; inspect before adding anything.
+
+---
+
+# 49. Copy system
+
+Rewrite the whole public and admin product where copy is generic, but preserve facts.
+
+## Public tone
+
+Direct.  
+Technical.  
+Practical.  
+Commercial.  
+Warm.  
+Surat-local.  
+Confident.
+
+Avoid:
+
+- unlock your creativity
+- embark on your journey
+- world-class
+- best-in-class
+- transform your passion
+- generic college language
+
+Prefer language like:
+
+- Set it. Test it. Correct it. Stitch it.
+- Learn the design. Run the machine. Read the result.
+- See why a sample fails — and how to correct it.
+- Bring the design off the screen.
+
+## Gujarati
+
+Natural Gujarati/Gujlish as the audience actually speaks. Keep common trade words in English where that is the floor language:
+
+- EMCAD
+- machine
+- batch
+- demo
+- WhatsApp
+- design
+- sample
+
+Do not produce formal textbook Gujarati just to achieve literal translation parity.
+
+## Admin tone
+
+Institute language:
+
+- enquiry
+- walk-in
+- follow-up
+- batch
+- fees
+- receipt
+- હાજરી
+- certificate
+- design job
+
+Never turn Karma Console into ERP jargon.
+
+---
+
+# 50. SEO and factual discipline
+
+Redesign must not loosen the current structured-data policy.
+
+Continue to exclude unverified:
+
+- reviews/aggregate rating schema
+- sample trainer Person data
+- fees for unverified courses
+- durations for unverified courses
+- opening hours
+- placement/outcome stats
+
+EMCAD may use its verified `P3M` duration as current code allows.
+
+SEO should emphasize real topics such as:
+
+- EMCAD DAHAO embroidery training Surat
+- embroidery design classes Surat
+- machine embroidery training Surat
+- practical embroidery machine training
+- sequence / beads / zardosi / cording training where factually supported
+
+Do not SEO-target Wilcom training as a Karma offering.
+
+---
+
+# 51. Accessibility
+
+Every phase must preserve/improve:
+
+- WCAG AA contrast
+- visible focus
+- semantic headings
+- semantic links/buttons
+- keyboard navigation
+- reduced-motion
+- 200% zoom usability
+- no hover-only critical information
+- meaningful alt text once real photos arrive
+- Gujarati text as actual selectable text
+- form error summary/focus behavior
+- 44–48px important touch targets
+
+Motion must never be required to understand the page.
+
+---
+
+# 52. Performance
+
+Target a sub-2.5s LCP on a realistic mid-range mobile connection once real media is integrated.
+
+Before photos:
+
+- no layout shift from placeholders
+- no large animation dependency
+- CSS/SVG first
+- IntersectionObserver only when necessary
+- observers cleaned up
+- no continuous expensive paint loops
+
+After photos arrive:
+
+- responsive sizes
+- AVIF/WebP strategy
+- explicit dimensions
+- priority only for true LCP media
+- lazy load below fold
+- object-position/focal point where needed
+
+Worker free-plan gzip limit remains 3 MB. Check with Wrangler dry-run after dependency changes.
+
+---
+
+# 53. Public/admin coherence formula
+
+The public site is **story + proof + conversion**.
+
+Karma Console is **density + status + action**.
+
+They share:
+
+- tokens
+- typography DNA
+- factual vocabulary
+- stitch semantics in restrained ways
+
+They do not share:
+
+- hero treatment
+- decorative motion
+- photo-heavy composition
+- public marketing surfaces
+
+---
+
+# 54. Final design balance
+
+Use this as a creative calibration target:
+
+- **55%** real production photography / future real media
+- **20%** typography and editorial layout
+- **12%** niche visual language
+- **8%** motion
+- **5%** material finish
+
+Until the 32 photos arrive, the 55% media layer is represented by honest named PhotoSlots and technique signatures — **not fake imagery**.
+
+If the final interface becomes 40% animation/vector decoration, it has failed.
+
+---
+
+# 55. Implementation phases
+
+Claude must execute phases in order, one clean PR at a time unless a smaller split is clearly safer. Do not wait for visual approval between phases; the owner will review the completed system afterward.
+
+| Phase | Scope | Status |
+| --- | --- | --- |
+| 1 | Audit + Design System v4 “Machine Lab” foundation | ⏳ Pending |
+| 2 | Global shell + hero + signature Screen-to-Stitch interaction | ⏳ Pending |
+| 3 | Homepage full rebuild | ⏳ Pending |
+| 4 | 11-course Machine Index + all course pages | ⏳ Pending |
+| 5 | Proof ecosystem: student work, stories, trainers, studio/machines | ⏳ Pending |
+| 6 | Admission + conversion + contact experience | ⏳ Pending |
+| 7 | Machine Notes technical archive | ⏳ Pending |
+| 8 | B2B Studio/services | ⏳ Pending |
+| 9 | About, verify, legal, errors/loading/404, footer + secondary public pages | ⏳ Pending |
+| 10 | Karma Console shell + Today at Karma + mobile operational system | ⏳ Pending |
+| 11 | Admissions, Students, Courses/Batches, Fees admin redesign | ⏳ Pending |
+| 12 | Attendance, Certificates, Design Desk, Content, Reports, Team admin redesign | ⏳ Pending |
+| 13 | Backend/query/free-tier audit + copy/i18n/SEO consistency | ⏳ Pending |
+| 14 | Accessibility/performance/responsive hardening + final whole-product creative audit | ⏳ Pending |
+
+---
+
+# 56. Phase 1 — Design System v4 “Machine Lab” foundation
+
+## Deliver
+
+- audit current public + admin primitives
+- preserve existing token names where shared
+- formalize Machine Lab additions
+- branded icon set
+- 11 technique signatures
+- canonical stitch semantics
+- mono utility notation
+- material textures
+- glass/aurora restrictions
+- motion levels
+- photo-slot manifest for all 32 slots
+- no-stock/no-generated-photo enforcement/documentation
+
+## Skill use
+
+Use relevant frontend-design, UI/UX, accessibility, design-system and code-review skills.
+
+## Acceptance
+
+- no public page is required to be visually complete yet
+- primitives render at 320/390/768/1440
+- Gujarati overrides correct
+- reduced motion correct
+- no new heavy dependency
+
+---
+
+# 57. Phase 2 — Global shell + hero + signature interaction
+
+## Deliver
+
+- public header
+- mobile menu
+- fixed two-action mobile conversion bar
+- footer
+- global dark/light rhythm
+- hero desktop and mobile variants
+- H1/H2/H3 PhotoSlots
+- connected-thread hero path
+- Screen-to-Stitch rail using P1/P2/P3 placeholders
+- button microinteraction rules
+
+## Acceptance
+
+A visitor can understand EMCAD + machine + Surat + demo from the first screen without photography.
+
+---
+
+# 58. Phase 3 — Homepage
+
+Implement the full architecture in §17.
+
+Do not use endless card grids. Use ledger/spec-grid/editorial/full-bleed compositions deliberately.
+
+Acceptance is the 3/10/20/30-second decision model in §3.
+
+---
+
+# 59. Phase 4 — Courses
+
+Rebuild:
+
+- course index
+- all 11 course pages
+- technique signatures
+- eight known course photo slots
+- three intentional signature-led courses without photos
+- factual duration/fees policy
+- related Machine Notes/internal linking
+
+No course should read as a generic duplicated template.
+
+---
+
+# 60. Phase 5 — Proof ecosystem
+
+Rebuild:
+
+- `/student-work`
+- `/success-stories`
+- trainer surfaces
+- studio/machine proof
+- machine-case proof
+- homepage proof integrations
+
+Use G/T/A/S/F placeholders exactly.
+
+Do not invent factual identities/outcomes.
+
+---
+
+# 61. Phase 6 — Admission + conversion + contact
+
+Redesign:
+
+- admission form experience
+- admissions info page
+- contact/visit
+- demo decision surfaces
+- call/directions/WhatsApp channel hierarchy
+- terms presentation
+
+Preserve all backend/security behavior.
+
+---
+
+# 62. Phase 7 — Machine Notes
+
+Make this the strongest technical-archive expression in the site.
+
+Rebuild index and article templates without changing factual trade knowledge unnecessarily.
+
+Use real semantic notation; no fake measurements.
+
+---
+
+# 63. Phase 8 — B2B Studio
+
+Rebuild services around production problems and deliverables.
+
+No fake file upload, no R2 activation, no invented turnaround or formats.
+
+---
+
+# 64. Phase 9 — Secondary public system
+
+Rebuild/polish:
+
+- About
+- Verify
+- Privacy
+- Terms
+- 404
+- global error
+- loading
+- footer
+- any remaining public route
+
+Ensure every EN route has GU parity.
+
+---
+
+# 65. Phase 10 — Console foundation
+
+Rebuild:
+
+- Console shell
+- mobile console navigation/action behavior
+- page header primitives
+- dense record row
+- status chip/light system
+- filter/search bars
+- desktop dropdown/mobile action sheet
+- Today at Karma
+
+No functional auth/permission changes unless fixing a demonstrated bug.
+
+---
+
+# 66. Phase 11 — Core operations admin
+
+Redesign:
+
+- Admissions
+- Students / Student 360
+- Courses & Batches
+- Fees
+
+Keep current archive/restore/delete and agreement-snapshot behavior.
+
+---
+
+# 67. Phase 12 — Remaining operations admin
+
+Redesign:
+
+- Attendance
+- Certificates
+- Design Desk
+- Content Desk
+- Reports/exports/audit
+- Team/permissions/account
+- A4 action entry points
+
+No generic admin kit.
+
+---
+
+# 68. Phase 13 — Backend / data / copy / SEO audit
+
+Perform a deliberate audit after the UI settles.
+
+Check:
+
+- query count
+- N+1
+- pagination
+- unbounded admin reads
+- duplicated state
+- cache correctness
+- permission checks
+- archive/deletion policy consistency
+- audit behavior
+- PII exposure
+- EN/GU copy quality
+- stale Wilcom language anywhere outside the quoted admission rule
+- SEO titles/descriptions/internal linking
+- JSON-LD factual discipline
+- analytics event coverage without PII
+- served artifacts such as `llms.txt`, sitemap and robots
+
+Do not change architecture just to satisfy a generic best-practice skill.
+
+---
+
+# 69. Phase 14 — Hardening + final creative audit
+
+Audit every public/admin route at least at:
+
+- 320
+- 360
+- 390
+- 430
+- 768
+- 1024
+- 1280
+- 1440
+- 1920
+
+Review:
+
+- overflow
+- Gujarati wrapping
+- motion
+- reduced motion
+- keyboard
+- focus
+- contrast
+- loading
+- empty states
+- errors
+- A4 print
+- bundle size
+- page rhythm
+- repeated visual patterns
+- generic copy
+- excess cards
+- excess dark sections
+- fake technicality
+- course specificity
+- mobile conversion
+- admin density
+
+Then do one final independent creative-director pass asking:
+
+> Does this feel like a real Surat commercial embroidery studio, or an agency concept for one?
+
+Remove anything that answers “agency concept.”
+
+---
+
+# 70. PR workflow
+
+For every phase:
+
+1. start from latest `main`
+2. create a dedicated feature branch
+3. read relevant skills before implementation
+4. implement only the phase scope plus necessary regressions
+5. update this file’s status and add a concise implementation record
+6. update `docs/project-context.md` and specialist docs when facts/architecture/major decisions change
+7. run:
+
+```bash
+npm ci
+npm run typecheck
+npm run lint
+npm test
+npm run build
+```
+
+8. run Wrangler dry-run if bundle-affecting dependencies changed
+9. open PR
+10. wait for GitHub CI + Cloudflare preview
+11. fix every regression
+12. merge only when required checks are green
+13. continue immediately to the next pending phase
+
+If the session limit interrupts work, stop only at a clean PR/phase boundary and leave this progress table accurate.
+
+---
+
+# 71. Infrastructure guardrails
+
+This redesign must **not** activate or change:
+
+- `karmadesignstudio.in`
+- DNS/custom-domain routing
+- Cloudflare R2
+- Cloudflare Turnstile
+- payment gateway
+- Supabase project
+- Hyperdrive architecture/binding name
+- Supabase Auth architecture
+- password-only admin decision
+- RLS lockdown
+- production deploy command
+
+Do not deploy manually.
+
+The custom-domain move remains a separate owner-gated launch task after final review.
+
+---
+
+# 72. Database guardrails
+
+Migration `0004_course_operations` is already applied as of this plan’s creation.
+
+Do not re-run it manually.
+
+Any future schema change must:
+
+- be additive unless explicitly approved otherwise
+- use Drizzle schema + generated/reviewed migration
+- preserve RLS lockdown
+- preserve staff invariants
+- avoid cascading destructive shortcuts
+- document whether the migration was actually applied
+
+Do not store media in Postgres.
+
+---
+
+# 73. Photography arrival round — later, not part of these 14 phases unless files arrive during execution
+
+When the actual 32 images arrive:
+
+1. verify filenames/content against §13
+2. confirm consent for trainers/student faces/work
+3. inspect actual dimensions/file sizes
+4. choose public-media pipeline based on evidence
+5. likely prefer optimized deployed static assets for a small rarely-changing public set unless R2 offers a real operational advantage
+6. generate responsive AVIF/WebP variants or use the approved Next/OpenNext-compatible image strategy
+7. replace PhotoSlots without restructuring layouts
+8. art-direct focal points per breakpoint
+9. write useful alt text
+10. build OpenGraph/social-share artwork from real media
+11. test LCP on mobile
+12. do a real-photo visual polish pass
+
+Do not use another studio’s images while waiting.
+
+---
+
+# 74. Final completion criteria
+
+This redesign is complete when:
+
+- every public page follows the Machine Lab identity
+- every public page is coherent in EN and GU
+- the hero tells Screen → Machine → Result clearly
+- all 11 courses feel distinct
+- EMCAD’s verified facts are clear within 30 seconds
+- no fake technical metric exists
+- no misleading Wilcom-training claim exists
+- 32 real-photo slots are ready without layout shift
+- the three non-photographed courses remain visually deliberate
+- Machine Notes own the technical-archive aesthetic
+- admin is compact, fast and first-class on mobile
+- no permission/security behavior was weakened
+- print workflows remain useful
+- backend/query behavior is free-tier-conscious
+- accessibility and reduced-motion are correct
+- Worker bundle stays within free-plan limits
+- CI and Cloudflare are green
+- the site still uses Workers.dev and the custom domain is untouched
+
+---
+
+# 75. Final design formula
+
+If there is ever uncertainty, come back to this ratio:
+
+**55% real production**  
+Machines, people, work, fabric.
+
+**20% typography/editorial layout**  
+Hierarchy, confidence, clarity.
+
+**12% niche visual language**  
+Stitch paths, nodes, technique signatures, material structure.
+
+**8% motion**  
+Explanatory, not decorative.
+
+**5% material finish**  
+Zari, pearl, sequence, fabric texture.
+
+And one final test:
+
+> **Does the interface demonstrate Screen-to-Stitch, or merely mention it?**
+
+The finished Karma experience should demonstrate it.
