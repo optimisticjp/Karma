@@ -699,7 +699,9 @@
     "meanwhileTitle": "The work is on the machines right now.",
     "meanwhileBody": "Nothing is published here yet, so come and see the real thing instead. Walk in during studio hours and you can watch a batch working, or message us and we will show you what came off the floor this week.",
     "galleryTitle": "Pieces from the studio",
-    "gallerySub": "Each one names the technique, the course it came from, and what it demonstrates."
+    "gallerySub": "Each one names the technique, the course it came from, and what it demonstrates.",
+    "archiveTitle": "The material archive",
+    "archiveSub": "Six pieces from this floor, photographed as they came off the machine. The frames are reserved at the exact shapes the photographs will be — a bridal panel is tall, a dupatta is square, and forcing both into the same tile would throw away the point."
   },
   "servicesPage": {
     "title": "Design development and production embroidery for garment businesses.",
@@ -845,7 +847,12 @@
     "n1": "students trained",
     "n2": "courses taught",
     "n3": "evening batches till",
-    "n4": "course families"
+    "n4": "course families",
+    "placeTitle": "The place itself",
+    "placeBody": "Mota Varachha, Surat. Studio hours are open — you can walk in, see the machines running, and decide afterwards.",
+    "placeFloorCaption": "The machine floor, wide.",
+    "placeEntranceCaption": "The entrance and signboard — what to look for from the road.",
+    "placeNote": "Machines named by the technique they run. No head counts, speeds or model numbers until the studio supplies them."
   },
   "storiesPage": {
     "title": "What changed after the course?",
@@ -854,7 +861,11 @@
     "consentTitle": "Published with consent",
     "consentBody": "Every story here is shared with the student’s permission and verified by the studio before it goes up. Unverified entries stay marked as samples.",
     "sampleTitle": "Sample stories",
-    "sampleBody": "The six stories below are sample archetypes, written to show the shape a real story takes here — the routes people actually take into this trade. Each is marked as a sample and is replaced in place the moment a real, consented story is published. None of them claims an income, a job or a placement."
+    "sampleBody": "The six stories below are sample archetypes, written to show the shape a real story takes here — the routes people actually take into this trade. Each is marked as a sample and is replaced in place the moment a real, consented story is published. None of them claims an income, a job or a placement.",
+    "portraitsLabel": "Portraits reserved",
+    "portraitsNote": "Two frames, waiting for the studio shoot. A name goes under a portrait only once that person has given written consent — until then the frame says what it is waiting for and nothing about who is in it.",
+    "casesTitle": "The stories",
+    "casesSub": "Before, what was actually learned, and what they do now. A specific thing learned is worth more than any adjective about the institute."
   },
   "contactPage": {
     "eyebrow": "Contact",
@@ -1176,7 +1187,8 @@
       "why": "Why they joined",
       "learned": "What they learned",
       "changed": "What changed",
-      "now": "Where they are now"
+      "now": "Where they are now",
+      "before": "Before"
     },
     "reviews": {
       "eyebrow": "What people say",

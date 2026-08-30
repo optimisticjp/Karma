@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { WorkLedger } from "@/components/work/WorkLedger";
+import { MaterialWall } from "@/components/work/MaterialWall";
 import { MachineCases } from "@/components/work/MachineCases";
 import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icon";
@@ -29,12 +30,24 @@ export async function generateMetadata({
  * left an intro above a "come and look instead" card, and made the absence of
  * photography the loudest thing on the site.
  *
- * Two changes fix that without inventing anything. The gallery now shows its
- * shoot-list rows as what they are: a named planned shot in a photo slot, with
- * a visible sample tag. And the page gains the proof the studio genuinely does
- * have — the machine case notes, which are trade facts rather than claims
- * about anyone, and which are more persuasive to a working operator than a
- * photograph would be.
+ * Three things fix that without inventing anything. The page opens with the
+ * material archive — the six reserved frames from the studio shoot, at their
+ * real ratios, as a mixed-ratio editorial wall rather than six identical
+ * tiles. The gallery below shows its shoot-list rows as what they are: a
+ * named planned shot in a photo slot, with a visible sample tag. And the page
+ * carries the proof the studio genuinely does have — the machine case notes,
+ * which are trade facts rather than claims about anyone, and which are more
+ * persuasive to a working operator than a photograph would be.
+ *
+ * THE TWO GALLERIES ARE NOT THE SAME THING, AND SHOULD NOT BE MERGED
+ * ------------------------------------------------------------------
+ * `<MaterialWall>` is the six photographs the owner's shoot is for: fixed
+ * slots, fixed ratios, no attribution, no captions beyond the shoot brief.
+ * `<WorkLedger>` is whatever staff have published through Content Desk, with
+ * its technique, course, production note and sample tags intact. One is the
+ * studio's own record of its work; the other is an editable feed. Collapsing
+ * them would mean either the shoot slots become deletable from an admin
+ * screen, or published items lose their consent metadata.
  */
 export default async function StudentWorkPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -71,6 +84,14 @@ export default async function StudentWorkPage({ params }: { params: Promise<{ lo
           </>
         }
       />
+
+      {/* The material archive: the six reserved frames, at their real ratios. */}
+      <section className="section band-material">
+        <div className="container-site">
+          <SectionHeading title={t("archiveTitle")} sub={t("archiveSub")} />
+          <MaterialWall className="u-section-body" />
+        </div>
+      </section>
 
       {/* The grid used to sit directly under the page H1, so the piece titles
           were the next heading on the page and the hierarchy jumped H1 -> H3.

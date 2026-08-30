@@ -426,6 +426,19 @@ Signature captions are bilingual in `courseDetail.signatures.<slug>`;
 Tests assert the produces line, fault list, output list, practice and machine
 description are all distinct across the eleven, so a duplicated template fails.
 
+**Proof (Phase 5).** `<MaterialWall>` is shared by the homepage and
+`/student-work`; exactly one frame carries a registration mark, because the
+mark means "precision / reference" and on every image it means nothing. The
+reserved shoot slots and the Content Desk gallery stay two separate things —
+merging them would either make the shoot slots deletable from an admin screen
+or strip consent metadata from published items. `<StoryCase>` leads with
+BEFORE → LEARNED → NOW on one stitch path, ending on a knot point. S1/S2 and
+T1/T2 are reserved frames that name a photograph and never a person, mapped
+**by slug** so re-ordering a list cannot reassign someone's portrait; still no
+`Person` structured data. `/about` gives each of the eleven techniques its own
+signature rather than three shared family swatches, and shows the floor and
+entrance with machines named by technique only.
+
 **The 32-photograph manifest.** `src/content/photo-manifest.ts` is the typed
 list of every shot on the owner's final brief, with each slot's intrinsic
 dimensions. `<ManifestPhoto id="…">` reserves the photograph's exact aspect
@@ -1700,7 +1713,7 @@ modules are importable in a test runner while the guard stays real in the app.
 `jsx: "preserve"` for Next.js — without the override a test importing a `.tsx`
 component sees raw JSX and fails to parse.
 
-**36 test files, 500 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
+**37 test files, 519 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
 which is the point — the policy survives a refactor:
 
 | Test | Guards |
@@ -1708,6 +1721,7 @@ which is the point — the policy survives a refactor:
 | `i18n-parity` | EN/GU catalogue keys mirror exactly |
 | `machine-lab-system` | the design system v4 foundation: 32-photo manifest, icon family, eleven technique signatures, stitch semantics, motion levels, Gujarati overrides, reduced motion, no new dependency |
 | `machine-lab-shell` | the hero states EMCAD/machine/Surat/demo without photography; one course's facts never become the site's; one continuous thread and one Level-4 moment; the rail never autoplays, loops or needs a drag; bands never re-point the palette; the mobile bar keeps exactly two actions |
+| `machine-lab-proof` | one shared material wall with exactly one registration mark; reserved slots and the editable gallery stay separate; the BEFORE→LEARNED→NOW arc and its stitch geometry; portraits mapped by slug and never captioned with a person; no job-placement, salary or earnings claim in any story's data |
 | `machine-lab-courses` | one index component for both surfaces; every course has a signature and only its own photograph; exactly one course carries confirmed duration/fee facts; no two course pages share a produces line, fault list, output list, practice or machine description |
 | `machine-lab-homepage` | the section order; no two dark bands adjacent; the Machine Index carries no fee and only confirmed durations; every EMCAD figure renders from the verified record, never from a message; no payment provider anywhere near the fee block; no invented machine specification; trainer frames name a photograph, never a person |
 | `auth-guard`, `permissions` | the six-state access chain, owner bypass, grant handling |

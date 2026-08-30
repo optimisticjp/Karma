@@ -1352,3 +1352,116 @@
   padding: 0.75rem 1rem;
   background: var(--color-card);
 }
+
+/* ------------------------------------------------------------------ *
+ * 21. Proof surfaces
+ *
+ * The material wall, the story arc, the reserved portraits and the
+ * about-page technique wall. Everything here holds one line: a frame
+ * says what photograph it is waiting for, and never who is in it.
+ * ------------------------------------------------------------------ */
+
+/* Exactly one registration mark on the wall — the anchor piece. A crosshair
+   on every image is how a technical language turns into wallpaper. */
+.work-wall-item {
+  position: relative;
+}
+.work-wall-mark {
+  position: absolute;
+  top: 0.625rem;
+  right: 0.625rem;
+  z-index: 1;
+}
+
+/* ---- BEFORE → LEARNED → NOW, on one stitch path ---- */
+
+.story-arc-steps {
+  position: relative;
+  margin-top: 1.25rem;
+  padding-left: 1.75rem;
+  list-style: none;
+}
+/* The path itself: the same 9-on / 6-off running stitch as everywhere else,
+   drawn once down the column rather than as three separate connectors. */
+.story-arc-steps::before {
+  content: "";
+  position: absolute;
+  left: 0.375rem;
+  top: 0.5rem;
+  bottom: 0.75rem;
+  width: 5px;
+  background-image:
+    radial-gradient(circle 1.75px at 50% 1.75px, var(--color-vermilion) 99%, transparent 100%),
+    linear-gradient(180deg, var(--color-vermilion) 0 9px, transparent 9px 15px);
+  background-size: 5px 15px, 2px 15px;
+  background-repeat: repeat-y, repeat-y;
+  background-position: 50% 0, 50% 0;
+  opacity: 0.7;
+}
+.story-arc-step {
+  position: relative;
+  padding-block: 0.5rem 0.875rem;
+}
+.story-arc-step + .story-arc-step {
+  border-top: var(--hairline);
+}
+/* The knot lands on the final step: in this system a knot point means
+   "decision / completion", which is exactly what NOW is. */
+.story-arc-mark {
+  position: absolute;
+  left: -1.75rem;
+  top: 0.75rem;
+  display: flex;
+  background: var(--color-card);
+}
+.story-arc-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ---- reserved portraits ---- */
+
+.story-portraits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.75rem, 0.5rem + 1vw, 1.25rem);
+  margin-top: 0.875rem;
+  max-width: 34rem;
+  list-style: none;
+  padding: 0;
+}
+.story-portraits-note {
+  margin-top: 1rem;
+  max-width: 62ch;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--color-stone);
+}
+
+/* ---- about: eleven techniques, eleven marks ---- */
+
+.about-technique-mark {
+  margin-bottom: 0.75rem;
+  border: var(--hairline);
+  border-radius: 0.5rem;
+  background: var(--color-card);
+  padding: 0.5rem 0.625rem;
+}
+
+.about-place {
+  display: grid;
+  gap: clamp(0.75rem, 0.5rem + 1vw, 1.5rem);
+}
+@media (min-width: 800px) {
+  .about-place {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    align-items: start;
+  }
+}
+.about-place-caption {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-stone);
+}

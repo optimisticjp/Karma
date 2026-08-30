@@ -3,7 +3,9 @@ import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { TechniquePlate } from "@/components/ui/TechniquePlate";
+import { TechniqueSignature } from "@/components/ui/TechniqueSignature";
+import { ManifestPhoto } from "@/components/ui/PhotoSlot";
+import { MonoNote } from "@/components/ui/MonoNote";
 import { TrainerProfile } from "@/components/site/TrainerProfile";
 import { Icon } from "@/components/ui/Icon";
 import { courses, coursesByFamily, families } from "@/content/courses";
@@ -115,16 +117,19 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
 
-      {/* The machine wall: every technique on the floor, named. Swatches, not
-          stand-in photographs — the real wall gets photographed later. */}
+      {/* The machine wall: every technique on the floor, named, each with its
+          OWN mark. Three shared family swatches told a visitor which of three
+          buckets a course sat in; eleven technique signatures tell them what
+          the stitch actually does, which is the thing they came to find out.
+          Still drawn, not stand-in photographs — the real wall is shot later. */}
       <section className="section bg-ivory-2">
         <div className="container-site">
           <SectionHeading title={t("machinesTitle")} sub={t("machinesBody")} />
           <ul className="u-section-body spec-grid">
-            {coursesByFamily.map((c, i) => (
+            {coursesByFamily.map((c) => (
               <li key={c.slug}>
-                <div className="mb-3 aspect-[3/2] overflow-hidden rounded border border-line">
-                  <TechniquePlate variant={c.family} seed={i} />
+                <div className="about-technique-mark">
+                  <TechniqueSignature slug={c.slug} />
                 </div>
                 <span className="spec-label">
                   {gu ? families[c.family].nameGu : families[c.family].nameEn}
@@ -138,6 +143,32 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      {/* The place itself. A visitor deciding whether to travel across Surat
+          is asking one question — is there a real floor with machines on it —
+          and the honest answer is a wide frame of the floor and the entrance
+          they will actually look for from the road. Named by technique only:
+          no head count, no model, no speed, because the studio has not
+          supplied any of those and inventing them to look authoritative is the
+          same lie as a stock photograph. */}
+      <section className="section band-human">
+        <div className="container-site">
+          <SectionHeading title={t("placeTitle")} sub={t("placeBody")} />
+          <div className="about-place u-section-body">
+            <figure>
+              <ManifestPhoto id="F1_STUDIO_FLOOR_WIDE" editorial />
+              <figcaption className="about-place-caption">{t("placeFloorCaption")}</figcaption>
+            </figure>
+            <figure>
+              <ManifestPhoto id="A2_ENTRANCE_SIGNBOARD" editorial />
+              <figcaption className="about-place-caption">{t("placeEntranceCaption")}</figcaption>
+            </figure>
+          </div>
+          <MonoNote as="p" className="mt-6">
+            {t("placeNote")}
+          </MonoNote>
         </div>
       </section>
 
