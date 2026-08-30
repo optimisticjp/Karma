@@ -191,7 +191,7 @@ export const RECORD_POLICY: Record<RecordEntity, RecordPolicy> = {
     deletableBy: "owner",
     confirmation: "word",
     blockedBy: [],
-    note: "Content Desk already archives through its own `status` column; deletion is for a draft that should never have been made. Consent and owner-verification timestamps are preserved by archiving, and lost by deleting — which is the point of preferring archive."
+    note: "Content Desk archives through its OWN `status` column and its own action, not through the shared archive path — `isArchivable()` deliberately excludes it, so do not wire a RecordMenu archive button here expecting it to work. Deletion is for a draft that should never have been made. Consent and owner-verification timestamps are preserved by archiving and lost by deleting, which is the point of preferring archive."
   },
   staff: {
     actions: ["add", "edit", "archive", "restore"],

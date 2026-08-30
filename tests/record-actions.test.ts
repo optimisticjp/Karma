@@ -130,6 +130,21 @@ describe("dependencies block deletion rather than cascading", () => {
     expect(policyFor("student").blockedBy).toContain("enrollment");
   });
 
+  it("has a preflight branch for EVERY entity the policy says is deletable", () => {
+    /**
+     * The gap this catches, found by reading the diff after it had already
+     * merged: `guardian`, `application_note` and `content_item` were listed as
+     * deletable and had no branch in `preflight()`, so the switch fell through
+     * to null and the action reported "missing". A record the policy said was
+     * deletable simply refused — a silent gap, not a visible error, and exactly
+     * what adding a new entity would reintroduce.
+     */
+    const source = read("src/lib/admin/destructive.ts");
+    for (const entity of deletableEntities()) {
+      expect(source, `preflight has no branch for "${entity}"`).toContain(`case "${entity}": {`);
+    }
+  });
+
   it("shows the operator the counts before asking for a confirmation", () => {
     const page = read("src/app/admin/(console)/records/[entity]/[id]/delete/page.tsx");
     expect(page).toContain("preflight(db, entity, id)");
