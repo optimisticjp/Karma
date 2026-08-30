@@ -82,9 +82,16 @@ export default async function CourseDetailPage({
   const name = gu ? course.nameGu : course.nameEn;
   const position = coursesByFamily.findIndex((c) => c.slug === course.slug);
 
-  /* The trainer who covers this family. Every profile is still sample data,
-     so the card says so rather than presenting a placeholder as a person. */
-  const trainer = course.family === "software" ? trainers[1] : trainers[0];
+  /* The trainer who covers this family, found by slug rather than by array
+     index so re-ordering the list cannot silently reassign courses to the
+     wrong person. Every profile is still sample data, so the card says so. */
+  const trainerSlug =
+    course.family === "software"
+      ? "sample-design-trainer"
+      : course.family === "modern"
+        ? "sample-modern-trainer"
+        : "sample-machine-trainer";
+  const trainer = trainers.find((tr) => tr.slug === trainerSlug) ?? trainers[0];
 
   const crumbs = {
     "@context": "https://schema.org",

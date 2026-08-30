@@ -449,7 +449,7 @@ Update this table after every completed/merged phase.
 | 1 | Brand system + design foundations | ✅ Complete + merged | PR #12 — `build` + Cloudflare Workers Builds green |
 | 2 | Homepage / 30-second decision | ✅ Complete + merged | PR #13 — `build` + Cloudflare Workers Builds green |
 | 3 | Courses / production-led detail pages | ✅ Complete + merged | PR #14 — `build` + Cloudflare Workers Builds green |
-| 4 | Proof ecosystem: work, stories, reviews, trainers | ⏳ Pending | |
+| 4 | Proof ecosystem: work, stories, reviews, trainers | 🚧 In progress | branch `phase-4/proof-ecosystem` |
 | 5 | Mobile conversion / call / directions / demo | ⏳ Pending | |
 | 6 | Studio / B2B commercial embroidery | ⏳ Pending | |
 | 7 | Machine Notes / social-to-search content | ⏳ Pending | |
@@ -1109,6 +1109,104 @@ Preserve consent architecture for real published student material.
 Add tests for sample-vs-verified behaviour.
 
 Merge when green; update progress.
+
+## Implementation record
+
+### The decision that shaped this phase
+`/student-work` and `/success-stories` both **filtered every sample out**,
+which — with nothing published — meant they rendered an intro above nothing.
+The absence of photography was the loudest thing on the site.
+
+CLAUDE.md's rule is that source placeholders stay visible *carrying their
+`sample: true` marker*, not that they are hidden, and the owner asked for the
+whole visual system populated. So samples now render, each with a visible tag,
+and Content Desk still replaces them wholesale the moment one real row is
+published. The old filtering was a workaround for placeholder text that read
+as editorial instructions ("Replace with the student's own sentence…"); the
+real fix was to write sample content worth showing.
+
+### 1. Machine proof — the strongest thing on the site
+`machineCases`: four notes running problem → diagnosis → what changed →
+setting → result. **These carry no sample flag**, because they make no claim
+about a person, a student or a client. Each is an ordinary production fault
+with its ordinary cause — the same note would be written in any embroidery
+unit in Surat — so there is nothing in them for the owner to verify.
+
+That is precisely why they are the best proof available: generic praise from
+an anonymous reviewer proves nothing, while naming the fault, the diagnosis
+and the setting that moved proves the studio runs production.
+
+### 2. Student work
+`/student-work` is an editorial grid, no carousel anywhere. Each piece carries
+the technique, the course it came from (linked), the technical note and what
+it demonstrates. Sample entries render their planned shot in a `<PhotoSlot>`
+with a visible tag, so a visitor sees "this shot is planned" rather than a
+fabricated piece. The machine case notes sit below.
+
+### 3. Success stories
+Six archetypes as mini case studies — before → why they joined → what they
+learned → what changed → where they are now — covering the routes people
+actually take into this trade: beginner → operator, tailor → added a service,
+homemaker → paid work, operator → digitiser, student → freelance designer,
+boutique owner → skill in-house. **No earnings, salary, job or placement is
+claimed anywhere**, and a test enforces it.
+
+The case-study fields are optional on `Story`, so a story published through
+Content Desk renders as before → after without needing five new fields on that
+form. Extending the CMS to solve a presentation problem would have been the
+wrong trade.
+
+### 4. Trainers
+Three sample profiles with the fields a student actually weighs: speciality,
+machines taught, software (only where true), experience, teaching style and
+selected work. Experience is **a range, never a year count**, and a test
+enforces that. Names are new — none is reused from the old ValidTheme
+template, and a test enforces that too.
+
+### 5. Reviews
+A wall, not a slider: a carousel hides seven of eight reviews behind an
+interaction and costs JS to do it. Seven cards, all on the page. Three appear
+on the homepage; the full wall is on `/success-stories`.
+
+### 6. Social authority
+Rounded owner-provided counts and four outbound links. No embedded feed: a few
+hundred kilobytes of third-party JavaScript to prove a follower count is a bad
+trade for an audience arriving on mobile data.
+
+### Tests (`tests/proof-sample-policy.test.ts`, 12 new)
+The sample contract is now held mechanically, because a reviewer reading a
+diff cannot see what a rendered page claims:
+
+- every unverified identity carries `sample: true`;
+- no ValidTheme template name reappears;
+- no earnings, salary, job-placement or ₹ figure appears in any sample;
+- trainer experience is a range, not a year count;
+- machine cases carry no sample flag and a full diagnosis chain in both
+  languages;
+- **no `Review`, `AggregateRating` or `Person` schema anywhere**;
+- no `offers:` or `timeRequired:` in `Course` schema;
+- `verifiedFacts.googleRating48` stays `false`;
+- every surface rendering a sample also renders `<SampleTag />`;
+- Content Desk replaces samples rather than sitting beside them.
+
+Two of those tests caught my own over-broad assertions rather than real bugs:
+"placement" is a legitimate embroidery term (where a patch sits before it is
+tacked down), and `timeRequired` appears in the comment that explains its own
+absence. Both are now matched in their intended sense.
+
+### Verification
+`npm run typecheck`, `npm run lint`, `npm test` (**208 passing**, up from 196)
+and `npm run build` all clean. Responsive audit at 320, 360, 375, 390, 430,
+768, 820, 1024, 1280, 1440 and 1728 across `/student-work`, `/success-stories`
+and `/about` in both locales: **zero horizontal overflow, zero sub-24px
+non-inline targets** at every width. Every public route returns 200.
+
+The homepage grew from 10,377px to 11,366px desktop, which is the cost of
+replacing a "we have nothing to show" block with three real work cards and a
+story teaser. The story teaser is a compact variant for exactly this reason —
+a full case study is ~800px, which is right on the stories page and wrong on a
+homepage already running fifteen sections — and the homepage review teaser
+stays at three of seven.
 
 ---
 

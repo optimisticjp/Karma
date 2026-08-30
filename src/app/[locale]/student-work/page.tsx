@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { GalleryGrid } from "@/components/work/GalleryGrid";
 import { PageIntro } from "@/components/ui/PageIntro";
+import { WorkLedger } from "@/components/work/WorkLedger";
+import { MachineCases } from "@/components/work/MachineCases";
 import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icon";
 import { getPublicGallery } from "@/lib/content/public";
@@ -21,28 +22,28 @@ export async function generateMetadata({
 }
 
 /**
- * Student work.
+ * Student work and machine notes.
  *
- * With nothing published, this page used to be a short intro, a huge band of
- * nothing, a small "not published yet" note marooned in the middle, and another
- * huge band of nothing — which made the absence the loudest thing on the site.
+ * The page used to filter every sample out, which — with nothing published —
+ * left an intro above a "come and look instead" card, and made the absence of
+ * photography the loudest thing on the site.
  *
- * Now the honest note sits in the intro's own aside, where it reads as context
- * rather than as a hole, and the page spends its remaining height on what a
- * visitor can actually do next. The gallery takes over the moment Content Desk
- * publishes one consented piece.
+ * Two changes fix that without inventing anything. The gallery now shows its
+ * shoot-list rows as what they are: a named planned shot in a photo slot, with
+ * a visible sample tag. And the page gains the proof the studio genuinely does
+ * have — the machine case notes, which are trade facts rather than claims
+ * about anyone, and which are more persuasive to a working operator than a
+ * photograph would be.
  */
 export default async function StudentWorkPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, tc, all] = await Promise.all([
+  const [t, tc, items] = await Promise.all([
     getTranslations("workPage"),
     getTranslations("common"),
     getPublicGallery()
   ]);
-  // Source fallbacks are shot-list entries, not student work. Only real,
-  // consented, Content-Desk-published pieces are shown.
-  const items = all.filter((g) => !g.sample);
+  const anySample = items.some((g) => g.sample);
 
   return (
     <>
@@ -63,47 +64,45 @@ export default async function StudentWorkPage({ params }: { params: Promise<{ lo
         aside={
           <>
             <p className="microlabel !text-vermilion-deep">
-              {items.length > 0 ? t("consentTitle") : t("pendingLabel")}
+              {anySample ? t("pendingLabel") : t("consentTitle")}
             </p>
-            <p className="mt-3">{items.length > 0 ? t("consentBody") : t("pendingNote")}</p>
+            <p className="mt-3">{anySample ? t("pendingNote") : t("consentBody")}</p>
           </>
         }
       />
 
-      {items.length > 0 ? (
-        <section className="section">
-          <div className="container-site">
-            <GalleryGrid items={items} />
-          </div>
-        </section>
-      ) : (
-        /* Nothing to show yet, so the page offers the next best thing: the
-           work itself is on the machines, and you are welcome to come and
-           look at it. No filler, no fabricated gallery. */
-        <section className="section bg-ivory-2">
-          <div className="container-site">
-            <div className="feature-surface grid gap-6 p-6 md:grid-cols-[1.2fr_0.8fr] md:items-center md:gap-10 md:p-8">
-              <div>
-                <h2 className="text-h3 font-display">{t("meanwhileTitle")}</h2>
-                <p className="u-lede">{t("meanwhileBody")}</p>
-              </div>
-              <div className="flex flex-wrap gap-3 md:justify-end">
-                <a
-                  href={waLink(tc("waPrefillDemo"))}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-primary"
-                >
-                  <Icon name="whatsapp" size={18} /> {tc("whatsapp")}
-                </a>
-                <Link href="/contact" className="btn btn-secondary">
-                  {t("visitCta")}
-                </Link>
-              </div>
+      <section className="section">
+        <div className="container-site">
+          <WorkLedger items={items} />
+        </div>
+      </section>
+
+      {/* The proof that does not need a camera. */}
+      <MachineCases />
+
+      <section className="section-compact">
+        <div className="container-site">
+          <div className="surface surface-feature grid gap-6 md:grid-cols-[1.2fr_0.8fr] md:items-center md:gap-10">
+            <div>
+              <h2 className="text-h3 font-display">{t("meanwhileTitle")}</h2>
+              <p className="u-lede">{t("meanwhileBody")}</p>
+            </div>
+            <div className="flex flex-wrap gap-3 md:justify-end">
+              <a
+                href={waLink(tc("waPrefillDemo"))}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary"
+              >
+                <Icon name="whatsapp" size={18} /> {tc("whatsapp")}
+              </a>
+              <Link href="/contact" className="btn btn-secondary">
+                {t("visitCta")}
+              </Link>
             </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
     </>
   );
 }

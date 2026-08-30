@@ -13,10 +13,14 @@ import { trainers } from "@/content/collections";
  * This section used to answer it with three cards whose headings read
  * "Sample: lead trainer name" over empty photo frames — the most damaging
  * moment on the page, because a visitor cannot tell a placeholder from a
- * broken site. Named profiles now appear only once real ones exist. Until
- * then we answer the question with what is actually true and verified about
- * how teaching works here, which is the part a prospective student is really
- * asking about anyway.
+ * broken site. The homepage still answers it with what is actually true and
+ * verified about how teaching works here, which is what a prospective student
+ * is really asking about anyway.
+ *
+ * The full profiles live on /about, where each one carries its own sample tag
+ * and there is room to say what a trainer is the one to ask about. A labelled
+ * profile on a page a visitor chose to open is a different thing from a
+ * placeholder ambushing them on the homepage.
  */
 export function Trainers() {
   const t = useTranslations("home.trainers");

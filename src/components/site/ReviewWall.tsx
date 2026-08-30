@@ -7,32 +7,29 @@ import { sampleReviews } from "@/content/collections";
 import { site, ownerProvidedFacts } from "@/lib/site";
 
 /**
- * Reviews and the Google listing.
+ * The review wall.
  *
- * Two rules shape this section, and both are about not overstating what we
- * have:
+ * A wall, not a slider: a carousel hides seven of eight reviews behind an
+ * interaction, costs JS, and on a phone competes with the page's own scroll.
+ * Eight short reviews in a masonry-ish column set read in one pass and need
+ * nothing to work.
  *
- *  1. The 4.8 is owner-provided, so it is attributed to Google and linked to
- *     the listing where anyone can check it. It is **not** emitted as
- *     `AggregateRating`: we have no verified review count, and a fabricated
- *     rich result is a different order of problem from a labelled card.
- *  2. The three review cards are sample text written to exercise this layout.
- *     Each one carries a visible <SampleTag /> and `sample: true` in source.
+ * Two constraints, both about not overstating what we have:
  *
- * No Maps iframe. A ~600KB embed to prove an address is a bad trade on a
- * phone on mobile data, which is how this audience arrives; the rating, the
- * landmark and one tap to directions do the same job.
- *
- * Three cards, not the full wall: the wall belongs on /success-stories, where
- * a visitor has gone looking for proof.
+ *  1. Every card is sample text, carries `sample: true` in source, and renders
+ *     a visible <SampleTag />.
+ *  2. **Nothing here is emitted as `Review` or `AggregateRating`.** The 4.8 is
+ *     owner-provided and links to the Google listing where it can be checked;
+ *     a fabricated rich result is a different order of problem from a card
+ *     that says what it is.
  */
-export function Reviews() {
-  const t = useTranslations("home.reviews");
+export function ReviewWall() {
+  const t = useTranslations("proof.reviews");
   const locale = useLocale();
   const gu = locale === "gu";
 
   return (
-    <section className="section-compact">
+    <section className="section">
       <div className="container-site">
         <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
           <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} />
@@ -51,13 +48,9 @@ export function Reviews() {
           </a>
         </div>
 
-        <ul className="review-grid u-section-body">
-          {/* Three on the homepage; the full wall lives on /success-stories.
-              Seven review cards here would outweigh the sections above them
-              and add seven more sample tags to a page that already carries
-              several. */}
-          {sampleReviews.slice(0, 3).map((r, i) => (
-            <Reveal as="li" key={r.nameEn} delay={i * 60} className="review-card">
+        <ul className="review-wall u-section-body">
+          {sampleReviews.map((r, i) => (
+            <Reveal as="li" key={r.nameEn} delay={i * 40} className="review-card">
               <p className="review-body">{gu ? r.bodyGu : r.bodyEn}</p>
               <p className="review-by">
                 <span className="review-name">{gu ? r.nameGu : r.nameEn}</span>
