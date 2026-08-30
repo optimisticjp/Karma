@@ -617,7 +617,8 @@
       "submit": "Send the brief",
       "submitting": "Sending…",
       "filesHelp": "Up to 3 files, 8 MB each: PNG, JPG, WebP, PDF, AI or ZIP.",
-      "privacyNote": "By sending, you agree your details are used only to respond to this brief."
+      "privacyNote": "By sending, you agree your details are used only to respond to this brief.",
+      "filesDeferred": "Files are shared on WhatsApp for now — the reference number in your confirmation keeps them with your brief. Private in-form upload is switched on with secure storage."
     },
     "success": {
       "title": "Brief received.",
@@ -640,7 +641,43 @@
       "A stitched or digitized sample before any full run.",
       "Revisions until the sample is right, then delivery."
     ],
-    "afterWhatsapp": "Rather talk it through?"
+    "afterWhatsapp": "Rather talk it through?",
+    "bringTitle": "What you bring",
+    "bringH": "Whatever you actually have.",
+    "bring": [
+      "A photograph of a piece you want matched",
+      "A physical sample with no source file",
+      "Artwork — vector, raster, or a hand drawing",
+      "An existing embroidery file that is not running well",
+      "Just a description of the look, and the garment it goes on"
+    ],
+    "returnTitle": "What comes back",
+    "returnH": "Something a machine can run.",
+    "returns": [
+      "A machine-ready file, in the format your machine takes",
+      "A stitched sample to approve before the full run",
+      "The corrections written down, so the fault does not come back",
+      "Finished production embroidery, if you would rather we ran it",
+      "An honest no, if the technique will not do what the design needs"
+    ],
+    "problemsEyebrow": "Start here",
+    "problemsTitle": "Four situations businesses arrive with.",
+    "problemsSub": "Nobody phones an embroidery studio asking for \"digitising\". They phone because something is not working, or because there is a look they cannot get made.",
+    "problemsReturns": "What you get back",
+    "capabilityTitle": "What the floor can run",
+    "capabilitySub": "The same eleven techniques the school teaches, on the same machines. This list is generated from the course catalogue, so it can never claim a technique the studio does not actually work in.",
+    "projectsTitle": "The shape of a job",
+    "projectsSub": "Generic project types, to show how a brief turns into something a machine can run.",
+    "projectsBrief": "The brief",
+    "projectsDelivered": "Delivered",
+    "projectsFoot": "These are illustrative work types, marked as samples — not real commissions, and not an endorsement by any business. Real client work is published only with the client's permission.",
+    "turnaroundTitle": "Turnaround",
+    "turnaroundBody": "It depends on the technique, the quantity and what is already on the floor, so we would rather agree a date with you than publish one that does not apply to your job. Tell us your deadline in the brief and we will say plainly whether it is workable.",
+    "formatsTitle": "File formats",
+    "formatsBody": "Tell us the format your machine takes and we will deliver in it. If you are not sure, send the file you have or a photograph of the machine plate — that is usually enough to work it out.",
+    "talkTitle": "Or skip the form.",
+    "talkSub": "A five-minute call settles most briefs faster than a written one. You are also welcome to bring the sample to the studio and put it on a machine.",
+    "talkCall": "Call the studio"
   },
   "aboutPage": {
     "eyebrow": "The studio",

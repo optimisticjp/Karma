@@ -5,8 +5,13 @@ import { PageIntro } from "@/components/ui/PageIntro";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Ledger, LedgerRow } from "@/components/ui/Ledger";
 import { Icon } from "@/components/ui/Icon";
-import { services } from "@/content/collections";
-import { waLink } from "@/lib/site";
+import { services, studioProblems, studioProjects } from "@/content/collections";
+import { TechniquePlate } from "@/components/ui/TechniquePlate";
+import { SampleTag } from "@/components/ui/SampleTag";
+import { TrackedLink } from "@/components/site/TrackedLink";
+import { Reveal } from "@/components/ui/Reveal";
+import { coursesByFamily, families } from "@/content/courses";
+import { site, waLink } from "@/lib/site";
 import { pageMeta } from "@/lib/seo";
 
 export async function generateMetadata({
@@ -19,6 +24,21 @@ export async function generateMetadata({
   return pageMeta({ locale, path: "/services", title: t("title"), description: t("description") });
 }
 
+/**
+ * Karma Studio — the business side.
+ *
+ * The student site and this page are aimed at different people, and the
+ * mistake would be to blur them. A student is buying a skill; a boutique or a
+ * production unit is buying a result, and arrives with a problem rather than
+ * a browsing intent. So this page leads with the problems — a sample with no
+ * source file, a design that fails at production speed — and names the
+ * service second.
+ *
+ * Every service on this page is one the studio already advertises. Nothing was
+ * invented to fill the structure out, no turnaround time is promised (none has
+ * been confirmed), and the sample projects are generic work types rather than
+ * named clients.
+ */
 export default async function ServicesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -60,7 +80,90 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
         }
       />
 
+      {/* 2 + 3. What you can bring, and what comes back. The exchange stated
+             plainly, because a buyer's first question is whether their
+             particular mess is something this studio takes. */}
       <section className="section">
+        <div className="container-site split split-even">
+          <div className="surface surface-feature">
+            <p className="microlabel !text-vermilion-deep">{t("bringTitle")}</p>
+            <h2 className="text-h3 mt-3 font-display">{t("bringH")}</h2>
+            <ul className="stack-lines mt-5">
+              {(t.raw("bring") as string[]).map((b) => (
+                <li key={b} className="flex gap-3 text-smallmeta">
+                  <Icon name="check" size={17} strokeWidth={2} className="mt-1 shrink-0 text-vermilion-deep" />
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="surface surface-machine surface-feature">
+            <p className="microlabel">{t("returnTitle")}</p>
+            <h2 className="text-h3 mt-3 font-display">{t("returnH")}</h2>
+            <ul className="stack-lines mt-5">
+              {(t.raw("returns") as string[]).map((r) => (
+                <li key={r} className="flex gap-3 text-smallmeta">
+                  <Icon name="check" size={17} strokeWidth={2} className="mt-1 shrink-0 text-needle-light" />
+                  <span>{r}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Problem-led. A business arrives with a situation, not a noun. */}
+      <section className="section bg-ivory-2">
+        <div className="container-site">
+          <SectionHeading eyebrow={t("problemsEyebrow")} title={t("problemsTitle")} sub={t("problemsSub")} rule />
+          <ol className="case-list u-section-body">
+            {studioProblems.map((p, i) => (
+              <Reveal as="li" key={p.slug} delay={i * 50} className="case-note">
+                <div className="case-head">
+                  <span className="case-index tabular" aria-hidden="true">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="chip">{gu ? p.serviceGu : p.serviceEn}</span>
+                </div>
+                <p className="case-problem">{gu ? p.askGu : p.askEn}</p>
+                <dl className="case-fields">
+                  <div>
+                    <dt className="case-label">{t("problemsReturns")}</dt>
+                    <dd className="case-value">{gu ? p.returnsGu : p.returnsEn}</dd>
+                  </div>
+                </dl>
+              </Reveal>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* 4. Machine capabilities, drawn straight from the catalogue so this
+             page can never claim a technique the studio does not teach. */}
+      <section className="section">
+        <div className="container-site">
+          <SectionHeading title={t("capabilityTitle")} sub={t("capabilitySub")} />
+          <ul className="u-section-body spec-grid">
+            {coursesByFamily.map((c, i) => (
+              <li key={c.slug}>
+                <div className="capability-plate">
+                  <TechniquePlate variant={c.family} seed={i} />
+                </div>
+                <span className="spec-label">
+                  {gu ? families[c.family].nameGu : families[c.family].nameEn}
+                </span>
+                <span className="spec-value mt-1 block">{gu ? c.nameGu : c.nameEn}</span>
+                <span className="spec-note mt-1 block">
+                  {gu ? c.production.machineGu : c.production.machineEn}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* The service list, kept as the plain index it always was. */}
+      <section className="section-compact bg-ivory-2">
         <div className="container-site">
           <SectionHeading title={t("whatTitle")} sub={t("whatSub")} />
           <dl className="u-section-body spec-grid">
@@ -71,6 +174,38 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
               </div>
             ))}
           </dl>
+        </div>
+      </section>
+
+      {/* 7. Sample work: generic project types, tagged. A named client or a
+             logo would be an endorsement nobody gave. */}
+      <section className="section">
+        <div className="container-site">
+          <SectionHeading title={t("projectsTitle")} sub={t("projectsSub")} />
+          <ul className="project-grid u-section-body">
+            {studioProjects.map((pr, i) => (
+              <Reveal as="li" key={pr.titleEn} delay={i * 60} className="project-card">
+                <p className="chip">{gu ? pr.techniqueGu : pr.techniqueEn}</p>
+                <h3 className="project-title">{gu ? pr.titleGu : pr.titleEn}</h3>
+                <dl className="case-fields">
+                  <div>
+                    <dt className="case-label">{t("projectsBrief")}</dt>
+                    <dd className="case-value">{gu ? pr.briefGu : pr.briefEn}</dd>
+                  </div>
+                  <div>
+                    <dt className="case-label">{t("projectsDelivered")}</dt>
+                    <dd className="case-value">{gu ? pr.deliveredGu : pr.deliveredEn}</dd>
+                  </div>
+                </dl>
+                {pr.sample ? (
+                  <p className="mt-4">
+                    <SampleTag />
+                  </p>
+                ) : null}
+              </Reveal>
+            ))}
+          </ul>
+          <p className="review-foot">{t("projectsFoot")}</p>
         </div>
       </section>
 
@@ -91,6 +226,17 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
           </div>
           <div>
             <SectionHeading title={t("guideTitle")} sub={t("guideSub")} />
+            {/* Turnaround and formats: said honestly rather than guessed.
+                No delivery time has been confirmed by the studio, and no
+                verified list of supported machine formats exists, so both
+                answers are "tell us and we will match it" — which is also
+                the truthful answer for job work of this kind. */}
+            <div className="surface mt-6">
+              <p className="case-label">{t("turnaroundTitle")}</p>
+              <p className="mt-2 text-smallmeta text-stone">{t("turnaroundBody")}</p>
+              <p className="case-label mt-5">{t("formatsTitle")}</p>
+              <p className="mt-2 text-smallmeta text-stone">{t("formatsBody")}</p>
+            </div>
             <ul className="mt-8 space-y-3.5">
               {guide.map((g) => (
                 <li key={g} className="flex gap-3">
@@ -140,6 +286,43 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
               <Icon name="whatsapp" size={18} /> {t("afterWhatsapp")}
             </a>
           </aside>
+        </div>
+      </section>
+
+      {/* 11. The three ways a business actually gets in touch. */}
+      <section className="section-compact bg-sand">
+        <div className="container-site split">
+          <div>
+            <SectionHeading title={t("talkTitle")} sub={t("talkSub")} />
+          </div>
+          <div className="action-row">
+            <TrackedLink
+              href={`tel:+${site.callPhone}`}
+              event="call_demo_click"
+              props={{ surface: "services" }}
+              className="btn btn-primary"
+            >
+              <Icon name="phone" size={17} /> {t("talkCall")}
+            </TrackedLink>
+            <TrackedLink
+              href={waLink(tc("waPrefillBusiness"))}
+              event="whatsapp_click"
+              props={{ surface: "services" }}
+              external
+              className="btn btn-secondary"
+            >
+              <Icon name="whatsapp" size={18} /> {tc("whatsapp")}
+            </TrackedLink>
+            <TrackedLink
+              href={site.mapsUrl}
+              event="directions_click"
+              props={{ surface: "services" }}
+              external
+              className="cta-tertiary"
+            >
+              <Icon name="pin" size={16} /> {tc("directions")}
+            </TrackedLink>
+          </div>
         </div>
       </section>
     </>

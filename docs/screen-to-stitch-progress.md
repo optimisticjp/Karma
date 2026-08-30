@@ -451,7 +451,7 @@ Update this table after every completed/merged phase.
 | 3 | Courses / production-led detail pages | ✅ Complete + merged | PR #14 — `build` + Cloudflare Workers Builds green |
 | 4 | Proof ecosystem: work, stories, reviews, trainers | ✅ Complete + merged | PR #15 — `build` + Cloudflare Workers Builds green |
 | 5 | Mobile conversion / call / directions / demo | ✅ Complete + merged | PR #16 — `build` + Cloudflare Workers Builds green |
-| 6 | Studio / B2B commercial embroidery | ⏳ Pending | |
+| 6 | Studio / B2B commercial embroidery | 🚧 In progress | branch `phase-6/studio-b2b` |
 | 7 | Machine Notes / social-to-search content | ⏳ Pending | |
 | 8 | Local SEO / structured data / measurement | ⏳ Pending | |
 | 9 | Accessibility / performance / responsive hardening | ⏳ Pending | |
@@ -1473,6 +1473,79 @@ Use honest deferred upload states.
 Sample B2B projects may be fictional but generic (e.g. “Bridal blouse panel”), not fake endorsements from real companies.
 
 Merge when green; update progress.
+
+## Implementation record
+
+### The positioning problem, and how it was solved
+A student is buying a skill; a boutique or a production unit is buying a
+result, and arrives with a problem rather than a browsing intent. The old page
+led with a list of service nouns, which is what every embroidery unit's page
+looks like.
+
+So the page now leads with **the four situations businesses actually arrive
+with** — a sample with no source file, a design that fails at production
+speed, bead or sequence placement that will not hold across a length, a look
+with no design yet — and names the service second. A buyer recognises
+themselves in a situation; they do not recognise themselves in "digitising".
+
+### Sections built
+1. **B2B positioning hero** — unchanged framing, kept.
+2 + 3. **What you bring / what comes back** — the exchange stated plainly as a
+   pair, the second panel on `.surface-machine` so the two read as a trade.
+4. **Machine capability** — generated from `coursesByFamily`, so the studio
+   page **cannot claim a technique the school does not teach**. That is the
+   whole reason it is generated rather than written.
+5. **Reference → production-ready workflow** — the existing five-step ledger.
+6. **Production problems** — the four above, on the Phase 4 case-note
+   primitive. A business reading "what you get back" is reading the same shape
+   as a machine note, deliberately.
+7. **Sample B2B work** — three generic project types, each tagged.
+8. **Turnaround** — see below.
+9. **File formats** — see below.
+10. **Brief form** — preserved, with one change (below).
+11. **Call / WhatsApp / directions**, all three tracked.
+
+### Decisions
+
+1. **No turnaround is promised, and the page says why.** None has been
+   confirmed by the owner, and a wrong delivery date costs a customer rather
+   than credibility. The copy says it depends on technique, quantity and
+   what is on the floor, and asks for the buyer's deadline instead — which is
+   also the truthful answer for job work of this kind.
+2. **No machine file format is claimed as supported.** Naming `.dst`, `.emb`
+   or `.pes` is a compatibility promise nobody has verified. The page asks
+   what the buyer's machine takes and offers to work it out from a photograph
+   of the machine plate. A test blocks those extensions from the copy.
+3. **The file upload field is gone until R2 is bound.** This is not
+   cosmetic: with the binding missing, an attached file *fails the request in
+   production and is silently dropped in demo mode*. Offering the input was
+   promising something that could not happen, and losing a business's artwork
+   is the most expensive way to discover that. The brief now says files go via
+   WhatsApp against the reference number. `MAX_FILES` and `MAX_FILE_BYTES`
+   stay imported and the API route is untouched, so restoring the field is a
+   few lines the day the bucket exists.
+4. **Sample projects are work types, never clients.** "Bridal blouse panel" is
+   a description of ordinary trade work and is safe as an illustration; a
+   named company, a logo or an implied endorsement is not. A test blocks
+   `ltd`, `pvt`, `®` and `™` from that content.
+
+### Backend preserved
+The brief API, Design Desk CRM, audit logging, service enquiry/status model
+and file metadata model are all untouched. Only the form's file input and the
+page's composition changed.
+
+### Tests (`tests/studio-b2b.test.ts`, 9 new — 228 total)
+No turnaround claim; no file-format claim; no file input while storage is off;
+the API's file guards still imported; capability generated from the catalogue;
+every problem maps to a service the studio already offers; sample projects
+carry no company markers; every studio row has both languages.
+
+### Verification
+`npm run typecheck`, `npm run lint`, `npm test` (**228 passing**) and
+`npm run build` all clean. Audited at 320, 360, 375, 390, 430, 768, 820, 1024,
+1280, 1440 and 1728 in both locales: nine sections, four problems, three
+tagged projects, **no file input**, zero horizontal overflow and zero
+sub-24px non-inline targets at every width.
 
 ---
 
