@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageHead } from "@/components/admin/PageHead";
 import { redirect } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
@@ -15,7 +16,7 @@ export default async function CertificatesPage() {
   if (!canView) redirect("/admin/no-access?reason=permission");
   const copy = certificatesCopy(session.staff.adminLocale);
   const db = getDb();
-  if (!db) return <div className="max-w-[78rem]"><Heading title={copy.title} lede={copy.lede} /><p className="alert alert-error mt-8">Database unavailable.</p></div>;
+  if (!db) return <div className="max-w-[78rem]"><PageHead title={copy.title} context={copy.lede} /><p className="alert alert-error mt-8">Database unavailable.</p></div>;
 
   const [enrollments, attendanceRows, certificates] = await Promise.all([
     db.select({
@@ -68,7 +69,7 @@ export default async function CertificatesPage() {
 
   return (
     <div className="max-w-[80rem]">
-      <Heading title={copy.title} lede={copy.lede} />
+      <PageHead title={copy.title} context={copy.lede} />
       <div className="mt-8 grid gap-4 sm:grid-cols-3"><Metric label={copy.eligible} value={eligibleCount} /><Metric label={copy.issued} value={issuedCount} /><Metric label={copy.revoked} value={revokedCount} /></div>
       <p className="form-note mt-5">{copy.r2Note}</p>
       {!canManage ? <p className="form-note mt-3">{copy.viewOnly}</p> : null}
@@ -96,7 +97,6 @@ export default async function CertificatesPage() {
   );
 }
 
-function Heading({ title, lede }: { title: string; lede: string }) { return <div><h1 className="text-h2">{title}</h1><span aria-hidden className="rule-stitch is-in" /><p className="u-lede">{lede}</p></div>; }
 function Metric({ label, value }: { label: string; value: number }) { return <div className="panel panel-body"><p className="microlabel">{label}</p><p className="text-h3 mt-2">{value}</p></div>; }
 function Fact({ label, value }: { label: string; value: string }) { return <div><dt className="microlabel">{label}</dt><dd className="text-smallmeta mt-1">{value}</dd></div>; }
 function formatDate(value: string, locale: "en" | "gu") { return new Intl.DateTimeFormat(locale === "gu" ? "gu-IN" : "en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kolkata" }).format(new Date(`${value}T00:00:00+05:30`)); }

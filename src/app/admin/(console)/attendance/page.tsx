@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageHead } from "@/components/admin/PageHead";
 import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
@@ -19,7 +20,7 @@ export default async function AttendancePage({ searchParams }: Props) {
   const copy = attendanceCopy(session.staff.adminLocale);
   const sheets = printCopy(session.staff.adminLocale);
   const db = getDb();
-  if (!db) return <div className="max-w-[76rem]"><Heading title={copy.title} lede={copy.lede} /><p className="alert alert-error mt-8">Database unavailable.</p></div>;
+  if (!db) return <div className="max-w-[76rem]"><PageHead title={copy.title} context={copy.lede} /><p className="alert alert-error mt-8">Database unavailable.</p></div>;
 
   const params = await searchParams;
   const today = kolkataDate();
@@ -85,7 +86,7 @@ export default async function AttendancePage({ searchParams }: Props) {
 
   return (
     <div className="max-w-[76rem]">
-      <Heading title={copy.title} lede={copy.lede} />
+      <PageHead title={copy.title} context={copy.lede} />
       <form method="get" className="panel panel-body mt-8 grid gap-4 md:grid-cols-[1fr_14rem_auto] md:items-end">
         <Field label={copy.batch} htmlFor="attendance-batch">
           <select id="attendance-batch" name="batch" className="input" defaultValue={selectedBatchId ? String(selectedBatchId) : ""} required>
@@ -112,7 +113,6 @@ export default async function AttendancePage({ searchParams }: Props) {
   );
 }
 
-function Heading({ title, lede }: { title: string; lede: string }) { return <div><h1 className="text-h2">{title}</h1><span aria-hidden className="rule-stitch is-in" /><p className="u-lede">{lede}</p></div>; }
 function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) { return <div><label className="label" htmlFor={htmlFor}>{label}</label>{children}</div>; }
 function kolkataDate() { return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date()); }
 function formatDate(value: string, locale: "en" | "gu") { return new Intl.DateTimeFormat(locale === "gu" ? "gu-IN" : "en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${value}T00:00:00+05:30`)); }

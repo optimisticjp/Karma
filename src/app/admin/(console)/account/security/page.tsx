@@ -1,4 +1,5 @@
 import { requireAdmin } from "@/lib/auth/guard";
+import { PageHead } from "@/components/admin/PageHead";
 import { getAdminT } from "@/lib/admin/i18n";
 import { PERMISSION_GROUPS } from "@/lib/auth/permissions";
 import { hasPermission } from "@/lib/auth/access";
@@ -24,9 +25,7 @@ export default async function AccountSecurityPage() {
 
   return (
     <div className="max-w-[48rem]">
-      <h1 className="text-h2">{t("account.title")}</h1>
-      <span aria-hidden className="rule-stitch is-in" />
-      <p className="u-lede">{t("account.lede")}</p>
+      <PageHead title={t("account.title")} context={t("account.lede")} />
 
       <section className="panel mt-10">
         <div className="panel-body">

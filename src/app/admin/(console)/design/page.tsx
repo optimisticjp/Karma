@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageHead } from "@/components/admin/PageHead";
 import { redirect } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
@@ -19,7 +20,7 @@ export default async function DesignPage({ searchParams }: Props) {
   if (!canView) redirect("/admin/no-access?reason=permission");
   const copy = designCopy(session.staff.adminLocale);
   const db = getDb();
-  if (!db) return <div className="max-w-[80rem]"><Heading title={copy.title} lede={copy.lede} /><p className="alert alert-error mt-8">Database unavailable.</p></div>;
+  if (!db) return <div className="max-w-[80rem]"><PageHead title={copy.title} context={copy.lede} /><p className="alert alert-error mt-8">Database unavailable.</p></div>;
 
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q.trim().toLowerCase().slice(0, 120) : "";
@@ -68,7 +69,7 @@ export default async function DesignPage({ searchParams }: Props) {
 
   return (
     <div className="max-w-[82rem]">
-      <Heading title={copy.title} lede={copy.lede} />
+      <PageHead title={copy.title} context={copy.lede} />
       <div className="mt-8 grid gap-4 sm:grid-cols-3"><Metric label={copy.jobsShown} value={jobs.length} /><Metric label={copy.needsAction} value={needsAction} /><Metric label={copy.dueSoon} value={dueSoon} /></div>
       <p className="form-note mt-5">{copy.r2Note}</p>
 
@@ -114,7 +115,6 @@ export default async function DesignPage({ searchParams }: Props) {
 }
 
 function groupBy<T>(items: T[], key: (item: T) => number) { const map = new Map<number, T[]>(); for (const item of items) { const id = key(item); const list = map.get(id) ?? []; list.push(item); map.set(id, list); } return map; }
-function Heading({ title, lede }: { title: string; lede: string }) { return <div><h1 className="text-h2">{title}</h1><span aria-hidden className="rule-stitch is-in" /><p className="u-lede">{lede}</p></div>; }
 function Metric({ label, value }: { label: string; value: number }) { return <div className="panel panel-body"><p className="microlabel">{label}</p><p className="text-h3 mt-2">{value}</p></div>; }
 function Fact({ label, value }: { label: string; value: string }) { return <div><dt className="microlabel">{label}</dt><dd className="text-smallmeta mt-1">{value}</dd></div>; }
 function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) { return <div><label className="label" htmlFor={htmlFor}>{label}</label>{children}</div>; }

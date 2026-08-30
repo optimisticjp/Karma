@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PageHead } from "@/components/admin/PageHead";
 import { asc, desc, eq } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
@@ -205,7 +206,7 @@ export default async function ContentPage() {
 }
 
 function Header({ title, lede }: { title: string; lede: string }) {
-  return <div><h1 className="text-h2">{title}</h1><span aria-hidden className="rule-stitch is-in" /><p className="u-lede">{lede}</p></div>;
+  return <PageHead title={title} context={lede} />;
 }
 
 function Metric({ label, value }: { label: string; value: number }) {

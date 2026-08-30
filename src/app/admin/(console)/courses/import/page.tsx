@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageHead } from "@/components/admin/PageHead";
 import { requireOwner } from "@/lib/auth/guard";
 import { VERIFIED_CATALOG_ROWS, VERIFIED_OPERATIONS_ROWS } from "@/lib/admin/catalog-import";
 import { applyVerifiedOperationsAction, importVerifiedCatalogAction } from "./actions";
@@ -14,13 +15,14 @@ export default async function ImportCourseCataloguePage({
 
   return (
     <div className="max-w-[48rem]">
-      <h1 className="text-h2">{gu ? "કોર્સ કેટલોગ ઇમ્પોર્ટ" : "Import course catalogue"}</h1>
-      <span aria-hidden className="rule-stitch is-in" />
-      <p className="u-lede">
-        {gu
-          ? "Karmaના verified course catalogueમાંથી missing courses ઉમેરો. પહેલેથી આવેલા slugs બદલાશે નહીં."
-          : "Add missing courses from Karma's verified catalogue. Existing course slugs are left untouched."}
-      </p>
+      <PageHead
+        title={gu ? "કોર્સ કેટલોગ ઇમ્પોર્ટ" : "Import course catalogue"}
+        context={
+          gu
+            ? "Karmaના verified course catalogueમાંથી missing courses ઉમેરો. પહેલેથી આવેલા slugs બદલાશે નહીં."
+            : "Add missing courses from Karma's verified catalogue. Existing course slugs are left untouched."
+        }
+      />
 
       {error ? (
         <p className="alert alert-error mt-8">

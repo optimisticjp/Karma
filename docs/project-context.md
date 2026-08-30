@@ -513,6 +513,32 @@ Students keeps `?student=<id>` instead — a master/detail selection has to
 survive a reload and be pasteable, which a fragment does not. A record id still
 may not appear in a path, because there are no per-record routes.
 
+**Remaining console modules (Phase 12).** Every console page now uses
+`<PageHead>`; a test fails on any `<h1 className="text-h2">` or local heading
+helper, so a ninth copy cannot creep back. The phase's real deliverable is a
+test that fails when one of §41–§46's decisions is undone: the attendance lock
+is server-computed (`sessionIsLocked`), certificates have **no file pipeline**
+(no `R2Bucket`, `putObject`, presigned URL or PDF library), the twelve
+design-job statuses are asserted against the enum, Content Desk stays a typed
+CMS (no `contentEditable`, no rich-text editor), Reports is not a BI dashboard,
+and Team keeps one Owner / five Admins / the `karma_staff_invariants` trigger /
+Owner-only administration / **no MFA gate**. The deletion-tombstone test now
+asserts the `auditLogs` insert happens **before** the `tx.delete`, not merely
+that the file mentions audit.
+
+**Remaining console modules (Phase 12).** Every console page now uses
+`<PageHead>`; a test fails on any `<h1 className="text-h2">` or local heading
+helper, so a ninth copy cannot creep back. The phase's real deliverable is a
+test that fails when one of §41-§46's decisions is undone: the attendance lock
+is server-computed (`sessionIsLocked`), certificates have **no file pipeline**
+(no `R2Bucket`, `putObject`, presigned URL or PDF library), the twelve
+design-job statuses are asserted against the enum, Content Desk stays a typed
+CMS (no `contentEditable`, no rich-text editor), Reports is not a BI dashboard,
+and Team keeps one Owner / five Admins / the `karma_staff_invariants` trigger /
+Owner-only administration / **no MFA gate**. The deletion-tombstone test now
+asserts the `auditLogs` insert happens **before** the `tx.delete`, not merely
+that the file mentions audit.
+
 **The 32-photograph manifest.** `src/content/photo-manifest.ts` is the typed
 list of every shot on the owner's final brief, with each slot's intrinsic
 dimensions. `<ManifestPhoto id="…">` reserves the photograph's exact aspect
@@ -1797,7 +1823,7 @@ modules are importable in a test runner while the guard stays real in the app.
 `jsx: "preserve"` for Next.js — without the override a test importing a `.tsx`
 component sees raw JSX and fails to parse.
 
-**43 test files, 609 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
+**44 test files, 628 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
 which is the point — the policy survives a refactor:
 
 | Test | Guards |
@@ -1805,6 +1831,8 @@ which is the point — the policy survives a refactor:
 | `i18n-parity` | EN/GU catalogue keys mirror exactly |
 | `machine-lab-system` | the design system v4 foundation: 32-photo manifest, icon family, eleven technique signatures, stitch semantics, motion levels, Gujarati overrides, reduced motion, no new dependency |
 | `machine-lab-shell` | the hero states EMCAD/machine/Surat/demo without photography; one course's facts never become the site's; one continuous thread and one Level-4 moment; the rail never autoplays, loops or needs a drag; bands never re-point the palette; the mobile bar keeps exactly two actions |
+| `machine-lab-modules` | one page-header implementation across the whole console; the attendance lock, the certificate no-file-pipeline rule, the twelve design statuses, Content Desk staying typed, Reports not becoming BI, and the one-Owner/five-Admin/no-MFA access model all fail the suite if undone; the deletion tombstone is written before the delete |
+| `machine-lab-modules` | one page-header implementation across the whole console; the attendance lock, the certificate no-file-pipeline rule, the twelve design statuses, Content Desk staying typed, Reports not becoming BI, and the one-Owner/five-Admin/no-MFA access model all fail the suite if undone; the deletion tombstone is written before the delete |
 | `machine-lab-operations` | one shared console page header, no local copies; every deep-linkable row is anchored and the queues link to those anchors; direct admission, the record-action policy, the full fee picture, receipt/statement printing and the derived (never stored) fee status all survive; schedule options and dated batches stay separate |
 | `machine-lab-console` | the console imports no public decorative component and no chart library; Today at Karma shows queues not metric cards; queues are permission-gated and capped; every queue href resolves to a real route; no phone number in a queue row; a status is never colour alone; authorization untouched |
 | `machine-lab-secondary` | no page renders an English field without a Gujarati branch; route parity is structural and the console stays outside `[locale]`; every indexable page has hreflang; the 404's broken path stays on the 404; loading animates nothing; verify and the legal pages stay motion-free |
