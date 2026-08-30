@@ -1471,6 +1471,18 @@ The register lives in `docs/content-checklist.md` (16 numbered questions) and
 | — | **Data retention** period for DPDP (12 months drafted in `/privacy`). |
 | — | Which staff get admin accounts, and which permission template each. |
 
+Questions the **repository itself** raises, which only the owner or the live
+environment can answer:
+
+| Question |
+| --- |
+| Has the temporary runtime `DATABASE_URL` secret actually been deleted from the Worker now that Hyperdrive is bound? `docs/deployment.md` §5c says to; nothing in the repo can confirm it. |
+| Has the required Cloudflare WAF rate-limiting rule on `/api/*` actually been created? The repo can only assert that it is required. |
+| Is `ALLOW_DEMO_MODE` set on any deployed environment? It must never be on production. |
+| Was Supabase TOTP enabled by following the (now-corrected) setup docs? If so it should be turned off — Karma has no UI to enrol, use or recover a factor. |
+| Should `content_items` join the weekly backup, `audit_logs` get indexes and a retention policy, and the deprecated `students.pin` / `applications.message` columns finally be dropped? |
+| Should `/api/health` keep gating `ok` on `TURNSTILE_SECRET_KEY` while Turnstile is deliberately deferred? As written, a correctly-deployed production Worker reports 503 until the owner finishes Turnstile — intentional, but it makes an uptime monitor hard to use in the meantime. |
+
 **Resolved and recorded**, so nobody re-asks: the address and landmarks (Q2);
 the landline (half of Q3); the 11-course catalogue; that Zardosi leads the
 display order; and that Karma Console is password-only.
@@ -1576,6 +1588,149 @@ Things that have cost time before, or would.
   `[team]`, `[login]`, `[dashboard]`, `[admission]`, `[brief]`, `[turnstile]`,
   `[email]`. None of them ever prints a secret — keep it that way.
 
+### Traps in the code that look like bugs and are not
+
+Each of these has been "fixed" by someone before, or is one edit away from
+being. They are load-bearing.
+
+- **`premium.css` is deliberately unlayered.** Wrapping it in `@layer
+  components` inverts the cascade and lets `globals.css` win — the radius
+  overrides, `.on-carbon`, `.bg-sand` and every `.hero-*` / `.page-intro-*`
+  heading rule depend on unlayered specificity.
+- **Because it outranks `@layer base`, any heading styled in `premium.css` must
+  restate the Gujarati overrides** (line-height 1.3, letter-spacing 0) or
+  Gujarati inherits Latin tracking. There is a block doing this for
+  `.hero-title` / `.page-intro-title` / `.console-page-title`; a new display
+  heading needs adding to it.
+- **A `--text-*` token is three values, not one.** Setting only `font-size`
+  drops the paired line-height and letter-spacing and the heading falls back to
+  body 1.625. That was the cause of "every display heading reads airy".
+- **Design token *names* are frozen.** `globals.css` is shared with Karma
+  Console, so a rename silently restyles the admin. v3 retuned values and added
+  tokens; it renamed nothing.
+- **`tests/hardening.test.ts` deliberately asserts that the base tokens FAIL on
+  sand.** That failing assertion is the documentation for why `.bg-sand`
+  re-points its own text colours. Do not "fix" it.
+- **`.tabbar-list` is declared twice in `premium.css`** — `repeat(5, …)` then
+  overridden to `repeat(2, …)` a few rules later, a leftover from the five-tab
+  version. Editing only the first declaration changes nothing.
+- **The header's desktop nav appears at `xl` (1280px) and the mobile bar hides
+  at exactly 1280px.** The breakpoints are paired on purpose; changing one
+  leaves a range with neither navigation nor actions.
+- **The `HYPERDRIVE` binding name is hard-coded** in `src/lib/db/index.ts`.
+  Renaming it in `wrangler.jsonc` does not error — it silently drops the Worker
+  onto the `DATABASE_URL` fallback.
+- **`--keep-vars` on the deploy command is load-bearing.** Dropping it wipes
+  every dashboard-set variable that is not in `wrangler.jsonc`.
+- **`ssl: false` is set only on the Hyperdrive path** (Hyperdrive terminates
+  TLS to the origin); the direct `DATABASE_URL` carries its own `sslmode`. Do
+  not unify them.
+- **A `DATABASE_URL` containing the substring `placeholder` is treated as
+  unconfigured** by `directUrl()`. A real connection string containing that
+  word would be silently ignored.
+- **Turnstile's helper fails OPEN** (`ok: true, skipped: true`) when the secret
+  is absent. Fail-closed is a *separate* per-route check
+  (`isProduction && !demoModeAllowed && !TURNSTILE_SECRET_KEY → 503`). **Any
+  new public endpoint must repeat that guard** — the helper will not do it.
+- **`src/lib/content/public.ts` silently swallows Postgres `42P01`**
+  (undefined table) so code could ship before migration `0003` was applied.
+  That silence also hides a genuinely dropped `content_items` table.
+- **`writeAudit()` never throws, by design** — an audit write failure must not
+  roll back a mutation the operator was already told succeeded. Where atomicity
+  matters, `auditValues()` is used inside the same transaction.
+- **`staff_role` enum values are positional and appended, never reordered.**
+  The order is exactly `('admin','trainer','owner')`.
+- **`uq_staff_console_email`'s predicate must stay `role <> 'trainer'`**, not
+  `role in ('owner','admin')`. Index predicates must be `IMMUTABLE`, and the
+  migration adding `'owner'` cannot evaluate the new value in the same
+  transaction. It also auto-covers any future console role.
+- **`staff.auth_user_id` is `varchar(64)`, not `uuid`, on purpose** — pre-existing
+  rows may hold non-UUID values, and a destructive cast was rejected under the
+  additive-migrations rule. There is no FK to `auth.users`.
+- **`fee_records` amounts are whole INR integers** by convention. Moving to
+  decimals is a data migration, not a type tweak.
+- **`batches.language` has a Gujarati literal default** baked into the DDL.
+  Check encoding before any manual DDL edit.
+- **`content_items.published_at` is cleared when status leaves `published`, but
+  consent and owner-verified timestamps are preserved.** Do not normalise these
+  to the same behaviour — they answer different questions.
+- **Any admin (non-owner) edit force-resets `ownerVerified` to false.** That is
+  a deliberate re-verification requirement, so only the Owner can publish a
+  homepage stat.
+- **`getPublicStories` / `getPublicGallery` replace the source samples
+  wholesale** the moment one managed row exists; they never mix. `getPublicFaqs`
+  is the deliberate exception — managed FAQs merge ahead of non-duplicate source
+  ones. Do not "fix" the asymmetry.
+- **`techniqueChips` (collections.ts) must stay in sync with
+  `GALLERY_TECHNIQUES`** (`src/lib/admin/content.ts`). A technique selectable in
+  Content Desk with no chip renders blank on the public gallery.
+- **The reviews' `bodyEn` fields are deliberately Gujlish** (romanised
+  Gujarati). That is how the audience writes; it is not a translation bug.
+- **The homepage Trainers section filters to `sample: false` and therefore
+  renders zero cards today**, on purpose. A "coming soon" marker was explicitly
+  rejected as reading like a broken site.
+- **`/admission` (the form) and `/admissions` (the information page) are both
+  real** and both linked. They are not duplicates.
+- **The locale layout's title template is `%s`**, so `pageMeta` titles render
+  verbatim and several already include "| Karma Design Studio". Adding a
+  template suffix would double it.
+- **Admin module copy lives in `src/lib/admin/*-copy.ts`, not in
+  `messages/{en,gu}.json`** — so the mechanical i18n parity test does **not**
+  cover it. EN/GU parity there is held only by
+  `satisfies Record<AdminLocale, …Copy>`.
+- **`dashboard.view` and `settings.view` exist in `PERMISSIONS` but are never
+  checked anywhere.** `/admin` requires only `requireAdmin()`. Removing them
+  breaks the permission editor and the message catalogues; adding a real gate
+  would silently lock out admins whose grants omit them.
+- **`safeNextPath` still blacklists `/admin/mfa`** and the login page still has
+  a dead `mfa-setup`/`mfa-challenge` branch. Both are legacy compatibility, and
+  a test pins the blacklist. Do not read either as evidence that MFA routes
+  exist, and do not "fix" the dead branch by making `evaluateAccess` emit those
+  reasons.
+- **The AAL plumbing is still live even though it gates nothing**:
+  `guard.ts` calls `getAssuranceLevel()` on every guarded request (a local JWT
+  decode, but it constructs a second cookie-backed Supabase client). Removing it
+  is safe **only** together with `AccessSubject.currentLevel`/`nextLevel`, which
+  `tests/auth-guard.test.ts` and `tests/permissions.test.ts` construct.
+
+### Built, but deliberately not wired
+
+Present in the tree, imported nowhere or rendered nowhere. **None of it is dead
+code to delete on sight** — each was built for a use that has not arrived.
+
+- `<StitchDivider>`, `<PullQuote>`, `ScreenToStitch.tsx` (the screen→stitch
+  range slider, reserved for a future course-detail page), `GalleryGrid.tsx`
+  (client-side technique filters + masonry; `/student-work` uses `WorkLedger`).
+- `.accent-italic` and `.section-major` in `globals.css`, both applied on zero
+  screens. The hero uses its own rhythm deliberately — a full major top pad
+  pushed the headline 215px down.
+- `/admin/courses/import` — the **route** is intentionally kept and still
+  owner-guarded; only the "Import verified catalogue" **button** was removed at
+  the owner's request (2026-08-30). Restoring the button is a few lines. Do not
+  delete the route as dead code.
+- `DESIGN_AUDIT_ACTIONS.fileDownloaded` — declared, no call site, waiting on R2.
+- `certificates.pdf_key` and `service_files.r2_key` columns, and `src/lib/r2.ts`
+  — all written ahead of the R2 binding.
+- The certificate print page renders a Print button as a server component with
+  `onClick={undefined}`; it is inert by construction and the instruction text
+  tells staff to use the browser print menu.
+
+### Known gaps found during the 2026-08-30 memory audit, and deliberately left alone
+
+Recorded rather than fixed, because each needs an owner decision and none was in
+scope for a documentation change. **Do not treat these as invisible.**
+
+| Gap | Why it matters |
+| --- | --- |
+| **`content_items` is not in `scripts/backup.ts`'s `TABLES` list** (18 entries, written before migration `0003`). | Every Content Desk row is outside the weekly CSV backup. A one-line fix, but it widens what the PII-bearing artifact contains. |
+| **The certificate print page hard-codes the `workers.dev` verify origin** instead of deriving it from `site.url`. | It will keep pointing at `workers.dev` after the domain cutover — exactly what `docs/launch-checklist.md` §2 says never to do. |
+| **`public/llms.txt` hard-codes `karmadesignstudio.in` URLs** while everything else derives from `NEXT_PUBLIC_SITE_URL`. | The two disagree today, and the cutover must update both. |
+| **The CSV export route writes no audit row.** | Exporting student, fee and design data is the one sensitive operation that leaves no trace beyond the Worker log. There is no audit action constant for `exports.run`. |
+| **Reference and receipt years are derived inconsistently** — students use IST (`kolkataDate`), but the admissions reference and fee `receiptNo` use the Worker's UTC year. | Between 00:00 and 05:30 IST on 1 January they produce the previous year. |
+| **Migration `0002` revokes on tables only, not on the 18 tables' identity sequences.** Only `0003` revokes a sequence. | An inconsistency in the Data API lockdown, not a known hole. |
+| **`audit_logs` has no indexes and no FK on actor**, and no retention policy. | Reporting queries scan it; it only grows. |
+| **The owner may have already enabled Supabase TOTP** by following the setup docs this PR corrected. | Supabase would then permit factor enrolment that Karma has no UI to enrol, use or recover. Worth confirming and, if so, turning off in the dashboard. |
+
 ---
 
 ## 43. Do not undo these decisions
@@ -1616,6 +1771,16 @@ most expensive thing a future session can do here.
     always-prefixed with no browser-language auto-redirect.
 20. **The design system is Screen to Stitch (v3)** — not a generic system, and
     not the one belonging to the vendored skill template.
+21. **`premium.css` stays unlayered**, and design token *names* stay frozen —
+    `globals.css` is shared with Karma Console.
+22. **`staff_role` enum values stay in order**, `uq_staff_console_email` keeps
+    its `role <> 'trainer'` predicate, and `staff.auth_user_id` stays
+    `varchar(64)`.
+23. **`writeAudit()` keeps never throwing**, and the `karma_staff_invariants`
+    trigger is never dropped to make a migration easier — the trigger is the
+    guarantee; the application checks are only the message.
+24. **The mobile bar stays two actions, not navigation**, and its 1280px
+    breakpoint stays paired with the header's.
 
 ---
 

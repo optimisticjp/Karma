@@ -44,6 +44,19 @@ every `@id` in `src/lib/schema.ts` derive from `site.url`. So the cutover is:
 **Do not hand-edit URLs anywhere.** If a URL is hardcoded somewhere, that is
 the bug — fix the source rather than the symptom.
 
+**Two places currently break that rule and must be fixed as part of the
+cutover** (found in the 2026-08-30 documentation audit, deliberately not
+changed then):
+
+- `src/app/admin/(console)/certificates/print/[certNo]/page.tsx` hard-codes
+  `https://karma-design-studio.essanciaonline.workers.dev/en/verify/…` for the
+  certificate verification URL instead of deriving it from `site.url`. Every
+  certificate printed after the cutover would carry a `workers.dev` link.
+- `public/llms.txt` hard-codes `karmadesignstudio.in` URLs, so it already
+  disagrees with every other canonical while the site runs on `workers.dev`.
+
+Fix the source in both — do not paper over either with a redirect.
+
 ## 3. Custom domain in Cloudflare
 
 Add the domain to the Worker (Workers & Pages → the service → Settings →
