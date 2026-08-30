@@ -386,6 +386,18 @@ is likewise unlayered and imported **after** `premium.css` in both root layouts
 | Machine notation | `src/components/ui/MonoNote.tsx` | `01 DESIGN`, `EMCAD / PATH`, indexes. Not body copy, not navigation, not buttons. |
 | Textures, glass, machine light, motion utilities, signature CSS | `src/app/machine-lab.css` | One glass treatment only (`.lab-glass`); there is deliberately no card variant. |
 
+**The shell (Phase 2).** The hero is the homepage's MACHINE band — dark, via
+`.on-carbon` — and carries four verified machine facts, with **"3 months"
+labelled as the EMCAD DAHAO course's own duration** so the other ten courses
+cannot inherit it by proximity. The Google/Instagram/Facebook figures moved out
+of the hero into `<TrustRail>`, attributed to the studio's own pages: social
+proof and verified operational facts are different kinds of claim, and mixing
+them made the machine facts read as marketing. `<ProductionRail>` is the
+reusable `01 DESIGN → 02 MACHINE → 03 RESULT` component; its stages are a prop
+so the longer B2B chain reuses it. Page rhythm is `.band-machine` /
+`.band-material` / `.band-human` / `.band-info`, which add surface and texture
+only — `.on-carbon` remains the one dark-surface implementation.
+
 **The 32-photograph manifest.** `src/content/photo-manifest.ts` is the typed
 list of every shot on the owner's final brief, with each slot's intrinsic
 dimensions. `<ManifestPhoto id="…">` reserves the photograph's exact aspect
@@ -1660,13 +1672,14 @@ modules are importable in a test runner while the guard stays real in the app.
 `jsx: "preserve"` for Next.js — without the override a test importing a `.tsx`
 component sees raw JSX and fails to parse.
 
-**33 test files, 430 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
+**34 test files, 456 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
 which is the point — the policy survives a refactor:
 
 | Test | Guards |
 | --- | --- |
 | `i18n-parity` | EN/GU catalogue keys mirror exactly |
 | `machine-lab-system` | the design system v4 foundation: 32-photo manifest, icon family, eleven technique signatures, stitch semantics, motion levels, Gujarati overrides, reduced motion, no new dependency |
+| `machine-lab-shell` | the hero states EMCAD/machine/Surat/demo without photography; one course's facts never become the site's; one continuous thread and one Level-4 moment; the rail never autoplays, loops or needs a drag; bands never re-point the palette; the mobile bar keeps exactly two actions |
 | `auth-guard`, `permissions` | the six-state access chain, owner bypass, grant handling |
 | `admin-seats` | one owner + five admin seats, invitation races |
 | `admin-invite`, `invite-callback`, `invite-persistence` | the token-hash invitation flow |

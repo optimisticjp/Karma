@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { LanguageToggle } from "./LanguageToggle";
 import { StitchPath } from "@/components/ui/StitchPath";
+import { StepIndex } from "@/components/ui/MonoNote";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -185,9 +186,9 @@ export function Header() {
                   className="group grid grid-cols-[2rem_1fr_auto] items-center gap-3 border-b border-line/70 py-3.5 text-lg font-semibold"
                   aria-current={isActive(item.href) ? "page" : undefined}
                 >
-                  <span className="font-display text-sm text-vermilion-deep" aria-hidden="true">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
+                  {/* Machine notation, not decoration: the menu is an index
+                      of the site, so it is numbered like one. */}
+                  <StepIndex n={index + 1} className="text-vermilion-deep" />
                   <span>{t(item.key)}</span>
                   <span aria-hidden="true" className="text-stone transition-transform group-hover:translate-x-1">→</span>
                 </Link>

@@ -704,3 +704,65 @@ language · 8% motion · 5% material finish.
 Until the photographs arrive, the 55% is represented by honest named frames and
 technique signatures — not fake imagery. **If the finished interface is 40%
 animation and vector decoration, it has failed.**
+
+## v4 shell: page rhythm, hero and the production rail (Phase 2)
+
+### Bands — HUMAN / MACHINE / MATERIAL
+
+| Class | Register | Use |
+| --- | --- | --- |
+| `.band-machine` | technical, dark — **requires `.on-carbon`** | hero, machine proof, the production rail |
+| `.band-material` | bright, editorial | student work, the material archive |
+| `.band-human` | warm | trainers, stories, visiting, the footer |
+| `.band-info` | light, neutral | facts, decisions, the trust rail |
+
+A band class adds **surface and texture only**. It never re-points a palette
+token: `.on-carbon` in `premium.css` already inverts every token so nested
+cards, rules, chips and buttons follow, and a second dark-surface
+implementation would drift from it within two phases. A test asserts no
+`.band-*` rule declares a colour token.
+
+Dark surfaces are punctuation. Each one is followed by a light band, because
+two dark bands in a row stop being punctuation.
+
+### The hero
+
+One markup tree at every width. On a phone the three frames are the vertical
+story `01 SCREEN / 02 MACHINE / 03 RESULT`; on a laptop the same list staggers
+beside the copy. There is no desktop collage plus a mobile copy — and a test
+fails if breakpoint-gated visibility classes ever wrap a whole composition
+there.
+
+The right side is **one continuous thread**: `<StitchRail>` spans the full
+track and the frames hang off it. Three connectors that happened to line up
+would not be the same claim. Laying that rail down is the **single Level-4
+moment** the homepage is allowed.
+
+`<StitchRail>` is the vertical sibling of `<StitchRule>`: same 9-on / 6-off
+stitch, same penetration dot at every stitch head, drawn in CSS so it holds
+exact pixel scale at any height. A rotated `<StitchRule>` would work
+geometrically and break the moment anything inside it had to stay upright.
+
+`.hero-lab .hero-title` is uppercase — the machine plate. **Gujarati keeps
+sentence case and zero tracking**, in the stylesheet, not at the call site.
+
+### The production rail
+
+`<ProductionRail>` takes its stages as a prop, so the longer B2B chain
+(SCREEN → SAMPLE → PROBLEM → CORRECTION → OUTPUT) reuses it rather than forking
+it.
+
+The interaction rule worth keeping: **every stage's media is visible at every
+width, and the tabs drive one detail panel and nothing else.** That removes the
+usual tab/accordion problem — on a phone the rail is a vertical story with
+nothing hidden behind a gesture a thumb has to discover, on a laptop the same
+markup is a row with one stage explained underneath. No autoplay, no drag
+requirement, no duplicated DOM. All three are tested.
+
+### Button microinteractions
+
+`.btn-stitch` draws exactly three 9/6 stitches under the primary label on hover
+and focus — 39px, the brand's own gesture at the size of a gesture. **No glow
+halo**; a glow would be the only decorative light on the page. The secondary
+action advances its arrow rather than growing a background. Reduced motion
+shows the finished state.

@@ -145,12 +145,19 @@
     repeating-linear-gradient(90deg, rgb(23 43 53 / 0.05) 0 1px, transparent 1px 22px);
 }
 
-/* On a dark surface the same textures have to be light, not darker still. */
+/* On a dark surface the same textures have to be light, not darker still.
+   `.on-carbon` is the project's real dark surface (premium.css); `.on-dark`
+   is the older marker and is kept so nothing that already uses it breaks. */
 .on-dark.tx-cotton,
 .on-dark.tx-weave,
 .on-dark.tx-satin,
 .on-dark.tx-cross,
-.on-dark.tx-density {
+.on-dark.tx-density,
+.on-carbon.tx-cotton,
+.on-carbon.tx-weave,
+.on-carbon.tx-satin,
+.on-carbon.tx-cross,
+.on-carbon.tx-density {
   --texture-ink: 245 240 230;
   --texture-strength: 0.05;
 }
@@ -469,6 +476,12 @@
     repeating-linear-gradient(90deg, rgb(32 33 30 / 0.03) 0 1px, transparent 1px 6px);
 }
 
+.on-carbon .photo-slot::after {
+  background-image:
+    repeating-linear-gradient(0deg, rgb(245 240 230 / 0.045) 0 1px, transparent 1px 6px),
+    repeating-linear-gradient(90deg, rgb(245 240 230 / 0.045) 0 1px, transparent 1px 6px);
+}
+
 /* ------------------------------------------------------------------ *
  * 8. Reduced motion
  *
@@ -499,5 +512,432 @@
   .m-l3,
   .m-l4 {
     transition-duration: 0.001s !important;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * 9. Page rhythm: HUMAN / MACHINE / MATERIAL
+ *
+ * A long page alternates between three registers so it never reads as
+ * one continuous scroll:
+ *
+ *   .band-machine   technical, dark      — requires .on-carbon
+ *   .band-material  bright, editorial    — the work itself
+ *   .band-human     warm                 — people, stories, visiting
+ *   .band-info      light, neutral       — facts and decisions
+ *
+ * The dark bands deliberately do NOT redefine the palette themselves:
+ * `.on-carbon` in premium.css already re-points every token so nested
+ * cards, rules, chips and buttons invert correctly, and a second dark
+ * surface implementation would drift from it within two phases. A band
+ * class only adds surface and texture on top.
+ *
+ * Dark surfaces are punctuation, not wallpaper. Two per page, three at
+ * the absolute outside.
+ * ------------------------------------------------------------------ */
+
+.band-machine {
+  position: relative;
+  background-image:
+    repeating-linear-gradient(0deg, rgb(245 240 230 / 0.045) 0 1px, transparent 1px 3px);
+}
+/* A steel edge where a machine band meets what came before it. */
+.band-machine::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--color-vermilion) 0 18%,
+    rgb(41 97 122 / 0.55) 18% 46%,
+    transparent 46%
+  );
+}
+
+.band-material {
+  background-color: var(--color-card);
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgb(var(--texture-ink) / var(--texture-strength)) 0 1px,
+    transparent 1px 4px
+  );
+}
+
+.band-human {
+  background-color: var(--color-ivory-2);
+  background-image:
+    repeating-linear-gradient(
+      37deg,
+      rgb(var(--texture-ink) / var(--texture-strength)) 0 1px,
+      transparent 1px 4px
+    ),
+    repeating-linear-gradient(
+      -53deg,
+      rgb(var(--texture-ink) / calc(var(--texture-strength) * 0.7)) 0 1px,
+      transparent 1px 5px
+    );
+}
+
+.band-info {
+  background-color: var(--color-ivory);
+  border-block: var(--hairline);
+}
+
+/* ------------------------------------------------------------------ *
+ * 10. The hero
+ *
+ * One markup tree at every width. On a phone the three frames are the
+ * vertical story `01 SCREEN / 02 MACHINE / 03 RESULT`; on a laptop the
+ * same list becomes a staggered composition beside the copy. There is
+ * no second DOM for a second breakpoint.
+ * ------------------------------------------------------------------ */
+
+/* The headline is a machine plate: uppercase, tight. Gujarati is never
+   uppercased, so it keeps sentence case and its own tracking. */
+.hero-lab .hero-title {
+  text-transform: uppercase;
+  letter-spacing: -0.028em;
+}
+:lang(gu) .hero-lab .hero-title {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* "Design on screen. PROVE IT on the machine." The emphasis is the verb —
+   it is the difference between a course and a claim. */
+.hero-promise-em {
+  font-style: normal;
+  color: var(--color-carbon);
+  background-image: linear-gradient(
+    90deg,
+    var(--color-vermilion) 0 9px,
+    transparent 9px 15px
+  );
+  background-repeat: repeat-x;
+  background-size: 15px 2px;
+  background-position: 0 100%;
+  padding-bottom: 0.15em;
+}
+
+/* The four verified machine facts. A spec row, not prose. */
+.hero-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.875rem 1.25rem;
+  margin-top: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  border-top: var(--hairline);
+  padding-top: 1.125rem;
+}
+@media (min-width: 640px) {
+  .hero-facts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .hero-facts > * + * {
+    padding-left: 1.125rem;
+    border-left: var(--hairline);
+  }
+}
+.hero-fact-value {
+  margin-top: 0.25rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.0625rem;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--color-carbon);
+  text-wrap: balance;
+}
+:lang(gu) .hero-fact-value {
+  letter-spacing: 0;
+  line-height: 1.55;
+}
+
+/* ---- the thread through the three frames ---- */
+
+.hero-thread {
+  margin: 0;
+}
+.hero-thread-track {
+  position: relative;
+}
+/* One continuous thread, spanning the whole track, behind the frames. It is
+   the page's single Level-4 moment. */
+.hero-thread-rail {
+  position: absolute;
+  top: 0.5rem;
+  bottom: 2.5rem;
+  left: 0.6875rem;
+  width: 5px;
+  z-index: 0;
+}
+.hero-thread-list {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: clamp(1.5rem, 1.2rem + 1.2vw, 2.5rem);
+  padding-left: 2.25rem;
+  list-style: none;
+}
+.hero-frame {
+  position: relative;
+}
+.hero-frame-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+/* The knot on the rail: this stage, reached. Sits on the thread, not beside
+   it, which is why it is drawn from the frame rather than from the rail. */
+.hero-frame-knot {
+  position: absolute;
+  left: -2.25rem;
+  top: 0.1875rem;
+  width: 15px;
+  height: 15px;
+  border-radius: 999px;
+  background: var(--color-ivory);
+  border: 2px solid var(--color-vermilion);
+}
+.hero-frame-media {
+  border-color: var(--color-line);
+}
+.hero-thread-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-top: 1rem;
+  padding-left: 2.25rem;
+  font-size: var(--text-smallmeta);
+  color: var(--color-stone);
+}
+.hero-thread-foot a {
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+/* On a laptop the frames stagger off the thread. The rail stays straight —
+   it is one thread — and the frames hang from it at alternating widths, which
+   is what makes the column read as a composition rather than a list. */
+@media (min-width: 960px) {
+  .hero-frame--1 .hero-frame-media {
+    width: 100%;
+  }
+  .hero-frame--2 .hero-frame-media {
+    width: 86%;
+    margin-left: auto;
+  }
+  .hero-frame--3 .hero-frame-media {
+    width: 94%;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * 11. The Screen-to-Stitch production rail
+ *
+ * Every stage's media is always visible at every width; the tabs drive
+ * one detail panel and nothing else. On a phone that makes the rail a
+ * vertical story with nothing hidden behind an interaction a thumb has
+ * to discover; on a laptop the same markup is a row with one stage
+ * explained underneath.
+ * ------------------------------------------------------------------ */
+
+.rail-track {
+  display: grid;
+  gap: clamp(1.25rem, 1rem + 1vw, 2rem);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+@media (min-width: 768px) {
+  .rail-track {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(1rem, 0.5rem + 1.6vw, 2.25rem);
+  }
+}
+
+.rail-stage {
+  position: relative;
+  min-width: 0;
+}
+.rail-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  /* Dense row, full touch target: the padding overflows the row rather than
+     making the row taller. */
+  min-height: 2.75rem;
+  padding: 0.5rem 0.125rem;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--color-stone);
+  transition: color var(--dur-l1) var(--ease-out-soft);
+}
+.rail-tab:hover,
+.rail-stage.is-active .rail-tab {
+  color: var(--color-carbon);
+}
+.rail-tab-index {
+  color: var(--color-vermilion-deep);
+}
+.rail-stage.is-active .rail-tab-label {
+  color: var(--color-carbon);
+}
+
+.rail-media {
+  transition: opacity var(--dur-l2) var(--ease-machine);
+  opacity: 0.72;
+}
+.rail-stage.is-active .rail-media {
+  opacity: 1;
+  border-color: var(--color-vermilion);
+}
+.rail-caption {
+  margin-top: 0.625rem;
+  font-size: var(--text-smallmeta);
+  line-height: 1.55;
+  color: var(--color-stone);
+}
+
+/* The thread between stages: horizontal between columns on a laptop,
+   vertical between rows on a phone. Only one of the two ever shows. */
+.rail-thread {
+  position: absolute;
+  pointer-events: none;
+}
+.rail-thread-h {
+  display: none;
+}
+.rail-thread-v {
+  display: block;
+}
+.rail-thread {
+  left: 1rem;
+  bottom: calc(clamp(1.25rem, 1rem + 1vw, 2rem) * -1);
+  height: clamp(1.25rem, 1rem + 1vw, 2rem);
+  width: 24px;
+}
+@media (min-width: 768px) {
+  .rail-thread {
+    left: auto;
+    bottom: auto;
+    top: 1.25rem;
+    right: calc(clamp(1rem, 0.5rem + 1.6vw, 2.25rem) * -1);
+    width: clamp(1rem, 0.5rem + 1.6vw, 2.25rem);
+    height: 4px;
+  }
+  .rail-thread-h {
+    display: block;
+  }
+  .rail-thread-v {
+    display: none;
+  }
+}
+
+.rail-detail {
+  margin-top: clamp(1.5rem, 1.2rem + 1vw, 2.25rem);
+  border-top: var(--hairline);
+  padding-top: 1.125rem;
+  max-width: 62ch;
+}
+.rail-detail-text {
+  margin-top: 0.375rem;
+  font-size: var(--text-bodylg);
+  line-height: var(--text-bodylg--line-height);
+  color: var(--color-stone);
+}
+.on-carbon .rail-detail-text {
+  color: #c9c4b9;
+}
+
+/* ------------------------------------------------------------------ *
+ * 12. Button microinteractions
+ *
+ * The primary action draws three tiny stitches under its label on hover
+ * and focus — the brand's own gesture, at the size of a gesture. No glow
+ * halo: a glow is what a SaaS button does, and it would be the only
+ * decorative light on the page.
+ * ------------------------------------------------------------------ */
+
+.btn-stitch {
+  position: relative;
+  overflow: hidden;
+}
+.btn-stitch::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0.5rem;
+  width: 39px; /* exactly three 9/6 stitches */
+  height: 2px;
+  translate: -50% 0;
+  background-image: linear-gradient(90deg, currentColor 0 9px, transparent 9px 15px);
+  background-size: 15px 2px;
+  background-repeat: repeat-x;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-l2) var(--ease-machine);
+  opacity: 0.85;
+}
+.btn-stitch:hover::after,
+.btn-stitch:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* The secondary action advances its thread toward the arrow rather than
+   growing a background. */
+.btn-secondary .arrow {
+  transition: translate var(--dur-l1) var(--ease-out-soft);
+}
+
+/* ------------------------------------------------------------------ *
+ * 13. The trust band
+ * ------------------------------------------------------------------ */
+
+.trust-band {
+  padding-block: clamp(1.5rem, 1.2rem + 1.1vw, 2.25rem);
+}
+.trust-source {
+  margin-top: 0.875rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-stone);
+}
+
+/* ------------------------------------------------------------------ *
+ * 14. The vertical running stitch
+ *
+ * Same geometry as `.stitch-rule`, turned through 90°: 9px stitch, 6px
+ * gap, a penetration dot at every stitch head, at exact CSS-pixel scale
+ * and any height.
+ * ------------------------------------------------------------------ */
+
+.stitch-rail {
+  --stitch-color: var(--color-vermilion);
+  display: block;
+  width: 5px;
+  background-image:
+    radial-gradient(circle 1.75px at 50% 1.75px, var(--stitch-color) 99%, transparent 100%),
+    linear-gradient(180deg, var(--stitch-color) 0 9px, transparent 9px 15px);
+  background-size: 5px 15px, 2px 15px;
+  background-repeat: repeat-y, repeat-y;
+  background-position: 50% 0, 50% 0;
+}
+
+/* Reduced motion: the rail, the button stitches and the rail media are all
+   final-state immediately. */
+@media (prefers-reduced-motion: reduce) {
+  .btn-stitch::after {
+    transition: none !important;
+  }
+  .rail-media {
+    transition: none !important;
+    opacity: 1 !important;
   }
 }

@@ -139,3 +139,30 @@ export function StitchRule({
     />
   );
 }
+
+/**
+ * The same running stitch, vertical — one continuous thread down a column.
+ *
+ * A rotated <StitchRule> would work geometrically and then break the moment
+ * anything inside it needed to stay upright, so the rail is drawn directly
+ * with the same 9/6 stitch and the same penetration dot at every stitch head.
+ * It is the piece that lets a composition claim ONE thread rather than three
+ * disconnected connectors: it spans the whole track and the frames sit on it.
+ */
+export function StitchRail({
+  tone = "vermilion",
+  draw = false,
+  className
+}: {
+  tone?: Tone;
+  draw?: boolean;
+  className?: string;
+}) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn("stitch-rail", draw && "stitch-wipe stitch-path--from-top", className)}
+      style={{ "--stitch-color": TONE_VAR[tone] } as CSSProperties}
+    />
+  );
+}

@@ -2,6 +2,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { site } from "@/lib/site";
 import { StitchRule } from "@/components/ui/StitchPath";
+import { MonoNote } from "@/components/ui/MonoNote";
 import { coursesByFamily } from "@/content/courses";
 
 export function Footer() {
@@ -11,7 +12,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="site-footer border-t border-line bg-ivory-2">
+    <footer className="site-footer band-human border-t border-line">
       <div className="container-site section-compact">
         {/* The permanent spine. It is the promise the whole site is built to
             keep, so it closes every page rather than living only on the home
@@ -38,7 +39,7 @@ export function Footer() {
           </div>
 
           <nav className="hidden md:block lg:col-span-2" aria-label={t("learn")}>
-            <p className="microlabel">{t("learn")}</p>
+            <MonoNote as="p">{t("learn")}</MonoNote>
             <ul className="mt-2 text-smallmeta">
               <li><Link className="stitch-link" href="/courses">{tn("courses")}</Link></li>
               <li><Link className="stitch-link" href="/notes">{tn("notes")}</Link></li>
@@ -53,7 +54,7 @@ export function Footer() {
           </nav>
 
           <nav className="hidden md:block lg:col-span-2" aria-label={t("students")}>
-            <p className="microlabel">{t("students")}</p>
+            <MonoNote as="p">{t("students")}</MonoNote>
             <ul className="mt-2 text-smallmeta">
               <li><Link className="stitch-link" href="/admissions">{tn("admissions")}</Link></li>
               <li><Link className="stitch-link" href="/admission">{t("admissionForm")}</Link></li>
@@ -63,7 +64,7 @@ export function Footer() {
           </nav>
 
           <div className="lg:col-span-3">
-            <p className="microlabel">{t("visit")}</p>
+            <MonoNote as="p">{t("visit")}</MonoNote>
             <address className="mt-2 text-smallmeta not-italic text-stone">
               <p>{locale === "gu" ? site.addressGu : site.addressEn}</p>
               <p className="font-semibold text-carbon">
