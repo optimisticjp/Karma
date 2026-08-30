@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { CourseCard } from "@/components/course/CourseCard";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { TechniquePlate } from "@/components/ui/TechniquePlate";
 import { Ledger, LedgerRow } from "@/components/ui/Ledger";
+import { Reveal } from "@/components/ui/Reveal";
 import { Icon } from "@/components/ui/Icon";
-import { coursesInFamily, families } from "@/content/courses";
+import { coursesByFamily, coursesInFamily, families } from "@/content/courses";
 import { pageMeta } from "@/lib/seo";
 
 export async function generateMetadata({
@@ -19,6 +20,32 @@ export async function generateMetadata({
   return pageMeta({ locale, path: "/courses", title: t("title"), description: t("description") });
 }
 
+/**
+ * The machine floor catalogue.
+ *
+ * This page used to be eleven cards in a grid, which asks a visitor to compare
+ * eleven things on the only axis a card offers — the name. The catalogue now
+ * leads with what each technique *produces*, because that is what someone is
+ * actually choosing between: bridal zardosi panels, sequin dupattas by the
+ * metre, tufted rugs, machine-ready files.
+ *
+ * Two cues are marked, and both are facts rather than opinions:
+ *
+ *  - **Flat Embroidery is the foundation.** Underlay, density and stitch
+ *    direction are the vocabulary every other machine technique is written in.
+ *  - **Zardosi leads.** The owner confirmed it is what most enquiries ask for
+ *    (2026-08-29), which is also why it heads `COURSE_DISPLAY_ORDER`.
+ *
+ * No course carries an invented "beginner" or "advanced" label. Every course
+ * here is taught from zero, which is stated once rather than eleven times.
+ */
+
+/** Facts, not difficulty ratings. See the note above. */
+const CUE: Record<string, "foundation" | "leads"> = {
+  "flat-embroidery": "foundation",
+  "zardosi-machine-embroidery": "leads"
+};
+
 export default async function CoursesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -27,12 +54,13 @@ export default async function CoursesPage({ params }: { params: Promise<{ locale
     getTranslations("common"),
     getLocale()
   ]);
+  const gu = l === "gu";
   const keys = Object.keys(families) as Array<keyof typeof families>;
   const stages = t.raw("pathway.stages") as Array<{ t: string; d: string }>;
 
   // One continuous catalogue numbering across all three families, so a
   // visitor can say "number six" and mean the same course we do.
-  let counter = -1;
+  let counter = 0;
 
   return (
     <>
@@ -71,29 +99,72 @@ export default async function CoursesPage({ params }: { params: Promise<{ locale
         return (
           <section key={key} className={idx % 2 === 1 ? "section bg-ivory-2" : "section"}>
             <div className="container-site">
-              {/* The family name is the heading; its intro is the lede. Setting
-                  the intro as an h2 turned a five-line sentence into display
-                  type and left the section without a name. */}
-              <SectionHeading
-                eyebrow={String(idx + 1).padStart(2, "0")}
-                title={l === "gu" ? f.nameGu : f.nameEn}
-                sub={l === "gu" ? f.introGu : f.introEn}
-              />
-              <div className="u-section-body grid gap-6 lg:gap-8 xl:grid-cols-2">
+              <div className="family-head">
+                <div className="family-plate">
+                  <TechniquePlate variant={key} seed={idx} />
+                </div>
+                <SectionHeading
+                  eyebrow={`${String(idx + 1).padStart(2, "0")} · ${t("familyLabel", { count: list.length })}`}
+                  title={gu ? f.nameGu : f.nameEn}
+                  sub={gu ? f.introGu : f.introEn}
+                />
+              </div>
+
+              <Ledger className="u-section-body">
                 {list.map((c) => {
                   counter += 1;
+                  const cue = CUE[c.slug];
                   return (
-                    <CourseCard key={c.slug} course={c} index={counter} layout="horizontal" />
+                    <li key={c.slug}>
+                      <Link href={`/courses/${c.slug}`} className="ledger-row course-row">
+                        <span className="ledger-index" aria-hidden="true">
+                          {String(counter).padStart(2, "0")}
+                        </span>
+                        <span className="ledger-title">
+                          {gu ? c.nameGu : c.nameEn}
+                          {cue ? (
+                            <span className={`course-cue course-cue--${cue}`}>{t(`cue.${cue}`)}</span>
+                          ) : null}
+                        </span>
+                        {/* What it makes — the axis people actually choose on.
+                            No trailing arrow: the whole row is the link and
+                            `a.ledger-row` already marks itself with the brand
+                            thread on hover. A stray glyph wrapped below the
+                            note whenever the note ran to two lines. */}
+                        <span className="ledger-note">
+                          {gu ? c.production.producesGu : c.production.producesEn}
+                        </span>
+                      </Link>
+                    </li>
                   );
                 })}
-              </div>
+              </Ledger>
             </div>
           </section>
         );
       })}
 
+      {/* How the families relate: the one thing a list of eleven cannot say. */}
+      <section className="section-compact bg-sand">
+        <div className="container-site split">
+          <div>
+            <SectionHeading title={t("relate.h2")} sub={t("relate.line")} />
+          </div>
+          <Reveal className="surface surface-feature">
+            <ol className="stack-lines">
+              {(t.raw("relate.points") as Array<{ t: string; d: string }>).map((r) => (
+                <li key={r.t}>
+                  <p className="font-display text-h4">{r.t}</p>
+                  <p className="mt-1.5 text-smallmeta text-stone">{r.d}</p>
+                </li>
+              ))}
+            </ol>
+          </Reveal>
+        </div>
+      </section>
+
       <section className="section border-t border-line">
-        <div className="container-site grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+        <div className="container-site split">
           <div>
             <SectionHeading title={t("pathway.h2")} sub={t("pathway.line")} />
           </div>
@@ -109,6 +180,8 @@ export default async function CoursesPage({ params }: { params: Promise<{ locale
           </Ledger>
         </div>
       </section>
+
+      <p className="sr-only">{t("countNote", { count: coursesByFamily.length })}</p>
     </>
   );
 }
