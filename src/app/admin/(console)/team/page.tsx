@@ -1,4 +1,5 @@
 import { requireOwner } from "@/lib/auth/guard";
+import { PageHead } from "@/components/admin/PageHead";
 import { getAdminT } from "@/lib/admin/i18n";
 import { listConsoleStaff } from "@/lib/auth/staff";
 import { adminClientConfigured } from "@/lib/supabase/admin";
@@ -36,7 +37,7 @@ export default async function TeamPage() {
   if (!dbConfigured()) {
     return (
       <div className="max-w-[48rem]">
-        <PageHeading title={t("team.title")} lede={t("team.lede")} />
+        <PageHead title={t("team.title")} context={t("team.lede")} />
         <p className="alert mt-8">{t("team.notConfigured")}</p>
       </div>
     );
@@ -103,7 +104,7 @@ export default async function TeamPage() {
 
   return (
     <div className="max-w-[64rem]">
-      <PageHeading title={t("team.title")} lede={t("team.lede")} />
+      <PageHead title={t("team.title")} context={t("team.lede")} />
 
       <p className="form-note mt-6">
         {t("team.seatsUsed", { used: seatsUsed, total: MAX_ADMIN_SEATS })}
@@ -203,15 +204,6 @@ export default async function TeamPage() {
   );
 }
 
-function PageHeading({ title, lede }: { title: string; lede: string }) {
-  return (
-    <div>
-      <h1 className="text-h2">{title}</h1>
-      <span aria-hidden className="rule-stitch is-in" />
-      <p className="u-lede">{lede}</p>
-    </div>
-  );
-}
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (

@@ -1857,7 +1857,7 @@ Claude must execute phases in order, one clean PR at a time unless a smaller spl
 | 9 | About, verify, legal, errors/loading/404, footer + secondary public pages | ✅ Complete + merged |
 | 10 | Karma Console shell + Today at Karma + mobile operational system | ✅ Complete + merged |
 | 11 | Admissions, Students, Courses/Batches, Fees admin redesign | ✅ Complete + merged |
-| 12 | Attendance, Certificates, Design Desk, Content, Reports, Team admin redesign | ⏳ Pending |
+| 12 | Attendance, Certificates, Design Desk, Content, Reports, Team admin redesign | ✅ Complete + merged |
 | 13 | Backend/query/free-tier audit + copy/i18n/SEO consistency | ⏳ Pending |
 | 14 | Accessibility/performance/responsive hardening + final whole-product creative audit | ⏳ Pending |
 
@@ -2851,6 +2851,70 @@ Redesign:
 - A4 action entry points
 
 No generic admin kit.
+
+---
+
+## Implementation record — merged 2026-08-30
+
+**Branch:** `redesign/phase-12-modules` · **PR:** #39
+
+### One header, everywhere
+
+Attendance, Certificates, Design Desk, Content Desk, Reports, Team, Account
+security and the catalogue import each rolled their own page title. All of them
+use `<PageHead>` now, and a test walks every console page and fails on an
+`<h1 className="text-h2">` or a local `Heading`/`PageHeading` helper — so the
+next module cannot quietly reintroduce a ninth copy.
+
+### The invariants this phase exists to protect
+
+Most of §41–§46 is *preservation*, so the deliverable is a test that fails when
+one of those decisions is undone:
+
+- **Attendance** — the lock is computed from the session's own timestamps
+  (`sessionIsLocked`), never from a prop a client could lie about; the printed
+  register stays one tap from the roster; and no decorative animation runs on a
+  screen used during a live class.
+- **Certificates** — issue, verify, print, revoke, with **no file pipeline**:
+  no `R2Bucket`, `putObject`, presigned URL or PDF library, and no PDF
+  dependency in `package.json`.
+- **Design Desk** — the twelve production-job statuses (new → review →
+  info_needed → quote_prepared → quote_sent → approved → in_progress →
+  sample_shared → revision → finalised → delivered → closed) are asserted
+  against the enum, and there is still no file upload while R2 is deferred.
+- **Content Desk** — a typed CMS, not a page builder: no `contentEditable`, no
+  `dangerouslySetInnerHTML`, no rich-text editor. One paste at a time is how a
+  design system gets dismantled.
+- **Reports** — actor, action, entity and time on every audit event, and it is
+  **not** a BI dashboard (no chart, canvas, sparkline or trendline).
+- **Team** — exactly one Owner and at most five Admins, the
+  `karma_staff_invariants` DB trigger still in the migrations, team
+  administration Owner-only with no permission key, accounts deactivated
+  rather than deleted, and **no MFA/AAL gate has come back**.
+
+### A test that now proves ordering, not just presence
+
+The deletion-tombstone test used to check that a file mentioned audit. It now
+finds the delete transaction and asserts the `auditLogs` insert appears
+**before** the `tx.delete` — because writing the tombstone after the delete
+would mean a failure between the two left a deletion with no record of who did
+it or what was destroyed, which is exactly the case an audit log exists for.
+
+### Two of my own tests were wrong, in the same way as before
+
+A blunt ban on the string `r2` failed on the certificates page's own honest
+note saying R2 is not activated. It now bans R2 *usage* — `R2Bucket`,
+`putObject`, `presigned`, `S3Client` — rather than the letters. A test that
+fails on an honest explanation teaches the next session to delete the
+explanation. (The seat constant also lives in `src/lib/auth/seats.ts`, not
+`access.ts`.)
+
+### Gates
+
+`npm run typecheck`, `npm run lint`, `npm test` (44 files, 628 tests) and
+`npm run build` all green. No dependency, no schema change, no permission
+change, no auth change.
+
 
 ---
 

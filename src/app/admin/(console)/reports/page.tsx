@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageHead } from "@/components/admin/PageHead";
 import { redirect } from "next/navigation";
 import { sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
@@ -162,13 +163,7 @@ export default async function ReportsPage() {
 }
 
 function Header({ title, lede }: { title: string; lede: string }) {
-  return (
-    <div>
-      <h1 className="text-h2">{title}</h1>
-      <span aria-hidden className="rule-stitch is-in" />
-      <p className="u-lede">{lede}</p>
-    </div>
-  );
+  return <PageHead title={title} context={lede} />;
 }
 
 function Metric({ label, value, note }: { label: string; value: number | string; note?: string }) {
