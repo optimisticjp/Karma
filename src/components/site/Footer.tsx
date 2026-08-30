@@ -1,6 +1,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { site } from "@/lib/site";
+import { StitchRule } from "@/components/ui/StitchPath";
 import { coursesByFamily } from "@/content/courses";
 
 export function Footer() {
@@ -12,6 +13,16 @@ export function Footer() {
   return (
     <footer className="site-footer border-t border-line bg-ivory-2">
       <div className="container-site section-compact">
+        {/* The permanent spine. It is the promise the whole site is built to
+            keep, so it closes every page rather than living only on the home
+            hero. Left/right rather than centred: a centred slab would read as
+            a different site than the ledger above it. */}
+        <div className="site-spine">
+          <p className="site-spine-title">{t("spine")}</p>
+          <StitchRule draw className="site-spine-rule" />
+          <p className="site-spine-sub">{t("spineSub")}</p>
+        </div>
+
         <div className="grid gap-x-8 gap-y-8 md:grid-cols-2 md:gap-y-10 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <p className="font-display text-h3 font-semibold leading-tight">Karma Design Studio</p>

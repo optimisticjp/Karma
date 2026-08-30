@@ -116,7 +116,10 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body>
+      {/* Column layout so the footer sits at the bottom of short pages (404,
+          verify results) instead of floating mid-viewport. Scoped to the
+          public shell: Karma Console has its own root layout. */}
+      <body className="site-body">
         {/* Marks JS availability so reveal animations never hide no-JS content */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
         <NextIntlClientProvider>

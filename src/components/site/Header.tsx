@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { LanguageToggle } from "./LanguageToggle";
+import { StitchPath } from "@/components/ui/StitchPath";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -90,15 +91,23 @@ export function Header() {
       <div className="container-site flex h-full items-center justify-between gap-5">
         <Link
           href="/"
-          className="site-brand-mark flex shrink-0 items-center leading-none"
+          className="site-brand-mark flex shrink-0 items-center gap-2 leading-none"
           aria-label="Karma Design Studio: home"
         >
-          {/* One line only. The descriptor used to sit under the name and
-              wrapped out of the header at every width below 1440. The hero
-              and the footer both say it properly; the header's job is
-              navigation. */}
-          <span className="whitespace-nowrap font-display text-lg font-semibold tracking-tight text-carbon sm:text-xl xl:text-2xl">
-            Karma Design Studio
+          {/* Karma has no logo file, so the wordmark has to carry the brand on
+              its own. Two weights plus a three-stitch tick does that without
+              inventing a mark the owner never approved — and it stays one
+              line, which is what kept breaking below 1440. */}
+          <StitchPath
+            d="M2 0 V 26"
+            viewBox="0 0 4 26"
+            tone="vermilion"
+            width={2.5}
+            className="site-brand-tick"
+          />
+          <span className="site-brand-word whitespace-nowrap font-display text-lg text-carbon sm:text-xl xl:text-[1.375rem]">
+            <span className="site-brand-name">Karma</span>{" "}
+            <span className="site-brand-tail">Design Studio</span>
           </span>
         </Link>
 
