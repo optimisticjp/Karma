@@ -451,7 +451,7 @@ Update this table after every completed/merged phase.
 | 3 | Courses / production-led detail pages | ✅ Complete + merged | PR #14 — `build` + Cloudflare Workers Builds green |
 | 4 | Proof ecosystem: work, stories, reviews, trainers | ✅ Complete + merged | PR #15 — `build` + Cloudflare Workers Builds green |
 | 5 | Mobile conversion / call / directions / demo | ✅ Complete + merged | PR #16 — `build` + Cloudflare Workers Builds green |
-| 6 | Studio / B2B commercial embroidery | 🚧 In progress | branch `phase-6/studio-b2b` |
+| 6 | Studio / B2B commercial embroidery | ✅ Complete + merged | PR #17 — `build` + Cloudflare Workers Builds green |
 | 7 | Machine Notes / social-to-search content | ⏳ Pending | |
 | 8 | Local SEO / structured data / measurement | ⏳ Pending | |
 | 9 | Accessibility / performance / responsive hardening | ⏳ Pending | |
