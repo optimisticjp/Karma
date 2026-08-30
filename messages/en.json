@@ -1067,7 +1067,21 @@
       "newBriefsHint": "Not yet reviewed",
       "allClear": "Nothing needs attention right now.",
       "noActivity": "No recorded activity yet.",
-      "notConfigured": "The database is not connected on this deployment, so there are no figures to show. Nothing here is invented: see the setup checklist in docs/admin-architecture.md."
+      "notConfigured": "The database is not connected on this deployment, so there are no figures to show. Nothing here is invented: see the setup checklist in docs/admin-architecture.md.",
+      "queueNewApplications": "New enquiries",
+      "queueFollowUps": "Follow-ups due",
+      "queueBatches": "Running today",
+      "queueBriefs": "Design jobs open",
+      "queueEmptyApplications": "No new enquiries.",
+      "queueEmptyFollowUps": "No follow-ups due today.",
+      "queueEmptyBatches": "No batch is running today.",
+      "queueEmptyBriefs": "No open design jobs.",
+      "queueMore": "Open the full list",
+      "seatsTaken": "{taken} of {seats} seats",
+      "dueOn": "Due {date}",
+      "noDeadline": "No deadline given",
+      "workDesk": "Your work, in the order it needs doing.",
+      "queueNote": "Each queue shows the first few. The count is the whole list."
     },
     "team": {
       "title": "Team",

@@ -1855,7 +1855,7 @@ Claude must execute phases in order, one clean PR at a time unless a smaller spl
 | 7 | Machine Notes technical archive | ✅ Complete + merged |
 | 8 | B2B Studio/services | ✅ Complete + merged |
 | 9 | About, verify, legal, errors/loading/404, footer + secondary public pages | ✅ Complete + merged |
-| 10 | Karma Console shell + Today at Karma + mobile operational system | ⏳ Pending |
+| 10 | Karma Console shell + Today at Karma + mobile operational system | ✅ Complete + merged |
 | 11 | Admissions, Students, Courses/Batches, Fees admin redesign | ⏳ Pending |
 | 12 | Attendance, Certificates, Design Desk, Content, Reports, Team admin redesign | ⏳ Pending |
 | 13 | Backend/query/free-tier audit + copy/i18n/SEO consistency | ⏳ Pending |
@@ -2687,6 +2687,83 @@ Rebuild:
 - Today at Karma
 
 No functional auth/permission changes unless fixing a demonstrated bug.
+
+## Implementation record — merged 2026-08-30
+
+**Branch:** `redesign/phase-10-console` · **PR:** #37
+
+### Today at Karma became a work desk
+
+It was seven numbers in seven cards. **"7 follow-ups due" tells an operator
+that seven things need attention; a queue tells them WHICH seven**, so the
+first one opens without a second navigation and a scan of a list. The counts
+did not disappear — each heads its queue, where it is a label for what follows
+rather than a number in a box.
+
+`getTodayQueues()` in `src/lib/admin/dashboard.ts` supplies four capped queues:
+new enquiries, follow-ups due, batches running today, open design jobs.
+
+**No charts.** A studio with one floor and four batch timings does not have a
+trend worth plotting, and a chart here would be decoration wearing an analytics
+costume. A test also blocks every chart library from `dependencies`.
+
+### Free-tier discipline is in the query, not in a comment
+
+Each queue is **gated on the caller's permission and only then queried** — an
+admin with attendance rights alone costs one round trip, not five. Every list
+is capped by `QUEUE_LIMIT`. The request-scoped pool holds a single connection,
+so these await in sequence by design; parallel calls would serialise anyway.
+
+### A bug caught before it shipped
+
+The first version linked each queue row to `/admin/admissions/${id}`,
+`/admin/design/${id}` and `/admin/courses/batches/${id}`. **None of those
+routes exist** — the console is a set of module lists built from `<details>`
+rows, not per-record pages — so every queue row would have been a 404, which is
+worse than the metric cards it replaced. Rows link to their module instead, and
+a test now resolves every `/admin/...` href in the file against the route tree
+and fails on one that does not exist. When Phases 11 and 12 rebuild those lists
+they can add row anchors and these links can deep-link into them.
+
+### What a queue row may carry
+
+A name, what it is about, and when it is due. **No phone number**: a queue is
+scanned in public, at a counter, and the number lives one tap away on the
+record itself. Tested.
+
+### Primitives
+
+`<PageHead>` — compact header, an operational context line (not a description
+of the page), actions on the same row where there is width. `<Queue>` /
+`<QueueRow>` — the count, then the rows behind it.
+
+**The status light** is a dot plus a word, never a dot alone: the dot is
+scannable down a column, the word is what makes it accessible, because colour
+alone is never a status. It self-neutralises for Gujarati like every other
+uppercase label in this system.
+
+Density and touch size stay un-opposed: rows are visually tight and every row
+keeps a ≥44px hit area from padding that overflows the row rather than a taller
+row. `env(safe-area-inset-bottom)` keeps the last row off the home indicator.
+
+### The console does not copy the public site
+
+Tests walk every file under `src/app/admin` and `src/components/admin` and fail
+on an import of `TechniqueSignature`, `TechniquePlate`, `MaterialWall`,
+`ManifestPhoto` or `ProductionRail`, or on a `machine-light`, `lab-glass`,
+texture or `band-machine` class. The console expresses the brand through
+operational logic — dense rows, status lights, numbered queues, actions beside
+the record — not through decoration.
+
+### Authorization
+
+Untouched, and asserted: `requireAdmin` still guards the page, permissions
+still decide what renders, and navigation is still UX rather than security.
+
+### Gates
+
+`npm run typecheck`, `npm run lint`, `npm test` (42 files, 591 tests) and
+`npm run build` all green. No dependency added.
 
 ---
 
