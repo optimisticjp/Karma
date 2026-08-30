@@ -487,6 +487,21 @@ motion out of it. Route parity is structural (everything under `[locale]`);
 hreflang via `pageMeta()` is required of every **indexable** page, with the
 `noindex` per-certificate URL exempt.
 
+**Karma Console (Phase 10).** Today at Karma is a work desk, not an analytics
+wall: four capped queues (new enquiries, follow-ups due, batches running, open
+design jobs) with the count heading each queue instead of seven metric cards.
+`getTodayQueues()` **gates each query on the caller's permission**, so an admin
+with attendance rights alone costs one round trip. No charts, and a test blocks
+every chart library. A queue row carries a name, what it is about and when it
+is due — **never a phone number**, because a queue is scanned in public at a
+counter. Rows link to their MODULE, not to per-record routes, which do not
+exist; a test resolves every `/admin/...` href against the route tree. New
+primitives: `<PageHead>` and `<Queue>`/`<QueueRow>`, plus a status **light**
+that is always a dot *and* a word, since colour alone is never a status. Tests
+walk the whole admin tree and fail on any public decorative import or texture
+class — the console expresses the brand through operational logic, not
+decoration. Authorization is unchanged.
+
 **The 32-photograph manifest.** `src/content/photo-manifest.ts` is the typed
 list of every shot on the owner's final brief, with each slot's intrinsic
 dimensions. `<ManifestPhoto id="…">` reserves the photograph's exact aspect
@@ -1771,7 +1786,7 @@ modules are importable in a test runner while the guard stays real in the app.
 `jsx: "preserve"` for Next.js — without the override a test importing a `.tsx`
 component sees raw JSX and fails to parse.
 
-**41 test files, 575 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
+**42 test files, 591 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
 which is the point — the policy survives a refactor:
 
 | Test | Guards |
@@ -1779,6 +1794,7 @@ which is the point — the policy survives a refactor:
 | `i18n-parity` | EN/GU catalogue keys mirror exactly |
 | `machine-lab-system` | the design system v4 foundation: 32-photo manifest, icon family, eleven technique signatures, stitch semantics, motion levels, Gujarati overrides, reduced motion, no new dependency |
 | `machine-lab-shell` | the hero states EMCAD/machine/Surat/demo without photography; one course's facts never become the site's; one continuous thread and one Level-4 moment; the rail never autoplays, loops or needs a drag; bands never re-point the palette; the mobile bar keeps exactly two actions |
+| `machine-lab-console` | the console imports no public decorative component and no chart library; Today at Karma shows queues not metric cards; queues are permission-gated and capped; every queue href resolves to a real route; no phone number in a queue row; a status is never colour alone; authorization untouched |
 | `machine-lab-secondary` | no page renders an English field without a Gujarati branch; route parity is structural and the console stays outside `[locale]`; every indexable page has hreflang; the 404's broken path stays on the 404; loading animates nothing; verify and the legal pages stay motion-free |
 | `machine-lab-studio` | the five-stage chain in order, reusing the homepage rail; drawn marks rather than borrowed photo slots, each used for the thing it means; no turnaround, file format, price, payment provider or upload control |
 | `machine-lab-notes` | the archive notation stays on the notes surfaces only; every note has a short bilingual issue label with no measurement in it; the index is still not a blog; the trade knowledge, course links and no-named-person rule are unchanged |

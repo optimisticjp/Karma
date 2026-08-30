@@ -1067,7 +1067,21 @@
       "newBriefsHint": "હજી રિવ્યૂ બાકી",
       "allClear": "અત્યારે કંઈ ધ્યાન માંગતું નથી.",
       "noActivity": "હજી કોઈ પ્રવૃત્તિ નોંધાઈ નથી.",
-      "notConfigured": "આ ડિપ્લોયમેન્ટ પર ડેટાબેઝ જોડાયેલો નથી, એટલે બતાવવા માટે આંકડા નથી. અહીં કંઈ બનાવટી નથી: સેટઅપ ચેકલિસ્ટ docs/admin-architecture.md માં છે."
+      "notConfigured": "આ ડિપ્લોયમેન્ટ પર ડેટાબેઝ જોડાયેલો નથી, એટલે બતાવવા માટે આંકડા નથી. અહીં કંઈ બનાવટી નથી: સેટઅપ ચેકલિસ્ટ docs/admin-architecture.md માં છે.",
+      "queueNewApplications": "નવી પૂછપરછ",
+      "queueFollowUps": "ફોલો-અપ બાકી",
+      "queueBatches": "આજે ચાલુ",
+      "queueBriefs": "ખુલ્લા ડિઝાઇન જોબ",
+      "queueEmptyApplications": "નવી પૂછપરછ નથી.",
+      "queueEmptyFollowUps": "આજે કોઈ ફોલો-અપ બાકી નથી.",
+      "queueEmptyBatches": "આજે કોઈ બેચ ચાલુ નથી.",
+      "queueEmptyBriefs": "કોઈ ડિઝાઇન જોબ ખુલ્લી નથી.",
+      "queueMore": "આખું લિસ્ટ ખોલો",
+      "seatsTaken": "{seats} માંથી {taken} સીટ",
+      "dueOn": "{date} સુધીમાં",
+      "noDeadline": "ડેડલાઇન આપી નથી",
+      "workDesk": "તમારું કામ, જે ક્રમમાં કરવાનું છે એ ક્રમમાં.",
+      "queueNote": "દરેક ક્યૂમાં પહેલા થોડા દેખાય છે. આંકડો આખા લિસ્ટનો છે."
     },
     "team": {
       "title": "ટીમ",
