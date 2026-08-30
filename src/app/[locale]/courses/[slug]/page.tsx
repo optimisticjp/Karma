@@ -7,7 +7,10 @@ import { CourseCard } from "@/components/course/CourseCard";
 import { ModuleAccordion } from "@/components/course/ModuleAccordion";
 import { FaqList } from "@/components/site/FaqList";
 import { PageIntro } from "@/components/ui/PageIntro";
-import { TechniquePlate } from "@/components/ui/TechniquePlate";
+import { TechniqueSignature } from "@/components/ui/TechniqueSignature";
+import { ManifestPhoto } from "@/components/ui/PhotoSlot";
+import { MonoNote } from "@/components/ui/MonoNote";
+import { coursePhotoFor } from "@/content/photo-manifest";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { StitchRule } from "@/components/ui/StitchPath";
 import { SampleTag } from "@/components/ui/SampleTag";
@@ -64,6 +67,22 @@ export async function generateMetadata({
  * Every technical claim on this page is trade knowledge about the technique,
  * held in `course.production`. Nothing asserts a duration, a fee, a student
  * outcome or a placement.
+ *
+ * WHY NO TWO OF THESE ELEVEN PAGES READ THE SAME
+ * ----------------------------------------------
+ * Everything above the fold is per-course: the technique's own signature, its
+ * own photograph where the shoot covers it, what it physically produces, the
+ * faults its training exists to fix, what it runs on, and what the finished
+ * work sells as. A visitor comparing zardosi with sequence work is reading two
+ * genuinely different pages, not one template with the nouns swapped.
+ *
+ * PHOTOGRAPH WHERE THERE IS ONE, SIGNATURE ALWAYS
+ * -----------------------------------------------
+ * Eight of the eleven courses are covered by the studio shoot. Those eight get
+ * their own frame; the other three do not get a borrowed one, and are not
+ * quietly demoted for it. The technique signature is on ALL eleven, because it
+ * describes the structure of the stitch and is therefore true of the technique
+ * whether or not anyone has photographed it yet.
  */
 export default async function CourseDetailPage({
   params
@@ -92,7 +111,6 @@ export default async function CourseDetailPage({
     .filter((c) => c.slug !== course.slug)
     .slice(0, 3);
   const name = gu ? course.nameGu : course.nameEn;
-  const position = coursesByFamily.findIndex((c) => c.slug === course.slug);
 
   /* The trainer who covers this family, found by slug rather than by array
      index so re-ordering the list cannot silently reassign courses to the
@@ -124,6 +142,11 @@ export default async function CourseDetailPage({
      is EMCAD DAHAO Embroidery Designing and nothing else; every other course
      keeps the honest "ask at your demo" fee and duration copy below. */
   const verified = verifiedOperationsFor(course.slug);
+
+  /* The studio shoot covers eight of the eleven. A course it does not cover
+     keeps its signature and gets no substitute — never another course's
+     photograph, never stock. */
+  const photo = coursePhotoFor(course.slug);
 
   const waCourse = `Hi Karma Design Studio! 👑 મને "${name}" કોર્સનો ફ્રી ડેમો બુક કરવો છે. નામ: ____ | ટાઇમ: સવાર/સાંજ`;
 
@@ -172,9 +195,21 @@ export default async function CourseDetailPage({
         }
         aside={
           <>
-            <div className="course-plate">
-              <TechniquePlate variant={course.family} seed={position} />
-            </div>
+            <figure className="course-mark">
+              {photo ? (
+                <ManifestPhoto id={photo.id} editorial className="course-mark-photo" />
+              ) : null}
+              <div className="course-signature">
+                <MonoNote as="p">{t("signatureLabel")}</MonoNote>
+                <TechniqueSignature slug={course.slug} />
+              </div>
+              {/* What the signature draws, in the reader's language. The
+                  English spec note on TECHNIQUE_SIGNATURES is the internal
+                  record; this is the sentence a visitor reads. */}
+              <figcaption className="course-signature-note">
+                {t(`signatures.${course.slug}` as "signatures.zardosi-machine-embroidery")}
+              </figcaption>
+            </figure>
             <dl className="ledger !border-t-0">
               {facts.map(([label, value]) => (
                 <div key={label} className="ledger-row is-labelled">

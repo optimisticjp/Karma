@@ -2,11 +2,11 @@
   "meta": {
     "home": {
       "title": "Embroidery Classes in Mota Varachha, Surat | Karma Design Studio",
-      "description": "Learn embroidery on real machines at Mahadev Chowk, Mota Varachha: flat, zardosi, 4-beads, sequence, coding, chain, appliqué, 3D, cross stitch, laser, tufting and emCAD design. Free demo class, evening batches till 10:30 pm."
+      "description": "Learn embroidery on real machines at Mahadev Chowk, Mota Varachha: flat, zardosi, 4-beads, sequence, coding, chain, appliqué, 3D, cross stitch, laser, tufting and EMCAD DAHAO design. Free demo class, evening batches till 10:30 pm."
     },
     "courses": {
       "title": "Machine Embroidery Courses in Mota Varachha, Surat | Karma Design Studio",
-      "description": "Live-machine embroidery courses in Surat: flat, zardosi, 4-beads, sequence, coding, chain/multi, appliqué and 3D, cross stitch, laser, tufting and emCAD design. Book a free demo class."
+      "description": "Live-machine embroidery courses in Surat: flat, zardosi, 4-beads, sequence, coding, chain/multi, appliqué and 3D, cross stitch, laser, tufting and EMCAD DAHAO design. Book a free demo class."
     },
     "admissions": {
       "title": "Admissions & Upcoming Batches | Karma Design Studio, Surat",
@@ -372,7 +372,7 @@
   "coursesPage": {
     "eyebrow": "Course catalogue",
     "title": "Eleven techniques, taught on the machines that make them.",
-    "intro": "Three families: machine embroidery, the modern techniques, and the emCAD design software behind both. Start wherever you are — most students arrive having never touched a machine.",
+    "intro": "Three families: machine embroidery, the modern techniques, and the EMCAD DAHAO design software behind both. Start wherever you are — most students arrive having never touched a machine.",
     "batchesCta": "See upcoming batches",
     "factsTitle": "In every course",
     "facts": [
@@ -383,7 +383,7 @@
     ],
     "pathway": {
       "h2": "Where the courses lead",
-      "line": "The courses connect. Most students start at one machine technique, add emCAD design, and move into production work or a unit of their own.",
+      "line": "The courses connect. Most students start at one machine technique, add EMCAD DAHAO design, and move into production work or a unit of their own.",
       "stages": [
         {
           "t": "Foundation at the machine",
@@ -394,7 +394,7 @@
           "d": "Zardosi, 4-beads, sequence, coding or chain and multi. Depth in one before breadth across many."
         },
         {
-          "t": "emCAD design",
+          "t": "EMCAD DAHAO design",
           "d": "Make the files the machines run. This is the step that turns an operator into a designer."
         },
         {
@@ -422,7 +422,7 @@
           "d": "Zardosi, beads, sequence, coding, chain and multi are what Surat's units order every day, and each has its own faults to learn."
         },
         {
-          "t": "emCAD is the leverage",
+          "t": "EMCAD DAHAO is the leverage",
           "d": "An operator runs someone's file. A digitiser decides whether the job works before the machine is switched on — and can take digitising work on its own."
         },
         {
@@ -471,7 +471,21 @@
     "feeNote": "Ask for the current fee when you call or come in. Receipts are issued for every payment.",
     "demoTitle": "Before you decide",
     "demoBody": "Come for a practical demo. Sit at the machine, watch a sample run, and ask whatever you want — there is no obligation and no booking fee.",
-    "relatedAll": "See the full catalogue"
+    "relatedAll": "See the full catalogue",
+    "signatureLabel": "Technique signature",
+    "signatures": {
+      "zardosi-machine-embroidery": "A tight parallel satin field with one restrained zari highlight — metallic thread laid in relief, stitch beside stitch.",
+      "flat-embroidery": "A precise running field with clean, deliberate direction changes. Every other machine technique is written in this vocabulary.",
+      "four-beads-machine-work": "Bead nodes attaching to a path, one after another, in the order the file sets.",
+      "sequence-work": "Overlapping perforated discs, each caught through its centre, with one restrained reflective shift.",
+      "coding-cording-machine": "A thicker cord following one curved Bezier path — the cord has weight the stitch line does not.",
+      "chain-multi-machine": "Linked loop construction over a second line of rhythm: one loop pulled through the last, repeated in register.",
+      "applique-3d-embroidery": "A raised border over a cut edge — the applied piece held down and the edge finished in one pass.",
+      "cross-stitch": "A restrained crossing-stitch lattice, each cross the same size and the same direction.",
+      "laser-work": "A precise trace, then one clean cut edge. No sparks and no scorching — a laser that behaves is a laser you have set correctly.",
+      "tufting": "Loops rising from a baseline, each one to the same height, which is the whole difficulty.",
+      "emcad-embroidery-design": "Vector nodes, then their handles, then the stitch path they produce. This is what digitising actually is."
+    }
   },
   "courseOps": {
     "factsTitle": "The course, as the institute states it",

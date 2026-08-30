@@ -3,10 +3,10 @@ import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { TechniquePlate } from "@/components/ui/TechniquePlate";
+import { MachineIndex } from "@/components/courses/MachineIndex";
 import { Ledger, LedgerRow } from "@/components/ui/Ledger";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/Reveal";
-import { Icon } from "@/components/ui/Icon";
 import { coursesByFamily, coursesInFamily, families } from "@/content/courses";
 import { pageMeta } from "@/lib/seo";
 
@@ -38,12 +38,32 @@ export async function generateMetadata({
  *
  * No course carries an invented "beginner" or "advanced" label. Every course
  * here is taught from zero, which is stated once rather than eleven times.
+ *
+ * The rows are `<MachineIndex>`, the same component the homepage uses, so the
+ * two surfaces cannot drift apart in what a course row is allowed to claim:
+ * what the technique produces, its family, a duration only where the owner
+ * confirmed one, and no fee at all. Photography leads a row where the shoot
+ * covers that course; the technique signature leads where it does not, in the
+ * same slot at the same size, so the three signature-led courses never read as
+ * the leftovers.
  */
 
 /** Facts, not difficulty ratings. See the note above. */
 const CUE: Record<string, "foundation" | "leads"> = {
   "flat-embroidery": "foundation",
   "zardosi-machine-embroidery": "leads"
+};
+
+/**
+ * One branded mark per family. A family is not a technique, so it gets an icon
+ * rather than a technique signature — a signature belongs to exactly one
+ * course, and borrowing one to head nine would be a small lie about what the
+ * mark means.
+ */
+const FAMILY_ICON: Record<string, IconName> = {
+  machine: "machine-head",
+  modern: "laser",
+  software: "node"
 };
 
 export default async function CoursesPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -96,12 +116,14 @@ export default async function CoursesPage({ params }: { params: Promise<{ locale
       {keys.map((key, idx) => {
         const f = families[key];
         const list = coursesInFamily(key);
+        const startAt = counter + 1;
+        counter += list.length;
         return (
           <section key={key} className={idx % 2 === 1 ? "section bg-ivory-2" : "section"}>
             <div className="container-site">
               <div className="family-head">
-                <div className="family-plate">
-                  <TechniquePlate variant={key} seed={idx} />
+                <div className="family-plate family-mark">
+                  <Icon name={FAMILY_ICON[key]} size={40} className="text-vermilion-deep" />
                 </div>
                 <SectionHeading
                   eyebrow={`${String(idx + 1).padStart(2, "0")} · ${t("familyLabel", { count: list.length })}`}
@@ -110,35 +132,15 @@ export default async function CoursesPage({ params }: { params: Promise<{ locale
                 />
               </div>
 
-              <Ledger className="u-section-body">
-                {list.map((c) => {
-                  counter += 1;
-                  const cue = CUE[c.slug];
-                  return (
-                    <li key={c.slug}>
-                      <Link href={`/courses/${c.slug}`} className="ledger-row course-row">
-                        <span className="ledger-index" aria-hidden="true">
-                          {String(counter).padStart(2, "0")}
-                        </span>
-                        <span className="ledger-title">
-                          {gu ? c.nameGu : c.nameEn}
-                          {cue ? (
-                            <span className={`course-cue course-cue--${cue}`}>{t(`cue.${cue}`)}</span>
-                          ) : null}
-                        </span>
-                        {/* What it makes — the axis people actually choose on.
-                            No trailing arrow: the whole row is the link and
-                            `a.ledger-row` already marks itself with the brand
-                            thread on hover. A stray glyph wrapped below the
-                            note whenever the note ran to two lines. */}
-                        <span className="ledger-note">
-                          {gu ? c.production.producesGu : c.production.producesEn}
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </Ledger>
+              <div className="u-section-body">
+                <MachineIndex
+                  courses={list}
+                  locale={l}
+                  startAt={startAt}
+                  cues={CUE}
+                  renderCue={(cue) => t(`cue.${cue}` as "cue.foundation")}
+                />
+              </div>
             </div>
           </section>
         );

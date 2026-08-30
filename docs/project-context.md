@@ -416,6 +416,16 @@ the manifest; machine stations are named by technique only, with no head count,
 model, speed or capacity. A test walks the rendered section order and fails if
 two dark bands become adjacent.
 
+**Courses (Phase 4).** `/courses` and the homepage render the same
+`<MachineIndex>`, so the two surfaces cannot drift in what a row may claim. A
+family heads with a branded icon, never a technique signature — a signature
+belongs to one technique. Eight courses lead with their own photograph; the
+other three get no substitute and keep the signature, which every course has.
+Signature captions are bilingual in `courseDetail.signatures.<slug>`;
+`TECHNIQUE_SIGNATURES[].description` remains the internal English spec note.
+Tests assert the produces line, fault list, output list, practice and machine
+description are all distinct across the eleven, so a duplicated template fails.
+
 **The 32-photograph manifest.** `src/content/photo-manifest.ts` is the typed
 list of every shot on the owner's final brief, with each slot's intrinsic
 dimensions. `<ManifestPhoto id="…">` reserves the photograph's exact aspect
@@ -1690,7 +1700,7 @@ modules are importable in a test runner while the guard stays real in the app.
 `jsx: "preserve"` for Next.js — without the override a test importing a `.tsx`
 component sees raw JSX and fails to parse.
 
-**35 test files, 480 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
+**36 test files, 500 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
 which is the point — the policy survives a refactor:
 
 | Test | Guards |
@@ -1698,6 +1708,7 @@ which is the point — the policy survives a refactor:
 | `i18n-parity` | EN/GU catalogue keys mirror exactly |
 | `machine-lab-system` | the design system v4 foundation: 32-photo manifest, icon family, eleven technique signatures, stitch semantics, motion levels, Gujarati overrides, reduced motion, no new dependency |
 | `machine-lab-shell` | the hero states EMCAD/machine/Surat/demo without photography; one course's facts never become the site's; one continuous thread and one Level-4 moment; the rail never autoplays, loops or needs a drag; bands never re-point the palette; the mobile bar keeps exactly two actions |
+| `machine-lab-courses` | one index component for both surfaces; every course has a signature and only its own photograph; exactly one course carries confirmed duration/fee facts; no two course pages share a produces line, fault list, output list, practice or machine description |
 | `machine-lab-homepage` | the section order; no two dark bands adjacent; the Machine Index carries no fee and only confirmed durations; every EMCAD figure renders from the verified record, never from a message; no payment provider anywhere near the fee block; no invented machine specification; trainer frames name a photograph, never a person |
 | `auth-guard`, `permissions` | the six-state access chain, owner bypass, grant handling |
 | `admin-seats` | one owner + five admin seats, invitation races |

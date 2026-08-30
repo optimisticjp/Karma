@@ -1302,3 +1302,53 @@
 .business-door {
   border-top: 2px solid var(--color-steel);
 }
+
+/* ------------------------------------------------------------------ *
+ * 20. Course surfaces
+ *
+ * A family gets an icon; a course gets its own technique signature and,
+ * where the studio shoot covers it, its own photograph. A family
+ * signature would be a small lie — a signature belongs to exactly one
+ * technique, and borrowing one to head nine courses would make the mark
+ * mean less than it does.
+ * ------------------------------------------------------------------ */
+
+.family-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The course aside: photograph where there is one, signature always. */
+.course-mark {
+  margin: 0 0 1.25rem;
+}
+.course-mark-photo {
+  margin-bottom: 0.875rem;
+}
+.course-signature {
+  border: var(--hairline);
+  border-radius: var(--radius-panel, 1rem);
+  background: var(--color-card);
+  padding: 0.875rem 1rem 1rem;
+}
+.course-signature .tech-sig {
+  margin-top: 0.5rem;
+}
+.course-signature-note {
+  margin-top: 0.625rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--color-stone);
+}
+
+/* A signature standing in for card media keeps the card's media ratio, so a
+   photographed course and a signature-led one are the same size on the shelf. */
+.card-signature {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--color-card);
+}
