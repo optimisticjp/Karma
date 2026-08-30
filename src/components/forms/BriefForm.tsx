@@ -4,7 +4,10 @@ import { useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { TurnstileWidget } from "./TurnstileWidget";
 import { waLink } from "@/lib/site";
-import { ACCEPT_ATTR, MAX_FILE_BYTES, MAX_FILES } from "@/lib/files";
+/* The size and count guards stay live: the submit handler still checks
+   anything that posts files, even with the input deferred. `ACCEPT_ATTR`
+   comes back with the field — see the note in the form body. */
+import { MAX_FILE_BYTES, MAX_FILES } from "@/lib/files";
 import { Link } from "@/i18n/navigation";
 
 /** B2B design brief (plan 9.6/10.2): one screen, files optional, quote by conversation. */
@@ -103,18 +106,22 @@ export function BriefForm() {
         {field("deadline", t("form.deadline"), { type: "date" })}
       </div>
       {field("details", t("form.details"), { textarea: true })}
-      <div>
-        <label className="label" htmlFor="brief-files">{t("form.files")}</label>
-        <input
-          id="brief-files"
-          name="files"
-          type="file"
-          multiple
-          accept={ACCEPT_ATTR}
-          className="input"
-          aria-describedby="brief-files-help"
-        />
-        <p id="brief-files-help" className="mt-2 text-xs text-stone">{t("form.filesHelp")}</p>
+      {/* Deferred upload, stated honestly.
+       *
+       * Private file storage (R2) is not switched on yet. With the binding
+       * missing, an attached file either fails the request in production or is
+       * silently dropped in demo mode — so offering a file input here would be
+       * promising something that cannot happen, and losing a business's
+       * artwork is the most expensive way to find that out.
+       *
+       * The field returns unchanged the day the bucket is bound; until then
+       * the brief says how to send files, and the API still accepts them if
+       * anything else posts one. `ACCEPT_ATTR` and the size limits stay
+       * imported for exactly that restoration.
+       */}
+      <div className="seam-note seam-note-accent">
+        <p className="label">{t("form.files")}</p>
+        <p className="mt-2 text-xs text-stone">{t("form.filesDeferred")}</p>
         <p className="mt-2 text-xs text-stone">🔒 {t("confidential")}</p>
       </div>
       {/* Honeypot: hidden from humans, tempting to bots */}

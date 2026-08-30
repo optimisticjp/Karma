@@ -193,6 +193,20 @@ rather than presented as Karma's own audited claim; and **the 4.8 never enters
 may be stated as *independently verified*, which is a different question from
 whether the owner has told us it is the rating on their listing.
 
+## Studio (B2B) — deferred and unconfirmed
+
+- **Turnaround time.** Not stated anywhere on the site; the services page
+  explains that it depends on technique, quantity and floor load and asks for
+  the buyer's deadline. Confirm a realistic range and it can be published.
+- **Supported machine file formats.** No extension is claimed. Confirm which
+  formats the studio actually delivers and the page can name them.
+- **In-form file upload.** Removed until R2 is bound: with no binding an
+  attached file fails in production and is dropped in demo mode. Restoring it
+  is a few lines — the API route and size guards are untouched.
+- **Sample B2B projects** (`studioProjects`) are generic work types, tagged as
+  samples. Replace with real commissions only with the client's written
+  permission.
+
 ## Still open after Phase 2
 
 - **Durations and module topics per course** (Q1, the open half). Four FAQ

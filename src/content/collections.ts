@@ -587,6 +587,129 @@ export const services: ServiceItem[] = [
  * consent. Until then every entry stays sample:true and renders a SampleTag.
  * NEVER invent a trainer. Delete a row rather than guess at one.
  * -------------------------------------------------------------------------- */
+/* --------------------------- studio (B2B) content ------------------------- */
+
+export type StudioProblem = {
+  slug: string;
+  /** The situation a business arrives with. */
+  askEn: string;
+  askGu: string;
+  /** What the studio calls that work. */
+  serviceEn: string;
+  serviceGu: string;
+  /** What comes back. */
+  returnsEn: string;
+  returnsGu: string;
+};
+
+/**
+ * Problem-led studio services.
+ *
+ * A business does not arrive looking for "digitising"; it arrives with a
+ * sample it has no file for, or a design that stitches badly at production
+ * speed. Naming the situation first and the service second is the difference
+ * between a services page a buyer recognises themselves in and a list of
+ * nouns.
+ *
+ * Every service named here is one the studio already advertises. Nothing was
+ * invented to fill the section out.
+ */
+export const studioProblems: StudioProblem[] = [
+  {
+    slug: "no-source-file",
+    askEn: "You have a physical sample and no source file.",
+    askGu: "તમારી પાસે ફિઝિકલ સેમ્પલ છે પણ સોર્સ ફાઇલ નથી.",
+    serviceEn: "Sample reconstruction",
+    serviceGu: "સેમ્પલ રિકન્સ્ટ્રક્શન",
+    returnsEn: "The piece read back into a machine-ready file — stitch types, density and travel order rebuilt so the next run matches the sample in your hand.",
+    returnsGu: "એ પીસને વાંચીને મશીન-રેડી ફાઇલમાં ફેરવવું — સ્ટિચ ટાઇપ, ડેન્સિટી અને ટ્રાવેલ ઓર્ડર ફરી બનાવીને, જેથી પછીનો રન તમારા હાથમાંના સેમ્પલ જેવો જ આવે."
+  },
+  {
+    slug: "fails-at-speed",
+    askEn: "The file stitches badly once the machine is at production speed.",
+    askGu: "મશીન પ્રોડક્શન સ્પીડ પર આવે એટલે ફાઇલ ખરાબ સીવાય છે.",
+    serviceEn: "Production correction",
+    serviceGu: "પ્રોડક્શન કરેક્શન",
+    returnsEn: "The fault diagnosed from a stitch-out and fixed in the file — underlay, density, pathing, pull compensation — rather than by slowing the head down and shipping it anyway.",
+    returnsGu: "સ્ટિચ-આઉટ પરથી ભૂલનું નિદાન અને ફાઇલમાં જ સુધારો — અન્ડરલે, ડેન્સિટી, પાથિંગ, પુલ કોમ્પેન્સેશન — હેડ ધીમી કરીને એમ જ માલ મોકલવાને બદલે."
+  },
+  {
+    slug: "bead-sequence-setup",
+    askEn: "You need bead or sequence placement that holds across a length.",
+    askGu: "તમને બીડ કે સિકવન્સનું એવું પ્લેસમેન્ટ જોઈએ છે જે આખી લંબાઈમાં ટકે.",
+    serviceEn: "Specialised digitising and setup",
+    serviceGu: "સ્પેશિયલાઇઝ્ડ ડિજિટાઇઝિંગ અને સેટઅપ",
+    returnsEn: "Feed, registration and travel order built for the machine that will run it, so a repeat does not drift between one end of a panel and the other.",
+    returnsGu: "જે મશીન પર ચાલવાનું છે એના માટે ફીડ, રજિસ્ટ્રેશન અને ટ્રાવેલ ઓર્ડર — જેથી પેનલના એક છેડાથી બીજા છેડા સુધી રિપીટ ખસે નહીં."
+  },
+  {
+    slug: "concept-to-sample",
+    askEn: "You want a specific embellished look and no design for it yet.",
+    askGu: "તમને ચોક્કસ એમ્બેલિશ્ડ લુક જોઈએ છે, પણ એની ડિઝાઇન હજી નથી.",
+    serviceEn: "Design development",
+    serviceGu: "ડિઝાઇન ડેવલપમેન્ટ",
+    returnsEn: "Concept worked up against the technique that will actually produce it — zardosi, beads, sequence, appliqué, 3D — and taken to a sample you can approve.",
+    returnsGu: "જે ટેકનિકથી ખરેખર બનવાનું છે એને ધ્યાનમાં રાખીને કન્સેપ્ટ તૈયાર — ઝરદોશી, બીડ્સ, સિકવન્સ, એપ્લિક, 3D — અને તમે મંજૂર કરી શકો એવા સેમ્પલ સુધી."
+  }
+];
+
+export type StudioProject = {
+  /** Always true: these are generic project types, not real commissions. */
+  sample: boolean;
+  titleEn: string;
+  titleGu: string;
+  techniqueEn: string;
+  techniqueGu: string;
+  briefEn: string;
+  briefGu: string;
+  deliveredEn: string;
+  deliveredGu: string;
+};
+
+/**
+ * ⚠️ SAMPLE studio projects — generic work types, not real commissions.
+ *
+ * The line these hold: a project type ("bridal blouse panel") is a description
+ * of ordinary trade work and is safe to show as an illustration; a named
+ * client, a logo, or an implied endorsement is not, and none appears here.
+ * Every card is tagged, and none of it enters structured data.
+ */
+export const studioProjects: StudioProject[] = [
+  {
+    sample: true,
+    titleEn: "Bridal blouse panel",
+    titleGu: "બ્રાઇડલ બ્લાઉઝ પેનલ",
+    techniqueEn: "Zardosi + beads",
+    techniqueGu: "ઝરદોશી + બીડ્સ",
+    briefEn: "A reference photograph and a fabric swatch, with no file and a fixed delivery date.",
+    briefGu: "એક રેફરન્સ ફોટો અને કાપડનો નમૂનો, ફાઇલ વગર અને નક્કી ડિલિવરી ડેટ સાથે.",
+    deliveredEn: "Digitised panel, one stitched sample for approval, then the production file.",
+    deliveredGu: "ડિજિટાઇઝ કરેલી પેનલ, મંજૂરી માટે એક સીવેલું સેમ્પલ, પછી પ્રોડક્શન ફાઇલ."
+  },
+  {
+    sample: true,
+    titleEn: "Repeat border, by the metre",
+    titleGu: "મીટરના હિસાબે રિપીટ બોર્ડર",
+    techniqueEn: "Sequence work",
+    techniqueGu: "સિકવન્સ વર્ક",
+    briefEn: "An existing file that drifted out of register across a dupatta length.",
+    briefGu: "એક જૂની ફાઇલ, જે દુપટ્ટાની લંબાઈમાં રજિસ્ટરની બહાર ખસી જતી હતી.",
+    deliveredEn: "Travel order re-cut and framing advice, with a corrected file that holds across the full length.",
+    deliveredGu: "ટ્રાવેલ ઓર્ડર ફરી ગોઠવ્યો અને ફ્રેમિંગની સલાહ, સાથે સુધારેલી ફાઇલ જે આખી લંબાઈમાં ટકે."
+  },
+  {
+    sample: true,
+    titleEn: "Uniform logo patches",
+    titleGu: "યુનિફોર્મ લોગો પેચ",
+    techniqueEn: "Flat + appliqué",
+    techniqueGu: "ફ્લેટ + એપ્લિક",
+    briefEn: "Artwork supplied at the wrong scale for the patch size required.",
+    briefGu: "જે સાઇઝના પેચ જોઈએ એના માટે ખોટા સ્કેલનું આર્ટવર્ક મળ્યું.",
+    deliveredEn: "Redrawn at size with legible small text, a sew-out for approval, and the file in the format the unit's machine takes.",
+    deliveredGu: "સાઇઝ પ્રમાણે ફરી દોર્યું, નાનું લખાણ વંચાય એ રીતે; મંજૂરી માટે સ્યુ-આઉટ, અને યુનિટની મશીન લે એ ફોર્મેટમાં ફાઇલ."
+  }
+];
+
 export type Trainer = {
   /** Always true today: no trainer has been confirmed by the owner. */
   sample: boolean;
