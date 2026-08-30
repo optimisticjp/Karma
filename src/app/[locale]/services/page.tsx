@@ -6,7 +6,9 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Ledger, LedgerRow } from "@/components/ui/Ledger";
 import { Icon } from "@/components/ui/Icon";
 import { services, studioProblems, studioProjects } from "@/content/collections";
-import { TechniquePlate } from "@/components/ui/TechniquePlate";
+import { TechniqueSignature } from "@/components/ui/TechniqueSignature";
+import { StudioRail } from "@/components/studio/StudioRail";
+import { MonoNote } from "@/components/ui/MonoNote";
 import { SampleTag } from "@/components/ui/SampleTag";
 import { TrackedLink } from "@/components/site/TrackedLink";
 import { Reveal } from "@/components/ui/Reveal";
@@ -38,6 +40,26 @@ export async function generateMetadata({
  * invented to fill the structure out, no turnaround time is promised (none has
  * been confirmed), and the sample projects are generic work types rather than
  * named clients.
+ *
+ * THE CHAIN CARRIES THE PAGE
+ * --------------------------
+ * `<StudioRail>` shows REFERENCE → DIGITISING → SAMPLE → CORRECTION →
+ * MACHINE-READY on the same `<ProductionRail>` the homepage uses for
+ * DESIGN → MACHINE → RESULT — which is why that component takes its stages as
+ * a prop rather than hard-coding three panels. A business arrives with a
+ * situation, and the order the work goes in answers "can this studio handle my
+ * mess" faster than any adjective.
+ *
+ * THREE THINGS THIS PAGE STILL WILL NOT SAY
+ * -----------------------------------------
+ * A turnaround time, a file format, or a price. The studio has confirmed none
+ * of them (`docs/content-checklist.md`), and a B2B page that invents a
+ * delivery window writes a cheque the floor has to cash. The copy asks for the
+ * buyer's deadline and their machine's format instead of announcing ours.
+ *
+ * There is also no file upload, and the brief form says so plainly rather than
+ * showing a dead control. Private file delivery waits on R2, which is
+ * deliberately not activated.
  */
 export default async function ServicesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -74,7 +96,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
         }
         aside={
           <>
-            <p className="microlabel !text-vermilion-deep">{t("confidentialTitle")}</p>
+            <MonoNote as="p" tone="vermilion">{t("confidentialTitle")}</MonoNote>
             <p className="mt-3">{t("confidential")}</p>
           </>
         }
@@ -112,8 +134,11 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
         </div>
       </section>
 
+      {/* The chain, in the order the work actually goes in. */}
+      <StudioRail />
+
       {/* 6. Problem-led. A business arrives with a situation, not a noun. */}
-      <section className="section bg-ivory-2">
+      <section className="section band-human">
         <div className="container-site">
           <SectionHeading eyebrow={t("problemsEyebrow")} title={t("problemsTitle")} sub={t("problemsSub")} rule />
           <ol className="case-list u-section-body">
@@ -144,10 +169,10 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
         <div className="container-site">
           <SectionHeading title={t("capabilityTitle")} sub={t("capabilitySub")} />
           <ul className="u-section-body spec-grid">
-            {coursesByFamily.map((c, i) => (
+            {coursesByFamily.map((c) => (
               <li key={c.slug}>
                 <div className="capability-plate">
-                  <TechniquePlate variant={c.family} seed={i} />
+                  <TechniqueSignature slug={c.slug} />
                 </div>
                 <span className="spec-label">
                   {gu ? families[c.family].nameGu : families[c.family].nameEn}

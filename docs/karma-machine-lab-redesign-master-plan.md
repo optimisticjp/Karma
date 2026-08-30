@@ -1853,7 +1853,7 @@ Claude must execute phases in order, one clean PR at a time unless a smaller spl
 | 5 | Proof ecosystem: student work, stories, trainers, studio/machines | ✅ Complete + merged |
 | 6 | Admission + conversion + contact experience | ✅ Complete + merged |
 | 7 | Machine Notes technical archive | ✅ Complete + merged |
-| 8 | B2B Studio/services | ⏳ Pending |
+| 8 | B2B Studio/services | ✅ Complete + merged |
 | 9 | About, verify, legal, errors/loading/404, footer + secondary public pages | ⏳ Pending |
 | 10 | Karma Console shell + Today at Karma + mobile operational system | ⏳ Pending |
 | 11 | Admissions, Students, Courses/Batches, Fees admin redesign | ⏳ Pending |
@@ -2535,6 +2535,66 @@ absence of any named person, client, statistic or promised result. The
 Rebuild services around production problems and deliverables.
 
 No fake file upload, no R2 activation, no invented turnaround or formats.
+
+## Implementation record — merged 2026-08-30
+
+**Branch:** `redesign/phase-8-studio` · **PR:** #35
+
+### The chain
+
+`<StudioRail>` shows **REFERENCE → DIGITISING → SAMPLE → CORRECTION →
+MACHINE-READY** on the same `<ProductionRail>` the homepage uses for
+DESIGN → MACHINE → RESULT. That reuse is exactly what the component was built
+for in Phase 2 — its stages have always been a prop rather than three
+hard-coded panels — so the B2B chain is a different set of stages, not a fork.
+
+A business arrives with a situation rather than a browsing intent, and the
+order the work goes in answers "can this studio handle my mess" faster than any
+adjective can.
+
+### Why these stages carry drawn marks
+
+The owner's 32-shot list covers the school, not the studio's commercial
+pipeline. Inventing five B2B photo slots would put five frames on the page that
+nobody has been briefed to shoot; borrowing the school's frames would caption
+commercial work with a classroom photograph. So `RailStage.photoId` became
+optional and each stage carries a canonical stitch mark instead — and every one
+means what it means everywhere else:
+
+| Stage | Mark | Meaning |
+| --- | --- | --- |
+| Reference | registration point | precision / reference |
+| Digitising | vector nodes | the file being built |
+| Sample | running stitch | progress |
+| Correction | broken path | failure / production problem |
+| Machine-ready | knot point | decision / completion |
+
+Tests assert that correction is the broken path and machine-ready is the knot,
+because those two are the ones a later edit would be tempted to prettify.
+
+### Three things this page still will not say
+
+**No turnaround time, no file format, no price.** The studio has confirmed none
+of the three (`docs/content-checklist.md`), and a B2B page that invents a
+delivery window writes a cheque the floor has to cash. The copy asks for the
+buyer's deadline and their machine's format instead of announcing ours, and
+tests scan both catalogues for delivery windows (`within N days`, `same day`,
+`24 hours`), for file extensions (`.dst`, `.emb`, `.pes`, …) and for `₹`.
+
+**Still no file upload.** The brief form says so plainly rather than showing a
+dead control; private file delivery waits on R2, which stays deactivated.
+
+### Capability
+
+The capability list is still generated from the course catalogue, so the page
+cannot claim a technique the studio does not teach — and each entry now shows
+that technique's **own signature** instead of a shared family swatch. A buyer
+sees what the stitch does, not which of three buckets it sits in.
+
+### Gates
+
+`npm run typecheck`, `npm run lint`, `npm test` (40 files, 563 tests) and
+`npm run build` all green. No dependency added.
 
 ---
 

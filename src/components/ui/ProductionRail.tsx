@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { ManifestPhoto } from "./PhotoSlot";
 import { MonoNote, StepIndex } from "./MonoNote";
 import { StitchPath } from "./StitchPath";
@@ -41,8 +41,19 @@ export type RailStage = {
   caption: string;
   /** The longer explanation shown in the detail panel when selected. */
   detail: string;
-  /** Slot id from the 32-photograph manifest. */
-  photoId: string;
+  /**
+   * Slot id from the 32-photograph manifest, where the stage has a
+   * photograph waiting for it.
+   */
+  photoId?: string;
+  /**
+   * A drawn mark, for a stage no photograph is planned for. The B2B chain is
+   * a process rather than a photo story and the owner's 32-shot list does not
+   * cover it, so those stages carry canonical stitch marks instead — which is
+   * honest, where a borrowed frame or an invented "coming soon" slot would
+   * not be.
+   */
+  mark?: ReactNode;
 };
 
 export function ProductionRail({
@@ -94,7 +105,11 @@ export function ProductionRail({
               <MonoNote className="rail-tab-label">{stage.label}</MonoNote>
             </button>
 
-            <ManifestPhoto id={stage.photoId} editorial className="rail-media" />
+            {stage.photoId ? (
+              <ManifestPhoto id={stage.photoId} editorial className="rail-media" />
+            ) : (
+              <span className="rail-media rail-mark">{stage.mark}</span>
+            )}
             <p className="rail-caption">{stage.caption}</p>
 
             {/* The thread between stages: horizontal on a laptop, vertical on a
