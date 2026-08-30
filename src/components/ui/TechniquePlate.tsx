@@ -22,6 +22,14 @@ import { cn } from "@/lib/utils";
 
 export type PlateVariant = "machine" | "modern" | "software";
 
+/**
+ * The thread colour is a custom property, not a hard-coded token. Vermilion is
+ * the interface accent — the one colour that means "act" — so six plates of it
+ * in the first viewport out-shout the primary button sitting beside them. A
+ * caller that fills a large area with swatches sets `--plate-accent` to a
+ * material colour (zari copper, needle blue) and leaves vermilion to the CTA.
+ */
+
 export function TechniquePlate({
   variant,
   className,
@@ -55,7 +63,7 @@ export function TechniquePlate({
             patternTransform={`rotate(${angle})`}
           >
             <rect width="7" height="7" fill="var(--color-ivory-2)" />
-            <path d="M1.5 0v7" stroke="var(--color-vermilion)" strokeWidth="1.8" opacity="0.6" />
+            <path d="M1.5 0v7" stroke="var(--plate-accent, var(--color-vermilion))" strokeWidth="1.8" opacity="0.6" />
             <path d="M4.5 0v7" stroke="var(--color-carbon)" strokeWidth="0.8" opacity="0.22" />
           </pattern>
         ) : null}
@@ -73,7 +81,7 @@ export function TechniquePlate({
             <path
               d="M1.5 9.5c0-4.5 6-4.5 6 0M9.5 9.5c0-4.5 6-4.5 6 0"
               fill="none"
-              stroke="var(--color-vermilion)"
+              stroke="var(--plate-accent, var(--color-vermilion))"
               strokeWidth="1.25"
               opacity="0.62"
             />
@@ -89,7 +97,7 @@ export function TechniquePlate({
             <path
               d="M0 16C6 16 6 6 11 6s5 10 11 10"
               fill="none"
-              stroke="var(--color-vermilion)"
+              stroke="var(--plate-accent, var(--color-vermilion))"
               strokeWidth="1.15"
               opacity="0.62"
             />
@@ -99,7 +107,7 @@ export function TechniquePlate({
               width="4"
               height="4"
               fill="var(--color-card)"
-              stroke="var(--color-vermilion)"
+              stroke="var(--plate-accent, var(--color-vermilion))"
               strokeWidth="0.9"
               opacity="0.8"
             />

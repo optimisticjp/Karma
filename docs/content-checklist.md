@@ -139,3 +139,63 @@ artefact of appending, not a decision. Both are presentation-only: the order
 now lives in `COURSE_DISPLAY_ORDER`, storage order and the `sortOrder` written
 by the catalogue import are untouched, and three tests hold the line. To
 re-rank the catalogue in future, edit that one list — nothing else.
+
+---
+
+## Sample content inventory (Phase 2, 2026-08-30)
+
+The owner asked for the whole visual system populated before real content
+arrives. Sample content is therefore allowed for prototyping, but every piece
+of it has to be replaceable in one place and unmistakable in three: in source,
+on screen, and in structured data.
+
+| What | Where | Marked how | Replace with |
+| --- | --- | --- | --- |
+| 3 reviews | `sampleReviews` in `src/content/collections.ts` | `sample: true` + visible `<SampleTag />` on every card | The studio's real Google reviews, with the reviewer's consent |
+| 2 student stories | `stories` in `src/content/collections.ts` | `sample: true`; public components filter on `!sample` | Six real, consented outcomes |
+| Gallery items | `galleryItems` in `src/content/collections.ts` | `sample: true`; filtered out of the public gallery | Real student and studio work |
+| Trainer profiles | `trainers` in `src/content/collections.ts` | `sample: true` | Owner-confirmed names, with consent |
+
+**Structured data is the hard line.** None of the above may enter
+`Review`, `AggregateRating` or any other schema type. A labelled placeholder
+card is a visible work-in-progress; a fabricated rich result in Google is a
+different order of problem, and it is the one that would follow the business
+around after the content is fixed.
+
+## Owner-provided trust facts (Phase 2, 2026-08-30)
+
+`ownerProvidedFacts` in `src/lib/site.ts` — a third category, between
+`verifiedFacts` (corroborated by two independent sources) and sample content
+(invented). The owner supplied these directly in
+`docs/screen-to-stitch-progress.md`, with the instruction: *"Do not claim they
+were independently verified if they were not."*
+
+| Fact | Value | Shown as |
+| --- | --- | --- |
+| Google rating | 4.8 | Hero trust rail and the reviews section, attributed to Google and linked to the live listing |
+| Instagram followers | 39K+ | Hero trust rail, attributed |
+| Facebook followers | 10K+ | Hero trust rail, attributed |
+
+Rules that follow: rounded, never precise; always attributed to the source
+rather than presented as Karma's own audited claim; and **the 4.8 never enters
+`AggregateRating`**, because we have no verified review count to go with it.
+
+`verifiedFacts.googleRating48` stays `false`. It governs whether the number
+may be stated as *independently verified*, which is a different question from
+whether the owner has told us it is the rating on their listing.
+
+## Still open after Phase 2
+
+- **Durations and module topics per course** (Q1, the open half). Four FAQ
+  answers and the fees section now say "ask at the demo" rather than guessing,
+  so nothing is blocked — but a real duration per course is better copy than
+  an honest deferral.
+- **Phone vs WhatsApp roles.** The owner's Facebook number
+  (+91 81605 17429) and the repo's published number (+91 99043 76340) have not
+  been reconciled. "Call for current batch" in the hero currently dials the
+  repo number. Phase 5 owns this decision; the two roles must not be silently
+  merged before then.
+- **Real photography.** Every visual on the homepage is drawn — technique
+  swatches, the workflow, the four production-proof panels. They are designed
+  to be replaced by photography without a layout change, not to hide its
+  absence indefinitely.

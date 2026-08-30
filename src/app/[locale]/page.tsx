@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Hero } from "@/components/home/Hero";
 import { HomepageStats } from "@/components/home/HomepageStats";
-import { CourseFamilies } from "@/components/home/CourseFamilies";
-import { ScreenToStitch } from "@/components/home/ScreenToStitch";
-import { HowItWorks } from "@/components/home/HowItWorks";
+import { CourseCatalogue } from "@/components/home/CourseCatalogue";
+import { ProductionWorkflow } from "@/components/home/ProductionWorkflow";
+import { ProblemsSolved } from "@/components/home/ProblemsSolved";
+import { MachineProof } from "@/components/home/MachineProof";
+import { Reviews } from "@/components/home/Reviews";
 import { Trainers } from "@/components/home/Trainers";
 import { Proof } from "@/components/home/Proof";
 import { LatestVideos } from "@/components/home/LatestVideos";
@@ -36,24 +38,38 @@ export async function generateMetadata({
 }
 
 /**
- * Homepage composition.
+ * Homepage composition — the 30-second decision.
  *
- * The page used to run sixteen sections at one uniform density, in an order
- * that put the two things a prospective student most needs — the schedule and
- * the fee answer — at positions eleven and twelve. It now reads as five
- * chapters, each a pair of sections sharing a surface, with the schedule
- * directly under the catalogue where the decision actually happens:
+ * The visitor arrives from an Instagram reel, on a phone, on mobile data. The
+ * order below is the order that answers their questions as they actually ask
+ * them, rather than the order a brochure would use:
  *
- *   1. The offer          Hero
- *   2. What, and when     Courses · Batches            (ivory-2)
- *   3. How the work works Screen→stitch · Method       (ivory, signature tier)
- *   4. Proof              Student work · Stories · Teaching · Studio channel
- *   5. Decide             Fees · FAQ                   (ivory-2)
- *   6. Close              Business door (dark) · Visit · CTA (dark)
+ *   1. What is this, and what do I do?     Hero (offer, 3 actions, trust rail)
+ *   2. What does the work actually involve? Workflow 01→06
+ *   3. What can I learn, and when?          Catalogue (11) · Batches
+ *   4. Will it fix my problem?              Problems we teach you to solve
+ *   5. Prove it.                            File → failed → correction → stitch
+ *   6. Watch it change.                     Screen-to-stitch slider
+ *   7. Who says so?                         Work · Trainers · Channel · Reviews
+ *   8. What will it cost, where is it?      Fees · Visit
+ *   9. Still unsure?                        FAQ
+ *  10. Not a student?                       Business door
+ *  11. Close.                               CTA
  *
- * Two dark bands punctuate the run, at the audience switch and at the close.
- * Section surfaces live on the components themselves; chapters that continue
- * a surface carry a hairline instead of a colour change.
+ * Steps 4 and 5 are the ones no competing institute has. Naming five real
+ * production faults and then showing a stitch-out that failed, with the file
+ * change that fixes it, is worth more than any adjective on the page.
+ *
+ * The <ScreenToStitch> slider is deliberately not here. It showed the same
+ * motif as file, path and finished piece — which the machine-proof strip now
+ * does with two more states and a failure, in less height. Keeping both cost
+ * 800px of desktop to say the same thing twice. The component stays for a
+ * course detail page, where the interaction has room to earn its place.
+ *
+ * Exactly two dark bands punctuate the run — the audience switch and the
+ * close. The machine-proof strip earns its emphasis from `bg-sand` and from
+ * the contrast inside its own panels; a third dark band would turn
+ * punctuation into decoration.
  */
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -63,23 +79,26 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     <>
       <Hero />
 
-      <CourseFamilies />
+      <ProductionWorkflow />
+
+      <CourseCatalogue />
       <BatchesTeaser />
 
-      <ScreenToStitch>
-        <HowItWorks />
-      </ScreenToStitch>
+      <ProblemsSolved />
+      <MachineProof />
 
       <HomepageStats />
       <Proof />
       <Trainers />
       <LatestVideos />
+      <Reviews />
 
       <Investment />
+      <VisitStudio />
+
       <HomeFaq />
 
       <BusinessBand />
-      <VisitStudio />
       <CtaBand />
     </>
   );

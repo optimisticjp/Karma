@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { StageOutline, StagePath, StageFinished } from "./motif";
 import { cn } from "@/lib/utils";
 
 /**
@@ -19,177 +20,7 @@ import { cn } from "@/lib/utils";
  * arrow keys, announced correctly, and free of any scroll-hijacking gesture.
  */
 
-/**
- * The shared motif: a buta (paisley), the shape this trade actually runs on
- * every second garment in Surat. One closed outline, one inner curl, a stem
- * and a bead run — drawn once and then treated three ways, so the slider
- * reads as one object changing state rather than three unrelated pictures.
- */
-const MOTIF = {
-  /* Closed buta: a round bulb at the lower left drawn up into the curled
-     point at the upper right. Laid on its side so it fills a landscape frame
-     the way a border motif fills a border. */
-  body:
-    "M336 46 C366 96, 350 158, 306 190 C254 226, 170 230, 122 198 " +
-    "C68 164, 60 100, 100 68 C138 40, 196 44, 218 84 " +
-    "C236 116, 276 122, 300 100 C318 84, 328 64, 336 46 Z",
-  /* The inner echo, the way a border row repeats just inside the outline. */
-  inner:
-    "M316 76 C338 118, 322 160, 288 182 C244 210, 176 212, 136 184 " +
-    "C92 154, 86 106, 116 82 C148 58, 194 62, 214 96 " +
-    "C230 122, 266 128, 292 110",
-  /* Filled forms worked inside the bulb. */
-  flowers: [
-    { cx: 160, cy: 140, r: 16 },
-    { cx: 208, cy: 160, r: 11 },
-    { cx: 132, cy: 174, r: 9 }
-  ],
-  /* Where the needle enters, walked around the outline in stitch order. */
-  stitches: [
-    [336, 46],
-    [356, 112],
-    [330, 168],
-    [280, 208],
-    [206, 228],
-    [140, 212],
-    [86, 166],
-    [66, 108],
-    [106, 66],
-    [170, 44],
-    [218, 84]
-  ] as const,
-  /* The handful of anchors an emCAD file would actually expose. */
-  nodes: [
-    [336, 46],
-    [306, 190],
-    [122, 198],
-    [100, 68],
-    [218, 84],
-    [300, 100]
-  ] as const
-};
-
-function StageOutline({ uid }: { uid: string }) {
-  return (
-    <svg
-      className="stage-layer"
-      viewBox="0 0 400 250"
-      preserveAspectRatio="xMidYMid meet"
-      aria-hidden="true"
-    >
-      <defs>
-        <pattern id={`${uid}-cad`} width="20" height="20" patternUnits="userSpaceOnUse">
-          <path d="M20 0H0v20" fill="none" stroke="var(--color-line)" strokeWidth="0.6" />
-        </pattern>
-      </defs>
-      <rect width="400" height="250" fill={`url(#${uid}-cad)`} />
-      <g fill="none" stroke="var(--color-carbon)" strokeWidth="1.7" strokeLinejoin="round">
-        <path d={MOTIF.body} />
-        <path d={MOTIF.inner} strokeWidth="1.1" />
-        {MOTIF.flowers.map((f) => (
-          <circle key={`${f.cx}-${f.cy}`} cx={f.cx} cy={f.cy} r={f.r} strokeWidth="1.1" />
-        ))}
-      </g>
-      {/* Control points: the giveaway that this is a file, not a photograph. */}
-      <g fill="var(--color-card)" stroke="var(--color-vermilion)" strokeWidth="1.3">
-        {MOTIF.nodes.map(([x, y]) => (
-          <rect key={`${x}-${y}`} x={x - 3.5} y={y - 3.5} width="7" height="7" />
-        ))}
-      </g>
-    </svg>
-  );
-}
-
-function StagePath() {
-  return (
-    <svg
-      className="stage-layer"
-      viewBox="0 0 400 250"
-      preserveAspectRatio="xMidYMid meet"
-      aria-hidden="true"
-    >
-      <rect width="400" height="250" fill="var(--color-ivory-2)" />
-      {/* The design, receded: the file is still underneath the path. */}
-      <g fill="none" stroke="var(--color-carbon)" strokeWidth="0.9" opacity="0.22">
-        <path d={MOTIF.body} />
-        <path d={MOTIF.inner} />
-        {MOTIF.flowers.map((f) => (
-          <circle key={`${f.cx}-${f.cy}`} cx={f.cx} cy={f.cy} r={f.r} />
-        ))}
-      </g>
-      {/* The travel path, dashed like thread, in the one accent colour. */}
-      <g
-        fill="none"
-        stroke="var(--color-vermilion)"
-        strokeWidth="2.3"
-        strokeLinejoin="round"
-        strokeDasharray="7 5"
-      >
-        <path d={MOTIF.body} />
-        <path d={MOTIF.inner} strokeWidth="1.7" />
-      </g>
-      {/* Every point where the needle goes into the cloth. */}
-      <g fill="var(--color-carbon)">
-        {MOTIF.stitches.map(([x, y]) => (
-          <circle key={`${x}-${y}`} cx={x} cy={y} r="2.8" />
-        ))}
-      </g>
-    </svg>
-  );
-}
-
-function StageFinished({ uid }: { uid: string }) {
-  return (
-    <svg
-      className="stage-layer"
-      viewBox="0 0 400 250"
-      preserveAspectRatio="xMidYMid meet"
-      aria-hidden="true"
-    >
-      <defs>
-        {/* Satin fill: short parallel strokes, the way a filled area is
-            actually stitched. Reads as embroidery, not as a flat vector. */}
-        <pattern
-          id={`${uid}-satin`}
-          width="6"
-          height="6"
-          patternUnits="userSpaceOnUse"
-          patternTransform="rotate(38)"
-        >
-          <rect width="6" height="6" fill="var(--color-vermilion)" />
-          <path d="M0 0v6" stroke="rgb(255 255 255 / 0.32)" strokeWidth="1.7" />
-        </pattern>
-        {/* The ground cloth. */}
-        <pattern id={`${uid}-weave`} width="8" height="8" patternUnits="userSpaceOnUse">
-          <rect width="8" height="8" fill="var(--color-card)" />
-          <path d="M0 4h8M4 0v8" stroke="var(--color-line)" strokeWidth="0.7" opacity="0.65" />
-        </pattern>
-      </defs>
-      <rect width="400" height="250" fill={`url(#${uid}-weave)`} />
-      <path
-        d={MOTIF.body}
-        fill={`url(#${uid}-satin)`}
-        stroke="var(--color-vermilion)"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-      <path d={MOTIF.inner} fill="none" stroke="rgb(255 255 255 / 0.6)" strokeWidth="3" />
-      {/* Flowers worked in a second colour, beads on the outline. */}
-      <g fill="var(--color-carbon)" opacity="0.88">
-        {MOTIF.flowers.map((f) => (
-          <circle key={`${f.cx}-${f.cy}`} cx={f.cx} cy={f.cy} r={f.r} />
-        ))}
-      </g>
-      <g fill="var(--color-card)" stroke="var(--color-carbon)" strokeWidth="1.2">
-        {MOTIF.stitches.map(([x, y]) => (
-          <circle key={`${x}-${y}`} cx={x} cy={y} r="4.2" />
-        ))}
-      </g>
-    </svg>
-  );
-}
-
-export function ScreenToStitch({ children }: { children?: React.ReactNode }) {
+export function ScreenToStitch() {
   const t = useTranslations("home.sts");
   const uid = useId().replace(/:/g, "");
   const [v, setV] = useState(1);
@@ -270,10 +101,6 @@ export function ScreenToStitch({ children }: { children?: React.ReactNode }) {
           </div>
         </div>
 
-        {/* The method steps used to be their own full section directly below,
-            with a second heading saying much the same thing. Same chapter, so
-            same section: one heading, one padding, half the height. */}
-        {children}
       </div>
     </section>
   );

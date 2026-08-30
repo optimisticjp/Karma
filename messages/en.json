@@ -56,6 +56,7 @@
     "exploreCourses": "Explore courses",
     "whatsapp": "WhatsApp us",
     "call": "Call",
+    "directions": "Directions",
     "seeAll": "See all",
     "sampleTag": "Sample: replace before launch",
     "sampleDataNote": "Sample schedule shown until the studio's live batch list is connected.",
@@ -72,60 +73,46 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "Skill શીખો, Future બનાવો",
-      "h1": "Learn the machines Surat runs on.",
-      "sub": "Karma is an embroidery academy and design lab in Mota Varachha. Eleven techniques — from flat and zardosi to appliqué, 3D, laser, tufting and emCAD design — taught at the machine, with a trainer next to you.",
-      "secondary": "See upcoming batches",
-      "indexTitle": "What you can learn here",
-      "indexCta": "Full course details and syllabus",
-      "fact1Label": "First class",
-      "fact1Value": "Free demo, no obligation",
-      "fact2Label": "Batch timing",
-      "fact2Value": "Morning and evening, till 10:30 pm",
-      "fact3Label": "Where",
-      "fact3Value": "Mota Varachha, Surat",
-      "fact4Label": "Fees",
-      "fact4Value": "Shared in person at your demo",
-      "indexCount": "{count} courses"
+      "eyebrow": "Commercial embroidery training · Mota Varachha, Surat",
+      "h1": "From screen to stitch.",
+      "promise": "Design on screen. Prove it on the machine.",
+      "sub": "Karma is an embroidery academy and design lab in Mota Varachha. Eleven techniques and emCAD design software, taught on live production machines — start from zero, or fix the faults your machine already gives you. First class is a practical demo.",
+      "ctaDemo": "Book a practical demo",
+      "ctaCall": "Call for current batch",
+      "wallCaption": "Drawn technique swatches — studio photography is being shot",
+      "wallCta": "See all 11 courses",
+      "trustGoogle": "Google rating",
+      "trustInstagram": "Instagram",
+      "trustFacebook": "Facebook",
+      "trustWhereLabel": "Where",
+      "trustWhereValue": "Mota Varachha, Surat",
+      "trustTeachingLabel": "How it's taught",
+      "trustTeachingValue": "On live machines"
     },
-    "families": {
-      "h2": "Choose the skill you want to master.",
-      "sub": "Three families. Start with the one that matches the work you want to do — every course is taught on live machines.",
-      "see": "See the courses",
-      "eyebrow": "Courses",
-      "count": "{count, plural, one {# course} other {# courses}}"
+    "workflow": {
+      "eyebrow": "The production workflow",
+      "h2": "Six stages between an idea and a garment.",
+      "sub": "Most classes stop at stage three. The two that decide whether a design ships are 04 and 05 — reading a failed sample, and correcting the file instead of compensating at the machine.",
+      "s1t": "Design",
+      "s1d": "Read artwork the way the trade reads it: technique, scale, material, and what the fabric will allow.",
+      "s2t": "Digitise",
+      "s2d": "Build the file in emCAD — stitch types, underlay, density and the travel order the head will follow.",
+      "s3t": "Set",
+      "s3d": "Frame, thread, tension and needle chosen for this cloth. Setup is where half of all faults are decided.",
+      "s4t": "Test",
+      "s4d": "Run a sample and read it honestly: puckering, gaps, registration, thread breaks.",
+      "s5t": "Correct",
+      "s5d": "Fix the file, not the symptom. An operator who slows the head down ships the fault anyway.",
+      "s6t": "Stitch",
+      "s6d": "Run the job, finish the piece, and know why it came out right.",
+      "note": "Every course teaches all six stages for its technique. That is the difference between learning a machine and learning the work."
     },
-    "sts": {
-      "eyebrow": "The workflow",
-      "h2": "Watch a file become a stitch.",
-      "sub": "One motif in three states: the emCAD file, the path the machine follows, and the finished piece. Every course teaches all three, because knowing only one of them is what keeps an operator an operator.",
-      "stage1": "The emCAD file",
-      "stage2": "The stitch path",
-      "stage3": "The finished piece",
-      "note1": "Outline, control points and colour blocks: the design as it leaves the screen.",
-      "note2": "Travel order, density and where the needle enters. Quality is decided here, not at the machine.",
-      "note3": "Satin fill, beadwork and finishing, on real fabric.",
-      "hint": "Drag the slider, or use the arrow keys",
-      "sliderLabel": "Reveal the stages, from file to finished piece"
-    },
-    "how": {
-      "h2": "Learn the complete workflow, not isolated techniques.",
-      "line": "Every course connects design sense, software, materials and machine work, so you understand why a design succeeds, not just which button to press.",
-      "s1t": "Understand the design",
-      "s1d": "Read artwork the way the trade reads it: technique, density, material.",
-      "s2t": "Build it in software",
-      "s2d": "emCAD pathing and machine-ready files, from the first week it's relevant.",
-      "s3t": "Prepare the machine",
-      "s3d": "Frames, tension, threading: set up like a professional, not a passenger.",
-      "s4t": "Test and finish the piece",
-      "s4d": "Stitch, check, fix, finish. Your hands learn what quality feels like."
-    },
-    "work": {
-      "h2": "Made in class. Built with real skills.",
-      "sub": "Pieces finished by students in live batches, with the technique on the label.",
-      "seeAll": "See all student work",
-      "pendingLabel": "Not published yet",
-      "pendingNote": "Student pieces are photographed on this floor and published with the student’s consent. Nothing here is bought in, and nothing is a supplier sample — which is why the strip is empty until the first shoot."
+    "catalogue": {
+      "eyebrow": "The catalogue",
+      "h2": "Eleven techniques, three families.",
+      "sub": "Pick by the work you want to do, not by the course name. Each one is taught at the machine, with a trainer beside you.",
+      "count": "{count, plural, one {# course} other {# courses}}",
+      "cta": "Full syllabus and course details"
     },
     "batches": {
       "h2": "Find a batch that fits your schedule.",
@@ -144,53 +131,58 @@
       "empty": "No upcoming batches are published right now. Message us on WhatsApp for the current schedule.",
       "error": "The batch list couldn't load right now. WhatsApp us and we'll share the current schedule directly."
     },
-    "stories": {
-      "h2": "What changed after the course?",
-      "seeAll": "More success stories",
-      "before": "Before",
-      "after": "Now",
-      "sub": "Named outcomes, published only with the student’s consent.",
+    "problems": {
+      "eyebrow": "Why people come here",
+      "h2": "The problems we teach you to solve.",
+      "sub": "If you already run a machine, you have met most of these. Each one has a cause, and the cause is teachable.",
+      "p1f": "The thread keeps breaking.",
+      "p1c": "Needle, thread and material are not matched — and the tension is set for a different cloth. Learn the combinations before you learn the machine.",
+      "p2f": "It looks right on screen and fails on fabric.",
+      "p2c": "Density, underlay and path direction. A design is not finished when it looks good; it is finished when it survives the cloth.",
+      "p3f": "Sequence and beadwork land out of register.",
+      "p3c": "Framing, travel order and correction. The hoop moves — the file has to be built expecting it.",
+      "p4f": "The operator compensates for a bad file.",
+      "p4c": "Slowing the head down ships the fault anyway. Fix it upstream, in the digitising, and it stays fixed for every run.",
+      "p5f": "Production is too slow to be worth it.",
+      "p5c": "Stitch count, colour changes and trims are design decisions. A better file runs faster on the same machine."
+    },
+    "machineProof": {
+      "eyebrow": "Proof from the machine",
+      "h2": "What a first stitch-out actually looks like.",
+      "sub": "Every institute shows you finished work. Here is the part they leave out: the same motif, stitched badly, with the four faults marked and the file change that fixes each one.",
+      "fileLabel": "Screen file",
+      "fileNote": "The design as it leaves emCAD: outline, control points and colour blocks. Nothing here has met cloth yet.",
+      "failedLabel": "Failed sample",
+      "failedNote": "Puckered ground, a thin and gapping fill, the inner line out of register, and a broken thread. Four faults, four different causes.",
+      "fixLabel": "Correction",
+      "fixNote": "Underlay added, density raised, travel order re-cut. Every change is made in the file — not by slowing the machine down.",
+      "finalLabel": "Final stitch",
+      "finalNote": "The same design, run again. Clean satin, the echo in register, and a piece you would put your name on.",
+      "foot": "These are drawn diagrams of ordinary production faults, not a record of any student's work. Real studio and student photography is being shot."
+    },
+    "sts": {
+      "eyebrow": "The workflow",
+      "h2": "Watch a file become a stitch.",
+      "sub": "One motif in three states: the emCAD file, the path the machine follows, and the finished piece. Every course teaches all three, because knowing only one of them is what keeps an operator an operator.",
+      "stage1": "The emCAD file",
+      "stage2": "The stitch path",
+      "stage3": "The finished piece",
+      "note1": "Outline, control points and colour blocks: the design as it leaves the screen.",
+      "note2": "Travel order, density and where the needle enters. Quality is decided here, not at the machine.",
+      "note3": "Satin fill, beadwork and finishing, on real fabric.",
+      "hint": "Drag the slider, or use the arrow keys",
+      "sliderLabel": "Reveal the stages, from file to finished piece"
+    },
+    "work": {
+      "h2": "Made in class. Built with real skills.",
+      "sub": "Pieces finished by students in live batches, with the technique on the label.",
+      "seeAll": "See all student work",
       "pendingLabel": "Not published yet",
-      "pendingNote": "Student outcomes go here once each person has agreed to be named and the studio has verified what changed for them. We would rather show none than write them ourselves.",
-      "visitCta": "Visit the studio"
+      "pendingNote": "Student pieces are photographed on this floor and published with the student’s consent. Nothing here is bought in, and nothing is a supplier sample — which is why the strip is empty until the first shoot."
     },
-    "business": {
-      "eyebrow": "For garment businesses",
-      "h2": "Need designs, digitizing or job work?",
-      "line": "The same studio that trains professionals develops designs and production embroidery for garment businesses. Send a brief and we will come back with questions or a quote.",
-      "a1": "Explore services",
-      "a2": "Submit a design brief"
-    },
-    "videos": {
-      "h2": "Latest from the studio",
-      "sub": "Live machines, real batches, real students: straight from our YouTube.",
-      "channel": "Visit our YouTube channel"
-    },
-    "cta": {
-      "h2": "Seats per batch are limited, so machine time stays personal.",
-      "sub": "Book your free demo this week.",
-      "signoff": "Skill શીખો, Future બનાવો."
-    },
-    "visit": {
-      "eyebrow": "The studio",
-      "h2": "Come and see the machines before you decide.",
-      "sub": "A real floor in Mota Varachha, not an address on a listing site. Walk in during studio hours, or book the free demo and just come.",
-      "phoneLabel": "Phone",
-      "firstTitle": "What happens on a first visit",
-      "firstSteps": [
-        {
-          "t": "You walk in, or message first",
-          "d": "No appointment needed during studio hours. A message just means someone is expecting you."
-        },
-        {
-          "t": "You sit at a machine",
-          "d": "The free demo is a real session on a real machine, not a tour and a brochure."
-        },
-        {
-          "t": "You leave without deciding",
-          "d": "We go through the fee and the batch timings. Deciding the same day is not expected."
-        }
-      ]
+    "proof": {
+      "emptyTitle": "Proof, when there is proof.",
+      "emptyBody": "No student work or outcomes are published here yet, because nothing goes up without the student’s consent and the studio’s verification. Until then the real evidence is on the floor — come and look at it."
     },
     "trainers": {
       "h2": "You learn from people who still do the work.",
@@ -206,6 +198,18 @@
       "p4Value": "Doubt-clearing with your trainer during studio hours.",
       "pendingLabel": "Still to come",
       "pendingNote": "Trainer profiles — real names, real specialities, real portraits — go here once each one is confirmed. We would rather show you nothing than a stand-in."
+    },
+    "videos": {
+      "h2": "Latest from the studio",
+      "sub": "Live machines, real batches, real students: straight from our YouTube.",
+      "channel": "Visit our YouTube channel"
+    },
+    "reviews": {
+      "eyebrow": "What people say",
+      "h2": "Reviews, and where to find us.",
+      "sub": "The rating below is on the studio's Google listing — open it and read the reviews yourself.",
+      "scoreSource": "on Google",
+      "foot": "The three cards above are sample text used while the real reviews are being collected, and they are marked as samples. The Google rating is owner-provided and links to the live listing."
     },
     "investment": {
       "eyebrow": "Fees",
@@ -231,14 +235,53 @@
       "noGateway": "There is no online payment on this website. Fees are paid in person at the studio, with a receipt.",
       "askCta": "Ask about fees"
     },
+    "visit": {
+      "eyebrow": "The studio",
+      "h2": "Come and see the machines before you decide.",
+      "sub": "A real floor in Mota Varachha, not an address on a listing site. Walk in during studio hours, or book the free demo and just come.",
+      "phoneLabel": "Phone",
+      "firstTitle": "What happens on a first visit",
+      "firstSteps": [
+        {
+          "t": "You walk in, or message first",
+          "d": "No appointment needed during studio hours. A message just means someone is expecting you."
+        },
+        {
+          "t": "You sit at a machine",
+          "d": "The free demo is a real session on a real machine, not a tour and a brochure."
+        },
+        {
+          "t": "You leave without deciding",
+          "d": "We go through the fee and the batch timings. Deciding the same day is not expected."
+        }
+      ]
+    },
     "faq": {
       "h2": "The questions people ask before they come.",
       "sub": "Straight answers. If yours is not here, ask on WhatsApp and a person will reply.",
       "all": "See all questions"
     },
-    "proof": {
-      "emptyTitle": "Proof, when there is proof.",
-      "emptyBody": "No student work or outcomes are published here yet, because nothing goes up without the student’s consent and the studio’s verification. Until then the real evidence is on the floor — come and look at it."
+    "business": {
+      "eyebrow": "For garment businesses",
+      "h2": "Need designs, digitizing or job work?",
+      "line": "The same studio that trains professionals develops designs and production embroidery for garment businesses. Send a brief and we will come back with questions or a quote.",
+      "a1": "Explore services",
+      "a2": "Submit a design brief"
+    },
+    "stories": {
+      "h2": "What changed after the course?",
+      "seeAll": "More success stories",
+      "before": "Before",
+      "after": "Now",
+      "sub": "Named outcomes, published only with the student’s consent.",
+      "pendingLabel": "Not published yet",
+      "pendingNote": "Student outcomes go here once each person has agreed to be named and the studio has verified what changed for them. We would rather show none than write them ourselves.",
+      "visitCta": "Visit the studio"
+    },
+    "cta": {
+      "h2": "Your first design should not stop at the screen.",
+      "sub": "Come and prove it on the machine. Book a practical demo, or call and ask what the current batch is running.",
+      "signoff": "From screen to stitch."
     }
   },
   "coursesPage": {

@@ -447,7 +447,7 @@ Update this table after every completed/merged phase.
 | Phase | Scope | Status | PR / merge notes |
 | --- | --- | --- | --- |
 | 1 | Brand system + design foundations | ✅ Complete + merged | PR #12 — `build` + Cloudflare Workers Builds green |
-| 2 | Homepage / 30-second decision | ⏳ Pending | |
+| 2 | Homepage / 30-second decision | 🚧 In progress | branch `phase-2/homepage-30-second-decision` |
 | 3 | Courses / production-led detail pages | ⏳ Pending | |
 | 4 | Proof ecosystem: work, stories, reviews, trainers | ⏳ Pending | |
 | 5 | Mobile conversion / call / directions / demo | ⏳ Pending | |
@@ -732,6 +732,93 @@ No carousel may be the only way to access essential content.
 No autoplay sound.
 
 Merge when green; update progress.
+
+## Implementation record
+
+### What was built
+- **Hero** rebuilt around the spine. `FROM SCREEN TO STITCH` as the H1, the
+  promise line under it, and three ranked actions: *Book a practical demo*
+  (primary), *Call for current batch* (secondary), *Directions* (tertiary
+  link). The right side is a **material wall** — six drawn technique plates,
+  labelled — because the studio has no photography, stock is off the table and
+  empty frames are worse than nothing.
+- **Trust rail**: 4.8 Google · 39K+ Instagram · 10K+ Facebook · Mota Varachha,
+  Surat · On live machines. Five facts, five columns.
+- **`<ProductionWorkflow>`**: 01 Design → 02 Digitise → 03 Set → 04 Test →
+  05 Correct → 06 Stitch, with a running stitch threading through the six
+  numbers on wide screens and dropping between them on one column.
+- **`<CourseCatalogue>`**: all eleven courses as one numbered ledger.
+- **`<ProblemsSolved>`**: "The problems we teach you to solve" — five
+  fault → cause pairs.
+- **`<MachineProof>`**: screen file → failed sample → correction → final
+  stitch, all four states drawn.
+- **`<Reviews>`**: the Google rating linked to the live listing, plus three
+  sample review cards.
+- **FAQ** gained the four missing topics: emCAD vs Wilcom, course duration,
+  when the next batch starts, and the job/freelance/own-unit question.
+- **Final CTA**: "Your first design should not stop at the screen."
+
+### Decisions
+
+1. **The failed-sample panel is the point of the proof section.** Every
+   institute in Surat publishes finished work; none publishes a stitch-out
+   that went wrong. Showing four faults on a bad sample and naming the file
+   change that fixes each one is the single most persuasive thing on the page,
+   and only someone who runs production every day can do it. The panels are
+   *diagrams of ordinary trade faults*, not a record of any student's work, so
+   there is no identity, outcome or statistic to verify.
+2. **Owner-provided facts are a third category** — `ownerProvidedFacts` in
+   `src/lib/site.ts`, between `verifiedFacts` and sample content. They are
+   rounded, attributed to their source, and **the 4.8 never enters
+   `AggregateRating`**: we have no verified review count, and a fabricated
+   rich result is a different order of problem from a labelled card.
+   `verifiedFacts.googleRating48` stays `false`, because that flag governs
+   whether the number may be called independently verified.
+3. **Three columns of families was wrong for eleven courses.** The split is
+   9 / 2 / 1, so machine work ran nine rows deep beside two columns of white
+   space and the section cost 2,200px to say what a list says in 700. One
+   numbered ledger with the family in the right-hand column groups without
+   fragmenting.
+4. **`<ScreenToStitch>` was removed from the homepage.** It showed the same
+   motif as file → path → finished, which the machine-proof strip now does
+   with two more states and a failure, in less height. Keeping both cost 800px
+   of desktop to say the same thing twice. The component is kept for a course
+   detail page in Phase 3, where the interaction has room to earn its place.
+5. **The proof strip is on `bg-sand`, not a third dark band.** Two dark bands
+   already punctuate this page (the audience switch and the close) and a third
+   turns punctuation into decoration. Each panel carries its own ground — CAD
+   grid, puckered weave, clean weave — so the contrast is inside the strip.
+6. **The technique plates are zari copper, not vermilion.** Six vermilion
+   plates beside a vermilion primary button made the texture louder than the
+   action. `TechniquePlate` now takes its thread colour from a
+   `--plate-accent` custom property so the accent stays reserved for actions.
+7. **Nothing was invented.** No duration, fee, student count, pass rate,
+   placement or earnings claim appears anywhere. Four of the new FAQ answers
+   deliberately say "ask at the demo", and the job/business answer explicitly
+   refuses to promise a job or an income.
+
+### Bugs found and fixed during the phase
+- The four proof panels rendered **blank**: `.stage-layer` is absolutely
+  positioned (it was written to stack states inside the slider), so the new
+  frame had to establish the containing block.
+- The correction panel's underlay lattice ran past the motif outline and read
+  as stray construction lines. Now clipped to the shape it supports.
+- `.rule-stitch` was still drawing the old v2 dash with no needle
+  penetrations, so two marks that both mean "stitch" were drawn two different
+  ways. It now uses the Phase 1 geometry.
+- The workflow's closing rule inherited the note's `68ch` measure, so it
+  stopped half way across the section.
+
+### Verification
+`npm ci`, `npm run typecheck`, `npm run lint`, `npm test` (196 passing) and
+`npm run build` all clean. Responsive audit in Chromium at 320, 360, 375, 390,
+430, 768, 820, 1024, 1280, 1440 and 1728, in both locales: **zero horizontal
+overflow, zero sub-24px non-inline targets** at every width. All eleven
+ledger rows, six workflow stages, five problem rows and four proof panels
+confirmed rendering at 390 and 1280. Every public route returns 200.
+
+Homepage height: 10,377px desktop / 16,742px mobile, for fifteen sections —
+against 12,220px before the catalogue and slider decisions above.
 
 ---
 

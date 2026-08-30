@@ -73,6 +73,38 @@ export const faqs: Faq[] = [
     qGu: "ઉંમરની કોઈ મર્યાદા છે? 18થી નાના સ્ટુડન્ટ જોડાઈ શકે?",
     aEn: "Under-18 students join with a parent or guardian's consent, which the admission form collects.",
     aGu: "18થી નાના સ્ટુડન્ટ્સ માતા-પિતા/વાલીની સંમતિ સાથે જોડાય છે; એડમિશન ફોર્મમાં એ વિગત લેવાય છે."
+  },
+  {
+    qEn: "Which software do you teach — emCAD or Wilcom?",
+    qGu: "કયું સોફ્ટવેર શીખવો છો — emCAD કે Wilcom?",
+    aEn:
+      "The design course is taught on emCAD, which is what the studio digitises production files on. The thinking transfers: underlay, density, stitch types, pull compensation and travel order are the same decisions in any digitising package, so an operator who understands them in emCAD reads a Wilcom file without starting over.",
+    aGu:
+      "ડિઝાઇન કોર્સ emCAD પર શીખવાય છે, કારણ કે સ્ટુડિયોમાં પ્રોડક્શન ફાઇલ એના પર જ ડિજિટાઇઝ થાય છે. સમજણ બધે કામ લાગે: અન્ડરલે, ડેન્સિટી, સ્ટિચ ટાઇપ, પુલ કોમ્પેન્સેશન અને ટ્રાવેલ ઓર્ડર — આ નિર્ણય દરેક સોફ્ટવેરમાં એકસરખા છે. emCAD માં આ સમજી લેનાર Wilcom ની ફાઇલ પણ નવેસરથી શીખ્યા વગર વાંચી શકે."
+  },
+  {
+    qEn: "How long does a course take?",
+    qGu: "કોર્સ કેટલો સમય ચાલે છે?",
+    aEn:
+      "It depends on the technique and on how much machine time you can give it each week, so we would rather tell you at your demo than publish a number that turns out to be wrong for you. Ask for the current duration when you call or come in.",
+    aGu:
+      "એ ટેકનિક પર અને તમે અઠવાડિયે કેટલો મશીન ટાઇમ આપી શકો એના પર આધાર રાખે છે. એટલે ખોટો પડે એવો આંકડો છાપવા કરતાં ડેમો વખતે રૂબરૂ કહેવાનું અમને વધારે યોગ્ય લાગે છે. કૉલ કરો કે રૂબરૂ આવો ત્યારે અત્યારની ડ્યુરેશન પૂછી લેજો."
+  },
+  {
+    qEn: "When does the next batch start?",
+    qGu: "નવી બેચ ક્યારે શરૂ થાય છે?",
+    aEn:
+      "Batches start through the year, morning and evening, and seats per batch are limited because every student needs a machine. Upcoming batches are listed on the admissions page; for what is running right now, call — that is always more current than a web page.",
+    aGu:
+      "બેચ આખું વર્ષ ચાલુ થાય છે, સવારે અને સાંજે. દરેક સ્ટુડન્ટને મશીન જોઈએ એટલે બેચ દીઠ સીટ મર્યાદિત હોય છે. આગામી બેચ એડમિશન પેજ પર છે; અત્યારે શું ચાલે છે એ માટે કૉલ કરો — વેબ પેજ કરતાં એ હંમેશાં વધારે તાજું હોય છે."
+  },
+  {
+    qEn: "After the course, can I take job work or start my own unit?",
+    qGu: "કોર્સ પછી જોબ વર્ક લઈ શકું કે પોતાનું યુનિટ શરૂ કરી શકું?",
+    aEn:
+      "Both paths exist in this trade — working on someone's machines, taking job work at home, or running your own unit — and the course is built around the production skills all three need: reading a design, digitising it, setting the machine and correcting a sample. What we will not do is promise you a job, an income or a placement. Come to a demo and ask us directly what the work looks like.",
+    aGu:
+      "આ ધંધામાં ત્રણેય રસ્તા છે — બીજાના મશીન પર કામ, ઘરેથી જોબ વર્ક, કે પોતાનું યુનિટ. કોર્સ એ જ પ્રોડક્શન સ્કિલ પર બનેલો છે જે ત્રણેયમાં જોઈએ: ડિઝાઇન વાંચવી, ડિજિટાઇઝ કરવી, મશીન સેટ કરવી અને સેમ્પલ સુધારવું. પણ નોકરી, કમાણી કે પ્લેસમેન્ટનું વચન અમે નહીં આપીએ. ડેમોમાં આવો અને કામ ખરેખર કેવું છે એ સીધું પૂછો."
   }
 ];
 
@@ -126,6 +158,76 @@ export const stories: Story[] = [
     afterEn: "Takes boutique orders from home",
     afterGu: "ઘરેથી બુટિકના ઓર્ડર લે છે",
     photoLabel: "Student with finished piece (with consent)"
+  }
+];
+
+/* --------------------------------- reviews -------------------------------- */
+
+export type Review = {
+  /** Always true today. Nothing here has been collected from a real reviewer. */
+  sample: boolean;
+  nameEn: string;
+  nameGu: string;
+  /** What they came for — never a claimed outcome, salary or placement. */
+  contextEn: string;
+  contextGu: string;
+  bodyEn: string;
+  bodyGu: string;
+};
+
+/**
+ * ⚠️ SAMPLE reviews — written to exercise the review-card layout, not
+ * collected from anyone.
+ *
+ * The owner asked for the full visual system populated before real content
+ * arrives, so unlike the older placeholders these read like reviews rather
+ * than like instructions. That makes the marking load-bearing:
+ *
+ *  1. `sample: true` on every row, and the public card renders <SampleTag />;
+ *  2. **none of this may enter Review or AggregateRating structured data** —
+ *     a fabricated rich result is a different order of problem from a
+ *     visibly-labelled placeholder card;
+ *  3. names are a first name plus an initial, deliberately generic, and none
+ *     is reused from the old ValidTheme template's fake testimonials;
+ *  4. nothing here claims earnings, a job, a placement or a pass rate. They
+ *     describe teaching and machine time, which is what the studio controls.
+ *
+ * Replace wholesale from the owner's real Google reviews before the domain
+ * cutover — tracked in docs/content-checklist.md.
+ */
+export const sampleReviews: Review[] = [
+  {
+    sample: true,
+    nameEn: "Hetal P.",
+    nameGu: "હેતલ પ.",
+    contextEn: "Zardosi batch, evenings",
+    contextGu: "ઝરદોશી બેચ, સાંજે",
+    bodyEn:
+      "Machine par baithine shikhvanu male chhe, e sauthi moti vaat chhe. First week thi j thread aur needle change karvanu potaje karyu. Sir dhairya thi samjave chhe.",
+    bodyGu:
+      "મશીન પર બેસીને શીખવાનું મળે છે, એ સૌથી મોટી વાત છે. પહેલા અઠવાડિયાથી જ થ્રેડ અને નીડલ ચેન્જ કરવાનું જાતે કર્યું. સર ધીરજથી સમજાવે છે."
+  },
+  {
+    sample: true,
+    nameEn: "Rina M.",
+    nameGu: "રીના મ.",
+    contextEn: "emCAD design",
+    contextGu: "emCAD ડિઝાઇન",
+    bodyEn:
+      "Design screen par saras lagti hati pan fabric par bagadti hati. Ahiya density ane underlay samjaya pachhi problem j nathi thati. File ma sudharo karvanu shikhva malyu.",
+    bodyGu:
+      "ડિઝાઇન સ્ક્રીન પર સરસ લાગતી હતી પણ ફેબ્રિક પર બગડતી હતી. અહીં ડેન્સિટી અને અન્ડરલે સમજાયા પછી પ્રોબ્લેમ જ નથી થતી. ફાઇલમાં સુધારો કરવાનું શીખવા મળ્યું."
+  },
+  {
+    sample: true,
+    nameEn: "Jignesh D.",
+    nameGu: "જિજ્ઞેશ દ.",
+    contextEn: "Sequence and coding work",
+    contextGu: "સિકવન્સ અને કોડિંગ વર્ક",
+    bodyEn:
+      "Mari pase pahelethi machine hati pan setting nathi aavdti hati. Demo ma j batavi didhu ke shu khotu chhe. Batch timing sanje hovathi kaam sathe fave chhe.",
+    bodyGu:
+      "મારી પાસે પહેલેથી મશીન હતી પણ સેટિંગ નહોતી આવડતી. ડેમોમાં જ બતાવી દીધું કે શું ખોટું છે. બેચ ટાઇમિંગ સાંજે હોવાથી કામ સાથે ફાવે છે."
   }
 ];
 
