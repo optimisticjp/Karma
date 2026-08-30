@@ -1856,7 +1856,7 @@ Claude must execute phases in order, one clean PR at a time unless a smaller spl
 | 8 | B2B Studio/services | ✅ Complete + merged |
 | 9 | About, verify, legal, errors/loading/404, footer + secondary public pages | ✅ Complete + merged |
 | 10 | Karma Console shell + Today at Karma + mobile operational system | ✅ Complete + merged |
-| 11 | Admissions, Students, Courses/Batches, Fees admin redesign | ⏳ Pending |
+| 11 | Admissions, Students, Courses/Batches, Fees admin redesign | ✅ Complete + merged |
 | 12 | Attendance, Certificates, Design Desk, Content, Reports, Team admin redesign | ⏳ Pending |
 | 13 | Backend/query/free-tier audit + copy/i18n/SEO consistency | ⏳ Pending |
 | 14 | Accessibility/performance/responsive hardening + final whole-product creative audit | ⏳ Pending |
@@ -2777,6 +2777,64 @@ Redesign:
 - Fees
 
 Keep current archive/restore/delete and agreement-snapshot behavior.
+
+---
+
+## Implementation record — merged 2026-08-30
+
+**Branch:** `redesign/phase-11-operations` · **PR:** #38
+
+### One page header instead of four copies of one
+
+Admissions, Students, Courses and Fees each carried their own local
+`PageHeading` / `Heading` helper rendering the same `h1.text-h2` + rule + lede.
+All four now use the shared `<PageHead>` from Phase 10, and the four local
+copies are deleted.
+
+The win is not tidiness: `console-head-title` starts at 1.375rem against
+`text-h2`'s 1.875rem, so the header stops eating a third of a 640px phone
+viewport telling an operator where they already know they are. A test pins the
+clamp.
+
+### The deep links Phase 10 promised
+
+Phase 10 shipped queue rows pointing at their module because per-record routes
+do not exist. The rows in those module lists now carry anchors — `app-12`,
+`batch-4`, `course-3`, `fee-19` — and the queues link into them:
+`/admin/admissions#app-12`.
+
+`.record-anchor` gives them `scroll-margin-top` so a deep-linked row lands
+**below** the sticky mobile console header rather than under it.
+
+Students was left alone deliberately: it is a master/detail list that already
+selects with `?student=<id>`, which survives a reload and can be pasted to a
+colleague. A fragment would do neither.
+
+A record id still may not appear in a path — that would be a per-record route,
+and there are none. The Phase 10 route test now strips the fragment before
+resolving, so both forms stay honest.
+
+### What these four screens must keep doing, now tested
+
+- **Admissions** keeps direct admission for walk-ins, calls and WhatsApp; keeps
+  `RecordMenu` and the one record-action policy; still shows status, course,
+  follow-up date and assignee on the closed row.
+- **Fees** shows agreed total, discount, received, balance and next due on one
+  open record, flags a short admission payment and an overdue balance, prints a
+  receipt and a statement — and **adds no online payment**. A test also asserts
+  the schema still has no stored paid flag: fee status is derived from the
+  ledger, and a flag would be a second truth.
+- **Courses** keeps standing schedule options and dated batches as two
+  different things — the course form owns the standing timetable, the page
+  lists the dated runs. Collapsing them would make the public admission form
+  offer a seat on a date nobody opened.
+
+### Gates
+
+`npm run typecheck`, `npm run lint`, `npm test` (43 files, 609 tests) and
+`npm run build` all green. No dependency added, no schema change, no
+permission change.
+
 
 ---
 

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
+import { PageHead } from "@/components/admin/PageHead";
 import { hasPermission } from "@/lib/auth/access";
 import { catalogCopy } from "@/lib/admin/courses-copy";
 import {
@@ -56,7 +57,7 @@ export default async function CoursesPage({
   if (!db) {
     return (
       <div className="max-w-[64rem]">
-        <PageHeading title={copy.title} lede={copy.lede} />
+        <PageHead title={copy.title} context={copy.lede} />
         <p className="alert alert-error mt-8">{copy.notConfigured}</p>
       </div>
     );
@@ -148,7 +149,7 @@ export default async function CoursesPage({
 
   return (
     <div className="max-w-[72rem]">
-      <PageHeading title={copy.title} lede={copy.lede} />
+      <PageHead title={copy.title} context={copy.lede} />
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <Metric label={copy.coursesCount} value={courses.length} />
@@ -219,7 +220,7 @@ export default async function CoursesPage({
               };
 
               return (
-                <details key={course.id}>
+                <details key={course.id} id={`course-${course.id}`} className="record-anchor">
                   <summary className={`data-row ${isArchived ? "is-archived" : ""}`}>
                     <span className="data-row__title">
                       {session.staff.adminLocale === "gu" ? course.nameGu : course.nameEn}
@@ -290,7 +291,7 @@ export default async function CoursesPage({
                                 status
                               };
                               return (
-                                <details key={batch.id}>
+                                <details key={batch.id} id={`batch-${batch.id}`} className="record-anchor">
                                   <summary className={`data-row ${batchArchived ? "is-archived" : ""}`}>
                                     <span className="data-row__title">{batch.label}</span>
                                     <span className="data-row__actions">
@@ -372,15 +373,6 @@ function money(value: number) {
   }).format(value);
 }
 
-function PageHeading({ title, lede }: { title: string; lede: string }) {
-  return (
-    <div>
-      <h1 className="text-h2">{title}</h1>
-      <span aria-hidden className="rule-stitch is-in" />
-      <p className="u-lede">{lede}</p>
-    </div>
-  );
-}
 
 function Metric({ label, value }: { label: string; value: number }) {
   return (

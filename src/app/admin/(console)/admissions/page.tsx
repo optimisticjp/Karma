@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { and, asc, desc, eq, inArray, isNull, or } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
+import { PageHead } from "@/components/admin/PageHead";
 import { hasPermission } from "@/lib/auth/access";
 import { admissionsCopy } from "@/lib/admin/admissions-copy";
 import { recordsCopy } from "@/lib/admin/records-copy";
@@ -42,7 +43,7 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
   if (!db) {
     return (
       <div className="max-w-[72rem]">
-        <PageHeading title={copy.title} lede={copy.lede} />
+        <PageHead title={copy.title} context={copy.lede} />
         <p className="alert alert-error mt-8">Database unavailable.</p>
       </div>
     );
@@ -157,7 +158,7 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
 
   return (
     <div className="max-w-[76rem]">
-      <PageHeading title={copy.title} lede={copy.lede} />
+      <PageHead title={copy.title} context={copy.lede} />
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <Metric label={copy.visible} value={applications.length} />
@@ -231,7 +232,7 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
                  without opening anything; opening it reveals the full record
                  and the forms. Native <details>, so no JavaScript and no page
                  change — the operator keeps their place in the list. */
-              <details key={application.id}>
+              <details key={application.id} id={`app-${application.id}`} className="record-anchor">
                 <summary className={`data-row ${application.archivedAt ? "is-archived" : ""}`}>
                   <span className="data-row__title">{application.fullName}</span>
                   <span className="data-row__actions">
@@ -329,9 +330,6 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
   );
 }
 
-function PageHeading({ title, lede }: { title: string; lede: string }) {
-  return <div><h1 className="text-h2">{title}</h1><span aria-hidden className="rule-stitch is-in" /><p className="u-lede">{lede}</p></div>;
-}
 
 function Metric({ label, value }: { label: string; value: number }) {
   return <div className="panel panel-body"><p className="microlabel">{label}</p><p className="text-h3 mt-2">{value}</p></div>;

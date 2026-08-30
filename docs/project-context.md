@@ -502,6 +502,17 @@ walk the whole admin tree and fail on any public decorative import or texture
 class — the console expresses the brand through operational logic, not
 decoration. Authorization is unchanged.
 
+**Core operations admin (Phase 11).** Admissions, Students, Courses and Fees
+each carried their own copy of the same page-heading helper; all four now use
+the shared `<PageHead>`, which is materially smaller (1.375rem vs `text-h2`'s
+1.875rem) so a console header stops eating a third of a phone viewport. The
+module lists now carry row anchors (`app-12`, `batch-4`, `course-3`, `fee-19`)
+and Today's queues deep-link into them; `.record-anchor` adds
+`scroll-margin-top` so a linked row lands below the sticky mobile header.
+Students keeps `?student=<id>` instead — a master/detail selection has to
+survive a reload and be pasteable, which a fragment does not. A record id still
+may not appear in a path, because there are no per-record routes.
+
 **The 32-photograph manifest.** `src/content/photo-manifest.ts` is the typed
 list of every shot on the owner's final brief, with each slot's intrinsic
 dimensions. `<ManifestPhoto id="…">` reserves the photograph's exact aspect
@@ -1786,7 +1797,7 @@ modules are importable in a test runner while the guard stays real in the app.
 `jsx: "preserve"` for Next.js — without the override a test importing a `.tsx`
 component sees raw JSX and fails to parse.
 
-**42 test files, 591 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
+**43 test files, 609 tests** (`vitest run`, ~4 s). Many encode a *policy* decision rather than a code detail,
 which is the point — the policy survives a refactor:
 
 | Test | Guards |
@@ -1794,6 +1805,7 @@ which is the point — the policy survives a refactor:
 | `i18n-parity` | EN/GU catalogue keys mirror exactly |
 | `machine-lab-system` | the design system v4 foundation: 32-photo manifest, icon family, eleven technique signatures, stitch semantics, motion levels, Gujarati overrides, reduced motion, no new dependency |
 | `machine-lab-shell` | the hero states EMCAD/machine/Surat/demo without photography; one course's facts never become the site's; one continuous thread and one Level-4 moment; the rail never autoplays, loops or needs a drag; bands never re-point the palette; the mobile bar keeps exactly two actions |
+| `machine-lab-operations` | one shared console page header, no local copies; every deep-linkable row is anchored and the queues link to those anchors; direct admission, the record-action policy, the full fee picture, receipt/statement printing and the derived (never stored) fee status all survive; schedule options and dated batches stay separate |
 | `machine-lab-console` | the console imports no public decorative component and no chart library; Today at Karma shows queues not metric cards; queues are permission-gated and capped; every queue href resolves to a real route; no phone number in a queue row; a status is never colour alone; authorization untouched |
 | `machine-lab-secondary` | no page renders an English field without a Gujarati branch; route parity is structural and the console stays outside `[locale]`; every indexable page has hreflang; the 404's broken path stays on the 404; loading animates nothing; verify and the legal pages stay motion-free |
 | `machine-lab-studio` | the five-stage chain in order, reusing the homepage rail; drawn marks rather than borrowed photo slots, each used for the thing it means; no turnaround, file format, price, payment provider or upload control |
