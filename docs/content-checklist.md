@@ -151,13 +151,22 @@ on screen, and in structured data.
 
 | What | Where | Marked how | Replace with |
 | --- | --- | --- | --- |
-| 3 reviews | `sampleReviews` in `src/content/collections.ts` | `sample: true` + visible `<SampleTag />` on every card | The studio's real Google reviews, with the reviewer's consent |
-| 2 student stories | `stories` in `src/content/collections.ts` | `sample: true`; public components filter on `!sample` | Six real, consented outcomes |
-| Gallery items | `galleryItems` in `src/content/collections.ts` | `sample: true`; filtered out of the public gallery | Real student and studio work |
-| Trainer profiles | `trainers` in `src/content/collections.ts` | `sample: true` | Owner-confirmed names, with consent |
+| 7 reviews | `sampleReviews` in `src/content/collections.ts` | `sample: true` + visible `<SampleTag />` on every card | The studio's real Google reviews, with the reviewer's consent |
+| 6 student stories | `stories` in `src/content/collections.ts` | `sample: true` + visible tag on every card | Six real, consented outcomes — the archetypes are the shapes to fill |
+| 6 gallery items | `galleryItems` in `src/content/collections.ts` | `sample: true` + visible tag; each renders its planned shot in a `<PhotoSlot>` | Real student and studio work |
+| 3 trainer profiles | `trainers` in `src/content/collections.ts` | `sample: true` + visible tag | Owner-confirmed names, with consent |
+
+**Not sample content:** `machineCases` in the same file carries no sample flag,
+because it makes no claim about a person, a student or a client. Each note is
+an ordinary production fault with its ordinary cause — the same note would be
+written in any embroidery unit in Surat — so there is nothing in it about
+anyone for the owner to verify.
 
 **Structured data is the hard line.** None of the above may enter
-`Review`, `AggregateRating` or any other schema type. A labelled placeholder
+`Review`, `AggregateRating`, `Person` or any other schema type. Six tests in
+`tests/proof-sample-policy.test.ts` hold this mechanically, along with the
+no-earnings rule and the requirement that every surface rendering a sample
+also renders its tag. A labelled placeholder
 card is a visible work-in-progress; a fabricated rich result in Google is a
 different order of problem, and it is the one that would follow the business
 around after the content is fixed.
@@ -195,7 +204,13 @@ whether the owner has told us it is the rating on their listing.
   been reconciled. "Call for current batch" in the hero currently dials the
   repo number. Phase 5 owns this decision; the two roles must not be silently
   merged before then.
-- **Real photography.** Every visual on the homepage is drawn — technique
-  swatches, the workflow, the four production-proof panels. They are designed
-  to be replaced by photography without a layout change, not to hide its
-  absence indefinitely.
+- **Real photography.** Every visual on the site is drawn or a named
+  placeholder — technique swatches, the workflow, the four production-proof
+  panels, and the `<PhotoSlot>` entries that name the shot they are waiting
+  for. They are designed to be replaced by photography without a layout
+  change, not to hide its absence indefinitely.
+- **Trainers.** Three sample profiles now exist as a shape to fill:
+  speciality, machines taught, software, experience, teaching style and
+  selected work. **No real trainer has been confirmed.** Experience is
+  deliberately written as a range, never a year count, and a test enforces
+  that.

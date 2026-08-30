@@ -4,8 +4,10 @@ import { Link } from "@/i18n/navigation";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { TechniquePlate } from "@/components/ui/TechniquePlate";
+import { TrainerProfile } from "@/components/site/TrainerProfile";
 import { Icon } from "@/components/ui/Icon";
 import { courses, coursesByFamily, families } from "@/content/courses";
+import { trainers } from "@/content/collections";
 import { site, verifiedFacts } from "@/lib/site";
 import { pageMeta } from "@/lib/seo";
 
@@ -32,9 +34,10 @@ export async function generateMetadata({
 export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, tc, l] = await Promise.all([
+  const [t, tc, tp, l] = await Promise.all([
     getTranslations("aboutPage"),
     getTranslations("common"),
+    getTranslations("proof.trainers"),
     getLocale()
   ]);
   const gu = l === "gu";
@@ -138,11 +141,24 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
 
-      {/* The founding story, the meaning of the name and the trainer profiles
-          are the owner's to give and have not been collected. They used to
-          render as three "awaiting the owner" blocks on the live page, which
-          tells a visitor the site is unfinished. Nothing is lost by omitting
-          the section: the moment real copy lands, restore it from git. */}
+      {/* Who teaches. Every profile is still sample data and says so on its
+          own card — but a labelled placeholder that answers "what would I be
+          told about a trainer" is more useful than an empty section, and it
+          is the shape the real profiles drop straight into.
+
+          The founding story and the meaning of the name are still the owner's
+          to give and are deliberately absent rather than rendered as
+          "awaiting the owner" blocks on a live page. */}
+      <section className="section">
+        <div className="container-site">
+          <SectionHeading eyebrow={tp("eyebrow")} title={tp("h2")} sub={tp("sub")} rule />
+          <div className="trainer-grid u-section-body">
+            {trainers.map((tr) => (
+              <TrainerProfile key={tr.slug} trainer={tr} />
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section className="section border-t border-line bg-ivory-2">
         <div className="container-site">

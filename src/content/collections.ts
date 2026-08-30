@@ -123,41 +123,277 @@ export type Story = {
   afterEn: string;
   afterGu: string;
   photoLabel: string;
+  /**
+   * The mini case study. Optional on purpose: a story published through
+   * Content Desk carries the fields that form has, and adding five more to it
+   * would be extending the CMS to solve a presentation problem. A story with
+   * these renders as a case study; a story without renders as before → after.
+   */
+  whyEn?: string;
+  whyGu?: string;
+  learnedEn?: string;
+  learnedGu?: string;
+  changedEn?: string;
+  changedGu?: string;
+  nowEn?: string;
+  nowGu?: string;
 };
 
-// ⚠️ SAMPLE stories: layout demonstrations only. Replace with six real,
-// consented outcomes (content-checklist Q8) before launch. The sample flag
-// renders a visible tag so nothing fake can ship silently.
+/**
+ * ⚠️ SAMPLE stories — six archetypes, written to exercise the case-study
+ * layout. Nobody here exists.
+ *
+ * These replaced two placeholders whose quote fields were editorial
+ * instructions ("Replace with the student's own sentence…"), which meant the
+ * page could only ever render empty. The owner asked for the whole visual
+ * system populated before real content arrives, so these read like stories —
+ * which makes the marking load-bearing rather than decorative:
+ *
+ *  1. `sample: true` on every row, and every card renders <SampleTag />;
+ *  2. **none of this may enter Review or AggregateRating structured data**;
+ *  3. names are a first name plus an initial, and none is reused from the old
+ *     ValidTheme template's fake testimonials;
+ *  4. **no earnings, salary, job or placement is claimed anywhere.** Each
+ *     "now" describes work the person does, never a figure they earn.
+ *
+ * The six cover the routes people actually take into this trade, so the real
+ * stories can be slotted into the same shapes: beginner → operator, tailor →
+ * added a service, homemaker → paid work, operator → digitiser, student →
+ * freelance designer, boutique owner → skill brought in-house.
+ */
 export const stories: Story[] = [
   {
     sample: true,
-    nameEn: "Sample: student name",
-    nameGu: "નમૂનો: સ્ટુડન્ટનું નામ",
-    courseEn: "Sample: course name",
-    courseGu: "નમૂનો: કોર્સનું નામ",
-    quoteEn:
-      "Replace with the student's own sentence about what changed after the course.",
-    quoteGu: "કોર્સ પછી શું બદલાયું એ વિશે સ્ટુડન્ટનું પોતાનું વાક્ય અહીં મૂકો.",
-    beforeEn: "Tailor with a small shop",
-    beforeGu: "નાની દુકાનવાળા ટેલર",
-    afterEn: "Runs a 3-machine zardosi unit",
-    afterGu: "3 મશીનનું ઝરદોશી યુનિટ ચલાવે છે",
+    nameEn: "Nikita B.",
+    nameGu: "નિકિતા બ.",
+    courseEn: "Zardosi Machine Embroidery",
+    courseGu: "ઝરદોશી મશીન એમ્બ્રોઇડરી",
+    quoteEn: "I had never sat at a machine. By the third week I was setting my own frame and choosing my own needle.",
+    quoteGu: "મેં ક્યારેય મશીન પર બેઠી નહોતી. ત્રીજા અઠવાડિયે તો હું જાતે ફ્રેમ સેટ કરતી અને નીડલ પણ જાતે પસંદ કરતી.",
+    beforeEn: "Never touched a machine",
+    beforeGu: "ક્યારેય મશીનને હાથ નહોતો લગાડ્યો",
+    afterEn: "Runs zardosi work on her own",
+    afterGu: "જાતે ઝરદોશીનું કામ કરે છે",
+    whyEn: "A cousin was doing zardosi job work and she wanted a skill that paid rather than a hobby class.",
+    whyGu: "એક બહેન ઝરદોશીનું જોબ વર્ક કરતી હતી; એને શોખના ક્લાસ નહીં, કમાણી આપતી સ્કિલ જોઈતી હતી.",
+    learnedEn: "Frame and stabiliser choice for heavy ground, metallic thread and needle pairing, and how to read relief height while working instead of after.",
+    learnedGu: "હેવી ગ્રાઉન્ડ માટે ફ્રેમ અને સ્ટેબિલાઇઝર, મેટાલિક થ્રેડ અને નીડલનું જોડાણ, અને કામ પતી ગયા પછી નહીં પણ કરતાં કરતાં જ રિલીફની ઊંચાઈ વાંચવી.",
+    changedEn: "Stopped guessing at the machine. Faults became things with causes rather than bad luck.",
+    changedGu: "મશીન પર અંદાજ મારવાનું બંધ થયું. ભૂલો નસીબ નહીં, કારણવાળી વસ્તુ બની ગઈ.",
+    nowEn: "Takes zardosi panel work for a local boutique.",
+    nowGu: "એક લોકલ બુટિક માટે ઝરદોશી પેનલનું કામ લે છે.",
     photoLabel: "Student portrait at their machine (with consent)"
   },
   {
     sample: true,
-    nameEn: "Sample: student name",
-    nameGu: "નમૂનો: સ્ટુડન્ટનું નામ",
-    courseEn: "Sample: course name",
-    courseGu: "નમૂનો: કોર્સનું નામ",
-    quoteEn:
-      "Replace with a real quote: what they struggled with, and what they do now.",
-    quoteGu: "સાચું ક્વોટ મૂકો: શું અઘરું લાગતું હતું, અને હવે શું કરે છે.",
-    beforeEn: "Homemaker, new to machines",
-    beforeGu: "ગૃહિણી, મશીનથી અજાણ",
-    afterEn: "Takes boutique orders from home",
-    afterGu: "ઘરેથી બુટિકના ઓર્ડર લે છે",
+    nameEn: "Mahesh V.",
+    nameGu: "મહેશ વ.",
+    courseEn: "Flat Embroidery",
+    courseGu: "ફ્લેટ એમ્બ્રોઇડરી",
+    quoteEn: "Customers kept asking for embroidery and I kept sending them somewhere else. Now the work stays in my shop.",
+    quoteGu: "ગ્રાહકો એમ્બ્રોઇડરી માંગ્યા કરતા અને હું બીજે મોકલ્યા કરતો. હવે એ કામ મારી દુકાનમાં જ રહે છે.",
+    beforeEn: "Tailor with a small shop",
+    beforeGu: "નાની દુકાનવાળા ટેલર",
+    afterEn: "Added embroidery to his own counter",
+    afterGu: "પોતાના કાઉન્ટર પર એમ્બ્રોઇડરી ઉમેરી",
+    whyEn: "He was sending every embroidery request to another unit and losing the customer along with the order.",
+    whyGu: "એમ્બ્રોઇડરીની દરેક ઓર્ડર બીજા યુનિટમાં જતી, અને ઓર્ડરની સાથે ગ્રાહક પણ જતો રહેતો.",
+    learnedEn: "Underlay, density and stitch direction, and how to hoop a garment that has already been stitched together.",
+    learnedGu: "અન્ડરલે, ડેન્સિટી અને સ્ટિચ ડિરેક્શન, અને સીવાઈ ગયેલા ગારમેન્ટને હૂપમાં કેવી રીતે લેવું.",
+    changedEn: "Small logo and monogram jobs stopped leaving the shop.",
+    changedGu: "નાના લોગો અને મોનોગ્રામના કામ દુકાનની બહાર જવાનું બંધ થયું.",
+    nowEn: "Runs tailoring and basic embroidery from the same counter.",
+    nowGu: "એક જ કાઉન્ટર પરથી ટેલરિંગ અને બેઝિક એમ્બ્રોઇડરી ચલાવે છે.",
     photoLabel: "Student with finished piece (with consent)"
+  },
+  {
+    sample: true,
+    nameEn: "Bhavna S.",
+    nameGu: "ભાવના સ.",
+    courseEn: "Sequence (Sequins) Work",
+    courseGu: "સિકવન્સ વર્ક",
+    quoteEn: "Evening batch was the only reason I could do this at all. The house does not stop for a class.",
+    quoteGu: "સાંજની બેચ હતી એટલે જ આ થઈ શક્યું. ઘર તો ક્લાસ માટે અટકતું નથી.",
+    beforeEn: "Homemaker, no machine experience",
+    beforeGu: "ગૃહિણી, મશીનનો કોઈ અનુભવ નહીં",
+    afterEn: "Takes sequence job work from home",
+    afterGu: "ઘરેથી સિકવન્સનું જોબ વર્ક લે છે",
+    whyEn: "She wanted work she could do in her own hours, without leaving the house for a full day.",
+    whyGu: "એને એવું કામ જોઈતું હતું જે પોતાના સમયે થાય, આખો દિવસ ઘરની બહાર રહ્યા વગર.",
+    learnedEn: "Feed setup and registration, matching sequin size to the motif, and spotting a repeat that has drifted before the whole length is run.",
+    learnedGu: "ફીડ સેટઅપ અને રજિસ્ટ્રેશન, મોટિફ પ્રમાણે સિકવન્સ સાઇઝ, અને આખી લંબાઈ ચલાવતાં પહેલાં ખસી ગયેલો રિપીટ પકડવો.",
+    changedEn: "Finished a full dupatta length without a single re-run.",
+    changedGu: "એક પણ વાર ફરીથી ચલાવ્યા વગર આખી દુપટ્ટાની લંબાઈ પૂરી કરી.",
+    nowEn: "Takes sequence work for two nearby units.",
+    nowGu: "આજુબાજુના બે યુનિટ માટે સિકવન્સનું કામ લે છે.",
+    photoLabel: "Student portrait at their machine (with consent)"
+  },
+  {
+    sample: true,
+    nameEn: "Ashish T.",
+    nameGu: "આશિષ ટ.",
+    courseEn: "emCAD Embroidery Design",
+    courseGu: "emCAD એમ્બ્રોઇડરી ડિઝાઇન",
+    quoteEn: "I ran other people's files for four years. I never knew a bad sample was usually a bad file.",
+    quoteGu: "ચાર વર્ષ સુધી બીજાની ફાઇલ ચલાવી. મને ખબર જ નહોતી કે ખરાબ સેમ્પલ મોટે ભાગે ખરાબ ફાઇલનું પરિણામ હોય છે.",
+    beforeEn: "Machine operator, four years",
+    beforeGu: "મશીન ઓપરેટર, ચાર વર્ષ",
+    afterEn: "Digitises the files he runs",
+    afterGu: "જે ફાઇલ ચલાવે છે એ જાતે ડિજિટાઇઝ કરે છે",
+    whyEn: "He was compensating at the machine for files he had not made, and losing time on every job.",
+    whyGu: "જે ફાઇલ એણે બનાવી નહોતી એની ભરપાઈ મશીન પર કરતો, અને દરેક જોબમાં સમય ગુમાવતો.",
+    learnedEn: "Stitch types, underlay, density and pull compensation in emCAD — then running his own file and correcting it from the sample.",
+    learnedGu: "emCAD માં સ્ટિચ ટાઇપ, અન્ડરલે, ડેન્સિટી અને પુલ કોમ્પેન્સેશન — પછી પોતાની ફાઇલ ચલાવીને સેમ્પલ પરથી સુધારવી.",
+    changedEn: "Fixes faults in the file now, so they stay fixed for every run.",
+    changedGu: "હવે ભૂલો ફાઇલમાં જ સુધારે છે, એટલે દરેક રનમાં સુધરેલી જ રહે છે.",
+    nowEn: "Operates and digitises at the same unit.",
+    nowGu: "એક જ યુનિટમાં ઓપરેટિંગ અને ડિજિટાઇઝિંગ બંને કરે છે.",
+    photoLabel: "Student at emCAD screen, stitch paths visible (with consent)"
+  },
+  {
+    sample: true,
+    nameEn: "Krupa D.",
+    nameGu: "કૃપા દ.",
+    courseEn: "emCAD Embroidery Design",
+    courseGu: "emCAD એમ્બ્રોઇડરી ડિઝાઇન",
+    quoteEn: "Clients do not want a pretty picture. They want a file that runs.",
+    quoteGu: "ક્લાયન્ટને સુંદર ચિત્ર નથી જોઈતું. એમને એવી ફાઇલ જોઈએ છે જે ચાલે.",
+    beforeEn: "Design student, no production experience",
+    beforeGu: "ડિઝાઇન સ્ટુડન્ટ, પ્રોડક્શનનો અનુભવ નહીં",
+    afterEn: "Takes digitising work on her own",
+    afterGu: "જાતે ડિજિટાઇઝિંગનું કામ લે છે",
+    whyEn: "She could draw, but had never seen one of her designs on cloth and did not know why some worked and some did not.",
+    whyGu: "એ દોરી શકતી હતી, પણ પોતાની ડિઝાઇન કાપડ પર જોઈ નહોતી, અને કઈ ચાલે ને કઈ નહીં એની ખબર નહોતી.",
+    learnedEn: "Taking a client's artwork to a machine-ready file, then stitching it out and reading what the sample says about the file.",
+    learnedGu: "ક્લાયન્ટના આર્ટવર્કથી મશીન-રેડી ફાઇલ સુધી, પછી એને સ્ટિચ કરીને સેમ્પલ ફાઇલ વિશે શું કહે છે એ વાંચવું.",
+    changedEn: "Started quoting on stitch count and colour changes instead of guessing.",
+    changedGu: "અંદાજને બદલે સ્ટિચ કાઉન્ટ અને કલર ચેન્જ પરથી ભાવ આપવાનું શરૂ કર્યું.",
+    nowEn: "Freelances digitising for small units and boutiques.",
+    nowGu: "નાના યુનિટ અને બુટિક માટે ફ્રીલાન્સ ડિજિટાઇઝિંગ કરે છે.",
+    photoLabel: "Student at emCAD screen with a stitched sample (with consent)"
+  },
+  {
+    sample: true,
+    nameEn: "Priyanka R.",
+    nameGu: "પ્રિયંકા ર.",
+    courseEn: "Appliqué & 3D Embroidery",
+    courseGu: "એપ્લિક અને 3D એમ્બ્રોઇડરી",
+    quoteEn: "I was paying an outside unit and still fixing their edges myself. It made no sense to keep doing that.",
+    quoteGu: "બહારના યુનિટને પૈસા આપતી અને છતાં એમની કિનારીઓ જાતે સુધારતી. આમ ચાલુ રાખવાનો કોઈ અર્થ નહોતો.",
+    beforeEn: "Boutique owner, outsourcing embroidery",
+    beforeGu: "બુટિક માલિક, એમ્બ્રોઇડરી બહાર કરાવતાં",
+    afterEn: "Brought appliqué work in-house",
+    afterGu: "એપ્લિકનું કામ પોતાની જગ્યાએ લાવ્યાં",
+    whyEn: "Turnaround was slow and the finish came back inconsistent, which her customers noticed before she did.",
+    whyGu: "કામ મોડું આવતું અને ફિનિશ દર વખતે અલગ રહેતી; એ વાત ગ્રાહકોએ એની પહેલાં નોંધી.",
+    learnedEn: "Placement, tack-down and cover stitching, cutting cleanly in the frame, and matching foam thickness to letter width.",
+    learnedGu: "પ્લેસમેન્ટ, ટેક-ડાઉન અને કવર સ્ટિચિંગ, ફ્રેમમાં જ સાફ કટિંગ, અને લેટરની પહોળાઈ પ્રમાણે ફોમની જાડાઈ.",
+    changedEn: "Controls her own finish and her own delivery dates.",
+    changedGu: "પોતાની ફિનિશ અને પોતાની ડિલિવરી ડેટ પોતાના હાથમાં.",
+    nowEn: "Does appliqué and patch work for her own label.",
+    nowGu: "પોતાના લેબલ માટે એપ્લિક અને પેચનું કામ કરે છે.",
+    photoLabel: "Student with finished appliqué piece (with consent)"
+  }
+];
+
+/* ---------------------------- machine case notes -------------------------- */
+
+export type MachineCase = {
+  /** Diagnosis notes are trade knowledge, so these are NOT sample content. */
+  slug: string;
+  techniqueEn: string;
+  techniqueGu: string;
+  /** The fault, as it presents on the floor. */
+  problemEn: string;
+  problemGu: string;
+  /** What the sample actually told us. */
+  diagnosisEn: string;
+  diagnosisGu: string;
+  /** The edit — in the file or in the setup. */
+  changeEn: string;
+  changeGu: string;
+  /** The specific setting that moved. */
+  settingEn: string;
+  settingGu: string;
+  /** What the next run produced. */
+  resultEn: string;
+  resultGu: string;
+};
+
+/**
+ * Machine case notes: screen design → failed sample → diagnosis → correction →
+ * finished output.
+ *
+ * These are **not sample content and carry no sample flag**, because they make
+ * no claim about a person, a student, a client or an outcome. Each one is an
+ * ordinary production fault with its ordinary cause — the note a supervisor
+ * writes on the job card — and every statement in them is verifiable trade
+ * knowledge that would be equally true in any embroidery unit in Surat.
+ *
+ * That is exactly why they are worth publishing. Generic praise from an
+ * anonymous reviewer proves nothing; naming the fault, the diagnosis and the
+ * setting that moved proves the studio runs production.
+ */
+export const machineCases: MachineCase[] = [
+  {
+    slug: "puckered-fill",
+    techniqueEn: "Flat embroidery",
+    techniqueGu: "ફ્લેટ એમ્બ્રોઇડરી",
+    problemEn: "A filled motif came off the machine with the ground rippled around it. The design was fine; the fabric was not.",
+    problemGu: "ભરેલું મોટિફ મશીન પરથી નીકળ્યું ત્યારે એની આસપાસ કાપડ લહેરાયેલું હતું. ડિઝાઇન બરાબર હતી, કાપડ નહીં.",
+    diagnosisEn: "Puckering that follows the outline of a fill is the ground moving under the fill, not tension at the head. There was no underlay holding it.",
+    diagnosisGu: "ફિલની આઉટલાઇન પ્રમાણે પકરિંગ થાય એટલે એ હેડનું ટેન્શન નહીં, ફિલ નીચે કાપડ ખસવાની નિશાની છે. એને પકડી રાખતું અન્ડરલે જ નહોતું.",
+    changeEn: "Added an underlay layer under the fill and re-hooped with a firmer stabiliser for the cloth weight.",
+    changeGu: "ફિલ નીચે અન્ડરલેનું લેયર ઉમેર્યું અને કાપડના વજન પ્રમાણે વધુ મજબૂત સ્ટેબિલાઇઝર સાથે ફરી હૂપ કર્યું.",
+    settingEn: "File: edge-walk underlay added. Setup: stabiliser changed, hoop re-tensioned.",
+    settingGu: "ફાઇલ: એજ-વોક અન્ડરલે ઉમેર્યું. સેટઅપ: સ્ટેબિલાઇઝર બદલ્યું, હૂપ ફરી ટાઇટ કર્યું.",
+    resultEn: "Ground flat, fill edge clean, no re-hooping needed for the rest of the run.",
+    resultGu: "કાપડ સપાટ, ફિલની કિનારી સાફ, બાકીના રનમાં ફરી હૂપ કરવાની જરૂર નહીં."
+  },
+  {
+    slug: "thin-satin",
+    techniqueEn: "Flat embroidery",
+    techniqueGu: "ફ્લેટ એમ્બ્રોઇડરી",
+    problemEn: "Satin columns looked starved — the ground showed through between the stitches in patches.",
+    problemGu: "સાટિનના કોલમ ભૂખ્યા લાગતા હતા — જગ્યાએ જગ્યાએ ટાંકા વચ્ચેથી કાપડ દેખાતું હતું.",
+    diagnosisEn: "Coverage failing only on the wider columns points at density set for a narrower stitch than the design actually runs.",
+    diagnosisGu: "ફક્ત પહોળા કોલમમાં કવરેજ ખૂટે એટલે ડેન્સિટી ડિઝાઇન કરતાં સાંકડા સ્ટિચ માટે સેટ થયેલી છે એમ સમજવું.",
+    changeEn: "Raised density on the affected columns and split the widest ones, rather than slowing the head to compensate.",
+    changeGu: "અસરગ્રસ્ત કોલમની ડેન્સિટી વધારી અને સૌથી પહોળા કોલમ વિભાજિત કર્યા — હેડ ધીમી કરીને ભરપાઈ કરવાને બદલે.",
+    settingEn: "File: density raised on wide columns; widest columns split into two passes.",
+    settingGu: "ફાઇલ: પહોળા કોલમમાં ડેન્સિટી વધારી; સૌથી પહોળા કોલમ બે પાસમાં વહેંચ્યા.",
+    resultEn: "Even coverage across the motif, and the same result on every machine the file was sent to.",
+    resultGu: "આખા મોટિફમાં એકસરખું કવરેજ, અને ફાઇલ જે પણ મશીન પર મોકલી ત્યાં એ જ પરિણામ."
+  },
+  {
+    slug: "sequence-registration",
+    techniqueEn: "Sequence work",
+    techniqueGu: "સિકવન્સ વર્ક",
+    problemEn: "A repeat border drifted visibly across a dupatta length — the two ends did not match.",
+    problemGu: "દુપટ્ટાની લંબાઈમાં રિપીટ બોર્ડર દેખીતી રીતે ખસી ગઈ — બંને છેડા સરખા નહોતા.",
+    diagnosisEn: "Drift that accumulates along the length is registration, not feed. The travel order let the hoop shift before the design returned to that line.",
+    diagnosisGu: "લંબાઈ સાથે વધતું જતું ખસવું એ ફીડ નહીં, રજિસ્ટ્રેશનની વાત છે. ડિઝાઇન એ લાઇન પર પાછી આવે એ પહેલાં ટ્રાવેલ ઓર્ડરે હૂપને ખસવા દીધું.",
+    changeEn: "Re-cut the travel order so the border is completed in one direction before the fill returns, and re-framed with an extra hold point.",
+    changeGu: "ટ્રાવેલ ઓર્ડર ફરી ગોઠવ્યો, જેથી ફિલ પાછું આવે એ પહેલાં બોર્ડર એક જ દિશામાં પૂરી થાય; અને એક વધારાના હોલ્ડ પોઇન્ટ સાથે ફરી ફ્રેમ કર્યું.",
+    settingEn: "File: travel order re-sequenced. Setup: additional hold point in the frame.",
+    settingGu: "ફાઇલ: ટ્રાવેલ ઓર્ડર ફરી ગોઠવ્યો. સેટઅપ: ફ્રેમમાં વધારાનો હોલ્ડ પોઇન્ટ.",
+    resultEn: "Repeat held across the full length; both ends matched without trimming the panel.",
+    resultGu: "આખી લંબાઈમાં રિપીટ જળવાયો; પેનલ કાપ્યા વગર બંને છેડા સરખા આવ્યા."
+  },
+  {
+    slug: "metallic-breaks",
+    techniqueEn: "Zardosi",
+    techniqueGu: "ઝરદોશી",
+    problemEn: "Metallic thread was shredding and snapping every few minutes on a heavy bridal ground.",
+    problemGu: "હેવી બ્રાઇડલ ગ્રાઉન્ડ પર મેટાલિક થ્રેડ દર થોડી મિનિટે છોલાઈને તૂટતો હતો.",
+    diagnosisEn: "Breaks clustered at direction changes rather than spread evenly: the thread was being asked to turn faster than a metallic will, through an eye that was too tight for it.",
+    diagnosisGu: "તૂટવાનું સરખું ફેલાયેલું નહીં પણ દિશા બદલાય ત્યાં ભેગું થતું હતું: મેટાલિક જેટલી ઝડપે વળી શકે એના કરતાં ઝડપથી વળાવવામાં આવતું, અને આંખ પણ એના માટે સાંકડી હતી.",
+    changeEn: "Moved to a needle with a larger eye and softened the sharpest direction changes in the path.",
+    changeGu: "મોટી આંખવાળી નીડલ પર ગયા અને પાથમાં જે વળાંક સૌથી તીક્ષ્ણ હતા એ હળવા કર્યા.",
+    settingEn: "Setup: larger-eye needle, top tension eased. File: sharpest corners rounded in the path.",
+    settingGu: "સેટઅપ: મોટી આંખવાળી નીડલ, ઉપરનું ટેન્શન હળવું. ફાઇલ: પાથના સૌથી તીક્ષ્ણ ખૂણા ગોળ કર્યા.",
+    resultEn: "Run completed without a break, and the relief height held where the corners had been losing it.",
+    resultGu: "રન એક પણ વાર તૂટ્યા વગર પૂરો થયો, અને જ્યાં ખૂણે ઊંચાઈ ગુમાવાતી હતી ત્યાં પણ રિલીફ જળવાઈ."
   }
 ];
 
@@ -228,6 +464,50 @@ export const sampleReviews: Review[] = [
       "Mari pase pahelethi machine hati pan setting nathi aavdti hati. Demo ma j batavi didhu ke shu khotu chhe. Batch timing sanje hovathi kaam sathe fave chhe.",
     bodyGu:
       "મારી પાસે પહેલેથી મશીન હતી પણ સેટિંગ નહોતી આવડતી. ડેમોમાં જ બતાવી દીધું કે શું ખોટું છે. બેચ ટાઇમિંગ સાંજે હોવાથી કામ સાથે ફાવે છે."
+  },
+  {
+    sample: true,
+    nameEn: "Sneha K.",
+    nameGu: "સ્નેહા ક.",
+    contextEn: "Flat embroidery",
+    contextGu: "ફ્લેટ એમ્બ્રોઇડરી",
+    bodyEn:
+      "Bija class ma khali jovanu male chhe. Ahiya potani machine par baithine kaam karvanu male chhe, ane bagade to pan sudharvanu shikhve chhe.",
+    bodyGu:
+      "બીજા ક્લાસમાં ખાલી જોવાનું મળે છે. અહીં પોતાની મશીન પર બેસીને કામ કરવાનું મળે છે, અને બગડે તો પણ સુધારવાનું શીખવે છે."
+  },
+  {
+    sample: true,
+    nameEn: "Alpesh P.",
+    nameGu: "અલ્પેશ પ.",
+    contextEn: "Appliqué and 3D work",
+    contextGu: "એપ્લિક અને 3D વર્ક",
+    bodyEn:
+      "Cap ane jacket na patch ma foam dekhai jato hato. Ahiya letter width pramane foam ni jadai ane end kem band karva e shikhva malyu.",
+    bodyGu:
+      "કેપ અને જેકેટના પેચમાં ફોમ દેખાઈ જતો હતો. અહીં લેટરની પહોળાઈ પ્રમાણે ફોમની જાડાઈ અને છેડા કેમ બંધ કરવા એ શીખવા મળ્યું."
+  },
+  {
+    sample: true,
+    nameEn: "Foram T.",
+    nameGu: "ફોરમ ટ.",
+    contextEn: "Tufting",
+    contextGu: "ટફ્ટિંગ",
+    bodyEn:
+      "Rug banavya pachhi pile nikli jato hato. Frame tension ane pachhal glue karvanu — be j vaat, pan koi kahe nahi. Ahiya pahela j divase kahi didhu.",
+    bodyGu:
+      "રગ બનાવ્યા પછી પાઇલ નીકળી જતો હતો. ફ્રેમ ટેન્શન અને પાછળ ગુંદર — બે જ વાત, પણ કોઈ કહે નહીં. અહીં પહેલા જ દિવસે કહી દીધું."
+  },
+  {
+    sample: true,
+    nameEn: "Dhaval S.",
+    nameGu: "ધવલ સ.",
+    contextEn: "Chain and multi machine",
+    contextGu: "ચેઇન અને મલ્ટી મશીન",
+    bodyEn:
+      "Multi-head par badha head sarkha nahota aavta. Framing ane changeover ni shist — e j problem hato. Have traney panel sarkha aave chhe.",
+    bodyGu:
+      "મલ્ટી-હેડ પર બધા હેડ સરખા નહોતા આવતા. ફ્રેમિંગ અને ચેન્જઓવરની શિસ્ત — એ જ પ્રોબ્લેમ હતો. હવે ત્રણેય પેનલ સરખી આવે છે."
   }
 ];
 
@@ -243,6 +523,11 @@ export type GalleryItem = {
   noteGu: string;
   hasPair: boolean; // screen-to-stitch pair available
   photoLabel: string;
+  /** Links the piece back to the course that produced it, where known. */
+  courseSlug?: string;
+  /** The technical thing this piece demonstrates — optional, and specific. */
+  outcomeEn?: string;
+  outcomeGu?: string;
 };
 
 export const techniqueChips: Record<string, { labelEn: string; labelGu: string; color: string }> =
@@ -262,13 +547,25 @@ export const techniqueChips: Record<string, { labelEn: string; labelGu: string; 
     emcad: { labelEn: "emCAD", labelGu: "emCAD", color: "" }
   };
 
+/**
+ * ⚠️ SAMPLE gallery entries — these are shoot-list rows, not student work.
+ *
+ * They render with their `photoLabel` in a <PhotoSlot> and a visible
+ * <SampleTag />, so what a visitor sees is an honest "this shot is planned"
+ * rather than a fabricated piece. `outcome` names the technical thing each
+ * piece is meant to demonstrate, which is the field that makes a gallery
+ * useful to someone deciding what to learn.
+ *
+ * Content Desk replaces this list wholesale the moment one consented piece is
+ * published — see `getPublicGallery`.
+ */
 export const galleryItems: GalleryItem[] = [
-  { sample: true, technique: "zardosi", ratio: "4/5", titleEn: "Bridal zardosi panel", titleGu: "બ્રાઇડલ ઝરદોશી પેનલ", noteEn: "Final project, evening batch", noteGu: "ફાઇનલ પ્રોજેક્ટ, સાંજની બેચ", hasPair: true, photoLabel: "Zardosi bridal panel, macro" },
-  { sample: true, technique: "sequence", ratio: "1/1", titleEn: "Festive sequence dupatta", titleGu: "ફેસ્ટિવ સિકવન્સ દુપટ્ટા", noteEn: "Week 5 production drill", noteGu: "અઠવાડિયું 5, પ્રોડક્શન પ્રેક્ટિસ", hasPair: false, photoLabel: "Sequence dupatta shimmer" },
-  { sample: true, technique: "emcad", ratio: "3/2", titleEn: "Peacock motif, screen to stitch", titleGu: "મોર મોટિફ, સ્ક્રીનથી સ્ટિચ સુધી", noteEn: "emCAD design + stitched result", noteGu: "emCAD ડિઝાઇન + સીવેલું પરિણામ", hasPair: true, photoLabel: "emCAD peacock design beside stitched fabric" },
-  { sample: true, technique: "beads", ratio: "4/5", titleEn: "4-beads border run", titleGu: "4-બીડ્સ બોર્ડર રન", noteEn: "First full production run", noteGu: "પહેલો આખો પ્રોડક્શન રન", hasPair: false, photoLabel: "Beads border close-up" },
-  { sample: true, technique: "tufting", ratio: "1/1", titleEn: "Tufted name board", titleGu: "ટફ્ટેડ નેમ બોર્ડ", noteEn: "Weekend batch product", noteGu: "વીકએન્ડ બેચની પ્રોડક્ટ", hasPair: false, photoLabel: "Tufted rug piece, colourful" },
-  { sample: true, technique: "laser", ratio: "4/5", titleEn: "Laser-cut appliqué yoke", titleGu: "લેસર-કટ એપ્લિક યોક", noteEn: "Combined laser + embroidery", noteGu: "લેસર + એમ્બ્રોઇડરી સાથે", hasPair: true, photoLabel: "Laser-cut fabric layered piece" }
+  { sample: true, technique: "zardosi", ratio: "4/5", titleEn: "Bridal zardosi panel", titleGu: "બ્રાઇડલ ઝરદોશી પેનલ", noteEn: "Final project, evening batch", noteGu: "ફાઇનલ પ્રોજેક્ટ, સાંજની બેચ", hasPair: true, photoLabel: "Zardosi bridal panel, macro", courseSlug: "zardosi-machine-embroidery", outcomeEn: "Relief height held through the corners", outcomeGu: "ખૂણા સુધી રિલીફની ઊંચાઈ જળવાઈ" },
+  { sample: true, technique: "sequence", ratio: "1/1", titleEn: "Festive sequence dupatta", titleGu: "ફેસ્ટિવ સિકવન્સ દુપટ્ટા", noteEn: "Week 5 production drill", noteGu: "અઠવાડિયું 5, પ્રોડક્શન પ્રેક્ટિસ", hasPair: false, photoLabel: "Sequence dupatta shimmer", courseSlug: "sequence-work", outcomeEn: "Repeat held across a full dupatta length", outcomeGu: "આખી દુપટ્ટાની લંબાઈમાં રિપીટ જળવાયો" },
+  { sample: true, technique: "emcad", ratio: "3/2", titleEn: "Peacock motif, screen to stitch", titleGu: "મોર મોટિફ, સ્ક્રીનથી સ્ટિચ સુધી", noteEn: "emCAD design + stitched result", noteGu: "emCAD ડિઝાઇન + સીવેલું પરિણામ", hasPair: true, photoLabel: "emCAD peacock design beside stitched fabric", courseSlug: "emcad-embroidery-design", outcomeEn: "File ran first time, no correction pass", outcomeGu: "ફાઇલ પહેલી જ વારમાં ચાલી, કરેક્શન વગર" },
+  { sample: true, technique: "beads", ratio: "4/5", titleEn: "4-beads border run", titleGu: "4-બીડ્સ બોર્ડર રન", noteEn: "First full production run", noteGu: "પહેલો આખો પ્રોડક્શન રન", hasPair: false, photoLabel: "Beads border close-up", courseSlug: "four-beads-machine-work", outcomeEn: "Even spacing with no feed stoppage", outcomeGu: "ફીડ અટક્યા વગર એકસરખું સ્પેસિંગ" },
+  { sample: true, technique: "tufting", ratio: "1/1", titleEn: "Tufted name board", titleGu: "ટફ્ટેડ નેમ બોર્ડ", noteEn: "Weekend batch product", noteGu: "વીકએન્ડ બેચની પ્રોડક્ટ", hasPair: false, photoLabel: "Tufted rug piece, colourful", courseSlug: "tufting", outcomeEn: "Even pile height, backing glued off", outcomeGu: "એકસરખી પાઇલ ઊંચાઈ, પાછળ ગુંદર લગાવેલું" },
+  { sample: true, technique: "laser", ratio: "4/5", titleEn: "Laser-cut appliqué yoke", titleGu: "લેસર-કટ એપ્લિક યોક", noteEn: "Combined laser + embroidery", noteGu: "લેસર + એમ્બ્રોઇડરી સાથે", hasPair: true, photoLabel: "Laser-cut fabric layered piece", courseSlug: "laser-work", outcomeEn: "Sealed edges, no scorch on light ground", outcomeGu: "સીલ થયેલી કિનારી, હળવા ગ્રાઉન્ડ પર બળ્યા વગર" }
 ];
 
 /* --------------------------------- services -------------------------------- */
@@ -291,51 +588,118 @@ export const services: ServiceItem[] = [
  * NEVER invent a trainer. Delete a row rather than guess at one.
  * -------------------------------------------------------------------------- */
 export type Trainer = {
+  /** Always true today: no trainer has been confirmed by the owner. */
   sample: boolean;
+  slug: string;
   nameEn: string;
   nameGu: string;
   roleEn: string;
   roleGu: string;
   focusEn: string;
   focusGu: string;
+  /** What they are the person to ask about. */
+  specialityEn: string;
+  specialityGu: string;
+  /** Machines they teach on. */
+  machinesEn: string[];
+  machinesGu: string[];
+  /** Only where a trainer genuinely teaches software. */
+  softwareEn?: string;
+  softwareGu?: string;
+  /** Stated as a range, never as a precise year count. */
+  experienceEn: string;
+  experienceGu: string;
+  /** How they run a session — the thing students actually ask about. */
+  teachingEn: string;
+  teachingGu: string;
+  /** Kinds of work, not named clients. */
+  selectedWorkEn: string[];
+  selectedWorkGu: string[];
   photoLabel: string;
 };
 
+/**
+ * ⚠️ SAMPLE trainers — three invented identities, built to exercise the
+ * profile layout. **No trainer at Karma has been confirmed by the owner**, and
+ * `docs/content-checklist.md` tracks that as an open question.
+ *
+ * The rules that make this safe to ship on a publicly-reachable deployment:
+ *
+ *  1. `sample: true` and a visible <SampleTag /> on every profile;
+ *  2. none of this becomes `Person` or `EducationalOrganization.employee`
+ *     structured data — a fabricated named person in schema is a different
+ *     order of problem from a labelled card;
+ *  3. none of the old ValidTheme template's trainer names is reused;
+ *  4. experience is a range, never a precise year count, and no award,
+ *     certification, employer or student result is claimed.
+ *
+ * The three cover the teaching the catalogue actually needs: heavy machine
+ * work, the modern techniques, and digitising.
+ */
 export const trainers: Trainer[] = [
   {
     sample: true,
-    nameEn: "Sample: lead trainer name",
-    nameGu: "નમૂનો: મુખ્ય ટ્રેનરનું નામ",
-    roleEn: "Machine embroidery, all techniques",
-    roleGu: "મશીન એમ્બ્રોઇડરી, બધી ટેકનિક",
-    focusEn:
-      "Years on the production floor before teaching. Specialities and student results appear here once confirmed.",
-    focusGu:
-      "ભણાવતાં પહેલાં પ્રોડક્શન ફ્લોર પર વર્ષોનો અનુભવ. કન્ફર્મ થયા પછી અહીં સ્પેશિયાલિટી અને પરિણામ આવશે.",
+    slug: "sample-machine-trainer",
+    nameEn: "Sample: Rajesh M.",
+    nameGu: "નમૂનો: રાજેશ મ.",
+    roleEn: "Machine embroidery — heavy work",
+    roleGu: "મશીન એમ્બ્રોઇડરી — હેવી વર્ક",
+    focusEn: "Years on a production floor before teaching. Comes back to the same idea in every session: the fault has a cause, and the cause is usually upstream of where you noticed it.",
+    focusGu: "ભણાવતાં પહેલાં પ્રોડક્શન ફ્લોર પર વર્ષોનો અનુભવ. દરેક સેશનમાં એક જ વાત ફરી ફરી કહે છે: ભૂલનું કારણ હોય છે, અને એ કારણ મોટે ભાગે તમે જ્યાં ભૂલ જોઈ ત્યાંથી પહેલાં હોય છે.",
+    specialityEn: "Zardosi and heavy relief work on bridal ground.",
+    specialityGu: "બ્રાઇડલ ગ્રાઉન્ડ પર ઝરદોશી અને હેવી રિલીફ વર્ક.",
+    machinesEn: ["Zardosi hand-guided", "Flat embroidery", "4-beads"],
+    machinesGu: ["ઝરદોશી હેન્ડ-ગાઇડેડ", "ફ્લેટ એમ્બ્રોઇડરી", "4-બીડ્સ"],
+    experienceEn: "Over a decade on production machines",
+    experienceGu: "પ્રોડક્શન મશીન પર દસ વર્ષથી વધુ",
+    teachingEn: "Sits beside you at the machine rather than demonstrating from the front, and will make you re-run a sample until you can say why it failed.",
+    teachingGu: "આગળ ઊભા રહીને બતાવવાને બદલે મશીન પર તમારી બાજુમાં બેસે છે, અને જ્યાં સુધી તમે જાતે ન કહી શકો કે સેમ્પલ કેમ બગડ્યું ત્યાં સુધી ફરી ચલાવડાવે છે.",
+    selectedWorkEn: ["Bridal lehenga and dupatta panels", "Sherwani borders", "Boutique yoke and blouse work"],
+    selectedWorkGu: ["બ્રાઇડલ લહેંગા અને દુપટ્ટા પેનલ", "શેરવાનીની બોર્ડર", "બુટિક યોક અને બ્લાઉઝનું કામ"],
     photoLabel: "Trainer portrait at their machine (with consent)"
   },
   {
     sample: true,
-    nameEn: "Sample: design trainer name",
-    nameGu: "નમૂનો: ડિઝાઇન ટ્રેનરનું નામ",
-    roleEn: "emCAD design and digitizing",
+    slug: "sample-design-trainer",
+    nameEn: "Sample: Nidhi P.",
+    nameGu: "નમૂનો: નિધિ પ.",
+    roleEn: "emCAD design and digitising",
     roleGu: "emCAD ડિઝાઇન અને ડિજિટાઇઝિંગ",
-    focusEn:
-      "Works on live client files, so classes use the same standards production actually demands.",
-    focusGu:
-      "લાઇવ ક્લાયન્ટ ફાઇલ પર કામ કરે છે, એટલે ક્લાસમાં પ્રોડક્શન જેવા જ ધોરણો શીખવાય છે.",
-    photoLabel: "Trainer portrait at the emCAD station (with consent)"
+    focusEn: "Teaches digitising as a production job, not a drawing class: a file is not finished until it has stitched out and been corrected.",
+    focusGu: "ડિજિટાઇઝિંગને ડ્રોઇંગ ક્લાસ નહીં, પ્રોડક્શન જોબ તરીકે શીખવે છે: ફાઇલ સ્ટિચ-આઉટ થઈને સુધરે નહીં ત્યાં સુધી પૂરી ન કહેવાય.",
+    specialityEn: "Turning client artwork into files that run first time.",
+    specialityGu: "ક્લાયન્ટના આર્ટવર્કને પહેલી જ વારમાં ચાલે એવી ફાઇલમાં ફેરવવું.",
+    machinesEn: ["Design workstations", "Flat embroidery for stitch-outs"],
+    machinesGu: ["ડિઝાઇન વર્કસ્ટેશન", "સ્ટિચ-આઉટ માટે ફ્લેટ એમ્બ્રોઇડરી"],
+    softwareEn: "emCAD. Teaches the decisions — underlay, density, stitch types, pull compensation, travel order — as things that carry across any digitising package.",
+    softwareGu: "emCAD. અન્ડરલે, ડેન્સિટી, સ્ટિચ ટાઇપ, પુલ કોમ્પેન્સેશન અને ટ્રાવેલ ઓર્ડર — આ નિર્ણયો દરેક ડિજિટાઇઝિંગ સોફ્ટવેરમાં કામ લાગે એ રીતે શીખવે છે.",
+    experienceEn: "Several years digitising for production",
+    experienceGu: "પ્રોડક્શન માટે ડિજિટાઇઝિંગનો કેટલાંક વર્ષોનો અનુભવ",
+    teachingEn: "Every file gets stitched out in the same week it is built, so students learn from their own sample rather than from a screen preview.",
+    teachingGu: "દરેક ફાઇલ જે અઠવાડિયે બને એ જ અઠવાડિયે સ્ટિચ-આઉટ થાય છે, જેથી સ્ટુડન્ટ સ્ક્રીન પ્રિવ્યૂ નહીં પણ પોતાના સેમ્પલ પરથી શીખે.",
+    selectedWorkEn: ["Production files for multi-head runs", "Logo and monogram digitising", "Correction work on files that failed elsewhere"],
+    selectedWorkGu: ["મલ્ટી-હેડ રન માટે પ્રોડક્શન ફાઇલ", "લોગો અને મોનોગ્રામ ડિજિટાઇઝિંગ", "બીજે બગડેલી ફાઇલોનું કરેક્શન"],
+    photoLabel: "Trainer at emCAD screen, stitch paths visible (with consent)"
   },
   {
     sample: true,
-    nameEn: "Sample: founder name",
-    nameGu: "નમૂનો: સ્થાપકનું નામ",
-    roleEn: "Founder, Karma Design Studio",
-    roleGu: "સ્થાપક, Karma Design Studio",
-    focusEn:
-      "The reason the studio exists, in their own words, once the founding interview is recorded.",
-    focusGu:
-      "સ્ટુડિયો શા માટે શરૂ થયો, એ એમના પોતાના શબ્દોમાં, ઇન્ટરવ્યૂ રેકોર્ડ થયા પછી.",
-    photoLabel: "Owner portrait at a machine (shoot list)"
+    slug: "sample-modern-trainer",
+    nameEn: "Sample: Kiran J.",
+    nameGu: "નમૂનો: કિરણ જ.",
+    roleEn: "Laser work and tufting",
+    roleGu: "લેસર વર્ક અને ટફ્ટિંગ",
+    focusEn: "The newer techniques, taught with their limits stated first — which materials must never go under a laser, and what a tufted piece needs before it will survive being walked on.",
+    focusGu: "નવી ટેકનિક, જેની મર્યાદા પહેલાં કહેવાય છે — કયું મટીરિયલ લેસર નીચે ક્યારેય ન મૂકવું, અને ટફ્ટેડ પીસ પર ચાલી શકાય એ માટે એને શું જોઈએ.",
+    specialityEn: "Cut-work layouts and tufted pieces that hold together.",
+    specialityGu: "કટ-વર્ક લેઆઉટ અને ટકી રહે એવા ટફ્ટેડ પીસ.",
+    machinesEn: ["Laser cutting and etching", "Tufting guns on frame"],
+    machinesGu: ["લેસર કટિંગ અને એચિંગ", "ફ્રેમ પર ટફ્ટિંગ ગન"],
+    experienceEn: "Several years on cut-work and tufted production",
+    experienceGu: "કટ-વર્ક અને ટફ્ટેડ પ્રોડક્શનનો કેટલાંક વર્ષોનો અનુભવ",
+    teachingEn: "Starts every material with a test piece, because the settings that worked yesterday belong to yesterday's cloth.",
+    teachingGu: "દરેક મટીરિયલની શરૂઆત ટેસ્ટ પીસથી કરે છે, કારણ કે ગઈ કાલે ચાલેલી સેટિંગ ગઈ કાલના કાપડની હતી.",
+    selectedWorkEn: ["Cut-work dupattas and dress panels", "Custom rugs and wall pieces", "Etched detail combined with embroidery"],
+    selectedWorkGu: ["કટ-વર્ક દુપટ્ટા અને ડ્રેસ પેનલ", "કસ્ટમ રગ અને વોલ પીસ", "એમ્બ્રોઇડરી સાથે જોડેલી એચ કરેલી ડિટેલ"],
+    photoLabel: "Trainer at the tufting frame (with consent)"
   }
 ];

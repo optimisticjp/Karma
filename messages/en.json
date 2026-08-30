@@ -182,7 +182,10 @@
     },
     "proof": {
       "emptyTitle": "Proof, when there is proof.",
-      "emptyBody": "No student work or outcomes are published here yet, because nothing goes up without the student’s consent and the studio’s verification. Until then the real evidence is on the floor — come and look at it."
+      "emptyBody": "No student work or outcomes are published here yet, because nothing goes up without the student’s consent and the studio’s verification. Until then the real evidence is on the floor — come and look at it.",
+      "storiesTitle": "Six routes into this trade.",
+      "storiesBody": "Beginner to operator, tailor to embroidery shop, operator to digitiser. The stories page sets each one out as a case study: why they joined, what they learned, and what actually changed.",
+      "storiesCta": "Read the stories"
     },
     "trainers": {
       "h2": "You learn from people who still do the work.",
@@ -673,7 +676,9 @@
     "sub": "Named outcomes, published with consent: businesses started, jobs landed, rates raised.",
     "eyebrow": "Success stories",
     "consentTitle": "Published with consent",
-    "consentBody": "Every story here is shared with the student’s permission and verified by the studio before it goes up. Unverified entries stay marked as samples."
+    "consentBody": "Every story here is shared with the student’s permission and verified by the studio before it goes up. Unverified entries stay marked as samples.",
+    "sampleTitle": "Sample stories",
+    "sampleBody": "The six stories below are sample archetypes, written to show the shape a real story takes here — the routes people actually take into this trade. Each is marked as a sample and is replaced in place the moment a real, consented story is published. None of them claims an income, a job or a placement."
   },
   "contactPage": {
     "eyebrow": "Contact",
@@ -969,5 +974,51 @@
     "book": "Book demo",
     "work": "Work",
     "contact": "Contact"
+  },
+  "proof": {
+    "cases": {
+      "eyebrow": "Machine notes",
+      "h2": "Four faults, and what actually fixed them.",
+      "sub": "Case notes from the floor: the fault, what the sample told us, the setting that moved, and what the next run produced. This is what a trainer writes on a job card.",
+      "diagnosis": "Diagnosis",
+      "change": "What changed",
+      "setting": "Setting",
+      "result": "Result",
+      "foot": "These are ordinary production faults with their ordinary causes — the same notes would be written in any embroidery unit in Surat. They describe technique, not any student's work, so there is nothing here about a person to verify."
+    },
+    "work": {
+      "demonstrates": "Demonstrates: "
+    },
+    "stories": {
+      "why": "Why they joined",
+      "learned": "What they learned",
+      "changed": "What changed",
+      "now": "Where they are now"
+    },
+    "reviews": {
+      "eyebrow": "What people say",
+      "h2": "The review wall.",
+      "sub": "All of them on the page, not one at a time behind a swipe. The rating links to the studio's Google listing so you can read the real ones there.",
+      "scoreSource": "on Google",
+      "foot": "Every card above is sample text, used while the real reviews are being collected, and each one is marked as a sample. None of it is submitted to Google or published as review data — the rating beside the heading is owner-provided and links to the live listing."
+    },
+    "social": {
+      "eyebrow": "Where the work actually lives",
+      "h2": "The reels are the portfolio.",
+      "sub": "Machine setup, thread matching, design judgement, sequence work, production problems — posted from the floor, mostly in Gujarati. Follower counts are owner-provided and rounded.",
+      "watch": "Watch",
+      "follow": "Follow"
+    },
+    "trainers": {
+      "eyebrow": "The people",
+      "h2": "Who would actually teach you.",
+      "sub": "Every profile below is sample data and says so on its card. No trainer has been confirmed yet, and no invented person appears in this site's structured data.",
+      "speciality": "Speciality",
+      "machines": "Machines taught",
+      "software": "Software",
+      "experience": "Experience",
+      "teaching": "How they teach",
+      "selectedWork": "Selected work"
+    }
   }
 }

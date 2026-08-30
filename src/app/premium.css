@@ -1631,3 +1631,315 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
 /* On a course page the problem rows carry no cause column — the cause is the
    whole course — so they set as a single hairline-separated list. */
 .problem-list .problem-row:only-child { border-bottom: var(--hairline); }
+
+/* ============================= proof ecosystem ============================
+ * Phase 4. Machine case notes, student work, story case studies, trainer
+ * profiles, the review wall and social authority.
+ * ========================================================================= */
+
+/* --- machine case notes ---------------------------------------------------
+ * A spec sheet, not cards: the five fields are a fixed schema, so a reader who
+ * has found "Setting" in the first note can jump straight to it in the
+ * fourth. Cards would re-flow that relationship on every breakpoint. */
+.case-list {
+  display: grid;
+  gap: clamp(1rem, 0.8rem + 0.9vw, 1.5rem);
+}
+@media (min-width: 900px) {
+  .case-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.case-note {
+  border: var(--hairline);
+  border-radius: var(--radius-panel);
+  background: var(--color-card);
+  padding: clamp(1.125rem, 0.9rem + 0.8vw, 1.625rem);
+}
+.case-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.case-index {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.125rem;
+  color: var(--color-vermilion);
+}
+.case-problem {
+  margin-top: 0.875rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-h4);
+  line-height: 1.32;
+  letter-spacing: -0.015em;
+}
+:lang(gu) .case-problem { letter-spacing: 0; line-height: 1.5; }
+.case-fields {
+  margin-top: 1.125rem;
+  border-top: var(--hairline);
+}
+.case-fields > * {
+  padding-block: 0.75rem;
+  border-bottom: var(--hairline);
+}
+.case-fields > :last-child { border-bottom: 0; padding-bottom: 0; }
+.case-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-needle);
+}
+:lang(gu) .case-label { letter-spacing: 0; text-transform: none; font-size: 0.8125rem; }
+.case-value {
+  margin-top: 0.25rem;
+  font-size: var(--text-smallmeta);
+  line-height: var(--text-smallmeta--line-height);
+  color: var(--color-stone);
+}
+.case-foot {
+  margin-top: clamp(1.25rem, 1rem + 0.8vw, 2rem);
+  padding-top: 1.25rem;
+  border-top: var(--hairline);
+  font-size: var(--text-smallmeta);
+  color: var(--color-stone);
+  max-width: 72ch;
+}
+
+/* --- student work grid ---------------------------------------------------- */
+.work-grid {
+  display: grid;
+  gap: clamp(1.25rem, 1rem + 1vw, 2rem);
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 620px) {
+  .work-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1100px) {
+  .work-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.work-item {
+  display: flex;
+  flex-direction: column;
+  border: var(--hairline);
+  border-radius: var(--radius-panel);
+  background: var(--color-card);
+  overflow: clip;
+}
+.work-media { position: relative; }
+.work-chip { position: absolute; left: 0.625rem; top: 0.625rem; }
+.work-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: clamp(0.875rem, 0.75rem + 0.5vw, 1.25rem);
+  border-top: var(--hairline);
+}
+.work-title {
+  font-family: var(--font-display);
+  font-size: var(--text-h4);
+  line-height: var(--text-h4--line-height);
+  font-weight: 700;
+}
+.work-note {
+  margin-top: 0.375rem;
+  font-size: var(--text-smallmeta);
+  color: var(--color-stone);
+}
+.work-outcome {
+  margin-top: 0.75rem;
+  font-size: var(--text-smallmeta);
+  line-height: 1.55;
+}
+.work-outcome-label { font-weight: 700; color: var(--color-needle); }
+.work-course { margin-top: auto; padding-top: 0.875rem; }
+
+/* --- story case studies --------------------------------------------------- */
+.story-grid {
+  display: grid;
+  gap: clamp(1.5rem, 1.1rem + 1.6vw, 2.5rem);
+}
+@media (min-width: 1000px) {
+  .story-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.story-case {
+  display: flex;
+  flex-direction: column;
+  border: var(--hairline);
+  border-radius: var(--radius-feature);
+  background: var(--color-card);
+  padding: clamp(1.125rem, 0.9rem + 0.9vw, 1.75rem);
+}
+.story-head {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+@media (min-width: 480px) {
+  .story-head { grid-template-columns: 7rem minmax(0, 1fr); gap: 1.25rem; }
+}
+/* A shoot-list label is a sentence, and this slot is ~112px wide. At that
+   size the text clipped, which looked like a rendering fault rather than a
+   planned shot. The camera mark carries it visually; the full label stays on
+   the element's aria-label, so it is still announced. */
+.story-media { overflow: clip; border-radius: 0.375rem; }
+.story-media [role="img"] { padding: 0.5rem; }
+.story-media [role="img"] span { display: none; }
+@media (min-width: 480px) {
+  .story-media [role="img"] {
+    padding: 0.75rem;
+    font-size: 0.6875rem;
+    line-height: 1.35;
+  }
+  .story-media [role="img"] span {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+  }
+}
+.story-name {
+  font-family: var(--font-display);
+  font-size: var(--text-h4);
+  line-height: var(--text-h4--line-height);
+  font-weight: 700;
+}
+.story-course {
+  margin-top: 0.125rem;
+  font-size: var(--text-smallmeta);
+  font-weight: 600;
+  color: var(--color-vermilion-deep);
+}
+.story-arc {
+  margin-top: 0.625rem;
+  font-size: var(--text-smallmeta);
+  color: var(--color-stone);
+}
+.story-arc strong { color: var(--color-carbon); font-weight: 700; }
+.story-arrow { margin-inline: 0.5rem; color: var(--color-vermilion); font-weight: 700; }
+.story-quote {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: var(--hairline);
+  font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+}
+.story-steps { margin-top: 1.25rem; border-top: var(--hairline); }
+.story-steps > * { padding-block: 0.75rem; border-bottom: var(--hairline); }
+.story-steps > :last-child { border-bottom: 0; padding-bottom: 0; }
+.story-step-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-needle);
+}
+:lang(gu) .story-step-label { letter-spacing: 0; text-transform: none; font-size: 0.8125rem; }
+.story-step-value {
+  margin-top: 0.25rem;
+  font-size: var(--text-smallmeta);
+  line-height: var(--text-smallmeta--line-height);
+  color: var(--color-stone);
+}
+
+/* --- trainer profiles ----------------------------------------------------- */
+.trainer-grid {
+  display: grid;
+  gap: clamp(1.25rem, 1rem + 1.2vw, 2rem);
+}
+@media (min-width: 900px) {
+  .trainer-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.trainer-card {
+  display: flex;
+  flex-direction: column;
+  border: var(--hairline);
+  border-radius: var(--radius-panel);
+  background: var(--color-card);
+  overflow: clip;
+}
+.trainer-media { border-bottom: var(--hairline); }
+.trainer-body { padding: clamp(1rem, 0.85rem + 0.6vw, 1.5rem); }
+.trainer-name {
+  font-family: var(--font-display);
+  font-size: var(--text-h4);
+  line-height: var(--text-h4--line-height);
+  font-weight: 700;
+}
+.trainer-role {
+  margin-top: 0.25rem;
+  font-size: var(--text-smallmeta);
+  font-weight: 600;
+  color: var(--color-vermilion-deep);
+}
+.trainer-focus {
+  margin-top: 0.75rem;
+  font-size: var(--text-smallmeta);
+  line-height: var(--text-smallmeta--line-height);
+  color: var(--color-stone);
+}
+.trainer-specs { margin-top: 1.125rem; border-top: var(--hairline); }
+.trainer-specs > * { padding-block: 0.625rem; border-bottom: var(--hairline); }
+.trainer-specs > :last-child { border-bottom: 0; }
+.trainer-spec-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-needle);
+}
+:lang(gu) .trainer-spec-label { letter-spacing: 0; text-transform: none; font-size: 0.8125rem; }
+.trainer-spec-value {
+  margin-top: 0.25rem;
+  font-size: var(--text-smallmeta);
+  line-height: 1.55;
+  color: var(--color-stone);
+}
+.trainer-work {
+  margin-top: 0.5rem;
+  font-size: var(--text-smallmeta);
+  line-height: 1.6;
+  color: var(--color-stone);
+}
+.trainer-work > li { padding-left: 1rem; text-indent: -1rem; }
+.trainer-work > li::before { content: "– "; color: var(--color-vermilion); }
+
+/* --- the review wall ------------------------------------------------------
+ * A wall, not a slider. A carousel hides seven of eight reviews behind an
+ * interaction and costs JS to do it. */
+.review-wall {
+  display: grid;
+  gap: clamp(1rem, 0.85rem + 0.6vw, 1.5rem);
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 640px) {
+  .review-wall { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1100px) {
+  .review-wall { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* --- social authority ------------------------------------------------------
+ * Links and counts, never an embedded feed: a few hundred kilobytes of
+ * third-party JavaScript to prove a follower count is a bad trade for an
+ * audience arriving on mobile data. */
+.social-rail { border-top: var(--hairline); }
+.social-link {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding-block: 0.875rem;
+  border-bottom: var(--hairline);
+  min-height: 2.75rem;
+  color: var(--color-carbon);
+}
+.social-value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.375rem;
+  letter-spacing: -0.02em;
+  min-width: 4.5rem;
+}
+:lang(gu) .social-value { letter-spacing: 0; }
+.social-label { font-size: var(--text-smallmeta); font-weight: 600; color: var(--color-stone); }
+.social-go { margin-left: auto; color: var(--color-vermilion-deep); align-self: center; }

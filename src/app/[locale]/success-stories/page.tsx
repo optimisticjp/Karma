@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { ManagedPhoto } from "@/components/ui/ManagedPhoto";
 import { PageIntro } from "@/components/ui/PageIntro";
+import { StoryCase } from "@/components/site/StoryCase";
+import { ReviewWall } from "@/components/site/ReviewWall";
+import { SocialAuthority } from "@/components/site/SocialAuthority";
 import { Icon } from "@/components/ui/Icon";
 import { getPublicStories } from "@/lib/content/public";
 import { pageMeta } from "@/lib/seo";
@@ -19,20 +21,29 @@ export async function generateMetadata({
   return pageMeta({ locale, path: "/success-stories", title: t("title"), description: t("description") });
 }
 
+/**
+ * Success stories, as mini case studies.
+ *
+ * This page used to filter sample stories out, which — since nothing has been
+ * published yet — meant it rendered an intro and then nothing at all. The
+ * owner asked for the full system populated before real content arrives, and
+ * CLAUDE.md's rule is that source placeholders stay visible *carrying their
+ * `sample: true` marker*, not that they are hidden. So the six archetypes now
+ * render, each with a visible tag, and each is replaced in place the moment a
+ * real story is published through Content Desk.
+ *
+ * None of this reaches structured data. There is no `Review` or `Person`
+ * markup on this page, and there will not be until the stories are real.
+ */
 export default async function StoriesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, th, tc, l, all] = await Promise.all([
+  const [t, tc, stories] = await Promise.all([
     getTranslations("storiesPage"),
-    getTranslations("home.stories"),
     getTranslations("common"),
-    getLocale(),
     getPublicStories()
   ]);
-  const gu = l === "gu";
-  // Managed rows are always sample:false; source fallbacks carry editorial
-  // instructions in their quote fields and must never reach a visitor.
-  const stories = all.filter((s) => !s.sample);
+  const anySample = stories.some((s) => s.sample);
 
   return (
     <>
@@ -48,45 +59,25 @@ export default async function StoriesPage({ params }: { params: Promise<{ locale
         aside={
           <>
             <p className="microlabel !text-vermilion-deep">
-              {stories.length > 0 ? t("consentTitle") : th("pendingLabel")}
+              {anySample ? t("sampleTitle") : t("consentTitle")}
             </p>
-            <p className="mt-3">{stories.length > 0 ? t("consentBody") : th("pendingNote")}</p>
+            <p className="mt-3">{anySample ? t("sampleBody") : t("consentBody")}</p>
           </>
         }
       />
 
       <section className="section">
         <div className="container-site">
-          <div className="grid gap-6 lg:gap-8 md:grid-cols-2">
+          <div className="story-grid">
             {stories.map((s, i) => (
-              <figure
-                key={`${s.nameEn}-${i}`}
-                className="card grid h-full gap-6 p-6 sm:grid-cols-[120px_1fr] md:p-8"
-              >
-                <ManagedPhoto src={s.mediaUrl} label={s.photoLabel} ratio="4/5" className="hidden sm:block" />
-                <div>
-                  <blockquote className="font-display text-h4 leading-snug">
-                    “{gu ? s.quoteGu : s.quoteEn}”
-                  </blockquote>
-                  <figcaption className="mt-4 space-y-1 text-smallmeta text-stone">
-                    <p className="font-bold text-carbon">{gu ? s.nameGu : s.nameEn}</p>
-                    <p>{gu ? s.courseGu : s.courseEn}</p>
-                    <p>
-                      {th("before")}: {gu ? s.beforeGu : s.beforeEn}
-                      <span aria-hidden="true" className="mx-2 text-vermilion-deep">
-                        →
-                      </span>
-                      <span className="font-semibold text-carbon">
-                        {th("after")}: {gu ? s.afterGu : s.afterEn}
-                      </span>
-                    </p>
-                  </figcaption>
-                </div>
-              </figure>
+              <StoryCase key={`${s.nameEn}-${i}`} story={s} />
             ))}
           </div>
         </div>
       </section>
+
+      <ReviewWall />
+      <SocialAuthority />
     </>
   );
 }
