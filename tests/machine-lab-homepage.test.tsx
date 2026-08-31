@@ -56,8 +56,13 @@ describe("homepage architecture", () => {
     expect(isAscending(sequence)).toBe(true);
   });
 
-  it("never runs two dark bands together", () => {
-    /* A dark surface is punctuation. Two in a row is wallpaper. */
+  it("puts no dark band on the page, and never repeats a surface", () => {
+    /* This asserted "never two DARK bands adjacent" until 2026-08-31. With the
+       site light-first the stronger statement holds — no section is dark at
+       all, which trivially implies it — so the interesting question moved:
+       two ADJACENT SECTIONS SHARING A SURFACE is now what makes a scroll read
+       as one slab. The warm chapter (trainers, then where you learn) is the
+       one deliberate exception and is named below. */
     const sections: Array<[string, string]> = [
       ["Hero", "src/components/home/Hero.tsx"],
       ["TrustRail", "src/components/home/TrustRail.tsx"],
@@ -79,16 +84,35 @@ describe("homepage architecture", () => {
       ["BusinessBand", "src/components/home/BusinessBand.tsx"],
       ["CtaBand", "src/components/home/CtaBand.tsx"]
     ];
-    /* Order them as the page renders them, then look for adjacent darks. */
+    const BANDS = ["band-machine", "band-material", "band-human", "band-info"] as const;
+    /* A chapter that deliberately continues its surface, carrying a hairline
+       instead of a colour change. Adding to this list is a design decision
+       and has to be made deliberately, which is the point of listing it. */
+    const SAME_SURFACE_ON_PURPOSE = ["Trainers → WhereYouLearn"];
+
+    /* Order them as the page renders them. */
     const rendered = sections
       .filter(([tag]) => home.includes(`<${tag} />`))
       .sort((a, b) => home.indexOf(`<${a[0]} />`) - home.indexOf(`<${b[0]} />`))
-      .map(([tag, file]) => ({ tag, dark: read(file).includes("on-carbon") }));
+      .map(([tag, file]) => {
+        const source = stripComments(read(file));
+        return {
+          tag,
+          dark: source.includes("on-carbon"),
+          band: BANDS.find((b) => source.includes(b)) ?? null
+        };
+      });
 
     expect(rendered.length).toBeGreaterThan(12);
-    for (let i = 1; i < rendered.length; i += 1) {
-      const pair = `${rendered[i - 1].tag} → ${rendered[i].tag}`;
-      expect(rendered[i - 1].dark && rendered[i].dark, pair).toBe(false);
+    expect(rendered.filter((s) => s.dark).map((s) => s.tag)).toEqual([]);
+
+    const banded = rendered.filter((s) => s.band);
+    /* Non-vacuity: if the band classes were renamed this would quietly pass. */
+    expect(banded.length).toBeGreaterThanOrEqual(6);
+    for (let i = 1; i < banded.length; i += 1) {
+      const pair = `${banded[i - 1].tag} → ${banded[i].tag}`;
+      if (SAME_SURFACE_ON_PURPOSE.includes(pair)) continue;
+      expect(banded[i - 1].band === banded[i].band, pair).toBe(false);
     }
   });
 

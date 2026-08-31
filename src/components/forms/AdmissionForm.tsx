@@ -453,7 +453,7 @@ export function AdmissionForm({
   const contextCourse = courses.find((c) => c.slug === data.courseSlug);
 
   return (
-    <div className="card p-6 md:p-10">
+    <div className="card p-4 md:p-7">
       {/* progress stitch */}
       <h2
         ref={stepHeading}

@@ -31,13 +31,20 @@ import { site } from "@/lib/site";
  *
  * THE SURFACE
  * -----------
- * The hero is the page's one MACHINE band: dark, technical, textured. It is
- * `.on-carbon`, which re-points every palette token rather than restyling
- * anything by hand, so the frames, rules, eyebrow and secondary button invert
- * correctly without a single dark-mode override at a call site. A warm ivory
- * hero read as a coaching centre; a steel one reads as the floor the work
- * actually happens on. The band immediately below it is light, because a dark
- * surface is punctuation and stops being punctuation the moment it repeats.
+ * The hero is the page's MACHINE band, and since 2026-08-31 that band is
+ * Steel Mist rather than Machine Black: pale, cool, technical, with the steel
+ * edge along its top and the density texture across it. The owner rejected
+ * the black-background treatment, and the hero was the loudest instance of it.
+ *
+ * What was lost is a colour. What carries "this is a machine floor, not a
+ * coaching centre" was never the black — it is the 9-on/6-off running stitch
+ * down the thread, the knot at each stage, the machine notation, the four
+ * verified facts set as a spec row, the tabular figures and the hairlines.
+ * Every one of them reads the same on a pale ground, and several read better.
+ *
+ * Nothing here overrides a colour at the call site, which is the property that
+ * made the swap a one-class change: the frames, rules, eyebrow and secondary
+ * button all take palette tokens.
  *
  * THE FACTS
  * ---------
@@ -68,7 +75,7 @@ export function Hero() {
   ];
 
   return (
-    <section className="hero hero-lab on-carbon band-machine machine-light tx-density">
+    <section className="hero hero-lab band-machine machine-light tx-density">
       <div className="container-site hero-grid">
         <div>
           <Reveal>

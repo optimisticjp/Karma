@@ -87,7 +87,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         <div className="container-site">
           <SectionHeading title={t("twoSidesTitle")} sub={t("twoSidesSub")} />
           <div className="u-section-body grid gap-6 lg:grid-cols-2 lg:gap-8">
-            <article className="card p-6 md:p-8">
+            <article className="card p-3.5 md:p-5">
               <Icon name="hoop" size={28} className="text-vermilion-deep" />
               <h3 className="text-h3 mt-5 font-display">{t("academyTitle")}</h3>
               <p className="u-lede">{t("academyBody")}</p>
@@ -100,7 +100,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
                 </Link>
               </p>
             </article>
-            <article className="card p-6 md:p-8">
+            <article className="card p-3.5 md:p-5">
               <Icon name="spool" size={28} className="text-vermilion-deep" />
               <h3 className="text-h3 mt-5 font-display">{t("labTitle")}</h3>
               <p className="u-lede">{t("labBody")}</p>

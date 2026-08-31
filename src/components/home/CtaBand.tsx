@@ -7,13 +7,20 @@ import { Icon } from "@/components/ui/Icon";
  * The close. Two thread lines bracket it, the way a finished panel is bound
  * top and bottom. Left-aligned rather than centred: after a whole page of
  * measured editorial setting, a centred slab would read as a different site.
+ *
+ * Light-first: this was the page's closing dark band. It is Steel Mist now,
+ * and the two vermilion stitch rules that bracket it — which drew from
+ * `--color-vermilion` and were therefore never dependent on the ground — are
+ * what still make it read as punctuation. The signoff moved from vermilion to
+ * vermilion-deep because the bright tone is large-text-only (4.02:1 on Steel
+ * Mist) and `text-h3` is 20px on a phone.
  */
 export function CtaBand() {
   const t = useTranslations("home.cta");
   const tc = useTranslations("common");
 
   return (
-    <section className="on-carbon band-machine">
+    <section className="band-machine">
       <div aria-hidden="true" className="stitch-line" />
       <div className="container-site section">
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:gap-16">
@@ -34,7 +41,7 @@ export function CtaBand() {
               </a>
             </div>
           </div>
-          <p className="font-display text-h3 text-vermilion lg:text-right">{t("signoff")}</p>
+          <p className="font-display text-h3 text-vermilion-deep lg:text-right">{t("signoff")}</p>
         </div>
       </div>
       <div aria-hidden="true" className="stitch-line" />

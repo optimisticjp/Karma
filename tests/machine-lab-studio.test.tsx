@@ -129,13 +129,20 @@ describe("what the studio says it can do", () => {
 });
 
 describe("band rhythm on the services page", () => {
-  it("uses one dark band and does not put another beside it", () => {
-    /* The chain is the page's technical moment; the sections either side of
-       it are light. */
+  it("carries its technical moment on a light surface, not a dark slab", () => {
+    /* This asserted the opposite until 2026-08-31: the chain was ~1,677px of
+       near-black on a 390px phone, and it was the page's dark band. The owner
+       rejected the black-background treatment, so `.band-machine` is Steel
+       Mist now and the rule tightens rather than relaxes — no dark surface on
+       this page at all, chain included. The chain is still the page's
+       technical moment; what says so is the steel edge, the notation and the
+       stitch marks, none of which needed the black. */
     expect((page.match(/on-carbon/g) ?? [])).toHaveLength(0);
-    expect(rail).toContain("on-carbon band-machine");
-    const chainAt = page.indexOf("<StudioRail />");
-    const nextSection = page.indexOf("<section", chainAt);
-    expect(page.slice(chainAt, nextSection + 120)).not.toContain("on-carbon");
+    expect(stripComments(rail)).not.toContain("on-carbon");
+    expect(rail).toContain("band-machine");
+    /* And it must not have quietly become an undifferentiated light section:
+       the technical band is a real surface change from what sits either side
+       of it. */
+    expect(page).toContain("band-human");
   });
 });

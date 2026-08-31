@@ -807,3 +807,221 @@ and fails if two `.on-carbon` sections are adjacent. This caught a pre-existing
 bug: the business band and the close were both dark and next to each other,
 while a comment claimed the page had "exactly two dark bands". A dark surface
 stops being punctuation the moment it repeats.
+
+---
+
+# v5 — "Light-first Machine Lab" (2026-08-31)
+
+The owner's compact-density brief
+(`docs/karma-compact-density-redesign-plan.md`) made two decisions. This
+section covers the first: **the public site no longer uses a large black or
+near-black full-width surface.** The second — viewport economics — is a layout
+matter and is recorded per phase in that plan.
+
+v5 is an **extension of v4, not a replacement**, on the same terms: not one
+token was renamed, because `globals.css` is shared with Karma Console. What
+changed is a set of *values* and one band's *meaning*.
+
+## What was actually dark, and what was not
+
+The measured answer (`docs/compact-density-audit.md`) is narrower than the
+impression. `.band-material`, `.band-human` and `.band-info` were already
+Cotton, Raw Silk and Worktable White; `/student-work`, `/success-stories`,
+`/about` and `/contact` had no dark surface at all; and **the footer was never
+dark** — it is `#e9decd` Raw Silk and always has been.
+
+Five surfaces were dark, and they were the five loudest moments on the site:
+
+| Was | Now |
+| --- | --- |
+| Homepage hero | Steel Mist `.band-machine` |
+| The production rail | Steel Mist `.band-machine` |
+| The EMCAD decision block | Steel Mist `.band-machine` |
+| The homepage close | Steel Mist `.band-machine` |
+| The B2B production chain | Steel Mist `.band-machine` |
+
+Plus two panels on `surface-machine` (a course page's machine/software spec,
+the `/services` exchange panel), and one inline closer on `/admissions`.
+
+## Steel Mist
+
+```
+--color-mist:      #e6ebee   /* the light technical surface */
+--color-mist-line: #c9d4da   /* its hairline               */
+```
+
+Derived from Steel Indigo `#172b35` by lifting lightness and dropping
+saturation, kept marginally warm so it reads as a *material* surface beside
+Cotton rather than as a cold web-app grey. Measured, not estimated:
+
+| Text role | On Steel Mist | On Cotton | Verdict |
+| --- | ---: | ---: | --- |
+| `carbon` | 15.10 | 15.97 | AAA all sizes |
+| `stone` | 5.41 | 5.72 | AA all sizes |
+| `needle` | 5.67 | 5.99 | AA — safe for small links |
+| `vermilion-deep` | 5.26 | 5.57 | AA — small-text accent |
+| `zari-deep` | 5.45 | 5.77 | AA |
+| `steel` | 12.20 | 12.90 | AAA |
+| `vermilion` | 4.02 | 4.25 | **Large text / UI only — the same rule as everywhere** |
+
+**Steel Mist therefore needs no re-pointed token block**, unlike `.bg-sand`.
+Every secondary token already clears AA on it, and it is in fact a slightly
+better ground than Raw Silk, where `stone` sits at 4.89. That is asserted in
+`tests/compact-density-system.test.ts`, which reads the hex out of the token
+rather than carrying its own copy — a test with a hardcoded colour keeps
+passing after a retune while the real surface has moved.
+
+## `.band-machine` is now the technical band, not the dark band
+
+The four-band vocabulary survives intact, because it is the site's rhythm
+language and three of the four were already right:
+
+| Class | Register |
+| --- | --- |
+| `.band-machine` | **technical — Steel Mist**, the software/EMCAD context and the machine proof |
+| `.band-material` | bright, editorial — the work itself |
+| `.band-human` | warm — people, stories, visiting, the footer |
+| `.band-info` | light, neutral — facts and decisions |
+
+Two details carried the change:
+
+- **The texture inverts with the ground.** The same 3px pitch at the same
+  2–5% strength, drawn in `--texture-ink` rather than in cream.
+- **The steel edge is now the band's main signal**, so its steel stop went
+  from a 55% wash to 85% and its tail resolves to `--color-mist-line` instead
+  of transparent. On near-black the edge was a highlight; on Steel Mist it is
+  the thing that says *technical*.
+
+`.machine-light`'s two radial stops halved in alpha (0.22 → 0.11, 0.13 →
+0.07). The **colours did not change**, and must not: a pale ground is exactly
+where a lavender gradient becomes tempting, and steel-blue plus one vermilion
+edge is the entire idea. The purple/violet/magenta ban in
+`tests/machine-lab-system.test.tsx` gets *more* load-bearing here, not less.
+
+## What the identity was actually made of
+
+Worth writing down, because it is the reason the swap cost one class per
+section rather than a redesign. Nothing in the left column needed the black:
+
+| Carried the identity | Depended on the black |
+| --- | --- |
+| The 9-on / 6-off running stitch, penetration dot at each stitch head | — |
+| Six canonical stitch marks with fixed meanings | — |
+| Eleven technique signatures | — |
+| Machine notation on the platform monospace stack | — |
+| Tabular figures on every number | — |
+| Hairlines over shadows; one vermilion accent | — |
+| Material textures at 2–5% | the `.on-dark` inversion |
+| | `.on-carbon` token re-pointing, `needle-light`, the hero plate |
+
+## `.on-carbon` stays defined, and is used by no public section
+
+The plan's §3 still permits a dark surface for **a small isolated overlay
+whose own content needs the contrast** — an EMCAD panel over a machine
+photograph is the reserved case, and those photographs have not arrived.
+Deleting the one correct dark-surface implementation would mean the next one
+is hand-rolled, which is the drift the class exists to prevent. Keeping ~40
+lines of currently-unused CSS is the cheaper mistake.
+
+Three small dark elements are deliberately unchanged, and each is explicitly
+inside the plan's exception:
+
+- the mobile-menu **scrim** — a modal scrim is not a page band;
+- the **active locale pill** — a 29px badge, and the only unambiguous
+  `aria-pressed` signal in the control;
+- the **skip link** — zero-size until focused, and carbon-on-ivory is the
+  highest-contrast pairing in the palette.
+
+**`SectionHeading`'s `onDark` prop is gone.** It existed so a dark band could
+be added anywhere for free, and it was the thing that broke silently when one
+was lightened — `text-ivory` on a pale ground is invisible and nothing catches
+it. With no callers left, removing it makes a future dark band a TypeScript
+error rather than white text on Steel Mist. `MonoNote`'s `"ivory"` tone went
+the same way and for the same reason.
+
+## The compact scale
+
+Every value below is the **phone** value at 390px. Desktop endpoints moved by
+at most a pixel or two: this is a mobile compaction, not a shorter website.
+
+### Section rhythm
+
+All three tiers survive — a page needs dynamics, and flattening them is what
+made the pre-v3 homepage read as one scroll — but each is now a pure `vw` ramp
+between a phone floor and a desktop cap, so the phone end is flat below about
+700px where the compact scale actually matters.
+
+| Tier | Was (390 → 1440) | Now |
+| --- | --- | --- |
+| `.section-major` | 48.5 → 88 | **32 → 80** |
+| `.section` | 40.5 → 72 | **24 → 64** |
+| `.section-compact` | 28.2 → 48 | **16 → 40** |
+
+### Rhythm utilities
+
+The tokens were never about the numbers — they exist so nobody picks a gap by
+eye, per component. That is unchanged; the numbers moved onto the compact
+scale of 4 / 6 / 8 / 12 / 16 / 20 / 24 / 32.
+
+| Relationship | Token | Was | Now |
+| --- | --- | ---: | ---: |
+| Eyebrow → heading | `--space-eyebrow-to-h` | 12 | **8** |
+| Heading → supporting paragraph | `--space-h-to-lede` | 16 | **12** |
+| Paragraph → action row | `--space-lede-to-action` | 24 | **16** |
+| Section heading → its content | `--space-heading-to-content` | 24 → 40 | **16 → 32** |
+
+### Type scale
+
+Only the **mobile end** of each clamp moved. The old scale opened a phone at
+44px for `display-xl` and 30px for `h2`, which is where the site was spending
+its first viewport.
+
+| Token | Phone (was → now) | Desktop | Plan's band |
+| --- | --- | ---: | --- |
+| `--text-display-xl` | 44 → **36** | 76 | hero 30–36 |
+| `--text-display` | 40 → **33** | 64 | — |
+| `--text-h1` | 36 → **29** | 56 | page title 24–30 |
+| `--text-h2` | 30 → **22** | 46 | section heading 18–22 |
+| `--text-h3` | 24 → **20** | 32 | — |
+| `--text-h4` | 20 → **17** | 24 | card title 15–18 |
+| `--text-lead` | 18 → **16** | 20 | body 14–16 |
+| `--text-bodylg` | 18 → **16** | 18 | body 14–16 |
+| `--text-smallmeta` | 15 → **14** | 14 | metadata 12–14 |
+| `--text-eyebrow` | 12 | 12 | eyebrow 11–13 |
+| `--text-btn` | 15 → **14** | 14 | buttons 13–16 |
+
+Body copy stays **16px at line-height 1.625**, and Gujarati stays at 1.8.
+Density is bought from headings, padding and rhythm — never from the reading
+size or the leading, and never from Gujarati's leading, which is taller
+because its vowel marks sit above and below the baseline.
+
+`tests/compact-density-system.test.ts` asserts each token against the plan's
+band by **evaluating the clamp at 390px**, not by matching its text, so a
+later session may re-express any of these freely as long as the phone value
+holds.
+
+### Buttons and tap targets
+
+`.btn` drops from a 48px floor to **44px** — the real WCAG 2.5.5 minimum, not
+below it — with padding `0.625rem 1.125rem`. Gujarati keeps a taller box
+(48px) for its vowel marks. **A dense screen may not buy its density from the
+tap target**, and there is a test for both floors.
+
+### Cards and ledger rows
+
+`.ledger-row` — the site's densest primitive — goes from 12px to 8px of block
+padding on a phone (17px → 12px from 640px), with the title at 15px and the
+note at 13px, promoting to 16/15 from 640px. Public card padding swept from
+`p-6 md:p-8` (24/32) to `p-3.5 md:p-5` (14/20), inside the plan's 12–18px
+band.
+
+`.card` itself still carries no padding: the call site owns it, which is what
+lets a dense list row and a feature panel share one surface primitive.
+
+## The rule this pass establishes
+
+**A surface owns the text colours that work on it, and adding a surface means
+measuring every secondary token against it before putting body copy there.**
+That was already the rule `.bg-sand` established. Steel Mist is the first
+surface to pass it without needing an override block — which is a fact worth
+knowing, not a licence to skip the measurement next time.

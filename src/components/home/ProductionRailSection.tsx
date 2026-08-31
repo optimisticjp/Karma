@@ -42,9 +42,9 @@ export function ProductionRailSection() {
   ];
 
   return (
-    <section className="section on-carbon band-machine">
+    <section className="section band-machine">
       <div className="container-site">
-        <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} rule onDark />
+        <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} rule />
         <ProductionRail stages={stages} label={t("railLabel")} className="mt-10" />
       </div>
     </section>

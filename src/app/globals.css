@@ -116,7 +116,7 @@
   --text-h1: clamp(1.625rem, 1.05rem + 3vw, 3.5rem);             /* 29 -> 56 */
   --text-h1--line-height: 1.14;
   --text-h1--letter-spacing: -0.03em;
-  --text-h2: clamp(1.1875rem, 0.75rem + 2.6vw, 2.875rem);        /* 22 -> 46 */
+  --text-h2: clamp(1.1875rem, 0.72rem + 2.6vw, 2.875rem);        /* 22 -> 46 */
   --text-h2--line-height: 1.2;
   --text-h2--letter-spacing: -0.025em;
   --text-h3: clamp(1.0625rem, 0.9rem + 1.3vw, 2rem);             /* 20 -> 32 */
@@ -145,7 +145,8 @@
 
   /* Systematic vertical rhythm. Spacing between related text is a SYSTEM
      value, never a per-component judgment call. This is the single habit
-     that separates designed pages from assembled ones. */
+     that separates designed pages from assembled ones.
+
      Retuned for compact density (v5): the compact scale is
      4 / 6 / 8 / 12 / 16 / 20 / 24 / 32, and these are the phone values. They
      still travel together as a system — the point of these tokens was never
@@ -291,10 +292,14 @@
      TIERS survive — a page needs dynamics, and flattening them is what made
      the pre-v3 homepage read as one scroll — but their phone ends move onto
      the compact scale. The desktop ends barely move: this is a mobile
-     compaction, not a shorter website. */
-  .section-major   { padding-block: clamp(2rem, 1.5rem + 2.2vw, 5rem); }    /* 32 -> 80 */
-  .section         { padding-block: clamp(1.5rem, 1.15rem + 1.5vw, 4rem); } /* 24 -> 64 */
-  .section-compact { padding-block: clamp(1rem, 0.8rem + 0.9vw, 2.5rem); }  /* 16 -> 40 */
+     compaction, not a shorter website.
+
+     Each tier is a pure vw ramp between a phone floor and a desktop cap, so
+     the phone end is the min (flat below ~700px, where the compact scale
+     matters) and the growth happens across tablet and laptop. */
+  .section-major   { padding-block: clamp(2rem, 4.6vw, 5rem); }   /* 32 -> 80 */
+  .section         { padding-block: clamp(1.5rem, 3.4vw, 4rem); } /* 24 -> 64 */
+  .section-compact { padding-block: clamp(1rem, 2.2vw, 2.5rem); } /* 16 -> 40 */
 
   /* Eyebrow: 12px caps for Latin; weight + colour only for Gujarati */
   .eyebrow {

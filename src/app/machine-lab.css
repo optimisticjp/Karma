@@ -208,6 +208,12 @@
  * Machine light: the reflection off steel under a work lamp. Steel-blue with
  * one vermilion edge, low alpha, behind ONE technical composition per page.
  * Not a purple-blue SaaS aurora, and never behind body copy.
+ *
+ * Light-first retune: the alphas were tuned to glow ON near-black. The same
+ * values over Steel Mist read as a coloured smear behind the headline, so
+ * they drop to roughly half. The two colours do not change — a pale ground is
+ * exactly where a lavender gradient becomes tempting, and steel-blue plus one
+ * vermilion edge is the whole point.
  */
 .machine-light {
   position: relative;
@@ -221,8 +227,8 @@
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(60% 70% at 22% 18%, rgb(41 97 122 / 0.22), transparent 68%),
-    radial-gradient(46% 58% at 82% 6%, rgb(197 72 50 / 0.13), transparent 70%);
+    radial-gradient(60% 70% at 22% 18%, rgb(41 97 122 / 0.11), transparent 68%),
+    radial-gradient(46% 58% at 82% 6%, rgb(197 72 50 / 0.07), transparent 70%);
   filter: blur(6px);
 }
 
@@ -521,27 +527,43 @@
  * A long page alternates between three registers so it never reads as
  * one continuous scroll:
  *
- *   .band-machine   technical, dark      — requires .on-carbon
+ *   .band-machine   technical            — Steel Mist, the software register
  *   .band-material  bright, editorial    — the work itself
  *   .band-human     warm                 — people, stories, visiting
  *   .band-info      light, neutral       — facts and decisions
  *
- * The dark bands deliberately do NOT redefine the palette themselves:
- * `.on-carbon` in premium.css already re-points every token so nested
- * cards, rules, chips and buttons invert correctly, and a second dark
- * surface implementation would drift from it within two phases. A band
- * class only adds surface and texture on top.
+ * A band class adds surface and texture only. It never re-points a
+ * palette token: doing that in two places is how two dark-surface
+ * implementations drift apart, and `.on-carbon` in premium.css already
+ * owns that inversion for anything that genuinely needs it.
  *
- * Dark surfaces are punctuation, not wallpaper. Two per page, three at
- * the absolute outside.
+ * LIGHT-FIRST (2026-08-31, compact-density plan §3). `.band-machine` was
+ * the dark technical band and required `.on-carbon`. The owner rejected
+ * the black-background treatment, so it is now the STEEL MIST band —
+ * still the technical register, still where the EMCAD/software context
+ * and the machine proof live, but pale. The identity was never in the
+ * black: it is in the 9-on/6-off running stitch, the six canonical
+ * marks, the eleven technique signatures, the machine notation, the
+ * tabular figures and the hairlines, every one of which survives a
+ * light ground unchanged. What the band keeps is its steel edge, which
+ * is the thing that actually said "technical".
  * ------------------------------------------------------------------ */
 
 .band-machine {
   position: relative;
+  background-color: var(--color-mist);
+  /* The texture inverts with the ground: ink on light, where it used to be
+     light on ink. Same 3px pitch, same 2-5% strength. */
   background-image:
-    repeating-linear-gradient(0deg, rgb(245 240 230 / 0.045) 0 1px, transparent 1px 3px);
+    repeating-linear-gradient(
+      0deg,
+      rgb(var(--texture-ink) / var(--texture-strength)) 0 1px,
+      transparent 1px 3px
+    );
 }
-/* A steel edge where a machine band meets what came before it. */
+/* A steel edge where a machine band meets what came before it. On a pale
+   ground this is now the band's main signal, so the steel stop is opaque
+   rather than a 55% wash that would disappear into Steel Mist. */
 .band-machine::before {
   content: "";
   position: absolute;
@@ -550,8 +572,8 @@
   background: linear-gradient(
     90deg,
     var(--color-vermilion) 0 18%,
-    rgb(41 97 122 / 0.55) 18% 46%,
-    transparent 46%
+    rgb(41 97 122 / 0.85) 18% 46%,
+    var(--color-mist-line) 46%
   );
 }
 
@@ -697,7 +719,9 @@
   width: 15px;
   height: 15px;
   border-radius: 999px;
-  background: var(--color-ivory);
+  /* Worktable White rather than the page ground, so the knot reads as a
+     filled point on the thread on any band it is ever placed over. */
+  background: var(--color-card);
   border: 2px solid var(--color-vermilion);
 }
 .hero-frame-media {

@@ -285,7 +285,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
           in the panel is drawn from copy already on this page. */}
       <section className="section-compact bg-ivory-2" id="brief">
         <div className="container-site grid gap-8 lg:grid-cols-[1.35fr_0.65fr] lg:items-start lg:gap-12">
-          <div className="card p-5 md:p-7">
+          <div className="card p-3.5 md:p-5">
             <BriefForm />
           </div>
           <aside className="lg:sticky lg:top-24">
