@@ -284,6 +284,41 @@ const paths: Record<string, React.ReactNode> = {
       <path d="M15.8 15.8 21 21" />
     </>
   ),
+
+  /* Console navigation. Deliberately the most ordinary shapes there are — a
+     house, a tray, two people, a calendar, three lines. Navigating to Students
+     is a universal action, not a branded concept, and the family's own rule is
+     that nobody should have to decode an embroidery symbol to find one. A
+     bobbin meaning "batches" would be clever exactly once. */
+  home: (
+    <>
+      <path d="M3.5 10.5 12 3.5l8.5 7" />
+      <path d="M5.5 9.5V20h13V9.5" />
+      <path d="M9.75 20v-5.5h4.5V20" />
+    </>
+  ),
+  tray: (
+    <>
+      <path d="M3.5 13.5h4l1.5 3h6l1.5-3h4" />
+      <path d="M6 4.5h12l2.5 9v6h-17v-6z" />
+    </>
+  ),
+  people: (
+    <>
+      <circle cx="9" cy="8.5" r="3.25" />
+      <path d="M3.5 19.5c0-3 2.5-4.75 5.5-4.75s5.5 1.75 5.5 4.75" />
+      <path d="M16 6.5a3 3 0 0 1 0 6" />
+      <path d="M17 15.25c2.2.4 3.5 1.9 3.5 4.25" />
+    </>
+  ),
+  calendar: (
+    <>
+      <rect x="3.5" y="5.5" width="17" height="15" rx="1.5" />
+      <path d="M3.5 10.5h17" />
+      <path d="M8 3.5v4M16 3.5v4" />
+    </>
+  ),
+  menu: <path d="M4 7h16M4 12h16M4 17h16" />,
   mail: (
     <>
       <rect x="3" y="5" width="18" height="14" rx="1.5" />
@@ -361,7 +396,12 @@ export const ICON_GROUPS = {
     "map",
     "mail",
     "check",
-    "plus"
+    "plus",
+    "home",
+    "tray",
+    "people",
+    "calendar",
+    "menu"
   ]
 } as const satisfies Record<string, readonly IconName[]>;
 

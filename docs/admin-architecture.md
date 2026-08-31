@@ -754,6 +754,64 @@ the page says exactly that rather than showing a plausible zero.
 
 ---
 
+### Navigation (2026-08-31)
+
+`src/app/admin/(console)/layout.tsx` computes one set of `canUse*` booleans
+from `hasPermission`, with no extra queries, and hands them to two surfaces:
+
+- **The rail** (≥1024px) — the full sectioned list. A module the caller cannot
+  use renders plainly inert rather than linking, which is right for a 17rem
+  sidebar.
+- **The bottom bar** (<1024px) — at most **four** destinations plus **More**,
+  filled from a priority-ordered candidate list filtered by what the caller can
+  reach. Here an unavailable destination is **omitted**, not greyed: a dead tab
+  in a bar of five is a fifth of the product's navigation.
+
+```
+Today (always) → Admissions → Students → Batches → Fees
+               → Attendance → Design → Certificates → Content → Reports
+```
+
+| Caller | Bar |
+| --- | --- |
+| Owner / full admin | Today · Admissions · Students · Batches · More |
+| `academy` template | Today · Students · Batches · Attendance · More |
+| `designLab` template | Today · Design · Reports · More |
+| fees-only admin | Today · Fees · More |
+| attendance-only admin | Today · Attendance · More |
+
+The order is the plan's recommended IA, and the audit's evidence supports it:
+Admissions owns two of the four Today queues and the only due-today count;
+`students.view` and `batches.view` are each granted by four of the five
+permission templates; a batch is already an addressable record Today
+deep-links. The *filtering* is what fixes the operators the audit found staring
+at an empty Today.
+
+**Team is never a tab**, at any permission level. It is Owner-only with no
+permission key at all, and a bar that differs between the Owner and every Admin
+teaches the wrong muscle memory for a destination used a handful of times a
+year. It lives in More, gated on `session.role === "owner"` exactly as before.
+
+**`/admin/batches` is a first-class route** as of 2026-08-31, gated on
+`batches.view || batches.manage`. Batches previously lived as nested
+`<details>` two levels inside a course row on `/admin/courses` — which is why
+Today deep-linked `/admin/courses#batch-N`, and why reaching the group running
+right now cost a drawer, a page, a course row and a batch row. A course is a
+thing you edit twice a year; a batch is a thing you open every day. The batch
+row's first action is the register, deep-linking
+`/admin/attendance?batch=N&date=<IST today>` — an href, not a new query, because
+the attendance page already accepts both parameters.
+
+`/admin/courses` is now the catalogue alone. It used to select every column of
+every batch with a trainer join purely to nest them and then render a count;
+that is one grouped query now.
+
+**Hidden navigation is still UX only.** Every destination re-checks its own
+permission server-side, and the bar renders from the same booleans as the rail
+rather than computing its own idea of what the caller may reach.
+
+---
+
 ## 13. Console design
 
 The existing "Digital Thread" system (`docs/design-system.md`), denser. Same

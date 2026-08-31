@@ -1389,7 +1389,7 @@ stripping comments, with breakpoint-prefixed variants exempt because §21
 explicitly allows more room on a larger screen.
 
 ## Phase 5 — Admission/conversion compactness
-**Status:** ✅ Complete — PR #47, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #47, merged as `50d1ca3`
 
 Delivered:
 
@@ -1428,17 +1428,68 @@ focus-to-field, the still consent step, and the demo times staying a preference
 with nothing on the surface that could reserve a seat.
 
 ## Phase 6 — Admin shell + mobile navigation
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #48, merged as `PLACEHOLDER_MERGE`
 
-Deliver:
+Delivered:
 
-- compact app header
-- role/permission-aware 4–5 item bottom nav
-- responsive tablet/desktop shell
-- More destination
-- safe-area handling
-- bottom-sheet action pattern
-- dense shared row/filter/metric primitives
+- **A permission-aware bottom navigation**, at most four destinations plus
+  More. The IA is the plan's recommended **Today · Admissions · Students ·
+  Batches**, but built as a *priority-ordered candidate list filtered by what
+  the caller can reach*, because a fixed four was wrong for the operators the
+  audit found: a fees-only admin's Today screen is empty, and an
+  attendance-only admin's one daily module was a button 1,100px below the fold.
+  They now get Today · Fees and Today · Attendance respectively. A destination
+  the caller cannot reach is **omitted, never greyed**.
+- **Team is never a tab**, at any permission level: it is Owner-only with no
+  permission key, and a bar that differs between the Owner and every Admin
+  teaches the wrong muscle memory for a destination used a few times a year.
+- The mobile drawer — **795px**, twelve rows, three group headings, opened and
+  closed dozens of times a shift — becomes the **More sheet**, opening above
+  the bar.
+- **The app bar: 72 → 52px.** It carried `personName · roleLabel` under the
+  brand on every console route — identity the operator already knows. That
+  moved into the More sheet beside the account link.
+- **`/admin/batches` created.** It did not exist: a batch lived as a nested
+  `<details>` two levels inside a course row, which is why Today deep-linked
+  `/admin/courses#batch-N`. Five signals said the batch is the daily object —
+  it owns a Today queue, it is already addressed as a record, `batches.*` is
+  already a distinct permission key, two A4 sheets hang off it, and the owner
+  had the catalogue's import entry point removed because "the catalogue is
+  settled." The row leads with **Attendance**, because that is the task a batch
+  exists for, and the deep link is an href: the attendance page already accepts
+  `?batch=` and `?date=`.
+- `/admin/courses` becomes the catalogue. It used to select **every column of
+  every batch with a trainer join** purely to nest them and then render a count
+  — now one grouped query.
+- **`kolkataDate` extracted to `src/lib/admin/dates.ts`.** It was an identical
+  one-liner in three files and a fourth was about to be written. The window it
+  would eventually disagree in is 00:00–05:30 IST, where an attendance register
+  belongs to yesterday.
+- **Chrome heights are tokens**: `--console-header-h` and `--console-bar-h`,
+  read by the app bar, the sticky `.toolbar` (previously hand-matched to a
+  `min-h-16` two files away), the More sheet, the record-action sheet and the
+  work surface's bottom reservation.
+- New dense primitives: `.console-bar` / `.console-tab` (a 20px icon and an
+  11px label in a 44px box, current marked by a running stitch rather than a
+  filled pill), `.console-sheet`, and `.chip-scroller` / `.chip-filter` —
+  horizontally scrollable filters, because eleven course names wrap to four
+  rows in Gujarati.
+- `.console-metrics` becomes a label/value **row** on a phone. The
+  `sm:grid-cols-3` metric trio cost 300px on nine console screens.
+- Five ordinary navigation icons added to the **universal** group — a house, a
+  tray, two people, a calendar, three lines. Navigating to Students is a
+  universal action, not a branded concept; a bobbin meaning "batches" would be
+  clever exactly once.
+- The **last legacy page header** removed: the delete page rendered a 27px
+  title against `PageHead`'s 22px. `.console-page-head`, `.console-page-title`
+  and `.console-page-sub` are gone from the stylesheet, because a second header
+  implementation with no callers is how a ninth copy creeps back.
+
+Five assertions re-pointed at their new homes (the toolbar anchor, the nav
+gate, the batch anchors, the schedule/batch separation, the shell's own
+authorization note). New suite: `tests/compact-density-console.test.ts`.
+
+**Worker: 2011.09 KiB gzip** against the 3 MB free plan — unchanged.
 
 ## Phase 7 — Core admin workflows
 **Status:** ⏳ Pending

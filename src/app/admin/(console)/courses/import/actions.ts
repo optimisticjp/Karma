@@ -49,6 +49,7 @@ export async function importVerifiedCatalogAction(): Promise<void> {
   }
 
   revalidatePath("/admin/courses");
+  revalidatePath("/admin/batches");
   revalidatePath("/admin");
   revalidatePath("/api/batches");
   redirect("/admin/courses");
@@ -112,6 +113,7 @@ export async function applyVerifiedOperationsAction(): Promise<void> {
   }
 
   revalidatePath("/admin/courses");
+  revalidatePath("/admin/batches");
   revalidatePath("/admin");
   revalidatePath("/api/batches");
   redirect("/admin/courses");

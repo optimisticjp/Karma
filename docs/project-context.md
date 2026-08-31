@@ -698,12 +698,25 @@ sections:
 | Section | Entries |
 | --- | --- |
 | Operations | Today · Admissions · Students · Fees |
-| Studio | Courses & Batches · Attendance · Design Desk · Certificates · Content · Reports |
+| Studio | Batches · Courses · Attendance · Design Desk · Certificates · Content · Reports |
 | Administration | Team *(owner only)* · Account & security |
 
-A link the caller cannot use renders disabled rather than linking. **Hidden
-navigation is UX, never security** — every page and every server action
-re-checks server-side.
+On the rail a link the caller cannot use renders disabled rather than linking.
+**Hidden navigation is UX, never security** — every page and every server
+action re-checks server-side.
+
+**Below 1024px there is a bottom navigation** (2026-08-31): at most four
+destinations plus More, filled from a priority-ordered candidate list filtered
+by what the caller can reach, where an unavailable destination is **omitted**
+rather than greyed. A full-permission admin gets the plan's recommended
+**Today · Admissions · Students · Batches**; a fees-only admin gets Today ·
+Fees; an attendance-only admin gets Today · Attendance. Team is never a tab at
+any permission level. Full reasoning: `docs/admin-architecture.md` §12.
+
+**`/admin/batches` exists as of 2026-08-31.** Batches used to be nested
+`<details>` two levels inside a course row, which is why Today deep-linked
+`/admin/courses#batch-N`. `/admin/courses` is the catalogue alone now, and the
+batch row leads with the register.
 
 Two product rules that shape every module:
 

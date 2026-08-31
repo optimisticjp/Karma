@@ -9,6 +9,7 @@ import { PrintLink } from "@/components/admin/PrintLink";
 import { printCopy } from "@/lib/admin/print-copy";
 import { designCopy } from "@/lib/admin/design-copy";
 import { DESIGN_STATUSES, isDesignStatus, type DesignStatus } from "@/lib/admin/design";
+import { kolkataDate } from "@/lib/admin/dates";
 import { DesignJobForm, DesignStatusForm, type DesignValue } from "./DesignForms";
 
 type Props = { searchParams: Promise<{ q?: string; status?: string }> };
@@ -119,7 +120,6 @@ function Metric({ label, value }: { label: string; value: number }) { return <di
 function Fact({ label, value }: { label: string; value: string }) { return <div><dt className="microlabel">{label}</dt><dd className="text-smallmeta mt-1">{value}</dd></div>; }
 function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) { return <div><label className="label" htmlFor={htmlFor}>{label}</label>{children}</div>; }
 function statusTone(status: DesignStatus) { if (["new", "review", "approved", "in_progress", "sample_shared", "finalised"].includes(status)) return "status-active"; if (["info_needed", "quote_prepared", "quote_sent", "revision"].includes(status)) return "status-pending"; return "status-off"; }
-function kolkataDate() { return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date()); }
 function plusDays(date: string, days: number) { const d = new Date(`${date}T00:00:00+05:30`); d.setDate(d.getDate() + days); return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(d); }
 function formatDate(value: string, locale: "en" | "gu") { return new Intl.DateTimeFormat(locale === "gu" ? "gu-IN" : "en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kolkata" }).format(new Date(`${value}T00:00:00+05:30`)); }
 function formatDateTime(value: Date, locale: "en" | "gu") { return new Intl.DateTimeFormat(locale === "gu" ? "gu-IN" : "en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" }).format(value); }

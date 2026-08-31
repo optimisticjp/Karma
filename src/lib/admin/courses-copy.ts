@@ -3,6 +3,14 @@ import type { AdminLocale } from "@/lib/admin/i18n";
 export type CatalogCopy = {
   title: string;
   lede: string;
+  /* The batch list became its own destination on 2026-08-31. It shares this
+     copy module because it shares the forms and the statuses — a batch page
+     with its own vocabulary would drift from the catalogue's within a phase. */
+  batchesTitle: string;
+  batchesLede: string;
+  courseLabel: string;
+  takeAttendance: string;
+  allCourses: string;
   notConfigured: string;
   coursesCount: string;
   activeCoursesCount: string;
@@ -76,8 +84,13 @@ export type CatalogCopy = {
 
 const COPY = {
   en: {
-    title: "Courses & Batches",
-    lede: "Maintain the course catalogue and the live teaching schedule. Nothing is deleted: courses can be made inactive and batches can be closed when they finish.",
+    title: "Courses",
+    lede: "The course catalogue: what is taught, what it costs and what is published. Nothing is deleted — a course can be made inactive or archived.",
+    batchesTitle: "Batches",
+    batchesLede: "The live teaching schedule. A batch is a group that starts on a date; the timetable a course is taught on lives on the course itself.",
+    courseLabel: "Course",
+    takeAttendance: "Attendance",
+    allCourses: "All courses",
     notConfigured: "The database is not connected on this deployment, so courses and batches cannot be managed.",
     coursesCount: "Courses",
     activeCoursesCount: "Active courses",
@@ -169,8 +182,13 @@ const COPY = {
     }
   },
   gu: {
-    title: "કોર્સ અને બેચ",
-    lede: "કોર્સ કેટલોગ અને લાઇવ ક્લાસ શેડ્યૂલ અહીં સંભાળો. કંઈપણ ડિલીટ થતું નથી: કોર્સને inactive કરી શકાય અને પૂર્ણ થયેલી બેચને બંધ કરી શકાય.",
+    title: "કોર્સ",
+    lede: "કોર્સ કેટલોગ: શું શીખવાય છે, ફી કેટલી છે અને સાઇટ પર શું દેખાય છે. કંઈપણ ડિલીટ થતું નથી — કોર્સને inactive કે archive કરી શકાય.",
+    batchesTitle: "બેચ",
+    batchesLede: "લાઇવ ક્લાસ શેડ્યૂલ. બેચ એટલે તારીખથી શરૂ થતું ગ્રુપ; કોર્સનું ટાઇમટેબલ કોર્સ પર જ રહે છે.",
+    courseLabel: "કોર્સ",
+    takeAttendance: "હાજરી",
+    allCourses: "બધા કોર્સ",
     notConfigured: "આ deployment પર database જોડાયેલું નથી, તેથી courses અને batches મેનેજ કરી શકાતા નથી.",
     coursesCount: "કોર્સ",
     activeCoursesCount: "ચાલુ કોર્સ",

@@ -70,8 +70,11 @@ export default async function TodayPage() {
     hasPermission(session.staff, "students.manage") ? { href: "/admin/students", label: t("nav.students") } : null,
     hasPermission(session.staff, "attendance.manage") ? { href: "/admin/attendance", label: t("nav.attendance") } : null,
     hasPermission(session.staff, "fees.manage") ? { href: "/admin/fees", label: t("permissions.groups.fees") } : null,
-    hasPermission(session.staff, "batches.manage") || hasPermission(session.staff, "courses.manage")
-      ? { href: "/admin/courses", label: t("nav.coursesBatches") }
+    hasPermission(session.staff, "batches.manage")
+      ? { href: "/admin/batches", label: t("nav.batches") }
+      : null,
+    hasPermission(session.staff, "courses.manage")
+      ? { href: "/admin/courses", label: t("nav.courses") }
       : null,
     hasPermission(session.staff, "design.manage") ? { href: "/admin/design", label: t("nav.designDesk") } : null,
     hasPermission(session.staff, "certificates.manage") ? { href: "/admin/certificates", label: t("nav.certificates") } : null,
@@ -145,13 +148,13 @@ export default async function TodayPage() {
               title={t("today.queueBatches")}
               count={c.runningBatches}
               emptyLabel={t("today.queueEmptyBatches")}
-              moreHref="/admin/courses"
+              moreHref="/admin/batches"
               moreLabel={t("today.queueMore")}
             >
               {queues.batches.slice(0, QUEUE_LIMIT).map((row) => (
                 <QueueRow
                   key={row.id}
-                  href={`/admin/courses#batch-${row.id}`}
+                  href={`/admin/batches#batch-${row.id}`}
                   title={row.label}
                   meta={`${row.startTime.slice(0, 5)}–${row.endTime.slice(0, 5)} · ${t("today.seatsTaken", {
                     taken: row.seatsTaken,
