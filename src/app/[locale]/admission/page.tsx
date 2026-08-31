@@ -74,14 +74,18 @@ export default async function AdmissionFormPage({
         aside={
           <>
             <p className="microlabel !text-vermilion-deep">{t("reassuranceTitle")}</p>
-            <ul className="mt-4 space-y-2.5">
+            {/* On a phone this aside stacks between the page title and the
+                first form field, so three reassurance lines were 208px of
+                "before you start" ahead of starting. Same three lines, one
+                wrapped row, at the aside's own 13px. */}
+            <ul className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 md:block md:space-y-1.5">
               {reassurance.map((r) => (
-                <li key={r} className="flex gap-2.5">
+                <li key={r} className="flex gap-1.5">
                   <Icon
                     name="check"
-                    size={16}
+                    size={14}
                     strokeWidth={2}
-                    className="mt-1 shrink-0 text-vermilion-deep"
+                    className="mt-0.5 shrink-0 text-vermilion-deep"
                   />
                   <span>{r}</span>
                 </li>

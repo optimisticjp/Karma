@@ -39,29 +39,29 @@ export function AdmissionNorms({
       <div className="container-site">
         <div className="reading-shell">
           <h2 className="text-h3 font-display">{title}</h2>
-          <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-          <p className="u-section-body text-stone">{intro}</p>
+          <StitchRule draw className="mt-2 max-w-[4.5rem]" />
+          <p className="u-section-body text-smallmeta text-stone">{intro}</p>
 
-          <details className="mt-6 border border-line bg-card">
-            <summary className="cursor-pointer px-5 py-4 font-semibold">
+          <details className="mt-3 border border-line bg-card">
+            <summary className="flex min-h-11 cursor-pointer items-center px-3 py-2 text-smallmeta font-semibold">
               {gu ? terms.titleGu : terms.titleEn} · {terms.clauses.length}
             </summary>
-            <div className="border-t border-line px-5 py-5">
-              <ol className="grid gap-4">
+            <div className="border-t border-line px-3 py-3">
+              <ol className="grid gap-2 text-smallmeta">
                 {terms.clauses.map((clause) => (
-                  <li key={clause.n} className="grid grid-cols-[1.75rem_minmax(0,1fr)] gap-3">
-                    <span className="text-smallmeta font-bold text-vermilion-deep">{clause.n}.</span>
+                  <li key={clause.n} className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-2">
+                    <span className="font-bold text-vermilion-deep">{clause.n}.</span>
                     <span>{gu ? clause.gu : clause.en}</span>
                   </li>
                 ))}
               </ol>
 
-              <div className="mt-7 border-t border-line pt-5">
+              <div className="mt-4 border-t border-line pt-3">
                 <p className="microlabel">{declarationLabel}</p>
-                <p className="mt-2 text-stone">{gu ? terms.declarationGu : terms.declarationEn}</p>
+                <p className="mt-1 text-smallmeta text-stone">{gu ? terms.declarationGu : terms.declarationEn}</p>
               </div>
 
-              {!gu ? <p className="form-note mt-5">{languageNote}</p> : null}
+              {!gu ? <p className="form-note mt-3">{languageNote}</p> : null}
             </div>
           </details>
         </div>
