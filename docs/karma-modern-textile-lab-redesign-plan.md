@@ -2711,7 +2711,7 @@ repointed at the blocks that render them.
 
 # Phase 5 — Batches + admissions + admission form
 
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #66
 
 Required:
 
@@ -2726,6 +2726,98 @@ Required:
 Acceptance:
 
 A visitor should understand “when, how, and what next” quickly on a phone.
+
+## `/batches`
+
+Four blocks: an intro whose two counts are computed from the rows the query
+returned (so the page cannot say "batches running" while showing none), the
+board, the joining seam, and the close.
+
+**The filters are built from the rows, not from the catalogue.** A filter
+offering eleven courses when two have an open batch teaches a visitor that the
+page is a brochure — so the course chips are derived from the board's own rows
+with their counts, and the morning/evening pair appears only when the board
+genuinely holds both. Morning and evening are read from `startTime` (16:00 is
+the boundary the studio's own four timings fall either side of); it is a
+reading of the data and is never presented as a stored field.
+
+**Three empty states, because they are three different facts**: nothing is open
+(the normal state between intakes), the list could not be loaded (a failure —
+showing the first for this would tell a visitor there are no batches when there
+may be several), and the filter matched nothing (with the control that caused
+it one tap away). Every batch-data rule from `tests/mtl-routes.test.ts`
+survives, repointed at the board that now renders them.
+
+## `/admissions`
+
+Six blocks: intro, the five joining steps as a seam, the free demo stated
+exactly as the studio runs it, the four things people check plus the handbook,
+the FAQ, and the close.
+
+**The batch list left this page.** It was twelve rows deep, two thirds of the
+way down — a second copy of a page that now exists, that could not be linked to
+from here, and that went stale in a different way. `/batches` owns it; this
+page links to it.
+
+The intro's aside states the three things somebody about to fill in a form
+wants confirmed before they start: the demo is free and its length is a
+verified figure, **nothing is paid on this website**, and a person replies. The
+no-payment line is architectural rather than a promise — there is no gateway in
+this repository to enable.
+
+## The admission form
+
+**Every defence is untouched.** Honeypot, the minimum-fill window enforced on
+the server, the idempotency key, Turnstile, the required parent/guardian
+mobile, the recorded admission-norms version, the two separate consents and the
+no-PII analytics rule are all exactly as they were;
+`tests/machine-lab-admission.test.tsx` still asserts each one.
+
+What changed is presentation, and the way it changed is the point: the form
+keeps the class NAMES it had — `.label`, `.input`, `.choice-chip`,
+`.field-error` — and **the public sheet restyles them inside `.kds`**. Nine
+hundred lines of security-critical markup were not worth re-typing to change a
+colour, and every rule is scoped, so the Console's identical class names are
+untouched. The progress bar became the design system's own `<ThreadProgress>`,
+and `StitchProgress` was deleted.
+
+Its accessibility contract changed shape rather than weakening:
+`role="progressbar"` with `aria-value*` became a named `<nav>` whose current
+step carries `aria-current="step"`, with the form's own live region still
+announcing "Step 2 of 4 · Details". On a phone the three inactive step LABELS
+are hidden — four do not fit, and in Gujarati they would be worse — while their
+marks and thread stay.
+
+## Deleted, not orphaned
+
+`DemoFacts`, `BatchTable` and `StitchProgress`. `FaqList` was rebuilt on the
+system's accordion instead: its 24px padding made eleven collapsed questions
+taller than the page carrying them, and `/admissions` lost 483px at 390 to that
+one change.
+
+## Measured
+
+With the board populated (six sample rows, demo mode) and no sideways drag at
+any width:
+
+| Width | `/batches` | `/admissions` | `/admission` |
+| --- | --- | --- | --- |
+| 390 | 4,171px | 6,897px | 2,586px |
+| 768 | 3,401px | 5,787px | 2,292px |
+| 820 | 3,337px | 5,657px | 2,292px |
+| 1024 | 3,107px | 5,559px | 2,127px |
+| 1440 | 3,358px | 5,537px | 2,152px |
+
+Gujarati within 3% of English on all three.
+
+## Verified
+
+**955 tests** across 60 files, including a new `tests/kds-admissions.test.ts`
+(19). It deliberately does NOT restate the form's defences — those stay in the
+suite that has always held them — and asserts the composition instead: the
+filters built from the rows, the three empty states, the reading measure, the
+44px controls, the scoped restyle, and that none of the three routes offers a
+way to pay online.
 
 ---
 

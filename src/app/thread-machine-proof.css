@@ -692,6 +692,13 @@
  * is a needle point, future is a construction line.
  */
 .kds .progress { display: flex; align-items: center; gap: 0.5rem; }
+/* On a phone four step names do not fit — they truncated to "COUR…" and
+   "DETAI…", and in Gujarati they would be worse. The current step is named in
+   the heading directly above, so the others become needle points and thread
+   until there is room for their labels. */
+@media (max-width: 29.999rem) {
+  .kds .progress li:not([aria-current="step"]) > .t-micro { display: none; }
+}
 .kds .progress-seg { flex: 1; height: 2px; background-color: var(--line); }
 .kds .progress-seg.is-done {
   background-image: linear-gradient(90deg, var(--ink) 0 9px, transparent 9px 15px);
@@ -1461,9 +1468,11 @@
   border-radius: var(--r-ui);
   background-color: var(--s-paper);
 }
+/* Two columns when there is no index — an FAQ has questions, not a
+   numbered order. */
 .kds .module-summary {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.75rem;
   min-height: 2.75rem;
@@ -1472,6 +1481,7 @@
   list-style: none;
 }
 .kds .module-summary::-webkit-details-marker { display: none; }
+.kds .module-summary:has(.module-index) { grid-template-columns: auto minmax(0, 1fr) auto; }
 .kds .module-index { color: var(--brand-accent-strong); }
 .kds .module-plus {
   flex: none;
@@ -1502,6 +1512,166 @@
 }
 @media (min-width: 48rem) { .kds .course-notes { padding: 1.75rem; } }
 .kds .course-notes-list { display: grid; gap: 1.25rem; margin-top: 1rem; }
+
+/* ---- the batch board ---------------------------------------------------- */
+
+.kds .batches-count {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  align-content: start;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background-color: var(--s-canvas);
+  padding: 1.5rem;
+}
+/* Two filter rows, tight together. `.book-tabs` carries its own vertical
+   rhythm for the single-filter case; stacked, that margin doubles into a gap
+   that reads as two unrelated controls. */
+.kds .board-filters { display: grid; gap: 0.625rem; }
+.kds .board-filters > .book-tabs { margin: 0; }
+/* Three columns, not the board's default four: the course name and its
+   date/time line are one cell here, because on this page the row IS the
+   batch rather than a teaser of one. */
+.kds .batch-board { margin-top: 1.25rem; }
+@media (min-width: 48rem) {
+  .kds .batch-board .board-row { grid-template-columns: minmax(0, 1fr) auto auto; }
+}
+
+/* ---- admissions --------------------------------------------------------- */
+
+.kds .before-grid {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1.75rem;
+}
+@media (min-width: 48rem) {
+  .kds .before-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.75rem 2.5rem; }
+}
+@media (min-width: 64rem) {
+  .kds .before-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+.kds .before-handbook {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--line);
+}
+@media (min-width: 64rem) {
+  .kds .before-handbook { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 3rem; }
+}
+.kds .handbook-list { display: grid; gap: 0.625rem; }
+.kds .handbook-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.625rem;
+}
+.kds .handbook-list .needle { margin-top: 0.5rem; }
+
+/* ---- forms --------------------------------------------------------------
+ *
+ * The public forms keep the class NAMES they already had — `.label`, `.input`,
+ * `.choice-chip`, `.field-error` — and this sheet restyles them inside `.kds`.
+ * That is deliberate: the markup, the validation, the honeypot, the
+ * minimum-fill window and the idempotency key are security-critical and were
+ * not worth re-typing to change a colour, and every rule here is scoped, so
+ * the Console's identical class names are untouched.
+ */
+
+/* The form column: a reading measure the whole way down, so a 900-line form
+   never becomes a 1,400px-wide field. */
+.kds .form-column { max-width: 46rem; }
+.kds .norms-list { display: grid; gap: 0.625rem; }
+.kds .norms-list li {
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr);
+  gap: 0.5rem;
+}
+.kds .norms-declaration {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+.kds .reading-shell { max-width: 46rem; }
+
+.kds .form-shell {
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background-color: var(--s-paper);
+  padding: 1rem;
+}
+@media (min-width: 48rem) { .kds .form-shell { padding: 1.75rem; } }
+
+.kds .label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: var(--t-meta);
+  font-weight: 700;
+  color: var(--ink);
+}
+.kds .input {
+  display: block;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-ui);
+  background-color: var(--s-paper);
+  color: var(--ink);
+  font-size: var(--t-body);
+  font-family: inherit;
+}
+.kds .input:focus-visible { border-color: var(--brand-accent-strong); }
+.kds .input-error { border-color: var(--bad); }
+.kds .field-error { margin-top: 0.35rem; font-size: var(--t-meta); color: var(--bad); }
+.kds .form-note { font-size: var(--t-meta); color: var(--ink-muted); }
+.kds .form-note-box {
+  border: 1px solid var(--line);
+  border-radius: var(--r-ui);
+  background-color: var(--s-cloth);
+  padding: 0.5rem 0.75rem;
+}
+.kds .form-callout {
+  border: 1px dashed var(--brand-accent);
+  border-radius: var(--r-card);
+  background-color: var(--brand-accent-soft);
+  padding: 1rem;
+}
+.kds .review-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+/** A choice: a course, a timing, a slot. Selected takes the accent, and the
+    target is a control-sized 44px in both languages. */
+.kds .choice-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-ui);
+  background-color: var(--s-paper);
+  color: var(--ink);
+  font-size: var(--t-meta);
+  font-weight: 700;
+  text-align: start;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+.kds .choice-chip:hover { border-color: var(--ink); }
+.kds .choice-chip[aria-pressed="true"],
+.kds .choice-chip.is-on {
+  border-color: var(--brand-accent-strong);
+  background-color: var(--brand-accent-soft);
+}
 
 /* ==========================================================================
  * 12. SMALL OBJECTS

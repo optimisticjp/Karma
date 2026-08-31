@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { formatDate } from "@/lib/utils";
 import { asLocale } from "@/i18n/routing";
+import { pick } from "@/lib/i18n/localized";
 import { cn } from "@/lib/utils";
 import { NeedlePoint } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
@@ -64,7 +65,7 @@ export function BatchBoard({ rows, sample }: { rows: BatchRow[]; sample?: boolea
   const courseChips = useMemo(() => {
     const seen = new Map<string, { slug: string; name: string; count: number }>();
     for (const row of rows) {
-      const name = locale === "gu" ? row.courseNameGu : row.courseNameEn;
+      const name = pick(row, "courseName", locale);
       const found = seen.get(row.courseSlug);
       if (found) found.count += 1;
       else seen.set(row.courseSlug, { slug: row.courseSlug, name, count: 1 });
@@ -138,13 +139,17 @@ export function BatchBoard({ rows, sample }: { rows: BatchRow[]; sample?: boolea
             return (
               <li key={row.id} className="board-row">
                 <span className="min-w-0">
-                  <span className="t-h4 block">
-                    {locale === "gu" ? row.courseNameGu : row.courseNameEn}
-                  </span>
+                  <span className="t-h4 block">{pick(row, "courseName", locale)}</span>
+                  {/* Every uncertain field is conditional. A row with no days
+                      renders no days; one with no language says nothing about
+                      language. The way not to invent a field is not to render
+                      it. */}
                   <span className="t-meta numeric mt-0.5 block">
                     {formatDate(row.startDate, locale)}
                     {row.days ? ` · ${row.days}` : null}
-                    {` · ${row.startTime.slice(0, 5)}–${row.endTime.slice(0, 5)}`}
+                    {row.startTime && row.endTime
+                      ? ` · ${row.startTime.slice(0, 5)}–${row.endTime.slice(0, 5)}`
+                      : null}
                     {row.language ? ` · ${row.language}` : null}
                   </span>
                 </span>
