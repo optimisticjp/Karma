@@ -118,7 +118,23 @@ describe("the footer", () => {
        simultaneously the tallest one on the site and the one with the fewest
        links. At 13px in two columns they cost about 130px. */
     expect(footer).not.toContain('className="hidden md:block lg:col-span-2"');
-    expect((footer.match(/footer-nav/g) ?? []).length).toBe(2);
+    /* Match the element, not the substring: `.footer-navs` — the wrapper that
+       pairs the two columns on a phone — contains `footer-nav`. */
+    expect((footer.match(/<nav className="footer-nav /g) ?? []).length).toBe(2);
+  });
+
+  it("pairs the two link columns on a phone", () => {
+    /* Two short lists stacked cost 371px of the footer's 1,047px at 390px.
+       Side by side they are 218px, and the footer is on all twenty-one public
+       pages. The address stays full width: wrapping a street name across a
+       170px column is how it becomes unreadable. */
+    expect(footer).toContain("footer-navs");
+    const body = ruleBody(premium, ".footer-navs");
+    expect(body).toBeTruthy();
+    expect(declaration(body!, "grid-template-columns")).toBe("repeat(2, minmax(0, 1fr))");
+    /* At `lg` it dissolves so each nav keeps its own span in the 12-column
+       grid, rather than nesting a grid inside a grid. */
+    expect(premium).toContain("display: contents");
   });
 
   it("is light, and says so through structure rather than a slab", () => {

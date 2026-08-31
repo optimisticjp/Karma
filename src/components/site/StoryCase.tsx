@@ -47,8 +47,15 @@ export function StoryCase({
 
   /* The three-step arc. BEFORE and NOW always exist on a story; LEARNED is
      what a Content Desk story may or may not have filled in, and the arc
-     survives without it rather than rendering an empty step. */
-  const arc: Array<[string, string | undefined]> = [
+     survives without it rather than rendering an empty step.
+
+     Teaser mode does not render it at all. `.story-arc` in the card's head
+     already states before → after on one line, so the numbered arc repeated
+     BEFORE and NOW immediately below it — 354px of restatement, measured, on a
+     homepage that runs nineteen sections. The teaser is identity, the arrow
+     and the quote; the arc and the detail are on the stories page, one link
+     away, where the reader went for exactly that. */
+  const arc: Array<[string, string | undefined]> = compact ? [] : [
     [t("before"), gu ? s.beforeGu : s.beforeEn],
     [t("learned"), gu ? s.learnedGu : s.learnedEn],
     [t("now"), (gu ? s.nowGu : s.nowEn) ?? (gu ? s.afterGu : s.afterEn)]
@@ -91,8 +98,49 @@ export function StoryCase({
         {gu ? s.quoteGu : s.quoteEn}
       </blockquote>
 
-      {/* BEFORE → LEARNED → NOW, on one stitch path. */}
-      {steps.length > 0 ? (
+      {/* BEFORE → LEARNED → NOW plus the case-study detail, behind one
+          disclosure.
+
+          Six full cases measured 5,004px on /success-stories at 390px — six
+          viewports, more than half the page, to read six stories nobody can
+          compare because only one fits on screen at a time. The identity, the
+          before → after and the quote are what a reader scans; the arc and the
+          detail are what they open when one of the six is *them*. Nothing is
+          removed and nothing is truncated: the whole case is one tap away, and
+          `<details>` means it is in the DOM, findable by Ctrl-F and readable by
+          a screen reader either way.
+
+          Teaser mode has no detail to disclose, so it renders the arc plainly
+          rather than wrapping one list in a control that saves nothing. */}
+      {steps.length > 0 && detail.length > 0 ? (
+        <details className="story-more">
+          <summary className="story-more-toggle">{t("readMore")}</summary>
+          <div className="story-more-body">
+            <ol className="story-arc-steps">
+              {steps.map(([label, value], i) => (
+                <li key={label} className="story-arc-step">
+                  <span className="story-arc-mark" aria-hidden="true">
+                    {i === steps.length - 1 ? <KnotPoint size={13} tone="vermilion" /> : null}
+                  </span>
+                  <p className="story-arc-head">
+                    <StepIndex n={i + 1} />
+                    <MonoNote className="story-step-label">{label}</MonoNote>
+                  </p>
+                  <p className="story-step-value">{value}</p>
+                </li>
+              ))}
+            </ol>
+            <dl className="story-steps">
+              {detail.map(([label, value]) => (
+                <div key={label}>
+                  <dt className="story-step-label">{label}</dt>
+                  <dd className="story-step-value">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </details>
+      ) : steps.length > 0 ? (
         <ol className="story-arc-steps">
           {steps.map(([label, value], i) => (
             <li key={label} className="story-arc-step">
@@ -109,16 +157,6 @@ export function StoryCase({
         </ol>
       ) : null}
 
-      {detail.length > 0 ? (
-        <dl className="story-steps">
-          {detail.map(([label, value]) => (
-            <div key={label}>
-              <dt className="story-step-label">{label}</dt>
-              <dd className="story-step-value">{value}</dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
     </article>
   );
 }

@@ -298,10 +298,17 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
                 </li>
               ))}
             </ol>
-            <p className="mt-5 text-smallmeta text-stone">{t("form.filesHelp")}</p>
-            <p className="mt-4 border-t border-line pt-4 text-smallmeta text-stone">
-              {t("confidential")}
-            </p>
+            {/* `form.filesHelp` used to render here — "Up to 3 files, 8 MB
+                each: PNG, JPG, WebP, PDF, AI or ZIP" — as guidance for an
+                in-form uploader that does not exist, beside a form that says
+                in its own words that files go over WhatsApp until private
+                storage is switched on. It told a business owner they could
+                attach files here and they could not. The key stays in the
+                catalogue: it is the copy to restore when R2 is activated, and
+                deleting it would lose the limits the API still enforces.
+
+                `confidential` went too — the form states the same sentence in
+                its file note, forty lines up the same screen. */}
             <a
               href={waLink(tc("waPrefillBusiness"))}
               target="_blank"

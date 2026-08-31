@@ -1605,7 +1605,7 @@ above. **770 tests pass.**
 bilingual audit headings and the responsive audit list).
 
 ## Phase 9 — Responsive + compactness hardening
-**Status:** ✅ Complete — PR #51, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #51, merged as `7b795b0`
 
 The matrix was run in a **real browser** rather than computed: Chromium (the
 container's own binary, driven by `playwright-core` installed outside the
@@ -1675,7 +1675,80 @@ breakpoint the block lives at moved.
 **Worker: 2021.78 KiB gzip** against the 3 MB free plan.
 
 ## Phase 10 — Final compactness pass
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #52, merged as `PLACEHOLDER_MERGE`
+
+The twelve questions were asked of **measured section heights at 390px**
+rather than of an impression — every route broken into its sections, each
+section into its biggest child. Three of the twelve had real answers left; the
+rest had already been answered in Phases 2–8, and saying so is more useful than
+inventing work.
+
+**Q9, can secondary information collapse — `/success-stories`.** Six full case
+studies measured **5,004px**: six viewports to read six stories nobody can
+compare, because only one fits on screen at a time. The identity, the
+before → after and the quote stay open; the numbered arc and the case-study
+detail moved behind one disclosure. Nothing is truncated and nothing is
+removed — `<details>` keeps it in the DOM, findable by Ctrl-F, readable by a
+screen reader, present with JavaScript off. **The section is 2,644px and the
+page went 9,511 → 6,821px (11.3 → 8.1 viewports).**
+
+**Q7, unnecessary whitespace — the footer, on all twenty-one public pages.**
+Its two link columns are short lists of two to six items and they were stacked:
+371px of a 1,047px footer. Paired on a phone they are 218px, and at `lg` the
+wrapper becomes `display: contents` so each nav keeps its own span in the
+twelve-column grid rather than nesting a grid inside one. **1,047 → 892px,
+times twenty-one pages.**
+
+**Q4 and the duplication behind it — the homepage story teaser.** The teaser's
+head already draws `before → after` on one line, and the numbered arc directly
+below it repeated BEFORE and NOW: **354px of restatement** on a page that runs
+nineteen sections. Teaser mode renders the identity, the arrow and the quote;
+the arc is on the stories page, one link away, where the reader went for it.
+
+**One correctness bug the measurement surfaced.** The `/services` aside
+rendered `form.filesHelp` — "Up to 3 files, 8 MB each: PNG, JPG, WebP, PDF, AI
+or ZIP" — as guidance for an **in-form uploader that does not exist**, beside a
+form that says in its own words that files go over WhatsApp until private
+storage is switched on. It told a business owner they could attach files here
+and they could not. R2 is deferred on purpose and the page has to say so
+consistently. The copy key stays in both catalogues: it is what to restore when
+R2 is activated, and it carries limits the API still enforces. The
+`confidential` line went with it — the form states the same sentence forty
+lines up the same screen.
+
+**Two controls on the screens before sign-in.** Everything behind
+`requireAdmin` needs a database and a session, so the console was measured by
+computation in Phases 6–8; `/admin/login` and `/admin/no-access` are public,
+and measuring them found the console language switch at **21.7 × 44.6px** — the
+only control on that screen besides the form — and the way back to the public
+site at **19px**. Both take `.tap` now. The language switch is still a
+no-JavaScript form posting to a server action, and the login screen still says
+nothing about *why* a sign-in failed.
+
+### The twelve questions, answered against the final measurements
+
+| # | Question | Answer |
+| --- | --- | --- |
+| 1 | What is taking too much vertical space? | Nothing structural left. The tallest remaining blocks are the 11-course catalogue (1,476px for eleven courses) and the services brief form (2,079px for a form with six fields, a deferred-upload note and a what-happens-next ledger). Both are content, not chrome. |
+| 2 | Can related elements sit horizontally? | Done where it reads: the footer's two link columns, the hero's three frames, the work wall's three tiles, the console's metric strips. Not the review wall — its own lede argues against a carousel, and 208px of review text in a 170px column would be worse. |
+| 3 | Can this card be shorter? | Every `<article className="panel">` per record in the console is gone; the story case is a disclosure; the export cards, the certificate candidates and the design jobs are rows. |
+| 4 | Can the copy be shorter? | Only where it was **duplicated**: the teaser's arc, Reports' three "Last 30 days" captions, the services confidentiality line. No verified fact was cut and no sentence was rewritten for length alone. |
+| 5 | Is the heading unnecessarily large? | Phase 2 retuned the whole mobile scale: display-xl 44 → 36, h1 36 → 29, h2 30 → 22, h4 20 → 17. Body copy stayed at 16/1.625. |
+| 6 | Is section padding excessive? | Section tiers are 32/24/16 at 390px. Nineteen sections × ~40px is 760px of a 18,381px homepage — 4%. Padding is no longer where the length is. |
+| 7 | Is there unnecessary whitespace? | The footer was the last of it. |
+| 8 | Can secondary content scroll horizontally? | The console's filter chips do (`.chip-scroller`). No public content does, deliberately: a horizontal scroller that hides content behind a gesture is a carousel by another name, and the review wall's own copy rejects that. |
+| 9 | Can secondary information collapse? | The stories, and eight console modules. |
+| 10 | Are important actions below the fold unnecessarily? | Admission is 2,126px at 390 with its sticky `.form-nav`; contact is 2,826px; the hero's action row is above the thread. |
+| 11 | Can the screen be understood without excessive scrolling? | Every route except the homepage and `/services` is under 9 viewports at 390px; most are under 5. The homepage is 21.8 viewports for **nineteen sections** — that is an editorial decision about how much a homepage should carry, and it belongs to the owner, not to a density pass. It is flagged in the report rather than resolved unilaterally. |
+| 12 | Does mobile feel like a polished native product? | The console does — compact app bar, permission-aware bottom navigation, rows with 44px controls inside them, sheets, chips, disclosures. The public site reads as a light technical document, which is what it should be. |
+
+**Worker: 2026.23 KiB gzip** against the 3 MB free plan.
+
+New suite: `tests/compact-density-final.test.ts` (11 assertions).
+
+---
+
+### The original question list, for reference
 
 For every public/admin page ask:
 

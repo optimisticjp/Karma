@@ -644,6 +644,21 @@ machine ratio, CAD coordinate, machine model or head count appears anywhere in
 the signature or icon geometry, and tests fail if one does. A drawing that
 invents a number is the same lie as a stock photograph, only harder to spot.
 
+**The compact-density work is complete (2026-08-31), PRs #43–#52.** The public
+site is light-first — Steel Mist is the technical surface and no large
+full-width black band remains — and both products are materially denser on a
+phone. The measured end state is in `docs/compact-density-audit.md` §11: every
+public route at every viewport from 320 to 1440, 280 combinations, with no
+horizontal overflow, no clipping, no element past the viewport edge, and every
+standalone control at 44px or more. Two sub-44px targets remain **on purpose**
+and are documented there: the footer's own links at 31.7px (WCAG 2.5.8 applies,
+not 2.5.5) and one inline link inside a sentence.
+
+One thing was deliberately **not** decided by the density pass: `/en` is 21.8
+viewports at 390px across nineteen sections, of which section padding is 4%.
+Shortening it further means removing sections, which is an editorial call about
+what a homepage carries. It is the owner's.
+
 **Gujarati is not systematically taller — measured 2026-08-31.** The density
 audit asserted it was "6–11% taller everywhere" and Phase 9 checked that in a
 browser at 390px. It is *shorter* on seven of nine public routes, by up to

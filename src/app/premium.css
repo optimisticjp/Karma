@@ -747,10 +747,34 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
 }
 .site-footer { position: relative; }
 /* WCAG 2.5.8: a 14px footer link is a 19px tap target. Padding, not a bigger
-   font, is what fixes that without turning the footer into a menu. */
+   font, is what fixes that without turning the footer into a menu.
+
+   Measured at 390px they are 31.7px, which clears the criterion's 24px with
+   margin. They deliberately do NOT take the 44px floor that a standalone
+   control gets: twenty links at 44px would add roughly 250px to a footer that
+   appears on all twenty-one public pages, and 2.5.8 is the criterion that
+   applies. */
 .site-footer a:not(.btn) {
   display: inline-block;
   padding-block: 0.3125rem;
+}
+
+/* The two link columns sit side by side on a phone.
+ *
+ * They are short lists of two to six items and they were stacked, which cost
+ * 371px of the footer's 1,047px at 390px. Two columns of six links is 218px.
+ * The address block below them stays full width — it is an address, and
+ * wrapping one across 170px is how a street name becomes unreadable. */
+.footer-navs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem 1rem;
+  align-items: start;
+}
+@media (min-width: 1024px) {
+  .footer-navs {
+    display: contents;
+  }
 }
 .site-footer::before {
   content: "";
@@ -2485,6 +2509,47 @@ details[open] > summary.data-row::after { transform: rotate(-135deg); }
   border-top: var(--hairline);
   font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
 }
+/* The case-study disclosure.
+ *
+ * A story's identity, before → after and quote stay open; the arc and the
+ * detail sit behind this. It is a control, so it takes the 44px floor, and it
+ * reads as an action rather than a heading — the reader is choosing to open
+ * one of six stories, not skipping a section. */
+.story-more {
+  margin-top: 1rem;
+  border-top: var(--hairline);
+}
+.story-more-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  font-size: var(--text-smallmeta);
+  font-weight: 700;
+  color: var(--color-vermilion-deep);
+  cursor: pointer;
+  list-style: none;
+}
+.story-more-toggle::-webkit-details-marker { display: none; }
+.story-more-toggle::after {
+  content: "";
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-1px) rotate(45deg);
+  transition: transform 140ms ease;
+}
+.story-more[open] > .story-more-toggle::after {
+  transform: translateY(1px) rotate(-135deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .story-more-toggle::after { transition: none; }
+}
+.story-more-body { padding-bottom: 0.75rem; }
+/* Inside the disclosure the arc is already separated by the toggle above it. */
+.story-more-body > .story-arc-steps { margin-top: 0.25rem; }
+
 .story-steps { margin-top: 1.25rem; border-top: var(--hairline); }
 .story-steps > * { padding-block: 0.75rem; border-bottom: var(--hairline); }
 .story-steps > :last-child { border-bottom: 0; padding-bottom: 0; }

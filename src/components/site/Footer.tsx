@@ -44,6 +44,10 @@ export function Footer() {
             </div>
           </div>
 
+          {/* The two link columns pair up on a phone and dissolve back into
+              the twelve-column grid at `lg`, where `.footer-navs` becomes
+              `display: contents` so each nav keeps its own column span. */}
+          <div className="footer-navs lg:col-span-4">
           <nav className="footer-nav lg:col-span-2" aria-label={t("learn")}>
             <MonoNote as="p">{t("learn")}</MonoNote>
             <ul className="mt-1.5 text-smallmeta">
@@ -68,6 +72,7 @@ export function Footer() {
               <li><Link className="stitch-link" href="/verify">{t("verify")}</Link></li>
             </ul>
           </nav>
+          </div>
 
           <div className="order-first lg:order-none lg:col-span-3">
             <MonoNote as="p">{t("visit")}</MonoNote>
