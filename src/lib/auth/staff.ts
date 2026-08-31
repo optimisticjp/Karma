@@ -5,21 +5,6 @@ import { and, asc, eq, inArray } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { isPermission, type Permission } from "./permissions";
 import type { StaffRole } from "./access";
-import { ADMIN_LOCALES, isAdminLocale, type AdminLocale } from "@/lib/admin/i18n";
-
-/**
- * Narrow a stored locale to a Console locale.
- *
- * The `locale` Postgres enum gained `hi` on 2026-08-31 so the PUBLIC site
- * could record a Hindi admission submission. `staff.admin_locale` shares that
- * enum, so the column can now technically hold a value the Console has no
- * catalogue for — nothing writes it, and this is what happens if something
- * ever does. Falling back to English beats rendering a console with no
- * strings, and beats a runtime throw on a staff member's sign-in.
- */
-function toAdminLocale(value: string): AdminLocale {
-  return isAdminLocale(value) ? value : ADMIN_LOCALES[0];
-}
 
 export type StaffRecord = {
   id: number;
@@ -74,7 +59,7 @@ export const getStaffByAuthUserId = cache(
         role: row.role,
         status: row.status,
         active: row.active,
-        adminLocale: toAdminLocale(row.adminLocale),
+        adminLocale: row.adminLocale,
         authUserId: row.authUserId,
         invitedAt: row.invitedAt,
         acceptedAt: row.acceptedAt,
@@ -138,7 +123,7 @@ export async function listConsoleStaff(): Promise<StaffRecord[]> {
     role: row.role,
     status: row.status,
     active: row.active,
-    adminLocale: toAdminLocale(row.adminLocale),
+    adminLocale: row.adminLocale,
     authUserId: row.authUserId,
     invitedAt: row.invitedAt,
     acceptedAt: row.acceptedAt,

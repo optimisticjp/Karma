@@ -1,14 +1,42 @@
 # Modern Textile Lab — information architecture
 
-**Status:** authoritative for public routes, navigation and conversion chrome
-**Supersedes:** the public-navigation and public mobile-conversion sections of
-`docs/karma-machine-lab-redesign-master-plan.md` and
-`docs/karma-compact-density-redesign-plan.md`
-**Does not touch:** Karma Console, `/admin/*`, or anything behind auth
+> ## ⚠ SUPERSEDED — 2026-08-31
+>
+> The owner stopped and rejected the Modern Textile Lab direction after PR #58.
+> This file was written for it and is **no longer authoritative for anything**.
+>
+> Authoritative instead:
+> [`docs/karma-modern-textile-lab-redesign-plan.md`](karma-modern-textile-lab-redesign-plan.md)
+> (THREAD / MACHINE / PROOF) and
+> [`docs/karma-creative-freedom-trust-proof-addendum.md`](karma-creative-freedom-trust-proof-addendum.md),
+> which beats the plan on visual creativity, trust/proof modules and sample
+> placeholders.
+>
+> **Where this file is now wrong, specifically:**
+>
+> - **§5 language selector.** It describes a three-locale chooser. The public
+>   website is **English + Gujarati only**; there is no Hindi website.
+> - **§2 homepage.** Its 20 → 8 section map and its removal table belong to the
+>   rejected composition. The rebuild starts from a blank homepage, and the
+>   addendum lifts the 7–8 section cap outright — trust and proof modules the
+>   removal table deleted are now **required**.
+> - **§4 navigation** and **§6 conversion chrome.** Superseded by the plan's
+>   §14 and §15, which the shell rebuild implements directly.
+> - **§1 route map.** Still broadly accurate, and `/batches` in particular is
+>   kept — the route and its "real rows or nothing" data contract survive the
+>   restart. Read it as a record of which routes exist, not as direction.
+>
+> Kept rather than deleted because its route inventory and the reasoning behind
+> `/batches` are genuinely useful, and because deleting the record of a rejected
+> direction is how a project rediscovers it a year later.
+
+**Original status (2026-08-31, now superseded):** authoritative for public
+routes, navigation and conversion chrome.
+**Does not touch:** Karma Console, `/admin/*`, or anything behind auth.
 
 Every decision below is traceable to a measurement in
-`docs/modern-textile-lab-audit.md` or to an owner decision in
-`docs/karma-modern-textile-lab-redesign-plan.md`.
+`docs/modern-textile-lab-audit.md` or to an owner decision in the
+Modern Textile Lab plan as it stood before the restart.
 
 ---
 

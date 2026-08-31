@@ -54,12 +54,15 @@ describe("Modern Textile Lab cannot reach Karma Console", () => {
     expect(body!).not.toContain("--console-bar-h");
   });
 
-  it("declares the Devanagari face where a staff member never downloads it", () => {
-    expect(lab).toContain('font-family: "Noto Sans Devanagari Variable"');
-    /* `stripComments` first: globals.css mentions Devanagari in the prose
+  it("declares no Devanagari face on either sheet", () => {
+    /* The public site is EN + GU. A Devanagari face was declared here for one
+       day, for a Hindi locale the owner then reversed.
+
+       `stripComments` first: globals.css mentions Devanagari in the prose
        explaining which shared marks the Gujarati subset claims. The claim
-       here is that it declares no Devanagari FACE, not that it never says
-       the word. */
+       here is that neither sheet declares a Devanagari FACE, not that neither
+       says the word. */
+    expect(stripComments(lab)).not.toContain("Devanagari");
     expect(stripComments(globals)).not.toContain("Devanagari");
   });
 });
@@ -196,39 +199,32 @@ describe("the type scale", () => {
  * ------------------------------------------------------------------ */
 
 describe("script-specific typography", () => {
-  it("gives each script its own font stack rather than one shared list", () => {
-    /* The Gujarati face claims the Devanagari-shared danda and stress marks.
-       One shared stack would draw a Hindi danda from the Gujarati font. */
-    expect(lab).toContain(".site-body :lang(hi) {");
-    expect(lab).toContain('"Noto Sans Devanagari Variable"');
-    const hi = ruleBody(lab, ".site-body :lang(hi)") as string;
-    expect(hi).toContain("--font-body");
-    expect(hi).not.toContain("Gujarati");
+  it("gives Gujarati its own font stack rather than sharing the Latin one", () => {
     const gu = ruleBody(lab, ".site-body :lang(gu)") as string;
+    expect(gu).toContain("--font-body");
     expect(gu).toContain("Gujarati");
-    expect(gu).not.toContain("Devanagari");
   });
 
-  it("declares the Gujarati stack after the Hindi one", () => {
-    /* Equal specificity, so source order decides which wins for a
-       `<span lang="gu">` on a Hindi page. */
-    expect(lab.indexOf(".site-body :lang(gu) {")).toBeGreaterThan(lab.indexOf(".site-body :lang(hi) {"));
+  it("ships no Devanagari face", () => {
+    /* The public website is English + Gujarati. A Devanagari @font-face was
+       added on 2026-08-31 for a Hindi locale and removed the same day with
+       it; a font nothing renders is payload on every public page. */
+    expect(stripComments(lab)).not.toContain("Devanagari");
+    expect(stripComments(lab)).not.toContain("U+0900");
+    expect(stripComments(lab)).not.toContain(":lang(hi)");
   });
 
-  it("never uppercases or letterspaces either script", () => {
-    const both = ruleBody(lab, ".site-body :lang(gu),\n.site-body :lang(hi)") ?? "";
-    expect(lab).toContain(".site-body :lang(hi) .eyebrow");
+  it("never uppercases or letterspaces Gujarati", () => {
+    const gu = ruleBody(lab, ".site-body :lang(gu)") as string;
+    expect(gu).toContain("letter-spacing: 0");
+    expect(lab).toContain(".site-body :lang(gu) .eyebrow");
     expect(lab).toContain("text-transform: none");
-    expect(both + lab).toContain("letter-spacing: 0");
   });
 
-  it("fetches Devanagari for Devanagari and nothing else", () => {
-    const face = lab.slice(lab.indexOf("@font-face"), lab.indexOf("}", lab.indexOf("unicode-range")));
-    expect(face).toContain("U+0900-097F");
-    /* It must NOT claim the arrows and stars that made the Gujarati face
-       download on English pages before it was subsetted. */
-    expect(face).not.toContain("U+2190");
-    expect(face).not.toContain("U+25A0");
+  it("gives Gujarati the line height its marks need", () => {
+    /* Gujarati carries marks above and below the line. Latin leading clips
+       them, which is a rendering bug that looks like a design choice. */
+    expect(lab).toContain(".site-body :lang(gu) { line-height: 1.8; }");
   });
 });
 

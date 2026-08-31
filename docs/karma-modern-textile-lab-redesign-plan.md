@@ -2019,28 +2019,108 @@ npm run build
 
 # Phase 0 — Recovery from the stopped implementation
 
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #61, merged as `PLACEHOLDER_MERGE`
 
-Goal:
+Product rules are back on the corrected owner direction. No visual work was
+done, deliberately.
 
-Return product rules to the corrected owner direction before designing anything else.
+## The Hindi website is gone
 
-Required:
+Removed: `messages/hi.json` (860 leaves), `hi` from `routing.locales`,
+`LOCALE_NAMES` and `OG_LOCALE`, the `@fontsource-variable/noto-sans-devanagari`
+dependency and its lockfile entry, the Devanagari `@font-face` and every
+`:lang(hi)` rule in `textile-lab.css`, and `tests/mtl-trilingual.test.ts`.
 
-- restore EN/GU-only public locales;
-- remove Hindi catalogue/routing/hreflang/sitemap;
-- remove Hindi-only package/font;
-- remove unapplied `0005_trilingual_locale.sql`, snapshot and journal record;
-- confirm no Supabase migration is needed because DB remains `{en,gu}`;
-- keep truthful Hindi teaching/support facts where semantically appropriate;
-- update `CLAUDE.md` and `docs/project-context.md` back to bilingual public site;
-- mark old `docs/modern-textile-lab-ia.md` as superseded where its navigation/locale direction conflicts;
-- retain useful audit measurements;
-- preserve `/batches` data contract;
-- decide which PR #57 code should be removed immediately versus replaced in Phase 1;
-- add regression tests preventing `/hi` and Hindi catalogue reintroduction.
+hreflang and the sitemap needed no edit: PR #58 had already made both derive
+from `routing.locales`, so removing the locale removed the alternates. That is
+the one piece of PR #58 worth keeping on its merits — a hreflang set that
+disagrees with the sitemap is worse than none, and deriving both from one
+source is what stops them disagreeing.
 
-No visual polishing in this phase.
+## The unapplied migration
+
+`drizzle/0005_trilingual_locale.sql`, `drizzle/meta/0005_snapshot.json` and the
+journal entry are deleted; the journal ends at `0004_course_operations` again.
+
+**It was never applied.** The plan's §2.2 records that the connected Supabase
+project was checked after the owner correction and `public.locale` is still
+`{en,gu}`, so there is nothing to roll back — and no rollback migration was
+written, because `ALTER TYPE … ADD VALUE` has no `DROP VALUE` and a migration
+attempting one would fail on a database that never gained the value.
+
+`tests/public-locales.test.ts` now asserts the journal has no unapplied entry,
+that every journal entry has both a SQL file and a snapshot on disk, and that
+every SQL file on disk has a journal entry — a file without an entry never
+runs, and an entry without a file crashes `db:migrate`.
+
+## One live defect fixed on the way
+
+PR #58 widened the TypeScript `localeEnum` to three values **ahead of** the
+migration that would have widened Postgres. Because that migration never ran,
+`main` shipped a Console student form offering a "Hindi" preferred-language
+option that would have thrown on save, against a column whose database enum
+does not contain the value. The option, its two copy labels and the widened
+enum are gone, and the test suite now asserts the enum matches what Postgres
+actually has. **Widen a `pgEnum` only in the same change as an applied
+`ALTER TYPE`, never ahead of one.**
+
+Also reverted for the same reason: the `hi` option on the design-brief locale
+select, and `z.enum(["en","gu","hi"])` in the two public form schemas. The
+`toAdminLocale()` narrowing helper in `src/lib/auth/staff.ts` existed only to
+defend against a value the enum can no longer hold, and went with it.
+
+## What was deliberately NOT removed
+
+**Karma teaches in Gujarati and Hindi.** That is a confirmed business fact and
+has nothing to do with the website's locale set. `TEACHING_LANGUAGES` in
+`src/lib/schema.ts` still publishes `availableLanguage` / `inLanguage` as
+`["gu","hi","en"]`, the FAQ still answers "Gujarati and Hindi" to "which
+language is training in?", and the catalogue still records
+`ગુજરાતી + Hindi` as the class language. A test asserts all of it survived,
+and asserts the constant is **not** derived from `routing.locales` — deriving
+it would silently tell a crawler the studio cannot teach a Hindi speaker.
+
+`src/lib/i18n/localized.ts` is kept and narrowed to EN/GU. Its reason for
+existing is not the third locale: the ternary it replaces renders a *missing*
+Gujarati field as English, indistinguishable from a translated one. It now
+warns instead. `scriptLang()` is kept for the same reason it was written —
+YouTube feed titles from the studio's Gujarati channel rendering unmarked
+inside an English document.
+
+The `/batches` route and its "real rows or nothing" data contract are
+untouched, per §2.1. Its **visuals** are rebuilt in Phase 5.
+
+## Disposition of the rejected design system
+
+`src/app/textile-lab.css` is **kept for now and replaced in Phase 1**, not
+deleted here. Deleting it in this PR would break every public route
+immediately, since roughly ninety files still resolve their colours through
+its token bridge — and a recovery PR that leaves `main` visually broken helps
+nobody. Phase 1 builds the replacement and migrates the callers; Phase 11
+deletes what is then dead. Only its Hindi-specific parts were removed here.
+
+`docs/modern-textile-lab-ia.md` carries a superseded header naming exactly
+which of its sections are now wrong and why, and `docs/modern-textile-lab-audit.md`
+is annotated as evidence rather than direction. Both are kept: deleting the
+record of a rejected direction is how a project rediscovers it a year later.
+
+## Docs and tests
+
+`CLAUDE.md` non-negotiables #1 and #15 and its roadmap section, and
+`docs/project-context.md` §7, §8, §38 and §46, are back on a bilingual public
+website and now point at this plan and its addendum. §38 records the owner's
+widened sample-content authorisation.
+
+New suite `tests/public-locales.test.ts` (24 assertions) is the regression
+guard: the routed set is exactly `["en","gu"]`, no `messages/hi.json`, no `/hi`
+segment in the app tree, no Devanagari face on any of the four stylesheets, no
+Devanagari string in either catalogue, one catalogue per routed locale and no
+orphans, the migration journal is clean, the enum matches the database, and the
+teaching languages survived. `tests/machine-lab-secondary.test.tsx`'s route
+parity assertion is a hard `toEqual(["en","gu"])` again — a locale is a product
+decision, and that is where it should be made rather than discovered.
+
+**861 tests pass** across 57 files. Typecheck, lint and build clean.
 
 ---
 
@@ -2293,6 +2373,17 @@ Measure:
 - performance.
 
 Worker gzip must remain safely under 3 MB.
+
+**Carried forward from Phase 0** — found while verifying the locale removal,
+out of scope for a recovery PR, do not lose:
+
+- **Unknown localized paths answer `200`, not `404`.** `/en/anything-unknown`
+  reaches `src/app/[locale]/[...rest]/page.tsx`, which calls `notFound()` and
+  renders the branded 404 correctly — with `noindex`, so nothing gets indexed —
+  but the HTTP status is `200` under `next start`. Confirm the status on the
+  deployed Worker and make it a real `404`; a soft 404 costs crawl budget and
+  is the kind of thing Search Console reports months later. Pre-existing, not
+  introduced by the rebuild.
 
 ---
 

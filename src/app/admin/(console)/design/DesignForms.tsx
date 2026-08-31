@@ -23,11 +23,11 @@ export type DesignValue = {
   deadline: string | null;
   details: string | null;
   /**
-   * The language the client sent the brief in — a PUBLIC locale, so it gained
-   * `hi` when the public site became trilingual. Distinct from the console
-   * language the surrounding page is rendered in, which stays `AdminLocale`.
+   * The language the client sent the brief in — a PUBLIC website locale, so
+   * it tracks `routing.locales` (`en` | `gu`). Distinct from the console
+   * language the surrounding page is rendered in, which is `AdminLocale`.
    */
-  locale: "en" | "gu" | "hi";
+  locale: "en" | "gu";
 };
 
 function Message({ state, copy }: { state: DesignState; copy: DesignCopy }) {
@@ -52,7 +52,7 @@ export function DesignJobForm({ copy, value }: { copy: DesignCopy; value?: Desig
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         <Field label={copy.email} htmlFor={`design-email-${value?.id ?? "new"}`}><input id={`design-email-${value?.id ?? "new"}`} name="email" className="input" type="email" maxLength={160} defaultValue={value?.email ?? ""} /></Field>
-        <Field label={copy.language} htmlFor={`design-locale-${value?.id ?? "new"}`}><select id={`design-locale-${value?.id ?? "new"}`} name="locale" className="input" defaultValue={value?.locale ?? "en"}><option value="gu">ગુજરાતી</option><option value="hi">हिन्दी</option><option value="en">English</option></select></Field>
+        <Field label={copy.language} htmlFor={`design-locale-${value?.id ?? "new"}`}><select id={`design-locale-${value?.id ?? "new"}`} name="locale" className="input" defaultValue={value?.locale ?? "en"}><option value="gu">ગુજરાતી</option><option value="en">English</option></select></Field>
         <Field label={copy.deadline} htmlFor={`design-deadline-${value?.id ?? "new"}`}><input id={`design-deadline-${value?.id ?? "new"}`} name="deadline" className="input" type="date" defaultValue={value?.deadline ?? ""} /></Field>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">

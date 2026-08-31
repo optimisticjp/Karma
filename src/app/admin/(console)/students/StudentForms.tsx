@@ -25,15 +25,19 @@ export type StudentEditValue = {
   email: string | null;
   area: string | null;
   /**
-   * Which language this student is taught in. Gained `hi` on 2026-08-31 —
-   * Karma teaches in Gujarati AND Hindi (a verified fact in
-   * `docs/content-checklist.md`), so being unable to record a Hindi-preferring
-   * student was a gap in the record, not a constraint anyone chose.
+   * Which language this student is taught in.
    *
-   * This is a TEACHING language and not a console locale. `AdminLocale` stays
-   * `"en" | "gu"`: they share a Postgres enum and mean different things.
+   * Karma teaches in Gujarati AND Hindi — a business fact, recorded in
+   * `TEACHING_LANGUAGES` and published as `availableLanguage`. This column
+   * cannot yet record "Hindi" because it shares the `{en, gu}` Postgres enum
+   * with the website-locale columns, and widening it needs an applied
+   * migration. A `hi` option was briefly offered here on 2026-08-31 while
+   * that migration sat unapplied, which would have failed on save.
+   *
+   * ⚠ CONFIRM-WITH-OWNER: whether staff need to record a Hindi-preferring
+   * student. If so this becomes its own enum, not a wider shared one.
    */
-  languagePref: "en" | "gu" | "hi";
+  languagePref: "en" | "gu";
   isMinor: boolean;
   photoConsent: boolean;
   notes: string | null;
@@ -98,7 +102,7 @@ function PersonFields({
         </Field>
         <Field label={copy.language} htmlFor={`student-language-${value?.id ?? "new"}`}>
           <select id={`student-language-${value?.id ?? "new"}`} name="languagePref" className="input" defaultValue={value?.languagePref ?? "gu"}>
-            <option value="gu">{copy.languageGu}</option><option value="hi">{copy.languageHi}</option><option value="en">{copy.languageEn}</option>
+            <option value="gu">{copy.languageGu}</option><option value="en">{copy.languageEn}</option>
           </select>
         </Field>
       </div>

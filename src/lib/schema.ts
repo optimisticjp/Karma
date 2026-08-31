@@ -58,9 +58,13 @@ type Locale = "en" | "gu";
  */
 /**
  * The languages Karma teaches in. Verified in `docs/content-checklist.md`
- * ("Teaching in Gujarati and Hindi") and separate from the website's locale
- * set — the site gained Hindi in 2026-08-31 because the teaching already had
- * it, not the other way round.
+ * ("Teaching in Gujarati and Hindi").
+ *
+ * DELIBERATELY NOT `routing.locales`. The website is published in English and
+ * Gujarati; the teaching happens in Gujarati, Hindi and English. Those are two
+ * different claims about two different things, and collapsing them would
+ * either publish a Hindi website nobody asked for or tell a crawler Karma
+ * cannot teach a Hindi speaker. It can.
  *
  * One constant because two blocks on the same page used to disagree.
  */
@@ -135,8 +139,8 @@ export function courseSchema(course: Course, locale: Locale) {
        `availableLanguage` above. They did: this said `["gu","en"]` while the
        organisation said `["gu","hi","en"]`, so one JSON-LD block on the same
        page contradicted another about whether Karma teaches in Hindi. It does
-       — that is a confirmed fact in `docs/content-checklist.md` — and both now
-       read from one constant. */
+       — a confirmed fact in `docs/content-checklist.md` — and both now read
+       from one constant. */
     inLanguage: TEACHING_LANGUAGES,
     teaches: course.outcomesEn,
     /* Real, and useful: this is genuinely on-site, in-person instruction. */

@@ -25,7 +25,7 @@ const slotKey = z
 
 export const admissionSchema = z
   .object({
-    locale: z.enum(["en", "gu", "hi"]).default("gu"),
+    locale: z.enum(["en", "gu"]).default("gu"),
     fullName: z.string().trim().min(2).max(160),
     whatsapp: inMobile,
     email: z.string().trim().email().max(160).optional().or(z.literal("")),
@@ -88,7 +88,7 @@ export const admissionSchema = z
 export type AdmissionInput = z.infer<typeof admissionSchema>;
 
 export const briefSchema = z.object({
-  locale: z.enum(["en", "gu", "hi"]).default("en"),
+  locale: z.enum(["en", "gu"]).default("en"),
   name: z.string().trim().min(2).max(160),
   company: z.string().trim().max(160).optional().or(z.literal("")),
   phone: inMobile,
