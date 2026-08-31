@@ -1716,17 +1716,43 @@ Scoping is preferred.
 Execute one clean PR per phase unless two tiny adjacent phases are clearly safer together.
 
 ## Phase 1 — repository + rendered screenshot audit
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #55, merged as `PLACEHOLDER_MERGE`
 
-- read all required docs/code
-- inventory all public routes/components/content/data
-- capture current screenshots at 390/768/1024/1440
-- record route heights, duplicate sections, broken states, visual cost centres
-- confirm current 32 photo slots
-- confirm current nav/locale implementation
-- create/update a durable audit doc
+Audit recorded in **`docs/modern-textile-lab-audit.md`**. Measured in Chromium
+against a production build — 100 screenshots at 390/768/1024/1440 across 25
+routes in both current locales, plus per-section geometry for every route.
+Browser tooling stayed outside the package, as §38 requires.
 
-No aesthetic coding until the audit is recorded.
+Six findings change how later phases are implemented:
+
+1. **The course taxonomy §17 asks for already exists.** `src/content/courses.ts`
+   types `family: "machine" | "modern" | "software"` with `FAMILY_ORDER` and an
+   owner-decided `COURSE_DISPLAY_ORDER` — 8 / 2 / 1 = 11. The homepage explorer
+   reads that, so no classification is invented and "popular" never appears.
+2. **`sampleBatches()` is the only fabricated batch data in the repository** —
+   and the only `"Sat-Sun"` string, i.e. the fake weekend §5.5 forbids. It is
+   already production-gated behind `demoModeAllowed`, so the new public route
+   simply must not call it. `getUpcomingBatches()` already filters status, date
+   and both archive flags in SQL before LIMIT.
+3. **The bilingual assumption is 135 occurrences across 46 files**, in the shape
+   `locale === "gu" ? x.nameGu : x.nameEn` — six of them Console files that must
+   be excluded. Phase 4's real work is the typed localized-content accessor §36
+   asks for, not a config change.
+4. **The Gujarati `@font-face` `unicode-range` already claims `U+0951-0952` and
+   `U+0964-0965`** — Devanagari-shared marks. Adding a Devanagari face without
+   reconciling that range would give Hindi its danda from the Gujarati font.
+5. **Homepage section padding is 4% of its 18,381px.** Twenty sections, and the
+   measurement names the duplication precisely: four sections (3,816px) argue
+   the machine claim, two show student work, two show the studio, and three
+   render only `sample: true` content. §39's editorial cut is the only lever
+   left, and this is where it falls.
+6. **`.on-carbon` survives unused from the last redesign**, which makes the
+   §4.4 Services charcoal hero a re-use rather than a re-implementation.
+
+Also confirmed: **32 photo slots, 0 filled**; no horizontal overflow at any
+width on any route; `globals.css` and `premium.css` are shared with Karma
+Console, which is why Phase 3 scopes a fourth public-only stylesheet rather than
+retuning shared tokens.
 
 ## Phase 2 — information architecture + public route/navigation model
 **Status:** ⏳ Pending
