@@ -57,11 +57,11 @@ export default function NotFound() {
         }
         aside={
           <>
-            <BrokenPath width={140} tone="vermilion" className="mb-5" />
+            <BrokenPath width={120} tone="vermilion" className="mb-2" />
             <MonoNote as="p" tone="vermilion">
               {t("popularTitle")}
             </MonoNote>
-            <Ledger className="mt-4">
+            <Ledger className="mt-1.5">
               {links.map((l) => (
                 <LedgerLink key={l.href} href={l.href} title={l.label} />
               ))}

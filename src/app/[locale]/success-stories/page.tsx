@@ -76,12 +76,29 @@ export default async function StoriesPage({ params }: { params: Promise<{ locale
             <p className="microlabel !text-vermilion-deep">
               {anySample ? t("sampleTitle") : t("consentTitle")}
             </p>
-            <p className="mt-3">{anySample ? t("sampleBody") : t("consentBody")}</p>
+            <p className="mt-1.5">{anySample ? t("sampleBody") : t("consentBody")}</p>
           </>
         }
       />
 
-      {/* Two frames, waiting for two photographs. No names on them. */}
+      <section className="section">
+        <div className="container-site">
+          <SectionHeading title={t("casesTitle")} sub={t("casesSub")} />
+          <div className="story-grid u-section-body">
+            {stories.map((s, i) => (
+              <StoryCase key={`${s.nameEn}-${i}`} story={s} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Two frames, waiting for two photographs. No names on them.
+
+          These used to run BEFORE the stories, so a page called Success
+          stories opened with 470 characters of caveat and two empty frames,
+          and the first actual story began about 1,350px down — 1.8 phone
+          viewports. The frames stay, labelled and honest; they just stop
+          standing in front of the content they are waiting to illustrate. */}
       <section className="section-compact band-human">
         <div className="container-site">
           <MonoNote as="p">{t("portraitsLabel")}</MonoNote>
@@ -93,17 +110,6 @@ export default async function StoriesPage({ params }: { params: Promise<{ locale
             ))}
           </ul>
           <p className="story-portraits-note">{t("portraitsNote")}</p>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="container-site">
-          <SectionHeading title={t("casesTitle")} sub={t("casesSub")} />
-          <div className="story-grid u-section-body">
-            {stories.map((s, i) => (
-              <StoryCase key={`${s.nameEn}-${i}`} story={s} />
-            ))}
-          </div>
         </div>
       </section>
 

@@ -120,10 +120,10 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
         aside={
           <>
             <p className="microlabel !text-vermilion-deep">{t("hoursLabel")}</p>
-            <p className="mt-3">
+            <p className="mt-1.5">
               <strong>{gu ? site.hoursGu : site.hoursEn}</strong>
             </p>
-            <p className="mt-3">{t("demoNote")}</p>
+            <p className="mt-1.5">{t("demoNote")}</p>
           </>
         }
       />

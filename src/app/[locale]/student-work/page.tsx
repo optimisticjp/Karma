@@ -80,7 +80,7 @@ export default async function StudentWorkPage({ params }: { params: Promise<{ lo
             <p className="microlabel !text-vermilion-deep">
               {anySample ? t("pendingLabel") : t("consentTitle")}
             </p>
-            <p className="mt-3">{anySample ? t("pendingNote") : t("consentBody")}</p>
+            <p className="mt-1.5">{anySample ? t("pendingNote") : t("consentBody")}</p>
           </>
         }
       />

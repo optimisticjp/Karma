@@ -72,7 +72,7 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ loc
         aside={
           <>
             <p className="microlabel !text-vermilion-deep">{t("asideTitle")}</p>
-            <p className="mt-3">{t("asideBody")}</p>
+            <p className="mt-1.5">{t("asideBody")}</p>
             <p className="mt-4">
               <strong>{gu ? site.hoursGu : site.hoursEn}</strong>
             </p>

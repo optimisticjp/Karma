@@ -97,7 +97,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
         aside={
           <>
             <MonoNote as="p" tone="vermilion">{t("confidentialTitle")}</MonoNote>
-            <p className="mt-3">{t("confidential")}</p>
+            <p className="mt-1.5">{t("confidential")}</p>
           </>
         }
       />
@@ -109,8 +109,8 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
         <div className="container-site split split-even">
           <div className="surface surface-feature">
             <p className="microlabel !text-vermilion-deep">{t("bringTitle")}</p>
-            <h2 className="text-h3 mt-3 font-display">{t("bringH")}</h2>
-            <ul className="stack-lines mt-5">
+            <h2 className="text-h3 mt-1.5 font-display">{t("bringH")}</h2>
+            <ul className="stack-lines mt-2">
               {(t.raw("bring") as string[]).map((b) => (
                 <li key={b} className="flex gap-3 text-smallmeta">
                   <Icon name="check" size={17} strokeWidth={2} className="mt-1 shrink-0 text-vermilion-deep" />
@@ -121,8 +121,8 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
           </div>
           <div className="surface surface-machine surface-feature">
             <p className="microlabel">{t("returnTitle")}</p>
-            <h2 className="text-h3 mt-3 font-display">{t("returnH")}</h2>
-            <ul className="stack-lines mt-5">
+            <h2 className="text-h3 mt-1.5 font-display">{t("returnH")}</h2>
+            <ul className="stack-lines mt-2">
               {(t.raw("returns") as string[]).map((r) => (
                 <li key={r} className="flex gap-3 text-smallmeta">
                   <Icon name="check" size={17} strokeWidth={2} className="mt-1 shrink-0 text-needle-light" />
@@ -262,7 +262,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
               <p className="case-label mt-5">{t("formatsTitle")}</p>
               <p className="mt-2 text-smallmeta text-stone">{t("formatsBody")}</p>
             </div>
-            <ul className="mt-8 space-y-3.5">
+            <ul className="mt-4 space-y-3.5">
               {guide.map((g) => (
                 <li key={g} className="flex gap-3">
                   <Icon

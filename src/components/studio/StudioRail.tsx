@@ -81,7 +81,7 @@ export function StudioRail() {
     <section className="section band-machine">
       <div className="container-site">
         <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} rule />
-        <ProductionRail stages={stages} label={t("railLabel")} className="mt-10" />
+        <ProductionRail stages={stages} label={t("railLabel")} className="u-section-body" />
       </div>
     </section>
   );

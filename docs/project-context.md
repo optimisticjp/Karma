@@ -2484,8 +2484,14 @@ Present in the tree, imported nowhere or rendered nowhere. **None of it is dead
 code to delete on sight** — each was built for a use that has not arrived.
 
 - `<StitchDivider>`, `<PullQuote>`, `ScreenToStitch.tsx` (the screen→stitch
-  range slider, reserved for a future course-detail page), `GalleryGrid.tsx`
-  (client-side technique filters + masonry; `/student-work` uses `WorkLedger`).
+  range slider, reserved for a future course-detail page).
+
+  ~~`GalleryGrid.tsx`~~ **deleted 2026-08-31.** It was a client-side
+  technique-filter masonry that `/student-work` never used — `WorkLedger` is
+  the gallery — and it carried the last `bg-carbon` filter pill on the public
+  side. It was superseded, not reserved: keeping it would have left a working
+  card-and-filter implementation of a decision the project deliberately made
+  the other way, one import away from undoing it.
 - `.accent-italic` and `.section-major` in `globals.css`, both applied on zero
   screens. The hero uses its own rhythm deliberately — a full major top pad
   pushed the headline 215px down.

@@ -162,11 +162,11 @@ export default async function NotePage({
             <StitchRule draw className="mt-4 max-w-[4.5rem]" />
             <p className="mt-5 text-stone">{gu ? note.whyGu : note.whyEn}</p>
 
-            <h2 className="text-h3 mt-10 font-display">{t("detailTitle")}</h2>
+            <h2 className="text-h3 u-section-body font-display">{t("detailTitle")}</h2>
             <StitchRule draw className="mt-4 max-w-[4.5rem]" />
             <p className="mt-5 text-stone">{gu ? note.detailGu : note.detailEn}</p>
 
-            <h2 className="text-h3 mt-10 font-display">{t("exampleTitle")}</h2>
+            <h2 className="text-h3 u-section-body font-display">{t("exampleTitle")}</h2>
             <StitchRule draw className="mt-4 max-w-[4.5rem]" />
             <p className="mt-5 text-stone">{gu ? note.exampleGu : note.exampleEn}</p>
             <p className="mt-4 text-smallmeta text-stone">{t("exampleNote")}</p>

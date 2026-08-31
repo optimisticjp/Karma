@@ -116,7 +116,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
       <section className="section">
         <div className="container-site reading-shell">
           {sections.map((s, i) => (
-            <div key={s.h} className={i === 0 ? "" : "mt-12"}>
+            <div key={s.h} className={i === 0 ? "" : "mt-6"}>
               <h2 className="text-h3 font-display">{s.h}</h2>
               <span aria-hidden="true" className="rule-stitch" />
               {s.p.map((p) => (

@@ -12,7 +12,6 @@ import { ManifestPhoto } from "@/components/ui/PhotoSlot";
 import { MonoNote } from "@/components/ui/MonoNote";
 import { coursePhotoFor } from "@/content/photo-manifest";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { StitchRule } from "@/components/ui/StitchPath";
 import { SampleTag } from "@/components/ui/SampleTag";
 import { TrackedLink } from "@/components/site/TrackedLink";
 import { TrackView } from "@/components/site/TrackView";
@@ -271,16 +270,14 @@ export default async function CourseDetailPage({
         <div className="container-site split">
           <div>
             <h2 className="text-h3 font-display">{t("whoTitle")}</h2>
-            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-            <p className="prose-measure mt-5 text-stone">{gu ? course.whoGu : course.whoEn}</p>
+                        <p className="prose-measure mt-2 text-stone">{gu ? course.whoGu : course.whoEn}</p>
           </div>
           <div>
             <h2 className="text-h3 font-display">{t("skillsTitle")}</h2>
-            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-            <ul className="mt-5 space-y-3">
+                        <ul className="mt-2 space-y-1.5">
               {(gu ? course.outcomesGu : course.outcomesEn).map((o) => (
-                <li key={o} className="flex gap-3">
-                  <Icon name="check" size={18} className="mt-1.5 shrink-0 text-success" strokeWidth={2} />
+                <li key={o} className="flex gap-2 text-smallmeta">
+                  <Icon name="check" size={16} className="mt-0.5 shrink-0 text-success" strokeWidth={2} />
                   <span>{o}</span>
                 </li>
               ))}
@@ -320,8 +317,7 @@ export default async function CourseDetailPage({
           </div>
           <div>
             <h2 className="text-h3 font-display">{t("practiceTitle")}</h2>
-            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-            <p className="prose-measure mt-5 text-stone">{gu ? p.practiceGu : p.practiceEn}</p>
+                        <p className="prose-measure mt-2 text-stone">{gu ? p.practiceGu : p.practiceEn}</p>
             <p className="mt-5 text-smallmeta text-stone">{t("practiceNote")}</p>
           </div>
         </div>
@@ -350,8 +346,7 @@ export default async function CourseDetailPage({
         <div className="container-site split">
           <div>
             <h2 className="text-h3 font-display">{t("proofTitle")}</h2>
-            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-            <p className="prose-measure mt-5 text-stone">{t("proofBody")}</p>
+                        <p className="prose-measure mt-2 text-stone">{t("proofBody")}</p>
             <p className="u-actions action-row">
               <Link href="/student-work" className="btn btn-secondary">
                 {t("proofCta")} <Icon name="arrow" size={18} className="arrow" />
@@ -390,11 +385,10 @@ export default async function CourseDetailPage({
         <div className="container-site split">
           <div>
             <h2 className="text-h3 font-display">{t("feeTitle")}</h2>
-            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-            {/* A course with a published, owner-verified fee plan states it in
+                        {/* A course with a published, owner-verified fee plan states it in
                 full above; repeating "there is no public price list" underneath
                 would contradict the block a reader has just read. */}
-            <p className="prose-measure mt-5 text-stone">
+            <p className="prose-measure mt-2 text-stone">
               {verified ? to("feeOffline") : t("feeBody")}
             </p>
             <p className="mt-4 text-smallmeta text-stone">{t("feeNote")}</p>

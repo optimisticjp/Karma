@@ -39,7 +39,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ locale:
         aside={
           <>
             <MonoNote as="p" tone="vermilion">{t("asideTitle")}</MonoNote>
-            <p className="mt-3">{t("asideBody")}</p>
+            <p className="mt-1.5">{t("asideBody")}</p>
           </>
         }
       />
