@@ -15,10 +15,32 @@ description of it. It also means everything below is a *switch*, not a build.
 - [ ] **Resolve the phone roles.** Two mobile numbers are published and
       neither has been confirmed as call-vs-WhatsApp. See
       `docs/content-checklist.md`. One sentence from the owner collapses this.
-- [ ] **Replace or confirm sample content.** Reviews, stories, trainers and
-      gallery entries are all sample data carrying visible tags. They are safe
-      to ship — none reaches structured data — but they should not be the
-      first impression on a domain the owner is advertising.
+- [ ] **Run the proof-replacement gate.** The public site ships a complete
+      trust layer — reviews, testimonials, student stories, trainers,
+      trusted-by marks, follower counts, a Google rating — populated from
+      `src/content/proof.ts`. The owner authorised sample content for the
+      Workers.dev preview (`docs/karma-creative-freedom-trust-proof-addendum.md`
+      §§6–9); it is **not** authorised for a custom domain.
+
+      `remainingSampleProof()` in that file returns every item that is not
+      `verified`, each with the instruction for replacing it. Walk that list
+      and, for every entry, do one of exactly three things:
+
+      1. replace it with real content and set `status: "verified"`;
+      2. confirm it as an owner statement and leave it `owner_provided`
+         (the follower counts and the Google rating are the intended cases —
+         they stay attributed on screen and outside rating schema); or
+      3. hide the module.
+
+      **Do not sign off while anything unexpected is still `sample`.** None of
+      it reaches structured data at any point — `tests/kds-proof-firewall.test.ts`
+      makes that mechanical — so the risk being managed here is not an SEO one:
+      it is a fictional student name being the first impression on a domain the
+      owner is advertising.
+
+      The older sample arrays in `src/content/collections.ts` are on the same
+      footing until the rebuild finishes moving pages onto the registry. Check
+      both until that file's proof arrays are gone.
 - [ ] **Confirm the durations and fees** the site currently declines to state,
       or leave them deferred and keep the "ask at the demo" answers.
 - [ ] **Studio photography.** Every visual is drawn or a named placeholder.

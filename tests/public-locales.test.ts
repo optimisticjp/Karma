@@ -115,8 +115,13 @@ describe("no /hi surface exists", () => {
     /* A face nothing renders is payload on every public page, and its
        presence is the quiet way a removed locale half-returns. */
     expect(read("package.json")).not.toContain("noto-sans-devanagari");
-    for (const sheet of ["src/app/globals.css", "src/app/premium.css", "src/app/machine-lab.css", "src/app/textile-lab.css"]) {
-      const css = stripComments(read(sheet));
+    /* Enumerated rather than listed: stylesheets come and go across the
+       rebuild, and a hardcoded list silently stops checking the one that was
+       added after it was written. */
+    const sheets = readdirSync(join(process.cwd(), "src/app")).filter((f) => f.endsWith(".css"));
+    expect(sheets.length).toBeGreaterThanOrEqual(3);
+    for (const sheet of sheets) {
+      const css = stripComments(read(`src/app/${sheet}`));
       expect(css, sheet).not.toContain("Devanagari");
       expect(css, sheet).not.toContain("U+0900");
       expect(css, sheet).not.toContain(":lang(hi)");

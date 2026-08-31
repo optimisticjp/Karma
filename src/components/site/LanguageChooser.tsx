@@ -139,7 +139,7 @@ export function LanguageChooser({
           <button
             type="button"
             aria-label="Close"
-            className="lab-sheet-scrim"
+            className="sheet-scrim"
             onClick={close}
           />
           <div
@@ -148,7 +148,7 @@ export function LanguageChooser({
             role="dialog"
             aria-modal="true"
             aria-label="Language"
-            className="lab-sheet lg:absolute lg:inset-auto lg:right-0 lg:top-full lg:mt-2 lg:w-64 lg:rounded-[0.625rem] lg:border lg:border-line lg:shadow-none"
+            className="sheet lg:absolute lg:inset-auto lg:right-0 lg:top-full lg:mt-2 lg:w-64 lg:rounded-[0.625rem] lg:border lg:border-line lg:shadow-none"
           >
             {routing.locales.map((code) => {
               const meta = LOCALE_NAMES[code];
@@ -158,7 +158,7 @@ export function LanguageChooser({
                   type="button"
                   onClick={() => choose(code)}
                   aria-current={code === locale ? "true" : undefined}
-                  className="lab-sheet-row"
+                  className="sheet-row"
                 >
                   <span className="min-w-0">
                     <span lang={code} className="block font-semibold leading-snug">

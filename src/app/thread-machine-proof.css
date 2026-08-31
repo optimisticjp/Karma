@@ -1,0 +1,1217 @@
+/* ==========================================================================
+ * THREAD / MACHINE / PROOF — the public design system
+ *
+ * Karma Design Studio & Classes. Machine embroidery, EMCAD DAHAO, live
+ * production machines, fabric, thread, samples, Surat.
+ *
+ * WHAT THIS FILE IS
+ * -----------------
+ * The public website's visual system, in full. It is not a theme layered over
+ * an older one: it declares its own colour, type, rhythm, surfaces, primitives
+ * and motion, and public components are written against it directly.
+ *
+ * It REPLACES `src/app/textile-lab.css`, which was deleted with this file's
+ * first commit. That file was a token bridge — it re-pointed the v3 `--color-*`
+ * variables to warmer values and added a handful of classes, of which almost
+ * none were ever used. Re-pointing a colour token is not a redesign, which is
+ * precisely why the owner stopped that implementation. This file does not
+ * re-point anything.
+ *
+ * SCOPE — WHY EVERY RULE IS UNDER `.kds`
+ * --------------------------------------
+ * Karma Console is a different product and is explicitly out of this rebuild.
+ * The two roots are already independent — `src/app/[locale]/layout.tsx` and
+ * `src/app/admin/layout.tsx` are separate root layouts — and only the public
+ * one imports this file. The `.kds` scope is the second lock: even if someone
+ * later imports this into the admin tree, nothing matches until an element
+ * carries the class, so a stray import cannot restyle a staff screen.
+ *
+ * WHAT IT DELIBERATELY DOES NOT DO
+ * --------------------------------
+ * It does not touch `globals.css`. That sheet holds Tailwind's `@theme`, the
+ * base reset, the font faces and the Gujarati script rules, and **the Console
+ * runs on it**. Anything added there is added to a product this rebuild is
+ * not allowed to change.
+ *
+ * THE ONE IDEA
+ * ------------
+ * A thread leaves a screen, passes through a machine, and becomes proof on
+ * fabric. That is why the system has two material registers rather than one
+ * palette: a WARM CLOTH register (canvas, cloth, sand) and a COOL MACHINE
+ * register (mist). The old public site was warm everywhere, which is how a
+ * site about digital design files ends up reading as a craft blog. Here,
+ * anything to do with the screen — EMCAD, files, digitising, process — sits on
+ * the cool register, and anything to do with the finished textile sits on the
+ * warm one. The visitor learns the distinction without being told it.
+ *
+ * EVERY CONTRAST RATIO IN THIS FILE IS COMPUTED, NOT ESTIMATED.
+ * ========================================================================== */
+
+.kds {
+  /* ======================================================================
+   * 1. THE BRAND ACCENT ADAPTER  (logo-neutral — plan §8, addendum §5)
+   *
+   * The owner may supply a logo in any colour: red, blue, green, gold,
+   * black, or multicolour. The site must still look intentional. So exactly
+   * FOUR variables carry every chromatic decision in the interface, and
+   * nothing else in this file hardcodes a hue.
+   *
+   * To re-brand: change these four. Nothing else.
+   *
+   * THE CONSTRAINT WHOEVER CHANGES THEM MUST MEET
+   * ---------------------------------------------
+   *   --brand-accent-strong  ≥ 4.5:1 against #faf8f5, and
+   *                          ≥ 4.5:1 with --brand-on-accent on top of it.
+   *   --brand-accent         ≥ 3.0:1 against #faf8f5 (it is only ever used
+   *                          for fills, marks and large type).
+   *
+   * Verified alternates, so this is not a hope: blue #1f5fa8 (6.08 on canvas,
+   * 6.44 with white), green #1f6b43 (6.11 / 6.48), gold #8a6a12 (4.77 / 5.06),
+   * black #14171a (16.97 / 17.99). All four pass. `tests/tmp-foundation.test.ts`
+   * recomputes the current values on every run.
+   *
+   * WHY TWO REDS AND NOT ONE
+   * ------------------------
+   * `--brand-accent` #d4462e is a thread colour — bright, textile, correct on
+   * a spool. It measures 3.57–4.45 on the five grounds, which is fine for a
+   * stitch line, a needle point or a 40px number, and NOT fine for a button
+   * label. `--brand-accent-strong` #b8321c measures 4.80–5.98 everywhere and
+   * carries white at 5.98, so it is what actions and accent body text use.
+   *
+   * The split is also true to the subject: the brighter red is the thread,
+   * the deeper red is the decision.
+   * ==================================================================== */
+  --brand-accent: #d4462e;
+  --brand-accent-strong: #b8321c;
+  --brand-accent-soft: #fbeae6;
+  --brand-on-accent: #ffffff;
+
+  /* ======================================================================
+   * 2. SURFACES — two registers, five grounds
+   * ==================================================================== */
+
+  /** Sheets, forms, media mats, anything that must read as paper. */
+  --s-paper: #ffffff;
+  /** The main ground. Warm near-white — near enough to white to feel
+      contemporary, warm enough not to feel like a spreadsheet. */
+  --s-canvas: #faf8f5;
+  /** WARM register: the textile alternate. Work, samples, studio, people. */
+  --s-cloth: #f0ebe3;
+  /** COOL register: EMCAD, files, digitising, process, diagnostics. This is
+      the token that stops the site reading as beige minimalism. */
+  --s-mist: #eef1f3;
+  /** Cool, one step deeper — an inset EMCAD panel inside a mist section. */
+  --s-mist-deep: #e2e7ea;
+
+  /* ---- ink ---------------------------------------------------------- */
+  /** Headings, body, linework. 14.44–17.99 across all five grounds. */
+  --ink: #14171a;
+  /** Secondary copy and metadata. 5.03–6.27 across all five grounds — it
+      passes the 4.5 body floor on the DEEPEST ground, which is why there is
+      only one muted ink and no per-surface variant to forget. */
+  --ink-muted: #5a6169;
+
+  /* ---- lines -------------------------------------------------------- */
+  /** Warm hairline, for the cloth register. 1.24 on cloth, its hardest case. */
+  --line: #dcd5ca;
+  /** Cool hairline, for the machine register. */
+  --line-cool: #d5dee3;
+  /** A structural rule that should read as a drawn edge, not a divider. */
+  --line-strong: #b9b0a2;
+
+  /* ---- status — INDEPENDENT of brand, by rule (plan §8.3) ------------
+   * These do not derive from the accent and never change when it does:
+   * "this batch is full" must not become a different colour because a logo
+   * arrived. All three clear 4.99:1 on every ground.
+   *
+   * They are never the only signal. With a red default accent, error red and
+   * brand red are neighbours, so status always carries an icon or a word as
+   * well — which is an accessibility requirement regardless of palette.
+   * ------------------------------------------------------------------ */
+  --ok: #1c6b45;
+  --warn: #8a5a08;
+  --bad: #b3261e;
+
+  /* ======================================================================
+   * 3. TYPE — computed clamps, 390px → 1440px
+   *
+   * Every clamp interpolates between the plan's mobile target at 390 and its
+   * desktop target at 1440, so the numbers below are the plan's numbers and
+   * not a guess that happens to look similar. §10 targets:
+   *
+   *   hero h1  34–40 → 54–68     page h1  28–34 → 44–56
+   *   h2       23–28 → 32–42     h3       18–21 → 22–27
+   *   body     15.5–17           meta     12–14      buttons 14–15
+   *
+   * The old system's dominant voice was small technical mono notation, which
+   * reads as a machine manual rather than a design school. Technical labels
+   * survive here as `--t-micro` and are deliberately rare.
+   * ==================================================================== */
+  --t-display: clamp(2.75rem, 1.7286rem + 4.1905vw, 5.5rem);   /*  44 → 88 */
+  --t-h1-hero: clamp(2.25rem, 1.6464rem + 2.4762vw, 3.875rem); /*  36 → 62 */
+  --t-h1: clamp(1.9375rem, 1.4964rem + 1.8095vw, 3.125rem);    /*  31 → 50 */
+  --t-h2: clamp(1.5625rem, 1.2839rem + 1.1429vw, 2.3125rem);   /*  25 → 37 */
+  --t-h3: clamp(1.21875rem, 1.0911rem + 0.5238vw, 1.5625rem);  /* 19.5 → 25 */
+  --t-h4: clamp(1.0625rem, 0.9929rem + 0.2857vw, 1.25rem);     /*  17 → 20 */
+  --t-lede: clamp(1.0625rem, 0.9696rem + 0.381vw, 1.3125rem);  /*  17 → 21 */
+  --t-body: clamp(1rem, 0.9768rem + 0.0952vw, 1.0625rem);      /*  16 → 17 */
+  --t-meta: clamp(0.84375rem, 0.8206rem + 0.0952vw, 0.90625rem); /* 13.5 → 14.5 */
+  --t-micro: clamp(0.75rem, 0.738rem + 0.0476vw, 0.78125rem);  /*  12 → 12.5 */
+  --t-btn: clamp(0.9375rem, 0.9259rem + 0.0476vw, 0.96875rem); /*  15 → 15.5 */
+
+  /* Large Latin type tightens; small type does not. Gujarati NEVER does —
+     enforced in §12, not left to each call site to remember. */
+  --track-display: -0.03em;
+  --track-tight: -0.02em;
+
+  /* ======================================================================
+   * 4. RHYTHM — not every section gets the same gap (plan §11.4)
+   * ==================================================================== */
+  --sp-hero: clamp(3.5rem, 2.2rem + 5.3333vw, 7rem);        /* 56 → 112 */
+  --sp-section: clamp(2.5rem, 1.5714rem + 3.8095vw, 5rem);  /* 40 → 80  */
+  --sp-tight: clamp(1.75rem, 1.1929rem + 2.2857vw, 3.25rem);/* 28 → 52  */
+
+  /* ======================================================================
+   * 5. MEASURE, CONTAINERS, RADIUS, ELEVATION
+   * ==================================================================== */
+  /** Readable content column. Plan §11.3 asks for 1180–1240. */
+  --w-main: 76.25rem;   /* 1220 */
+  /** Media may exceed the reading column; nothing else may. */
+  --w-wide: 90rem;      /* 1440 */
+  /** Long-form prose. Characters, not pixels — it is a reading limit. */
+  --w-prose: 68ch;
+  --gutter: 1.25rem;
+
+  /* A photograph is a physical print, so media frames are SQUARE. Interactive
+     surfaces get a small radius. Nothing here is a 24px pill card. */
+  --r-media: 0px;
+  --r-ui: 0.375rem;     /* 6  — buttons, inputs, chips */
+  --r-card: 0.625rem;   /* 10 — the rare card */
+  --r-round: 999px;     /* genuinely circular things only */
+
+  /* Structure comes from hairlines. There is exactly ONE shadow, and it is
+     for things that genuinely float above the page: a popover, a sticky
+     dock, a glass caption over a photograph. Cards do not float. */
+  --lift: 0 1px 2px rgb(20 23 26 / 0.05), 0 8px 24px -8px rgb(20 23 26 / 0.14);
+
+  /* Chrome heights, so sticky offsets and scroll padding derive from one
+     number rather than being restated at each call site. */
+  --header-h: 3.5rem;
+  --dock-h: 3.75rem;
+
+  background-color: var(--s-canvas);
+  color: var(--ink);
+  font-size: var(--t-body);
+}
+
+@media (min-width: 48rem) { .kds { --gutter: 2rem; } }
+@media (min-width: 64rem) { .kds { --gutter: 3rem; --header-h: 4rem; } }
+
+/* An anchor must not land under the sticky header. */
+.kds { scroll-padding-top: calc(var(--header-h) + 0.75rem); }
+
+/* ==========================================================================
+ * 6. CONTAINERS AND SECTIONS
+ *
+ * Two containers and three rhythms. A section states its ground and its
+ * rhythm; it does not invent padding.
+ * ========================================================================== */
+
+.kds .wrap {
+  width: 100%;
+  max-width: var(--w-main);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.kds .wrap-wide {
+  width: 100%;
+  max-width: var(--w-wide);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+/** Break the gutter deliberately — a full-bleed photograph or media rail. */
+.kds .bleed {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  max-width: 100vw;
+}
+.kds .prose { max-width: var(--w-prose); }
+
+.kds .band { padding-block: var(--sp-section); }
+.kds .band-hero { padding-block: var(--sp-hero); }
+.kds .band-tight { padding-block: var(--sp-tight); }
+
+/* ---- grounds ---------------------------------------------------------- */
+.kds .on-canvas { background-color: var(--s-canvas); }
+.kds .on-paper { background-color: var(--s-paper); }
+.kds .on-cloth { background-color: var(--s-cloth); }
+
+/* The cool register. Anything about the screen, the file or the process.
+   It carries the cool hairline with it, so a rule inside a machine section
+   is never a warm line on a cool ground. */
+.kds .on-mist {
+  background-color: var(--s-mist);
+  --line: var(--line-cool);
+}
+
+/* ==========================================================================
+ * 7. TYPOGRAPHY
+ *
+ * Set as classes rather than bare element selectors: a heading's SIZE is a
+ * composition decision and its LEVEL is a document-structure decision, and
+ * tying them together is how a page ends up with an h3 chosen because 20px
+ * looked right.
+ * ========================================================================== */
+
+.kds .t-display,
+.kds .t-h1-hero,
+.kds .t-h1,
+.kds .t-h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: var(--track-display);
+  line-height: 1.04;
+  text-wrap: balance;
+  color: var(--ink);
+}
+.kds .t-display { font-size: var(--t-display); }
+.kds .t-h1-hero { font-size: var(--t-h1-hero); line-height: 1.05; }
+.kds .t-h1 { font-size: var(--t-h1); line-height: 1.08; }
+.kds .t-h2 { font-size: var(--t-h2); line-height: 1.14; letter-spacing: var(--track-tight); }
+
+.kds .t-h3,
+.kds .t-h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: var(--track-tight);
+  line-height: 1.25;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.kds .t-h3 { font-size: var(--t-h3); }
+.kds .t-h4 { font-size: var(--t-h4); letter-spacing: -0.01em; }
+
+.kds .t-lede {
+  font-size: var(--t-lede);
+  line-height: 1.5;
+  color: var(--ink-muted);
+  text-wrap: pretty;
+}
+.kds .t-body { font-size: var(--t-body); line-height: 1.6; }
+.kds .t-meta { font-size: var(--t-meta); line-height: 1.45; color: var(--ink-muted); }
+
+/**
+ * The technical label. Small, spaced, uppercase — and RARE. It is for
+ * genuinely technical notation: a stage number, a file format, a slot id.
+ * It is not a decorative eyebrow above every heading, which is what made the
+ * previous system read as a machine manual.
+ */
+.kds .t-micro {
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/** The editorial interruption. One per page at most (plan §10). */
+.kds .t-editorial {
+  font-family: var(--font-accent);
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/** Figures in a column must not jitter between rows. */
+.kds .numeric { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+/* ==========================================================================
+ * 8. ACTIONS
+ *
+ * One primary action per context. Squarer than a pill, so the buttons read as
+ * machine controls rather than app chrome — 6px, not 999px.
+ * ========================================================================== */
+
+.kds .act {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.875rem;          /* 46 — comfortably over the 44 target */
+  padding-inline: 1.125rem;
+  border: 1px solid transparent;
+  border-radius: var(--r-ui);
+  font-size: var(--t-btn);
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+/** The one decision on the screen. Deep accent, white on it at 5.98:1. */
+.kds .act-primary {
+  background-color: var(--brand-accent-strong);
+  color: var(--brand-on-accent);
+  border-color: var(--brand-accent-strong);
+}
+.kds .act-primary:hover { background-color: var(--ink); border-color: var(--ink); }
+
+/** Everything else worth doing. A drawn edge, not a second colour. */
+.kds .act-secondary {
+  background-color: transparent;
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+.kds .act-secondary:hover { background-color: var(--ink); color: var(--s-paper); border-color: var(--ink); }
+
+/** A third action that must not compete. Text with a thread underline. */
+.kds .act-quiet {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  font-size: var(--t-btn);
+  font-weight: 700;
+  color: var(--brand-accent-strong);
+}
+.kds .act-quiet:hover { color: var(--ink); }
+
+/** The arrow leans forward on hover. 3px, once — plan §13 Level 2. */
+.kds .act .arrow,
+.kds .act-quiet .arrow { transition: transform 160ms ease; }
+.kds .act:hover .arrow,
+.kds .act-quiet:hover .arrow { transform: translateX(3px); }
+
+/**
+ * An inline link inside prose, underlined with a running stitch rather than a
+ * solid rule. The dash pattern is the same 9-on/6-off geometry as `.thread`,
+ * so one mark means one thing across the whole site.
+ */
+.kds .link-thread {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--brand-accent);
+  text-decoration-thickness: 2px;
+  text-decoration-skip-ink: none;
+  text-underline-offset: 0.22em;
+}
+.kds .link-thread:hover { color: var(--brand-accent-strong); }
+
+/* ==========================================================================
+ * 9. THE NICHE GRAMMAR
+ *
+ * Marks that come from embroidery mechanics rather than from a UI kit. Each
+ * has one job. None of them is decoration applied to every heading — that is
+ * how a signature becomes wallpaper.
+ * ========================================================================== */
+
+/**
+ * THREAD LINE — a running stitch, 9 on / 6 off. The site's one repeated mark.
+ * Horizontal by default; `.thread-v` runs it down a column to connect stages.
+ */
+.kds .thread {
+  display: block;
+  height: 2px;
+  border: 0;
+  background-image: linear-gradient(90deg, var(--brand-accent) 0 9px, transparent 9px 15px);
+  background-size: 15px 2px;
+  background-repeat: repeat-x;
+}
+.kds .thread-v {
+  /* `display: block` is not optional: this renders on a `<span>`, and an
+     inline box ignores width and height entirely — the thread was invisible
+     until this line existed. */
+  display: block;
+  width: 2px;
+  height: 100%;
+  background-image: linear-gradient(180deg, var(--brand-accent) 0 9px, transparent 9px 15px);
+  background-size: 2px 15px;
+  background-repeat: repeat-y;
+}
+/** The same stitch in ink, for a structural rule that is not an accent. */
+.kds .thread-ink { background-image: linear-gradient(90deg, var(--line-strong) 0 9px, transparent 9px 15px); }
+
+/**
+ * NEEDLE POINT — the penetration mark. A current step, an exact selected
+ * point, a junction where a stage completes. Small on purpose: it is a
+ * needle, not a bullet.
+ */
+.kds .needle {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--r-round);
+  background-color: var(--brand-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-accent) 18%, transparent);
+  flex: none;
+}
+.kds .needle-done { background-color: var(--ink); box-shadow: none; }
+.kds .needle-todo {
+  background-color: transparent;
+  border: 1.5px solid var(--line-strong);
+  box-shadow: none;
+}
+
+/**
+ * HOOP WINDOW — the embroidery frame as a crop. For a stitch macro, a machine
+ * detail, a face. Used OCCASIONALLY: the plan's rule is that not every
+ * photograph becomes a circle, and a round crop is a strong enough gesture
+ * that a page can carry one.
+ */
+.kds .hoop {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--r-round);
+  overflow: hidden;
+  /* The double ring is the hoop's two rings, which is the whole reason this
+     shape means anything here rather than being a round avatar. */
+  box-shadow:
+    inset 0 0 0 1px var(--line),
+    0 0 0 1px var(--line),
+    0 0 0 7px var(--s-paper),
+    0 0 0 8px var(--line);
+}
+.kds .hoop > * { width: 100%; height: 100%; object-fit: cover; }
+
+/**
+ * MACHINE FRAME — the default media frame. Square corners, a hairline, and
+ * two short registration ticks at one corner. Restrained on purpose: the
+ * plan's rule is that not every image is covered in CAD crosshairs.
+ */
+.kds .mframe {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-media);
+  background-color: var(--s-cloth);
+}
+.kds .mframe > img,
+.kds .mframe > picture > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.kds .mframe::after {
+  content: "";
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-top: 1.5px solid var(--brand-accent);
+  border-left: 1.5px solid var(--brand-accent);
+  opacity: 0.75;
+  pointer-events: none;
+}
+/** The frame on the machine register takes the cool line. */
+.kds .on-mist .mframe { border-color: var(--line-cool); background-color: var(--s-mist-deep); }
+
+/**
+ * PHOTO PLACEHOLDER — what a reserved slot from the 32-shot manifest looks
+ * like until the file arrives.
+ *
+ * The addendum's §14 rule: it must PREVIEW the intended art direction rather
+ * than being a dashed empty box, and must still be unmistakably a placeholder.
+ * So it reserves the photograph's exact aspect ratio, states the shot it is
+ * waiting for, and carries a faint weave so the frame reads as cloth rather
+ * than as a missing asset.
+ */
+.kds .photo-wait {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  padding: 0.875rem;
+  background-color: var(--s-cloth);
+  background-image:
+    repeating-linear-gradient(90deg, rgb(20 23 26 / 0.035) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(0deg, rgb(20 23 26 / 0.035) 0 1px, transparent 1px 5px);
+  color: var(--ink-muted);
+  text-align: left;
+}
+.kds .on-mist .photo-wait { background-color: var(--s-mist-deep); }
+
+/* ==========================================================================
+ * 10. THE SAMPLE BOOK
+ *
+ * Karma's catalogue is eleven techniques. A visitor choosing between zardosi
+ * and sequence work is choosing a MATERIAL, so the catalogue is built like a
+ * book of physical samples rather than a grid of product cards.
+ * ========================================================================== */
+
+/**
+ * STITCH SWATCH — a technique's texture, at swatch scale. One per course.
+ * Square, edge-to-edge, with a pinked edge on one side so it reads as cut
+ * cloth. The drawing inside comes from the technique's real structure.
+ */
+.kds .swatch {
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-media);
+  background-color: var(--s-paper);
+  /* The swatch draws in two inks: `currentColor` for the cloth and
+     `--brand-accent` for the one thread that matters. `--kds-swatch-bg` is
+     the ground a drawing punches back through — a sequin's hole, a laser's
+     cut — so it must track the tile's own background and not be assumed
+     white. */
+  color: var(--ink);
+  --kds-swatch-bg: var(--s-paper);
+}
+/** EMCAD is the one technique that happens on a screen, so its swatch sits on
+    the cool register. That single difference carries the brand thesis. */
+.kds .swatch.is-machine {
+  background-color: var(--s-mist);
+  border-color: var(--line-cool);
+  --kds-swatch-bg: var(--s-mist);
+}
+.kds .swatch > svg { display: block; width: 100%; height: 100%; }
+/** The pinked (zigzag) edge along the bottom — a cut fabric sample. */
+.kds .swatch::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 6px;
+  background-image:
+    linear-gradient(135deg, var(--s-canvas) 25%, transparent 25%),
+    linear-gradient(225deg, var(--s-canvas) 25%, transparent 25%);
+  background-size: 8px 8px;
+  background-position: 0 0;
+  background-repeat: repeat-x;
+  pointer-events: none;
+}
+
+/**
+ * SAMPLE STRIP — the horizontal rail those swatches live on. Scroll-snap, so
+ * a thumb flicks through techniques the way a hand flicks through a sample
+ * book, and no carousel library is needed to do it.
+ */
+.kds .strip {
+  display: grid;
+  grid-auto-flow: column;
+  /* Paint containment, and it is load-bearing rather than an optimisation.
+     Without it the rail's off-screen columns keep contributing to
+     `documentElement.scrollWidth` even though `overflow-x` clips them and the
+     page cannot actually be scrolled sideways — a phantom that shows up in
+     every responsive audit as a horizontal-overflow failure and cannot be
+     traced to a visible element. Measured at 390px: 1379px reported without
+     it, 390px with it. It also stops the browser painting eleven off-screen
+     swatches. */
+  contain: paint;
+  grid-auto-columns: minmax(9.5rem, 42vw);
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  /* Runs to the screen edge on a phone so the rail reads as continuing past
+     the viewport — which is the affordance that says "scroll me". */
+  padding-inline: var(--gutter);
+  margin-inline: calc(var(--gutter) * -1);
+  padding-block: 0.25rem;
+}
+.kds .strip::-webkit-scrollbar { display: none; }
+.kds .strip > * { scroll-snap-align: start; }
+@media (min-width: 48rem) { .kds .strip { grid-auto-columns: minmax(11rem, 24vw); gap: 1rem; } }
+@media (min-width: 64rem) { .kds .strip { grid-auto-columns: minmax(12rem, 17vw); } }
+
+/* ==========================================================================
+ * 11. PROOF SURFACES
+ * ========================================================================== */
+
+/**
+ * WORK TILE — student work is image-first. The caption is secondary and never
+ * becomes a testimonial card. Each piece keeps its own aspect ratio, because
+ * a bridal panel is portrait and a dupatta is square, and normalising them
+ * into one rectangle throws away the only thing worth showing about textile
+ * work.
+ */
+.kds .tile { position: relative; display: block; overflow: hidden; }
+.kds .tile img { display: block; width: 100%; height: auto; transition: transform 420ms cubic-bezier(0.2, 0.7, 0.3, 1); }
+.kds .tile:hover img { transform: scale(1.03); }
+
+/**
+ * GLASS CAPTION — a label over a photograph. Allowed by the addendum §16 for
+ * exactly this: captions, floating facts, overlays on media. The blur is a
+ * progressive enhancement; the fallback is a solid mat, so the text is
+ * readable whether or not `backdrop-filter` is supported.
+ */
+.kds .glass {
+  background-color: rgb(255 255 255 / 0.88);
+  color: var(--ink);
+  border: 1px solid rgb(255 255 255 / 0.5);
+  border-radius: var(--r-ui);
+}
+@supports (backdrop-filter: blur(10px)) {
+  .kds .glass {
+    background-color: rgb(255 255 255 / 0.7);
+    backdrop-filter: blur(12px) saturate(1.1);
+  }
+}
+
+/**
+ * BATCH BOARD — the schedule, as a production board rather than a table of
+ * marketing copy. Rows are dense and scannable; every field is optional
+ * because the data contract is "real rows or nothing" and a row with no
+ * recorded trainer must render no trainer rather than an invented one.
+ */
+.kds .board { border-top: 1px solid var(--line); }
+.kds .board-row {
+  display: grid;
+  gap: 0.125rem 1rem;
+  align-items: baseline;
+  padding-block: 0.875rem;
+  border-bottom: 1px solid var(--line);
+}
+@media (min-width: 48rem) {
+  .kds .board-row {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) auto auto;
+    align-items: center;
+    padding-block: 1rem;
+  }
+}
+
+/**
+ * THREAD PROGRESS — form steps as stitch logic. Completed is stitched, current
+ * is a needle point, future is a construction line.
+ */
+.kds .progress { display: flex; align-items: center; gap: 0.5rem; }
+.kds .progress-seg { flex: 1; height: 2px; background-color: var(--line); }
+.kds .progress-seg.is-done {
+  background-image: linear-gradient(90deg, var(--ink) 0 9px, transparent 9px 15px);
+  background-size: 15px 2px;
+  background-color: transparent;
+}
+.kds .progress-seg.is-now {
+  background-image: linear-gradient(90deg, var(--brand-accent) 0 9px, transparent 9px 15px);
+  background-size: 15px 2px;
+  background-color: transparent;
+}
+
+/* ==========================================================================
+ * 11a. THE HERO SCENE
+ *
+ * Screen → machine → proof, as ONE composition rather than three rectangles.
+ * The finished piece leads because it is the thing being promised; the screen
+ * and the machine sit beneath it as the two steps that produced it; and a
+ * thread runs down the column through a needle point at each stage.
+ *
+ * The connection is the point. Three unlinked frames say "here are some
+ * photographs"; three frames on a thread say "this became that".
+ * ========================================================================== */
+
+.kds .hero-scene { position: relative; padding-left: 1.5rem; }
+.kds .hero-scene-thread {
+  position: absolute;
+  left: 0.19rem;
+  top: 0.5rem;
+  bottom: 1.5rem;
+  width: 2px;
+}
+.kds .hero-stage-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  margin-left: -1.5rem;
+  padding-left: 0.02rem;
+}
+.kds .hero-stage-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.kds .hero-stage-pair .hero-stage-tag { margin-left: 0; }
+.kds .hero-stage--lead { margin: 0; }
+
+/**
+ * TABLET GETS ITS OWN COMPOSITION, not a wider phone.
+ *
+ * Between 768 and 1024 the text block runs full width — at that measure a
+ * 55/45 split would give the headline a phone-width column at desktop type
+ * sizes — so the width goes to the MEDIA instead. The three stages lay out
+ * across the page in the order they happen, and the thread turns ninety
+ * degrees to run through them horizontally. Same mark, same job, other
+ * direction.
+ */
+@media (min-width: 48rem) and (max-width: 63.999rem) {
+  .kds .hero-scene {
+    padding-left: 0;
+    padding-top: 1.75rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: start;
+  }
+  .kds .hero-scene-thread {
+    left: 0;
+    right: 0;
+    top: 0.35rem;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+  }
+  /* The vertical thread becomes a horizontal one. */
+  .kds .hero-scene-thread .thread-v {
+    width: 100%;
+    height: 2px;
+    background-image: linear-gradient(90deg, var(--brand-accent) 0 9px, transparent 9px 15px);
+    background-size: 15px 2px;
+    background-repeat: repeat-x;
+  }
+  /* Screen, then machine, then proof — the order it actually happens in,
+     which the stacked phone layout cannot show without pushing the finished
+     piece below the fold. */
+  .kds .hero-stage--lead { order: 3; }
+  .kds .hero-stage-pair {
+    display: contents;
+  }
+  .kds .hero-stage-tag { margin-left: 0; }
+}
+
+/** The material, in the first viewport. Small, but unmistakably cloth. */
+.kds .hero-swatches {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.75rem;
+}
+.kds .hero-swatches > li { width: 3.25rem; flex: none; }
+@media (min-width: 48rem) {
+  .kds .hero-swatches { gap: 0.625rem; }
+  .kds .hero-swatches > li { width: 3.75rem; }
+}
+
+/* ==========================================================================
+ * 11b. PROOF FORMATS
+ *
+ * Five shapes, because proof is five different things. There is deliberately
+ * no shared `.proof-card`: a large featured quote, a swipeable snippet, a
+ * before/after journey, a garment label and a follower figure have nothing in
+ * common except the word "proof", and giving them one class is how a site ends
+ * up with the same card six times.
+ * ========================================================================== */
+
+/** A snippet on the review rail. Wider than a swatch — it holds a sentence. */
+.kds .strip-wide { grid-auto-columns: minmax(16rem, 78vw); }
+@media (min-width: 48rem) { .kds .strip-wide { grid-auto-columns: minmax(18rem, 40vw); } }
+@media (min-width: 64rem) { .kds .strip-wide { grid-auto-columns: minmax(19rem, 26vw); } }
+
+.kds .quote-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1.125rem 1.125rem;
+  background-color: var(--s-paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+}
+
+/** Stars. Sized by the text beside them, so a rating never floats loose. */
+.kds .stars { display: inline-block; width: 5.5rem; flex: none; }
+.kds .stars svg { display: block; width: 100%; height: auto; }
+
+/**
+ * THE JOURNEY. Threaded down the stages on a phone, across them on a laptop —
+ * the same mark doing the same job in both directions.
+ */
+.kds .journey-stages { display: grid; gap: 1.25rem; margin-top: 1rem; }
+.kds .journey-stage { position: relative; padding-left: 1.5rem; }
+.kds .journey-stage > .needle { position: absolute; left: 0; top: 0.35rem; }
+.kds .journey-thread {
+  position: absolute;
+  left: 0.19rem;
+  top: 1.1rem;
+  bottom: -1.25rem;
+  width: 2px;
+  height: auto;
+  background-image: linear-gradient(180deg, var(--line-strong) 0 9px, transparent 9px 15px);
+  background-size: 2px 15px;
+  background-repeat: repeat-y;
+}
+@media (min-width: 48rem) {
+  .kds .journey-stages { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+  .kds .journey-stage { padding-left: 0; padding-top: 1.5rem; }
+  .kds .journey-stage > .needle { top: 0; left: 0; }
+  .kds .journey-thread {
+    left: 1rem;
+    right: -1.5rem;
+    top: 0.19rem;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+    background-image: linear-gradient(90deg, var(--line-strong) 0 9px, transparent 9px 15px);
+    background-size: 15px 2px;
+    background-repeat: repeat-x;
+  }
+}
+
+/**
+ * TRUSTED BY, as a rack of garment labels.
+ *
+ * A woven label has a centre fold and two stitched edges; that is the whole
+ * drawing, and it is why this reads as something sewn into a garment rather
+ * than as a row of grey wordmarks.
+ */
+.kds .label-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.875rem;
+}
+.kds .garment-label {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.1rem;
+  min-width: 9.5rem;
+  padding: 0.625rem 1.125rem;
+  background-color: var(--s-paper);
+  /* The two stitched edges, top and bottom, in the same running stitch as
+     everything else in this system. */
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background-image:
+    linear-gradient(90deg, var(--line-strong) 0 5px, transparent 5px 9px),
+    linear-gradient(90deg, var(--line-strong) 0 5px, transparent 5px 9px);
+  background-size: 9px 1px, 9px 1px;
+  background-position: 0 4px, 0 calc(100% - 4px);
+  background-repeat: repeat-x;
+}
+.kds .garment-label-name {
+  font-weight: 800;
+  font-size: var(--t-meta);
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+.kds .garment-label-type {
+  font-size: var(--t-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.kds :lang(gu) .garment-label-type { text-transform: none; letter-spacing: 0; }
+
+/** Follower figures. Typography, not a widget — no third-party script. */
+.kds .social-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+}
+.kds .social-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 1.125rem 1.25rem 1rem;
+  background-color: var(--s-paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  transition: border-color 160ms ease;
+}
+.kds .social-cell:hover { border-color: var(--ink); }
+
+/** One line of proof, beside a decision. A rule, not a box. */
+.kds .micro-proof {
+  border-left: 2px solid var(--brand-accent);
+  padding-left: 0.875rem;
+}
+
+/* ==========================================================================
+ * 12. SMALL OBJECTS
+ * ========================================================================== */
+
+/** A chip: a filter, a family, a technique. Selected takes the accent. */
+.kds .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 2.25rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-ui);
+  background-color: transparent;
+  font-size: var(--t-meta);
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+.kds .chip:hover { border-color: var(--ink); }
+.kds .chip[aria-selected="true"],
+.kds .chip[aria-pressed="true"],
+.kds .chip.is-on {
+  background-color: var(--brand-accent-soft);
+  border-color: var(--brand-accent-strong);
+  color: var(--brand-accent-strong);
+}
+
+/**
+ * SAMPLE MARKER — the preview disclosure required by the addendum §8.
+ *
+ * Sample proof is allowed on the Workers.dev preview and must be visibly
+ * identified without destroying the composition. Small, quiet, and never
+ * removable by a caller: a component that renders sample proof renders this.
+ */
+.kds .is-sample {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.4rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: 3px;
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  background-color: color-mix(in srgb, var(--s-paper) 70%, transparent);
+}
+
+/* ==========================================================================
+ * 11c. LIGHT AND LAYOUT HELPERS
+ * ========================================================================== */
+
+/**
+ * SCREEN GLOW — the light coming off a monitor.
+ *
+ * The addendum permits gradients for "subtle screen illumination" and rules
+ * out a generic purple SaaS aurora. This is the former: a cool, low, off-white
+ * bloom rising from the bottom of a panel, which is what a lit screen actually
+ * does to the surface around it. It belongs behind EMCAD and process content
+ * and nowhere else, so it is named for its job rather than as `.gradient-1`.
+ */
+.kds .glow-screen {
+  position: relative;
+  isolation: isolate;
+}
+.kds .glow-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(120% 80% at 50% 108%, rgb(255 255 255 / 0.95) 0%, rgb(255 255 255 / 0) 62%),
+    radial-gradient(90% 60% at 18% 4%, color-mix(in srgb, var(--brand-accent) 7%, transparent) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/**
+ * BENTO — a mixed-size grid, for content that is genuinely heterogeneous:
+ * a proof wall of photographs at three different ratios, studio evidence,
+ * social figures. Not a page layout, and not the answer to a list of equals.
+ *
+ * A child opts into more room with `.bento-wide` / `.bento-tall`; everything
+ * else takes one cell, so the grid degrades to a plain column on a phone
+ * without a second set of rules.
+ */
+.kds .bento {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.kds .bento > .bento-wide { grid-column: span 2; }
+@media (min-width: 48rem) {
+  .kds .bento { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+  .kds .bento > .bento-wide { grid-column: span 2; }
+  .kds .bento > .bento-tall { grid-row: span 2; }
+}
+
+/** A two-track editorial split. The site's default asymmetry. */
+.kds .split {
+  display: grid;
+  gap: 1.5rem;
+}
+@media (min-width: 64rem) {
+  .kds .split { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 3rem; align-items: start; }
+  .kds .split-reverse { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); }
+}
+
+/* ==========================================================================
+ * 12b. OVERLAYS — the sheet and the dock
+ *
+ * A phone gets bottom-anchored chrome because that is where the thumb is.
+ * Both of these are real dialogs/landmarks in markup; what is here is only
+ * their surface.
+ * ========================================================================== */
+
+/**
+ * SHEET — a bottom sheet on a phone, a popover on a laptop. The component
+ * decides which; this styles the phone form and lets a caller override the
+ * anchoring at a breakpoint.
+ */
+.kds .sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background-color: rgb(20 23 26 / 0.42);
+}
+.kds .sheet {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 56;
+  max-height: 80vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background-color: var(--s-paper);
+  border-top: 1px solid var(--line);
+  border-radius: 0.75rem 0.75rem 0 0;
+  padding-block: 0.375rem calc(0.375rem + env(safe-area-inset-bottom));
+  box-shadow: var(--lift);
+  animation: kds-rise 240ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+.kds .sheet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0.5rem 1.125rem;
+  text-align: start;
+  border-bottom: 1px solid var(--line);
+}
+.kds .sheet-row:last-child { border-bottom: 0; }
+.kds .sheet-row[aria-current="true"] { background-color: var(--brand-accent-soft); }
+
+/**
+ * DOCK — the contextual conversion bar. NOT site-wide: it belongs to the
+ * high-intent routes named in the plan's §15 (course detail, `/admission`,
+ * `/admissions`, `/batches`) and nowhere else, which is why it is a component
+ * a route opts into rather than a fixture in the layout.
+ *
+ * A page carrying it must also carry `.has-dock`, or the last element on the
+ * page sits underneath it.
+ */
+.kds .dock {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.375rem 0.875rem calc(0.375rem + env(safe-area-inset-bottom));
+  background-color: var(--s-paper);
+  border-top: 1px solid var(--line);
+  box-shadow: var(--lift);
+}
+.kds .dock > * { min-height: 2.75rem; }
+.kds.has-dock { padding-bottom: calc(var(--dock-h) + env(safe-area-inset-bottom)); }
+@media (min-width: 64rem) {
+  .kds .dock { display: none; }
+  .kds.has-dock { padding-bottom: 0; }
+}
+
+/* ==========================================================================
+ * 13. SCRIPT
+ *
+ * Gujarati is a first-class language, not a translated afterthought.
+ *
+ * The tracking above is a Latin decision. Applied to Gujarati it clips and
+ * separates marks that belong to their base letter, so it is switched OFF
+ * here rather than at each call site — a rule nobody has to remember cannot
+ * be forgotten. Uppercase is meaningless in the script and is removed from
+ * `.t-micro` for the same reason.
+ * ========================================================================== */
+
+.kds :lang(gu) {
+  letter-spacing: 0;
+  line-height: 1.75;
+  --track-display: 0;
+  --track-tight: 0;
+}
+.kds :lang(gu) .t-display,
+.kds :lang(gu) .t-h1-hero,
+.kds :lang(gu) .t-h1,
+.kds :lang(gu) .t-h2,
+.kds :lang(gu) .t-h3,
+.kds :lang(gu) .t-h4 {
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+.kds :lang(gu) .t-micro,
+.kds :lang(gu) .is-sample,
+.kds :lang(gu) .chip {
+  text-transform: none;
+  letter-spacing: 0;
+}
+/* Playfair has no Gujarati coverage and the script has no italic convention. */
+.kds :lang(gu) .t-editorial { font-family: inherit; font-style: normal; }
+
+/* ==========================================================================
+ * 14. MOTION
+ *
+ * Four grammars, each with one job (plan §13, addendum §16). Nothing loops,
+ * nothing follows the cursor, nothing hijacks the scroll, and nothing runs
+ * while the visitor is reading.
+ * ========================================================================== */
+
+/** Level 3, once per page: a thread stitching itself into place. */
+@keyframes kds-draw {
+  from { background-size: 0 2px; }
+  to { background-size: 15px 2px; }
+}
+.kds .thread-draw {
+  animation: kds-draw 700ms cubic-bezier(0.3, 0.8, 0.3, 1) both;
+}
+
+/** Level 2: a needle arriving at its point. */
+@keyframes kds-needle {
+  from { transform: scale(0.4); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.kds .needle-in { animation: kds-needle 280ms cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+
+/** Level 2: media resolving, used on a photograph and nothing else. */
+@keyframes kds-reveal {
+  from { opacity: 0; transform: translateY(10px) scale(1.012); }
+  to { opacity: 1; transform: none; }
+}
+.kds .media-in { animation: kds-reveal 520ms cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+
+/** Level 1: a panel or sheet arriving. */
+@keyframes kds-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.kds .rise-in { animation: kds-rise 300ms cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+
+/**
+ * Reduced motion renders the COMPLETE final state — not a shorter animation.
+ * A thread that has not drawn is an invisible rule, so it is given its full
+ * background-size rather than being left mid-animation.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .kds *,
+  .kds *::before,
+  .kds *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .kds .thread-draw { background-size: 15px 2px; }
+  .kds .tile:hover img { transform: none; }
+}
+
+/* ==========================================================================
+ * 15. FOCUS
+ *
+ * Visible on every ground, and never removed. The accent is the focus colour
+ * because focus IS the current state, which is what the accent means
+ * everywhere else in this system.
+ * ========================================================================== */
+
+.kds :focus-visible {
+  outline: 2px solid var(--brand-accent-strong);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+.kds ::selection { background-color: var(--brand-accent-soft); color: var(--ink); }

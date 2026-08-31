@@ -14,12 +14,22 @@ const handleIntl = createMiddleware(routing);
  *    gets from middleware is a Supabase session refresh, NOT an access check:
  *    authorization is the database's job, in `src/lib/auth/guard.ts`.
  *
+ *  - `/design` is the internal design-system reference. Like `/admin` it sits
+ *    outside `[locale]` and has its own root layout, so next-intl must leave
+ *    it alone: rewriting it to `/en/design` sends it to the localized
+ *    catch-all and renders the 404 instead of the page. It is not indexed and
+ *    is not in the sitemap.
+ *
  *  - everything else keeps the existing next-intl behaviour untouched:
  *    always-prefixed `/en` and `/gu`, no browser-language auto-redirect.
  */
 export default async function middleware(request: NextRequest) {
-  if (request.nextUrl.pathname.startsWith("/admin")) {
+  const { pathname } = request.nextUrl;
+  if (pathname.startsWith("/admin")) {
     return updateAdminSession(request);
+  }
+  if (pathname === "/design" || pathname.startsWith("/design/")) {
+    return;
   }
   return handleIntl(request);
 }

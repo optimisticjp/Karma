@@ -1,4 +1,21 @@
 /**
+ * ⚠ NEW PROOF CONTENT GOES IN `src/content/proof.ts`, NOT HERE.
+ *
+ * That file is the single typed registry for reviews, testimonials, student
+ * stories, trainers, partners, social counts and ratings, and it carries a
+ * `sample | owner_provided | verified` status on every item — which is what
+ * the pre-launch replacement audit walks and what the schema firewall filters
+ * on.
+ *
+ * The proof arrays still in THIS file serve the public pages that have not yet
+ * been rebuilt on the new design system. Each rebuild phase moves its page
+ * across; these are deleted once nothing reads them. Adding a twelfth sample
+ * review here would make it invisible to the launch gate.
+ *
+ * The FAQs and machine cases below are not proof and stay.
+ */
+
+/**
  * Bilingual collections. Anything not yet verified with the owner carries
  * sample: true and renders with a visible "Sample: replace before launch"
  * tag (no-ghost-content rule, master plan 2.5). Real assets replace these

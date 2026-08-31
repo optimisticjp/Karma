@@ -2019,7 +2019,7 @@ npm run build
 
 # Phase 0 — Recovery from the stopped implementation
 
-**Status:** ✅ Complete — PR #61, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #61, merged as `5709308`
 
 Product rules are back on the corrected owner direction. No visual work was
 done, deliberately.
@@ -2126,38 +2126,173 @@ decision, and that is where it should be made rather than discovered.
 
 # Phase 1 — New THREAD / MACHINE / PROOF foundation
 
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #62, merged as `PLACEHOLDER_MERGE`
 
-Goal:
+A real public design system, in one file, that declares its own values instead
+of re-pointing somebody else's.
 
-Create a real new public design system rather than a token bridge over the old one.
+## `src/app/textile-lab.css` is deleted, not layered under
 
-Required:
+The rejected system's only live effect was its token bridge. A class-usage
+sweep found the truth of it: of everything it defined — `.surface-*`, `.tex-*`,
+`.lab-row`, `.lab-tabs`, `.thread-divider`, `.action-bar` — **exactly one
+class was used by any component** (`.lab-sheet`, by the language chooser).
+Everything else was dead on arrival. That is the clearest possible evidence for
+the owner's judgement that it was a reskin.
 
-- new public-scoped colour tokens;
-- logo-neutral accent adapter;
-- new type/rhythm system;
-- new light surfaces;
-- new border/radius rules;
-- new responsive containers;
-- Thread Line;
-- Needle Point;
-- Stitch Swatches;
-- Sample Strip;
-- Machine Frame;
-- Hoop Window;
-- new CTA/button language;
-- new placeholder framing;
-- motion primitives;
-- reduced-motion rules;
-- public-only scope that cannot alter Console;
-- remove/replace obsolete `textile-lab.css` rather than stack another stylesheet indefinitely.
+`src/app/thread-machine-proof.css` replaces it. The public root imports three
+sheets instead of four, and a test asserts the file is gone and the import with
+it.
 
-Acceptance:
+## The one idea, made structural
 
-Render a component showcase or representative internal test surface across mobile/tablet/desktop.
+**Two material registers rather than one palette.** A WARM CLOTH register —
+canvas, cloth — for work, samples, studio and people; a **COOL MACHINE**
+register — mist, mist-deep — for EMCAD, files, digitising and process. The old
+public palette was warm everywhere, which is how a site about digital design
+files reads as a craft blog. Anything about the screen now sits on the cool
+ground, and a visitor learns the distinction without being told it.
 
-The system must look clearly unrelated to the current site before proceeding.
+## Logo-neutral, and arithmetic rather than aspiration
+
+Four variables carry every chromatic decision. A test enumerates **every hex in
+the stylesheet** and fails on one that is not a declared token, so "nothing
+else hardcodes a hue" is enforced rather than intended.
+
+Two reds, because the measurement demanded it: `--brand-accent` `#D4462E`
+measures 3.57–4.45 on the five grounds — fine for a stitch line or a 40px
+number, not fine for a button label — and `--brand-accent-strong` `#B8321C`
+measures 4.80–5.98 everywhere and carries white at 5.98. The split is also true
+to the subject: the brighter red is the thread, the deeper red is the decision.
+
+Four alternates were checked before the palette was written and are recomputed
+on every test run: blue `#1F5FA8` (6.08 on canvas / 6.44 with white), green
+`#1F6B43` (6.11 / 6.48), gold `#8A6A12` (4.77 / 5.06), black `#14171A`
+(16.97 / 17.99).
+
+**One muted ink, no per-surface variant** — `#5A6169` clears the 4.5 body floor
+on the deepest of the five grounds, precisely so there is nothing to forget.
+The previous system needed a "deep step" swapped in on its sand surface.
+
+Status colours stay independent of the brand and clear 4.99:1 everywhere.
+
+## Type computed from the plan's own numbers
+
+Every clamp interpolates between §10's mobile target at 390 and its desktop
+target at 1440. Rendered: hero h1 **36 → 62**, page h1 **31 → 50**, h2
+**25 → 37**, h3 **19.5 → 25**, body **16 → 17**, meta **13.5 → 14.5**, buttons
+**15 → 15.5**. A test asserts both target ranges and that **no level crosses
+the one below it at any of ten widths** — a real bug from the previous system,
+where two clamps with different slopes made a heading render smaller than its
+own lede at exactly 390px.
+
+Gujarati protection is in the system: `:lang(gu)` zeroes the tracking tokens,
+strips uppercase from every label class and raises the line height, so no call
+site has to remember.
+
+## The grammar
+
+Thread Line (9 on / 6 off, the one repeated mark, and the same geometry as the
+progress bar and the link underline), Needle Point, Hoop Window, Machine Frame,
+Stitch Swatch, Sample Strip, Work Tile, Batch Board, Thread Progress.
+
+**The eleven Stitch Swatches are the piece of work that carries the identity.**
+The old technique signatures were line DIAGRAMS on a wide frame — an
+explanation of a stitch, in outline, which read as a manual. A swatch is a
+different object: a square of cloth cut from a sample book, filled, edge to
+edge, texture running off all four sides. The geometry is inherited because it
+is domain knowledge and it was right — beads attach to a path, sequins overlap
+and are perforated, chain is interlocking loops, cording is couched at
+intervals, EMCAD is nodes and handles. EMCAD is the one swatch on the cool
+register, because it is the one technique that happens on a screen; that single
+difference is the whole thesis in one tile.
+
+## Trust and proof architecture, built now
+
+`src/content/proof.ts` is one typed registry with
+`sample | owner_provided | verified` on every item — reviews, testimonials,
+student stories, trainers, partners, social counts, the Google rating,
+statistics. Nothing is scattered through JSX, because a sample name typed into
+a component is invisible to the replacement audit and will survive to launch.
+
+`owner_provided` exists as its own state because "the studio told us this" and
+"we made this up for the preview" are different claims: the follower counts and
+the rating are real figures nobody has audited, and they are published
+attributed and outside rating schema.
+
+**Seven proof formats, and deliberately no shared card** — `FeaturedReview`,
+`ReviewRail`, `RatingBlock`, `StoryJourney`, `TrustedByRail`, `SocialProof`,
+`MicroProof`. Trusted-by is drawn as stitched garment labels rather than grey
+wordmarks, because a woven label is what actually gets sewn into the things
+Karma's clients make. Follower counts are typography, not a third-party widget.
+
+The **firewall**: `tests/kds-proof-firewall.test.ts` asserts the schema builders
+cannot even import the registry, that no `Review` / `AggregateRating` /
+`Person` type is emitted, that the rating carries **no review count** (an
+AggregateRating needs one, and the figure circulating online is an unverifiable
+aggregate), that every module renders its own `SampleMark`, and that sample copy
+promises no earnings, no placement, no machine specification and no "small
+batches". `remainingSampleProof()` is what the launch checklist now walks.
+
+## Two real defects found by building the reference
+
+1. **`.thread-v` never declared `display: block`.** It renders on a `<span>`,
+   and an inline box ignores width and height — so the vertical thread was
+   invisible everywhere it was used. Caught by looking at a screenshot, not by
+   a test; a test now covers both orientations.
+2. **`/design` was being rewritten to `/en/design` by the intl middleware** and
+   rendering the localized 404 with a 200. Like `/admin`, it now bypasses
+   next-intl.
+
+Plus a third worth recording because it will recur: **the scroll rails were
+inflating `documentElement.scrollWidth` to 1379px at a 390px viewport** while
+the page could not actually be scrolled sideways. `overflow-x: auto` clipped
+the columns visually but they kept contributing to ancestor scroll overflow —
+a phantom that reads as a horizontal-overflow failure in every responsive audit
+and cannot be traced to a visible element. `contain: paint` on `.strip` fixes
+it (measured: 1379 → 390). The capture harness now records `canScrollX` as well
+as `scrollWidth`, because only one of those two is what a finger can do.
+
+## The quality gate
+
+`/design` renders every primitive in composition — not a swatch dump, because a
+grid of isolated components always looks fine and tells you nothing. It has its
+own root layout loading `globals.css` and the new system and **neither of the
+two older public stylesheets**, so anything that only looks right on a public
+page is borrowing, and it shows up here. Not indexed, not in the sitemap, not
+linked.
+
+Rendered at 390 / 768 / 1440 in Chromium, plus 820:
+
+| Width | Height | Horizontal overflow | Page scrolls sideways |
+| ---: | ---: | --- | --- |
+| 390 | 13,222 | no | no |
+| 768 | 9,217 | no | no |
+| 820 | 9,400 | no | no |
+| 1440 | 10,424 | no | no |
+
+Two changes came out of looking at the renders rather than the code:
+
+- **The hero was a clean training company that could have taught anything.**
+  Four stitch swatches now sit in the first viewport, above the actions. They
+  say "eleven techniques, physically different from each other" faster than a
+  sentence can.
+- **Tablet was a stretched phone.** Between 768 and 1024 the text runs full
+  width — at that measure a 55/45 split gives the headline a phone-width column
+  at desktop type sizes — so the width goes to the media instead: the three
+  hero stages lay out across the page in the order they happen, and the thread
+  turns ninety degrees to run through them horizontally. Same mark, same job,
+  other direction.
+
+## Verified
+
+**891 tests** across 58 files, of which 62 are new (`kds-foundation` 41,
+`kds-proof-firewall` 21). Typecheck, lint and build clean.
+**Worker 2056.26 KiB gzip**, +25.66 on Phase 0, against the 3 MB limit.
+
+`docs/design-system.md` is rewritten for the new public system;
+`CLAUDE.md` non-negotiable #8 and "Where things live" name it; the launch
+checklist carries the proof-replacement gate.
 
 ---
 
