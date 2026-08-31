@@ -89,10 +89,21 @@ describe("motion is fully optional", () => {
 });
 
 describe("layout survives text the studio did not write", () => {
-  it("lets third-party titles break rather than overflow a clipped box", () => {
+  it("keeps the break rule available, and renders no foreign feed without it", () => {
+    /* A string this studio did not write — a YouTube title, a handle, a
+       hashtag — is an unbreakable token that will overflow a clipped box.
+       `.u-break` is the answer and it stays defined.
+
+       The homepage video shelf was the only public surface rendering one, and
+       it left with the rebuild. So the live rule is now the SCAN: if a public
+       component ever renders feed text again, it has to opt in. */
     expect(read("src/app/globals.css")).toContain(".u-break");
-    // The YouTube feed is the one place a foreign string is rendered.
-    expect(read("src/components/home/LatestVideos.tsx")).toContain("u-break");
+    const feedish = walk("src/components")
+      .filter((f) => f.endsWith(".tsx"))
+      .filter((f) => /youtube|\bfeed\b/i.test(read(f)) && read(f).includes("v.title"));
+    for (const file of feedish) {
+      expect(read(file), file).toContain("u-break");
+    }
   });
 
   it("drops the brand tail on a cramped header row, not on a narrow viewport", () => {

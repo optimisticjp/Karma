@@ -126,10 +126,15 @@ describe("every public surface that renders a sample also renders its tag", () =
     "src/components/site/StoryCase.tsx",
     "src/components/site/TrainerProfile.tsx",
     "src/components/site/ReviewWall.tsx",
-    "src/components/work/WorkLedger.tsx",
-    "src/components/home/Reviews.tsx"
+    "src/components/work/WorkLedger.tsx"
   ];
 
+  /* These are the surfaces still reading the older `sample: true` arrays in
+     `src/content/collections.ts`. The rebuilt surfaces read
+     `src/content/proof.ts` instead and render `<SampleMark>`, which
+     `tests/kds-proof-firewall.test.ts` asserts per module — including that the
+     marker is inside each module rather than passed in by a caller who can
+     forget it. This list shrinks as routes move across. */
   it("imports and renders <SampleTag /> guarded on the sample flag", () => {
     for (const file of surfaces) {
       const source = read(file);

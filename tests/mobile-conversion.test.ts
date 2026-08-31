@@ -35,7 +35,8 @@ describe("the two mobile numbers keep their separate roles", () => {
       "src/components/kds/shell/ActionDock.tsx",
       "src/components/kds/shell/SiteHeader.tsx",
       "src/components/kds/shell/SiteFooter.tsx",
-      "src/components/home/Hero.tsx",
+      "src/components/kds/home/BatchesVisit.tsx",
+      "src/components/kds/home/HomeClose.tsx",
       "src/app/[locale]/contact/page.tsx",
       "src/app/[locale]/courses/[slug]/page.tsx"
     ]) {
@@ -46,9 +47,14 @@ describe("the two mobile numbers keep their separate roles", () => {
   });
 
   it("dials the owner-published number from every explicit call-for-demo action", () => {
+    /* Every surface that offers a call. The homepage hero no longer does —
+       its two actions are the demo and the catalogue — so it is not here;
+       the call lives in the menu, the batches block, the close and the
+       footer, which is where somebody ready to phone actually looks. */
     for (const file of [
       "src/components/kds/shell/SiteHeader.tsx",
-      "src/components/home/Hero.tsx",
+      "src/components/kds/home/BatchesVisit.tsx",
+      "src/components/kds/home/HomeClose.tsx",
       "src/app/[locale]/courses/[slug]/page.tsx"
     ]) {
       expect(read(file)).toContain("tel:+${site.callPhone}");

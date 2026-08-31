@@ -98,7 +98,14 @@
       "step2": "Machine",
       "step3": "Result",
       "threadCaption": "Studio photography is being shot. These three frames are reserved for it.",
-      "threadCta": "See all 11 courses"
+      "threadCta": "See all 11 courses",
+      "factDemoLabel": "Free demo · EMCAD DAHAO",
+      "factDemoValue": "{days} days, no charge",
+      "ctaCourses": "Explore courses",
+      "swatchMore": "+7 more",
+      "stageScreen": "01 screen",
+      "stageMachine": "02 machine",
+      "stageProof": "03 proof"
     },
     "trust": {
       "label": "What people already see",
@@ -109,7 +116,11 @@
       "whereValue": "Mota Varachha, Surat",
       "teachingLabel": "How it's taught",
       "teachingValue": "On live machines",
-      "source": "Rating and follower counts as supplied by the studio from its own Google, Instagram and Facebook pages. They are social proof, not a verified review score."
+      "source": "Rating and follower counts as supplied by the studio from its own Google, Instagram and Facebook pages. They are social proof, not a verified review score.",
+      "h2": "Reach and reputation",
+      "socialLabel": "Social",
+      "follow": "Follow the machine floor",
+      "partnersLabel": "Work sent to us by"
     },
     "rail": {
       "eyebrow": "Screen to stitch",
@@ -158,9 +169,11 @@
       "courseLabel": "The course",
       "softwareLabel": "Software",
       "durationLabel": "Duration",
+      "months": "{count} months",
       "practicalLabel": "Training",
       "practicalValue": "Live machine practical throughout",
       "demoLabel": "Free demo",
+      "demoValue": "{days} days · {hours} hours a session · no charge",
       "timingsLabel": "Batch timings",
       "timingsNote": "Four timings run. Tell us which suits you when you book — these are preferences, not a seat held on a date.",
       "feeLabel": "Fee",
@@ -206,11 +219,12 @@
       "p6c": "Frame, stabiliser, needle and tension are decisions, not defaults. Set the machine for the cloth in front of you and the same file runs the same way on any head."
     },
     "wall": {
-      "eyebrow": "Off the machine",
-      "h2": "Work made here",
-      "sub": "Pieces stitched on this floor, photographed as they came off the machine. Different techniques, different cloth, different shapes — which is why this is a wall and not a grid of six identical tiles.",
+      "eyebrow": "Made on this floor",
+      "h2": "Work that came off these machines.",
+      "sub": "Different techniques, different cloth, different shapes — which is why this is a wall and not a grid of identical tiles.",
       "count": "{count} pieces",
-      "cta": "See the full archive"
+      "cta": "See the full archive",
+      "pending": "Studio photography is being shot. Every frame above is reserved at the exact size its photograph will occupy, so nothing moves when the files arrive."
     },
     "studio": {
       "eyebrow": "Where you actually learn",
@@ -366,6 +380,76 @@
       "visitCta": "Visit the studio"
     },
     "cta": {
+      "h2": "Your design should not stop at the screen.",
+      "sub": "Come and prove it on the machine. Book the free two-day demo, or call and ask what the current batch is running.",
+      "signoff": "From screen to stitch."
+    },
+    "smp": {
+      "eyebrow": "Screen to stitch",
+      "h2": "One design, five states — including the one that went wrong.",
+      "sub": "Every institute shows you finished work. Here is the part they leave out: the same motif, stitched badly, with the faults marked and the file change that fixes each one. Follow it through.",
+      "railLabel": "Production stages",
+      "screenLabel": "Screen",
+      "screenTitle": "The EMCAD DAHAO file",
+      "screenNote": "Outline, control points and colour blocks — the design as it leaves the screen. Nothing here has met cloth yet.",
+      "pathLabel": "Path",
+      "pathTitle": "The stitch path",
+      "pathNote": "Travel order, density and where the needle enters. Quality is decided here, not at the machine.",
+      "failedLabel": "Failed",
+      "failedTitle": "The first stitch-out",
+      "failedNote": "Puckered ground, a thin and gapping fill, the inner line out of register, and a broken thread. Four faults, four different causes.",
+      "fixLabel": "Correction",
+      "fixTitle": "What changed in the file",
+      "fixNote": "Underlay added, density raised, travel order re-cut. Every change is made in the file — not by slowing the machine down.",
+      "proofLabel": "Proof",
+      "proofTitle": "The same design, run again",
+      "proofNote": "Clean satin, the echo in register, and a piece you would put your name on. That is the whole course in one object.",
+      "foot": "These are drawn diagrams of ordinary production faults, not a record of any student's work. Real studio and student photography is being shot."
+    },
+    "paths": {
+      "label": "What are you here for?",
+      "learnTitle": "I want to learn embroidery",
+      "learnSub": "Eleven techniques · free demo · current batches",
+      "improveTitle": "I already run a machine",
+      "improveSub": "Advanced technique · Machine Notes · fault troubleshooting",
+      "commercialTitle": "I need design or production work",
+      "commercialSub": "Digitising · job work · send a brief on WhatsApp"
+    },
+    "book": {
+      "eyebrow": "The sample book",
+      "h2": "Pick by the material, not the course name.",
+      "sub": "Eleven techniques across three families. Each one is taught at the machine, with a trainer beside you. Flick through and open the one that makes what you want to make.",
+      "filterLabel": "Filter by family",
+      "all": "All",
+      "months": "{count} months",
+      "cta": "Explore all {count} techniques"
+    },
+    "voices": {
+      "eyebrow": "What people say",
+      "h2": "The part you cannot get from a syllabus.",
+      "railLabel": "Reviews",
+      "before": "Before",
+      "learned": "Learned",
+      "now": "Now",
+      "ratingSource": "as reported by the studio",
+      "ratingNote": "No review count is shown and no rating schema is published: an aggregate rating needs a verified count, and the figure circulating online could not be confirmed."
+    },
+    "when": {
+      "eyebrow": "When you can come",
+      "h2": "Current batches, and where to find us.",
+      "sub": "Straight from the studio's records. If a batch is not listed here, it is not open yet.",
+      "full": "Full",
+      "seatsLeft": "{count} seats left",
+      "seeAll": "See every batch",
+      "emptyTitle": "No batch is open for booking right now.",
+      "emptyBody": "New batches open through the month. Message or call the studio and we will tell you what is starting next — or book the free demo now and pick a batch afterwards.",
+      "visitLabel": "Visit the studio",
+      "visitNote": "Walk in during opening hours. You do not need an appointment to see the floor."
+    },
+    "close": {
+      "faqEyebrow": "Before you come",
+      "faqH2": "The questions people actually ask.",
+      "faqAll": "All admission questions",
       "h2": "Your design should not stop at the screen.",
       "sub": "Come and prove it on the machine. Book the free two-day demo, or call and ask what the current batch is running.",
       "signoff": "From screen to stitch."

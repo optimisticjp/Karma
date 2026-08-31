@@ -469,6 +469,10 @@
  * that a page can carry one.
  */
 .kds .hoop {
+  /* A `<span>`, so the display MUST be stated: an inline box ignores width,
+     height, aspect-ratio and overflow, and the hoop silently degrades to a
+     rounded rectangle the size of whatever it wraps. */
+  display: block;
   position: relative;
   aspect-ratio: 1 / 1;
   border-radius: var(--r-round);
@@ -928,6 +932,281 @@
   border-left: 2px solid var(--brand-accent);
   padding-left: 0.875rem;
 }
+
+/* ==========================================================================
+ * 11e. THE HOMEPAGE
+ *
+ * Ten blocks, and every one a different shape. That is the point: the site may
+ * use familiar patterns, and what it must not do is use the same one ten
+ * times.
+ * ========================================================================== */
+
+/* ---- hero facts ------------------------------------------------------- */
+
+.kds .hero-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.5rem;
+  max-width: 30rem;
+}
+
+/* ---- entry paths ------------------------------------------------------ */
+
+/**
+ * A stitched index, not three cards. Three equal cards with an icon in a
+ * circle flatten three unequal choices into three equal boxes, and cost about
+ * three times the height on a phone.
+ */
+.kds .paths { margin-top: 0.75rem; }
+.kds .path-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.875rem;
+  padding-block: 0.875rem;
+}
+.kds .path-index { color: var(--ink-muted); }
+.kds .path-title { display: block; }
+.kds .path-sub { display: block; margin-top: 0.15rem; }
+.kds .path-arrow { color: var(--ink-muted); transition: transform 160ms ease; }
+.kds .path-row:hover .path-arrow { transform: translateX(3px); }
+.kds .path-row:hover .path-title { color: var(--brand-accent-strong); }
+.kds .path-rule { opacity: 0.6; }
+
+/* ---- the sample book -------------------------------------------------- */
+
+.kds .book-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.5rem 0 1.25rem; }
+.kds .book-strip { grid-auto-columns: minmax(11rem, 52vw); }
+@media (min-width: 48rem) { .kds .book-strip { grid-auto-columns: minmax(13rem, 28vw); } }
+@media (min-width: 64rem) { .kds .book-strip { grid-auto-columns: minmax(14rem, 19vw); } }
+
+.kds .sample { display: block; }
+.kds .sample-name { display: block; margin-top: 0.625rem; line-height: 1.25; }
+.kds .sample-produces {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 0.25rem;
+}
+.kds .sample-meta { display: block; margin-top: 0.4rem; }
+.kds .sample:hover .sample-name { color: var(--brand-accent-strong); }
+.kds .sample:hover .swatch { border-color: var(--ink); }
+
+/* ---- Screen → Machine → Proof ---------------------------------------- */
+
+.kds .smp { margin-top: 1.75rem; }
+.kds .smp-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+@media (min-width: 40rem) { .kds .smp-tabs { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.kds .smp-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-ui);
+  background-color: var(--s-paper);
+  text-align: start;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+.kds .smp-tab:hover { border-color: var(--ink); }
+.kds .smp-tab.is-on { border-color: var(--ink); background-color: var(--ink); color: var(--s-paper); }
+.kds .smp-tab.is-on .needle { background-color: var(--brand-accent); box-shadow: none; }
+.kds .smp-tab-index {
+  font-size: var(--t-micro);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+.kds .smp-tab-name { font-size: var(--t-meta); font-weight: 700; min-width: 0; }
+.kds .smp-thread { margin: 1rem 0 1.25rem; }
+
+.kds .smp-panel { display: grid; gap: 1.25rem; animation: kds-reveal 320ms ease both; }
+@media (min-width: 64rem) {
+  .kds .smp-panel { grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr); gap: 2.5rem; align-items: start; }
+}
+/**
+ * The drawing carries its own ground and a 400×250 viewBox, so the frame is
+ * sized by aspect ratio rather than by the SVG's intrinsic size. That keeps
+ * the five states EXACTLY the same size as each other — a stage that resized
+ * when you selected it would undo the whole "one object changing" idea.
+ */
+.kds .smp-figure {
+  aspect-ratio: 400 / 250;
+  overflow: hidden;
+  border: 1px solid var(--line-cool);
+  border-radius: var(--r-media);
+  background-color: var(--s-paper);
+}
+.kds .smp-figure svg { display: block; width: 100%; height: 100%; }
+.kds .smp-photo { margin-top: 1.25rem; }
+.kds .smp-foot { margin-top: 1.5rem; max-width: var(--w-prose); }
+
+@media (prefers-reduced-motion: reduce) {
+  .kds .smp-panel { animation: none; }
+}
+
+/* ---- the EMCAD panel -------------------------------------------------- */
+
+.kds .emcad { display: grid; gap: 1.75rem; }
+@media (min-width: 64rem) {
+  .kds .emcad { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 3rem; align-items: start; }
+}
+.kds .emcad-swatch { width: 4rem; }
+.kds .emcad-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.5rem;
+  margin-top: 1.5rem;
+}
+.kds .emcad-timings { margin-top: 1.5rem; }
+.kds .emcad-timing-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+  margin-top: 0.5rem;
+}
+.kds .emcad-timing-list li {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--line-cool);
+  border-radius: var(--r-ui);
+  background-color: var(--s-paper);
+  font-variant-numeric: tabular-nums;
+}
+
+/**
+ * The fee reads as a SHEET, because that is what a fee plan is: the one place
+ * on the site that should feel like a document handed across a desk rather
+ * than a panel on a page.
+ */
+.kds .emcad-fee {
+  padding: 1.5rem;
+  background-color: var(--s-paper);
+  border: 1px solid var(--line-cool);
+  border-radius: var(--r-card);
+}
+@media (min-width: 48rem) { .kds .emcad-fee { padding: 2rem; } }
+.kds .emcad-total {
+  font-family: var(--font-display);
+  font-size: var(--t-display);
+  font-weight: 800;
+  letter-spacing: var(--track-display);
+  line-height: 1;
+  margin-top: 0.5rem;
+}
+.kds .emcad-schedule { display: grid; gap: 1rem; }
+.kds .emcad-schedule li {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.625rem;
+}
+.kds .emcad-offline { margin-top: 1.25rem; }
+.kds .emcad-actions { display: flex; flex-wrap: wrap; gap: 0.625rem; margin-top: 1.25rem; }
+
+/* ---- the proof wall --------------------------------------------------- */
+
+.kds .wall-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.kds .wall-more { flex: none; }
+.kds .wall-lead { margin-top: 1.75rem; }
+
+/**
+ * THE WALL — masonry, because the pieces are genuinely different shapes.
+ *
+ * A grid of equal cells would crop a portrait bridal panel and a wide
+ * screen-and-result pair into the same rectangle, which throws away the one
+ * thing worth showing about textile work. CSS columns pack mixed ratios with
+ * no cropping and no JavaScript, and they stay two columns on a phone so the
+ * wall still reads as a wall rather than as a stack of single images.
+ */
+.kds .wall-masonry {
+  margin-top: 0.75rem;
+  columns: 2;
+  column-gap: 0.75rem;
+}
+@media (min-width: 48rem) {
+  .kds .wall-masonry { columns: 3; column-gap: 1rem; }
+}
+.kds .wall-piece {
+  break-inside: avoid;
+  margin-bottom: 0.75rem;
+}
+@media (min-width: 48rem) {
+  .kds .wall-piece { margin-bottom: 1rem; }
+}
+
+/* ---- voices ----------------------------------------------------------- */
+
+.kds .voices-rail { margin-top: 2.5rem; }
+.kds .voices-foot { display: grid; gap: 2rem; margin-top: 2.5rem; }
+@media (min-width: 64rem) {
+  .kds .voices-foot { grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr); gap: 3rem; align-items: start; }
+}
+
+/* ---- trust signals ---------------------------------------------------- */
+
+.kds .trust-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  gap: 1.25rem 1.5rem;
+}
+
+/* ---- batches + visit -------------------------------------------------- */
+
+.kds .when { display: grid; gap: 2rem; }
+@media (min-width: 64rem) {
+  .kds .when { grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.6fr); gap: 3rem; align-items: start; }
+}
+.kds .when-board { margin-top: 1.5rem; }
+.kds .when-empty {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background-color: var(--s-canvas);
+}
+.kds .when-empty-actions { display: flex; flex-wrap: wrap; gap: 0.625rem; margin-top: 1.125rem; }
+.kds .when-visit {
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background-color: var(--s-cloth);
+}
+.kds .when-address { font-style: normal; margin-top: 0.5rem; line-height: 1.5; }
+.kds .when-visit-actions { display: flex; flex-wrap: wrap; gap: 0.625rem; margin-top: 1.125rem; }
+
+/* ---- FAQ + close ------------------------------------------------------ */
+
+.kds .close-grid { display: grid; gap: 1.75rem; }
+@media (min-width: 64rem) {
+  .kds .close-grid { grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr); gap: 3rem; align-items: start; }
+}
+.kds .close-band { margin-top: var(--sp-section); }
+.kds .close-inner {
+  display: grid;
+  gap: 1.5rem;
+  padding-block: var(--sp-tight);
+}
+@media (min-width: 64rem) {
+  .kds .close-inner { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); align-items: end; gap: 3rem; }
+}
+.kds .close-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-top: 1.5rem; }
+.kds .close-signoff {
+  font-family: var(--font-display);
+  color: var(--brand-accent-strong);
+}
+@media (min-width: 64rem) { .kds .close-signoff { text-align: end; } }
 
 /* ==========================================================================
  * 12. SMALL OBJECTS

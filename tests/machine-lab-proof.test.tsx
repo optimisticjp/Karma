@@ -31,9 +31,13 @@ const stripComments = (source: string) =>
  * ------------------------------------------------------------------ */
 
 describe("the material wall", () => {
-  it("is one component, shared by the homepage teaser and the archive", () => {
-    expect(read("src/components/home/StudentWorkWall.tsx")).toContain("MaterialWall");
+  it("draws the archive and the homepage wall from the same six slots", () => {
+    /* The ARRANGEMENTS differ on purpose — the archive is a material wall and
+       the homepage is a bento anchored by the studio panorama — but both are
+       the manifest's six work photographs and neither invents a seventh. */
     expect(workPage).toContain("MaterialWall");
+    expect(read("src/components/kds/home/ProofWall.tsx")).toContain('photosInGroup("work")');
+    expect(read("src/components/work/MaterialWall.tsx")).toContain('photosInGroup("work")');
   });
 
   it("uses the six work slots and lets each keep its own shape", () => {

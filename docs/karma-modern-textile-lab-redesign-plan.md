@@ -2318,7 +2318,7 @@ checklist carries the proof-replacement gate.
 
 # Phase 2 — Header, menu, locale switch, footer
 
-**Status:** ✅ Complete — PR #63, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #63, merged as `02c6620`
 
 The shell is the one thing on every page, so this is the phase where the site
 starts to feel like a different product before a single page is rebuilt.
@@ -2446,7 +2446,7 @@ the page unlocks.
 
 # Phase 3 — Homepage rebuilt from zero
 
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #64
 
 Goal:
 
@@ -2470,6 +2470,114 @@ Delete/move obsolete homepage components once no longer needed.
 Acceptance:
 
 At 390px the page must feel substantially shorter, more visual and easier to decide from than the current baseline.
+
+## What shipped
+
+Ten blocks in `src/components/kds/home/`, composed by a `page.tsx` that is now
+a list of ten tags and a comment explaining the order. All twenty-two files in
+`src/components/home/` are **deleted**, not hidden: the directory does not
+exist, and a test asserts it.
+
+| # | Block | What it answers | Shape |
+| --- | --- | --- | --- |
+| 1 | `HomeHero` | What is this, what do I do? | Editorial split + threaded photo scene |
+| 2 | `EntryPaths` | Which of these three people am I? | Stitched index, three rows |
+| 3 | `SampleBook` | What can I actually learn? | Family tabs + horizontal swatch rail |
+| 4 | `ScreenMachineProof` | Prove the claim | Five-state tablist, one motif |
+| 5 | `EmcadPanel` | How long, how much, when, how do I pay? | Document sheet on cloth |
+| 6 | `ProofWall` | Show me the work and the floor | Wide lead + masonry |
+| 7 | `HomeVoices` | Does anyone else rate it? | Four different proof formats |
+| 8 | `TrustSignals` | How big is this, who sends work? | Typographic counters + label rail |
+| 9 | `BatchesVisit` | When can I come, and where to? | Schedule board + address panel |
+| 10 | `HomeClose` | Anything else? Then what? | Accordion + close |
+
+**No block shares a shape with another, and no two adjacent blocks share a
+ground.** The grounds run canvas → paper → canvas → mist → cloth → canvas →
+paper → cloth → paper → canvas; all four are in play and the adjacency rule is
+asserted rather than described. `on-mist` is the cool register — screen, file,
+process — so it belongs to the Screen → Proof rail and NOT to the fee panel,
+which is paperwork and sits on cloth.
+
+## The order is the argument
+
+The old page put the one course with a confirmed duration and a published fee
+**eighth**, behind five screens of preamble, while four separate sections
+argued the same machine claim and three carried 1,900px of sample cards. The
+new order is the order the questions arrive in, and a test asserts the money
+question lands in the first half.
+
+Nothing verified was lost. What did not come back: the four overlapping
+"why us" sections, the video shelf, the follower-count rail floated beside
+machine facts, and the second fees chapter.
+
+## Trust and proof, designed rather than deferred
+
+Four formats, not four copies of one card: a featured quote at heading scale, a
+swipeable review rail, a before → learned → now journey, and the rating as a
+figure. Plus the counters, the social blocks and the stitched garment-label
+partner rail. Every sample item carries its own marker, the rating is
+`owner_provided` and says so, and **no review count is published anywhere** —
+an `AggregateRating` needs one and the figure circulating online could not be
+confirmed. `src/lib/schema.ts` still cannot import the proof registry.
+
+## Measured
+
+| Width | `/en` | `/gu` | Sideways drag |
+| --- | --- | --- | --- |
+| 390 | 12,248px | 11,857px | no |
+| 768 | 10,547px | 10,785px | no |
+| 820 | 10,667px | 10,924px | no |
+| 1024 | 9,552px | 9,572px | no |
+| 1440 | 10,190px | 10,367px | no |
+
+**Baseline at 390 was 18,665px across 20 sections.** The new page is 12,248px
+across 10 — 34% shorter, with more photography reserved, not less.
+
+## Three bugs the browser found and the source could not
+
+1. **`.hoop` was `display: inline`.** It renders on a `<span>`, so
+   `aspect-ratio`, `width`, `height` and `overflow` were all ignored and the
+   embroidery hoop was a rounded rectangle the size of whatever it wrapped —
+   everywhere it appears, including `/design`. This is the same failure that
+   made `.thread-v` invisible in Phase 1, so the regression test was widened
+   from the two threads to **every span-rendered primitive**.
+2. **The bento could not pack the wall.** The six work photographs are at three
+   ratios on purpose; a fixed-cell grid left holes the size of the tiles. The
+   wall is masonry now (CSS columns, two on a phone, three from 48rem), each
+   frame captioned with the shot it is holding.
+3. **Two message keys did not exist.** `home.emcad.months` and
+   `home.emcad.demoValue` were rendered by a component and absent from both
+   catalogues. next-intl does not fail a build for that — it logs
+   `MISSING_MESSAGE` and prints the key path into the page. A new test resolves
+   **every literal `t("…")` in `src/components/kds/**` against both
+   catalogues**, so the class of defect cannot ship again.
+
+## Verified
+
+**913 tests** across 57 files. `tests/machine-lab-homepage.test.tsx` and
+`tests/machine-lab-shell.test.tsx` were replaced by
+`tests/kds-homepage.test.ts` (35): they asserted the composition of a page that
+no longer exists, and every factual rule underneath them — EMCAD figures
+rendered from the record, no online payment, no invented machine specification,
+no student name or earning on a frame, no other digitising package, the
+signature interaction never autoplaying or needing a drag — was carried
+forward against the new components.
+
+## Carried forward
+
+`messages.home` still holds **sixteen namespaces** written for the twenty-
+section page that no component reads (`rail`, `workflow`, `catalogue`,
+`studio`, `machineProof`, `sts`, `work`, `proof`, `trainers`, `videos`,
+`reviews`, `investment`, `visit`, `faq`, `stories`, `cta`). They are
+translated assets and several belong to subjects whose own pages are rebuilt in
+Phases 4–7, so they are kept and **resolved in the Phase 8 copy pass** — reused
+where a rebuilt page wants them, removed where nothing does.
+
+The **10:30 pm vs 23:00 last-class conflict** is visible on this page for the
+first time in one screen: the footer/visit panel says "evening batches till
+10:30 pm" while the EMCAD timings render `20:00–23:00` from
+`course-operations.ts`. Both come from existing verified-or-declared sources
+and the discrepancy is the owner's to resolve (`docs/content-checklist.md`).
 
 ---
 

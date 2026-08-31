@@ -27,9 +27,17 @@ const stripComments = (source: string) =>
  * ------------------------------------------------------------------ */
 
 describe("the course index", () => {
-  it("uses the same Machine Index as the homepage, so the two cannot drift", () => {
+  it("reads the same catalogue as the homepage, so the two cannot drift", () => {
+    /* The PRESENTATIONS are now deliberately different — `/courses` is a
+       ledger and the homepage is a rail of swatches, because the plan asks
+       for each surface to be composed for what it carries rather than for
+       one component to be reused everywhere.
+
+       What must not diverge is the DATA. Both read `coursesByFamily`, so a
+       course cannot exist on one and be missing from the other. */
     expect(indexPage).toContain("MachineIndex");
-    expect(read("src/components/home/CourseCatalogue.tsx")).toContain("MachineIndex");
+    expect(indexPage).toContain("coursesByFamily");
+    expect(read("src/components/kds/home/SampleBook.tsx")).toContain("coursesByFamily");
     /* And the old hand-rolled catalogue row is gone. */
     expect(indexPage).not.toContain("course-row");
   });

@@ -1,31 +1,20 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Hero } from "@/components/home/Hero";
-import { TrustRail } from "@/components/home/TrustRail";
-import { ProductionRailSection } from "@/components/home/ProductionRailSection";
-import { EmcadDecision } from "@/components/home/EmcadDecision";
-import { StudentWorkWall } from "@/components/home/StudentWorkWall";
-import { WhereYouLearn } from "@/components/home/WhereYouLearn";
-import { HomepageStats } from "@/components/home/HomepageStats";
-import { CourseCatalogue } from "@/components/home/CourseCatalogue";
-import { ProductionWorkflow } from "@/components/home/ProductionWorkflow";
-import { ProblemsSolved } from "@/components/home/ProblemsSolved";
-import { MachineProof } from "@/components/home/MachineProof";
-import { Reviews } from "@/components/home/Reviews";
-import { Trainers } from "@/components/home/Trainers";
-import { Proof } from "@/components/home/Proof";
-import { LatestVideos } from "@/components/home/LatestVideos";
-import { BatchesTeaser } from "@/components/home/BatchesTeaser";
-import { Investment } from "@/components/home/Investment";
-import { HomeFaq } from "@/components/home/HomeFaq";
-import { BusinessBand } from "@/components/home/BusinessBand";
-import { VisitStudio } from "@/components/home/VisitStudio";
-import { CtaBand } from "@/components/home/CtaBand";
+import { HomeHero } from "@/components/kds/home/HomeHero";
+import { EntryPaths } from "@/components/kds/home/EntryPaths";
+import { SampleBook } from "@/components/kds/home/SampleBook";
+import { ScreenMachineProof } from "@/components/kds/home/ScreenMachineProof";
+import { EmcadPanel } from "@/components/kds/home/EmcadPanel";
+import { ProofWall } from "@/components/kds/home/ProofWall";
+import { HomeVoices } from "@/components/kds/home/HomeVoices";
+import { TrustSignals } from "@/components/kds/home/TrustSignals";
+import { BatchesVisit } from "@/components/kds/home/BatchesVisit";
+import { HomeClose } from "@/components/kds/home/HomeClose";
 import { routing } from "@/i18n/routing";
 import { pageMeta } from "@/lib/seo";
 
-// Content Desk proof/FAQ/gallery/stories are database-backed. Keep the page
-// request-time until the planned R2 incremental cache/ISR work is activated.
+/* Batches and the published FAQs are database-backed. Keep the page
+   request-time until the planned incremental-cache work is activated. */
 export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
@@ -43,66 +32,43 @@ export async function generateMetadata({
 }
 
 /**
- * Homepage composition — the 30-second decision.
+ * THE HOMEPAGE.
  *
- * The visitor arrives from an Instagram reel, on a phone, on mobile data. The
- * order below is the order that answers their questions as they actually ask
- * them, rather than the order a brochure would use:
+ * Ten blocks, rebuilt from a blank composition. The page it replaces had
+ * TWENTY sections and ran 18,665px at 390px, and its problem was not length —
+ * it was that four separate sections argued the same machine claim, three
+ * sections carried 1,900px of `⚠ Sample` cards, and the one course with a
+ * confirmed fee sat behind five screens of preamble.
  *
- *   1.  What is this, and what do I do?      Hero — offer, three actions, facts
- *   2.  Does anyone else rate it?            Trust rail
- *   3.  Show me the claim.                   01 DESIGN → 02 MACHINE → 03 RESULT
- *   4.  What does the work actually involve? Workflow 01→06
- *   5.  What can I learn?                    Machine Index — all eleven
- *   6.  Will it fix my problem?              Six production faults, named
- *   7.  Prove it.                            File → failed → correction → stitch
- *   8.  What does it cost, exactly?          EMCAD DAHAO decision block
- *   9.  What does a fee cover?               What is and is not included
- *  10.  When does it run?                    Batches
- *  11.  Show me the work.                    Material wall · gallery · stories
- *  12.  Who teaches, and where?              Trainers · the studio floor
- *  13.  Anything else?                       Channel · reviews · visit · FAQ
- *  14.  Not a student?                       Business door
- *  15.  Close.                               CTA
+ * THE ORDER IS THE ORDER THE QUESTIONS ARRIVE IN
+ * ----------------------------------------------
+ *  1  Hero               What is this and what do I do?
+ *  2  Entry paths        Which of these three people am I?
+ *  3  Sample book        What can I actually learn?
+ *  4  Screen → Proof     Prove the claim. ← the signature interaction
+ *  5  EMCAD panel        How long, how much, when, and how do I pay?
+ *  6  Proof wall         Show me the work and the floor.
+ *  7  Voices             Does anyone else rate it?
+ *  8  Trust signals      How big is this, and who sends work?
+ *  9  Batches + visit    When can I come, and where to?
+ * 10  FAQ + close        Anything else? Then here is the one action.
  *
- * Steps 6 and 7 are the ones no competing institute has. Naming six real
- * production faults and then showing a stitch-out that failed, with the file
- * change that fixes it, is worth more than any adjective on the page.
+ * EVERY BLOCK IS A DIFFERENT SHAPE
+ * --------------------------------
+ * A hero scene, a stitched index, a horizontal sample rail, a five-state
+ * tablist, a document-like fee sheet, a bento wall, four proof formats, a
+ * typographic counter row, a schedule board and an accordion. That is the
+ * addendum's §2 rule applied: the site may use familiar patterns, and what it
+ * must not do is use the same one nine times.
  *
- * Step 8 is the newest and the most valuable: the studio confirmed EMCAD
- * DAHAO's duration, timetable and fee in writing, so the page states them
- * plainly instead of asking people to enquire about a number. It reads those
- * figures straight from `src/content/course-operations.ts`, and it names the
- * one course they belong to — the other ten have no confirmed duration and no
- * published fee, and must not inherit either by standing nearby.
- *
- * The <ScreenToStitch> slider is deliberately not here. It showed the same
- * motif as file, path and finished piece — which the machine-proof strip now
- * does with two more states and a failure, in less height. The component
- * stays for a course detail page, where the interaction has room to earn it.
- *
- * BAND RHYTHM — MACHINE / MATERIAL / HUMAN / INFO
- * -----------------------------------------------
- * Since the light-first pass there are no dark bands, so the rule that keeps
- * a long scroll from reading as one slab is surface CHANGE, not darkness: no
- * two consecutive banded sections may share a band. MACHINE is Steel Mist
- * (the hero, the production rail, the EMCAD decision, the close), MATERIAL is
- * Worktable White (the index, the work wall), HUMAN is Raw Silk (trainers, the
- * studio, the footer) and INFO is Cotton (facts and decisions). The one
- * deliberate repeat is the warm chapter — trainers, then where you learn —
- * which carries a hairline instead of a colour change.
- *
- * ORDER — the 30-second decision, compacted
- * -----------------------------------------
- * Reordered 2026-08-31 to the compact-density plan's §6 rhythm. The EMCAD
- * decision block used to be the EIGHTH section: the one course with a
- * confirmed duration and a published fee sat behind the rail, the workflow,
- * the catalogue, the problems and the machine proof, and a visitor asking
- * "how long, how much" travelled four screens to find out. It is third now,
- * with <Investment> — the institute-wide half of the money question —
- * immediately after it, so the two halves of one question are one chapter.
- * The rail and the eleven-course index follow, which is the order the plan
- * asks for and also the order the questions actually arrive in.
+ * WHAT IS DELIBERATELY NOT HERE
+ * -----------------------------
+ * Three sample-only sections left the homepage in the earlier direction and
+ * have NOT come back as decoration — they came back as designed proof formats
+ * that declare what they are. What did not come back at all: the four
+ * overlapping "why us" sections, the video shelf, the trust rail of follower
+ * counts floated beside machine facts, and the second fees chapter. Nothing
+ * verified was lost; every fact removed is on the page that owns it.
  */
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -110,35 +76,16 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
-      <Hero />
-      <TrustRail />
-
-      <EmcadDecision />
-      <Investment />
-
-      <ProductionRailSection />
-      <CourseCatalogue />
-      <BatchesTeaser />
-
-      <ProblemsSolved />
-      <MachineProof />
-      <ProductionWorkflow />
-
-      <StudentWorkWall />
-      <HomepageStats />
-      <Proof />
-
-      <Trainers />
-      <WhereYouLearn />
-
-      <LatestVideos />
-      <Reviews />
-      <VisitStudio />
-
-      <HomeFaq />
-
-      <BusinessBand />
-      <CtaBand />
+      <HomeHero />
+      <EntryPaths />
+      <SampleBook />
+      <ScreenMachineProof />
+      <EmcadPanel />
+      <ProofWall />
+      <HomeVoices />
+      <TrustSignals />
+      <BatchesVisit />
+      <HomeClose />
     </>
   );
 }

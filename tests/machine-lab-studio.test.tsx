@@ -29,10 +29,13 @@ describe("the studio production chain", () => {
     expect([...positions].sort((a, b) => a - b)).toEqual(positions);
   });
 
-  it("reuses the homepage's rail rather than forking it", () => {
+  it("uses the shared rail rather than forking one of its own", () => {
+    /* The rail is generic — its stages are a prop — which is what let the
+       B2B chain reuse it. The homepage no longer renders it: its signature is
+       now a five-state sequence that carries a failed stitch-out and its
+       correction, which a three-stage rail cannot express. The rail stays for
+       the surfaces whose story genuinely is three stages. */
     expect(rail).toContain("ProductionRail");
-    expect(read("src/components/home/ProductionRailSection.tsx")).toContain("ProductionRail");
-    /* Which is the whole reason the rail takes its stages as a prop. */
     expect(railBase).toContain("stages: RailStage[]");
   });
 
