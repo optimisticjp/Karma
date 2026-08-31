@@ -11,11 +11,16 @@ import "../thread-machine-proof.css";
  * script rules, and the new public system on top, and it loads NEITHER
  * `premium.css` NOR `machine-lab.css`.
  *
- * That omission is the useful part. Everything on `/design` is rendered by the
- * new system alone, with none of the old one underneath it, so what the page
- * shows is what the system actually does rather than what it does while
- * standing on two older stylesheets. If a primitive only looks right on a
- * public page, it is borrowing, and this page is where that shows up.
+ * That omission USED to be the useful part: while the public layout still
+ * loaded both Console sheets, this page was the only place a primitive could
+ * be seen standing on its own, and anything that only looked right on a public
+ * page was borrowing.
+ *
+ * Phase 11 cut those two imports from the public layout as well, so the public
+ * site and this reference now render on exactly the same two stylesheets. The
+ * check this page performed is now structural rather than observational — and
+ * `tests/kds-cleanup.test.ts` asserts the imports on all three roots, so it
+ * cannot quietly come back.
  */
 
 export const metadata: Metadata = {

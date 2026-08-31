@@ -779,7 +779,7 @@ middleware. It is the rendered reference for the system at `/design`.
 (#62), Phase 2 shell (#63), Phase 3 homepage (#64), Phase 4 courses (#65),
 Phase 5 conversion routes (#66), Phase 6 work and notes (#67), Phase 7
 secondary routes (#68), Phase 8 copy and SEO (#69), Phase 9 photography (#70),
-Phase 10 hardening. The homepage
+Phase 10 hardening (#71), Phase 11 audit and cleanup. The homepage
 is ten blocks
 in `src/components/kds/home/`, no two of the same shape; the twenty-two
 components in `src/components/home/` are deleted. Measured at 390px it is
@@ -867,6 +867,18 @@ carried forward — is in
     nothing scrolling sideways so the overflow was silently cut off. It hit
     `.cases`, `.dock` (via a filter chip that could not wrap and widened the
     whole document) and a 22px link in the family list.
+
+**And the one from Phase 11 that changes how the site is built:**
+
+11. **The public layout imports `globals.css` and `thread-machine-proof.css`,
+    and nothing else.** It also imported `premium.css` and `machine-lab.css` —
+    the Console's system — so a public page downloaded **196 KB** of CSS where
+    it now downloads **116 KB**, and the old visual language could still reach
+    a public page. `/admin` still imports both, unchanged; `globals.css` stays
+    because Tailwind and the `@theme` tokens live there. Seventeen superseded
+    components are deleted outright rather than left unimported, and both
+    public forms moved onto the rebuilt system — presentation only, with every
+    defence asserted in `tests/kds-cleanup.test.ts`.
 
 ---
 
@@ -2257,6 +2269,7 @@ which is the point — the policy survives a refactor:
 | `kds-work-notes` | the archive and the Content Desk feed staying two different things; the case notes carrying no sample marker because they claim nothing about a person; the notes search matching the question, fault and tags but never the answer; a note page answering before it explains, emitting `TechArticle` and never a `Person` |
 | `kds-admissions` | the batch board's filters built from the rows, its three distinct empty states and its bounded query; the admissions page carrying no second batch list; the form at a reading measure with 44px controls, the system's primitives and no console palette; none of the three routes offering a way to pay online |
 | `kds-courses` | the catalogue's five blocks and the course template's nine, in order and with no two adjacent grounds alike; no fee on a tile or in the hero; a duration only where the owner confirmed one; the same media box photographed or not; no payment provider, machine specification, unconfirmed trainer or week/month inside a syllabus module title |
+| `kds-cleanup` | the public layout loading only Tailwind and the public sheet while `/admin` keeps its own; every superseded component deleted rather than unimported, and nothing importing one; no public markup speaking the old vocabulary; both public forms on the rebuilt system with honeypot, minimum-time check, Turnstile, live region, guardian mobile and terms version all still present |
 | `kds-routing` | an unknown localized path answering 404 through a middleware rewrite rather than a soft 200, with the public-path table matching the content modules exactly and agreeing with the sitemap about what is indexable; nothing overflowing a 320px phone; a standalone course link carrying the 44px floor; every animation reduced to nothing under `prefers-reduced-motion`; a visible focus ring |
 | `kds-photo` | the manifest holding exactly the owner's 32 slots in the briefed groups, each with the intrinsic size the frame reserves from; every slot placed in a real composition and resolved by slug rather than by position; the three courses with no station falling back to their own stitch swatch; no stock, generated or remote image anywhere; the placeholder honest to a screen reader and the shoot guidance never presented as an alt; no call site imposing its own ratio on a reserved frame |
 | `kds-copy-seo` | no public message the site does not render, and both catalogues the same shape with no empty Gujarati string; every page's title and description unique and inside what a result shows; no outcome, fee or guarantee promised in a search result that the page itself refuses to claim; a breadcrumb on every indexable second-level route, localized on both crumbs; hreflang and the sitemap derived from the one locale list; no route submitted that its own page tells the crawler to ignore; no Wilcom, no rupee figure, no machine specification and no duration for a course the owner has not confirmed one for |

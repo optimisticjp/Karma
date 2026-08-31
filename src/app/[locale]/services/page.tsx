@@ -303,7 +303,9 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
             {t("formTitle")}
           </h2>
           <div className="split">
-            <div className="form-shell min-w-0">
+            {/* `<BriefForm>` carries its own `.form-shell`. Wrapping it in a
+                second one drew a box inside a box. */}
+            <div className="min-w-0">
               <BriefForm />
             </div>
             <aside className="min-w-0">

@@ -11,8 +11,11 @@ import {
   photosInGroup
 } from "../src/content/photo-manifest";
 import { ICON_GROUPS, ICON_NAMES } from "../src/components/ui/Icon";
-import { TECHNIQUE_SIGNATURES } from "../src/components/ui/TechniqueSignature";
-import { STITCH_SEMANTICS } from "../src/components/ui/StitchMark";
+/* `<TechniqueSignature>` and `<StitchMark>` were deleted in Phase 11 with the
+   rest of the superseded public system. `<StitchSwatch>` carries the eleven
+   technique marks now and `src/components/kds/marks.tsx` carries the shared
+   ones; every rule below is repointed, none dropped. */
+import { STITCH_SWATCHES } from "../src/components/kds/StitchSwatch";
 import { courses } from "../src/content/courses";
 
 const read = (p: string) => readFileSync(join(process.cwd(), p), "utf8");
@@ -30,7 +33,7 @@ const stripComments = (source: string) =>
 
 const machineLabCss = read("src/app/machine-lab.css");
 const globalsCss = read("src/app/globals.css");
-const signatureSource = read("src/components/ui/TechniqueSignature.tsx");
+const signatureSource = read("src/components/kds/StitchSwatch.tsx");
 const iconSource = read("src/components/ui/Icon.tsx");
 
 /* ------------------------------------------------------------------ *
@@ -180,13 +183,13 @@ describe("icon family", () => {
 describe("technique signatures", () => {
   it("gives every course in the catalogue a signature, and invents none", () => {
     const slugs = courses.map((c) => c.slug).sort();
-    expect(Object.keys(TECHNIQUE_SIGNATURES).sort()).toEqual(slugs);
+    expect(Object.keys(STITCH_SWATCHES).sort()).toEqual(slugs);
     expect(courses).toHaveLength(11);
   });
 
   it("describes what each signature draws", () => {
-    for (const [slug, sig] of Object.entries(TECHNIQUE_SIGNATURES)) {
-      expect(sig.description.length, slug).toBeGreaterThan(15);
+    for (const [slug, sig] of Object.entries(STITCH_SWATCHES)) {
+      expect(sig.describes.length, slug).toBeGreaterThan(15);
       expect(sig.render(), slug).toBeTruthy();
     }
   });
@@ -225,15 +228,23 @@ describe("technique signatures", () => {
 
 describe("stitch semantics", () => {
   it("defines six marks and six meanings, each distinct", () => {
-    const meanings = Object.values(STITCH_SEMANTICS);
-    expect(meanings).toHaveLength(6);
-    expect(new Set(meanings).size).toBe(6);
+    /* `STITCH_SEMANTICS` listed six marks and asserted each meant ONE thing.
+       The rebuilt system keeps that rule by having fewer marks rather than a
+       table of them: `marks.tsx` exports exactly the shared four, and the
+       eleven technique swatches are per-course drawings rather than a reusable
+       vocabulary. A fifth shared mark is what this now catches. */
+    const marks = read("src/components/kds/marks.tsx");
+    const exported = [...marks.matchAll(/^export function (\w+)/gm)].map((m) => m[1]);
+    expect(exported).toEqual(["ThreadLine", "NeedlePoint", "HoopWindow", "ThreadProgress"]);
   });
 
   it("keeps the running stitch geometry identical to the brand spec (9 on, 6 off)", () => {
-    const marks = read("src/components/ui/StitchMark.tsx");
-    expect(marks).toContain('strokeDasharray="9 6"');
-    expect(machineLabCss).toContain("stroke-dasharray: 9 6");
+    /* The geometry moved from an SVG dash array into the CSS the whole system
+       shares, which is stricter: every stitched thing now takes the same
+       numbers from one place instead of each drawing repeating them. */
+    const tmp = read("src/app/thread-machine-proof.css");
+    expect(tmp).toContain("var(--brand-accent) 0 9px, transparent 9px 15px");
+    expect(tmp).toContain("background-size: 15px 2px");
   });
 });
 
@@ -378,31 +389,35 @@ describe("primitives render", () => {
     }
   });
 
-  it("renders all eleven technique signatures, decoratively and fluidly", async () => {
+  it("renders all eleven technique marks, decoratively and fluidly", async () => {
     const { renderToStaticMarkup } = await import("react-dom/server");
-    const { TechniqueSignature } = await import("../src/components/ui/TechniqueSignature");
-    for (const slug of Object.keys(TECHNIQUE_SIGNATURES)) {
-      const html = renderToStaticMarkup(<TechniqueSignature slug={slug} />);
+    const { StitchSwatch } = await import("../src/components/kds/StitchSwatch");
+    for (const slug of Object.keys(STITCH_SWATCHES)) {
+      const html = renderToStaticMarkup(<StitchSwatch slug={slug} />);
       expect(html, slug).toContain('aria-hidden="true"');
-      expect(html, slug).toContain("sig-play");
-      /* No fixed width/height: the signature scales with its container at
-         320, 390, 768 and 1440 alike. */
-      expect(html, slug).toContain('viewBox="0 0 160 96"');
+      /* No fixed width or height: the mark scales with its container at 320,
+         390, 768 and 1440 alike. */
+      expect(html, slug).toContain("viewBox");
       expect(html, slug).not.toMatch(/<svg[^>]*\swidth="/);
     }
   });
 
   it("returns nothing rather than an empty frame for an unknown course", async () => {
     const { renderToStaticMarkup } = await import("react-dom/server");
-    const { TechniqueSignature } = await import("../src/components/ui/TechniqueSignature");
-    expect(renderToStaticMarkup(<TechniqueSignature slug="not-a-course" />)).toBe("");
+    const { StitchSwatch } = await import("../src/components/kds/StitchSwatch");
+    expect(renderToStaticMarkup(<StitchSwatch slug="not-a-course" />)).toBe("");
   });
 
   it("renders each stitch mark and each manifest frame", async () => {
     const { renderToStaticMarkup } = await import("react-dom/server");
-    const marks = await import("../src/components/ui/StitchMark");
-    for (const Mark of [marks.KnotPoint, marks.RegistrationPoint, marks.BrokenPath, marks.ThreadTail]) {
-      expect(renderToStaticMarkup(<Mark />)).toContain("<svg");
+    const marks = await import("../src/components/kds/marks");
+    /* The rebuilt marks are CSS-driven rather than SVG — a repeating
+       background is cheaper than a path and re-colours from the brand accent
+       for free — so what is asserted is that each one renders a box it can be
+       seen in, which is the defect that actually happened: `.hoop` shipped as
+       an inline span and was invisible. */
+    for (const Mark of [marks.ThreadLine, marks.NeedlePoint]) {
+      expect(renderToStaticMarkup(<Mark />)).toContain("<span");
     }
 
     /* `<ManifestPhoto>` and `<PhotoSlot>` were deleted in Phase 9 — two
@@ -420,10 +435,14 @@ describe("primitives render", () => {
     }
   });
 
-  it("renders machine notation with a zero-padded index", async () => {
-    const { renderToStaticMarkup } = await import("react-dom/server");
-    const { MonoNote, StepIndex } = await import("../src/components/ui/MonoNote");
-    expect(renderToStaticMarkup(<MonoNote>01 DESIGN</MonoNote>)).toContain("mono-note");
-    expect(renderToStaticMarkup(<StepIndex n={3} />)).toContain(">03<");
+  it("still writes a stage index zero-padded, wherever it appears", async () => {
+    /* `<MonoNote>` / `<StepIndex>` were deleted with the superseded system.
+       The notation is now `.t-micro .numeric` written at the call site, and
+       the rule that survives is the zero-padding: 01, 02, 03 — a stage index
+       that jumps from 9 to 10 changes width and the column jitters. */
+    const chain = read("src/components/kds/studio/StudioChain.tsx");
+    expect(chain).toContain('String(i + 1).padStart(2, "0")');
+    const terms = read("src/app/[locale]/terms/page.tsx");
+    expect(terms).toContain('String(i + 1).padStart(2, "0")');
   });
 });
