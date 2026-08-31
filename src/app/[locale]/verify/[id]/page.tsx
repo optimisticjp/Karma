@@ -34,7 +34,7 @@ export default async function VerifyResultPage({
         <h1 className="text-h2 font-display">{t("title")}</h1>
 
         {!dbConfigured ? (
-          <div className="card mt-8 border-marigold p-6 md:p-8">
+          <div className="card mt-8 border-marigold p-3.5 md:p-5">
             <p className="font-semibold">{t("unavailable")}</p>
             <p className="mt-2 font-mono text-smallmeta text-stone">{certNo}</p>
             <p className="mt-3 text-smallmeta">
@@ -42,7 +42,7 @@ export default async function VerifyResultPage({
             </p>
           </div>
         ) : cert ? (
-          <div className="card mt-8 border-success p-6 md:p-8">
+          <div className="card mt-8 border-success p-3.5 md:p-5">
             <div className="flex items-center gap-4">
               <span className="seal-in flex h-14 w-14 flex-none items-center justify-center rounded-full border-2 border-dashed border-success">
                 <Icon name="check" size={26} className="text-success" strokeWidth={2} />
@@ -75,7 +75,7 @@ export default async function VerifyResultPage({
             ) : null}
           </div>
         ) : (
-          <div className="card mt-8 border-error p-6 md:p-8">
+          <div className="card mt-8 border-error p-3.5 md:p-5">
             <p className="text-h3 font-display text-error">{t("invalidTitle")}</p>
             <p className="mt-2 font-mono text-smallmeta text-stone">{certNo}</p>
             <p className="u-lede">{t("invalidBody")}</p>

@@ -41,19 +41,35 @@ const css = read("src/app/machine-lab.css");
  * ------------------------------------------------------------------ */
 
 describe("page rhythm holds across the whole public site", () => {
-  it("keeps dark bands rare on every page", () => {
-    /* The homepage has four across fifteen sections — the hero, the claim,
-       the money and the close — and each is followed by a light band. That
-       is punctuation. A fifth would be a pattern, and a pattern is
-       wallpaper. */
-    const homeSections = publicComponents.filter(
-      (f) => f.startsWith("src/components/home/") && read(f).includes("on-carbon")
+  it("puts no dark band on any public surface", () => {
+    /* LIGHT-FIRST, 2026-08-31. This used to cap dark bands at four on the
+       homepage and two per page — and that cap is exactly the shape of
+       assertion that goes SILENTLY VACUOUS when the real number reaches zero.
+       It is now the rule the owner actually gave: the public site does not
+       use a dark full-width surface at all.
+   
+       `.on-carbon` itself is still defined in premium.css, deliberately — the
+       compact-density plan §3 keeps a dark surface available for a small
+       isolated overlay whose own content needs the contrast. What may not
+       come back is a public SECTION wearing it. */
+    const offenders = [...publicComponents, ...publicPages].filter((f) =>
+      stripComments(read(f)).includes("on-carbon")
     );
-    expect(homeSections.length).toBeLessThanOrEqual(4);
+    expect(offenders, "no public file may wear .on-carbon").toEqual([]);
 
-    for (const page of publicPages) {
-      const inline = (read(page).match(/on-carbon/g) ?? []).length;
-      expect(inline, page).toBeLessThanOrEqual(2);
+    /* Non-vacuity: a walk that silently matched nothing would pass the line
+       above without proving anything. */
+    expect(publicComponents.length).toBeGreaterThan(20);
+    expect(publicPages.length).toBeGreaterThan(10);
+  });
+
+  it("still varies its surface, so a long scroll is not one flat ground", () => {
+    /* The danger on the other side of light-first is a beige monotone. The
+       four-band vocabulary is what prevents it, and every one of the four
+       must still be in use somewhere on the public site. */
+    const all = [...publicComponents, ...publicPages].map((f) => read(f)).join("\n");
+    for (const band of ["band-machine", "band-material", "band-human", "band-info"]) {
+      expect(all, band).toContain(band);
     }
   });
 

@@ -186,7 +186,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
               <figcaption className="contact-entrance-caption">{t("entranceCaption")}</figcaption>
             </figure>
 
-            <div className="card mt-6 p-5 md:p-6">
+            <div className="card mt-6 p-3.5 md:p-4">
               {/* The landmark already sits with the address above; repeating it
                   here would be emphasis by duplication. This card carries the
                   part the address cannot: which floor, and what to do if you

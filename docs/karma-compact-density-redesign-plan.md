@@ -1191,7 +1191,7 @@ The 32 real photographs remain placeholders until the files arrive.
 Execute as separate PRs. Do not wait for owner review between phases unless blocked by an actual owner fact.
 
 ## Phase 1 — Research + density audit
-**Status:** ✅ Complete — PR #43, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #43, merged as `628a1e8`
 
 Delivered:
 
@@ -1224,18 +1224,55 @@ Findings that changed the plan's own assumptions:
 No broad visual implementation. Audit tooling and its own tests only.
 
 ## Phase 2 — Light-first public design system
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #44, merged as `PLACEHOLDER_MERGE`
 
-Deliver:
+Delivered:
 
-- remove large black/near-black public surfaces
-- define Steel Mist/light technical surface
-- retune public section spacing
-- retune mobile typography scale
-- compact card/ledger primitives
-- light footer
-- preserve technique signatures/stitch semantics
-- update `docs/design-system.md`
+- **Every dark public surface is gone.** The five that existed — the homepage
+  hero, the production rail, the EMCAD decision block, the homepage close and
+  the B2B chain — plus two `surface-machine` panels and the `/admissions`
+  closer are now Steel Mist. `tests/machine-lab-final.test.tsx` fails if one
+  returns.
+- **Steel Mist** `#e6ebee` with hairline `#c9d4da`, and it needs no re-pointed
+  token block: carbon 15.10:1, stone 5.41, needle 5.67, vermilion-deep 5.26,
+  zari-deep 5.45. Bright vermilion stays large-text-only, the same rule as on
+  Cotton.
+- `.band-machine` re-specified as the **technical** band rather than the
+  **dark** band, keeping the four-band vocabulary. Texture inverted to ink on
+  light; the steel edge strengthened, because on a pale ground the edge is what
+  says "technical". `.machine-light` alphas halved; its two colours unchanged.
+- Section rhythm **48.5 / 40.5 / 28.2 → 32 / 24 / 16** at 390px, all three
+  tiers preserved, desktop ends unchanged.
+- Rhythm utilities onto the compact scale: 12/16/24 → **8/12/16**.
+- Mobile type scale retuned into the plan's bands — hero 44 → **36**, h1 36 →
+  **29**, h2 30 → **22**, h4 20 → **17** — with every desktop endpoint intact.
+  Body stays 16/1.625 and Gujarati stays at 1.8: density is bought from
+  headings, padding and rhythm, never from the reading size.
+- `.btn` floor 48 → **44px** (the real WCAG minimum, not below it); Gujarati
+  keeps 48. `.ledger-row` padding 12 → **8px** on a phone. Public card padding
+  `p-6 md:p-8` → `p-3.5 md:p-5` across ten files.
+- `SectionHeading`'s `onDark` prop and `MonoNote`'s `"ivory"` tone **removed**,
+  so a future dark band is a TypeScript error rather than invisible white text.
+- `.on-carbon` **kept defined** and used by no public section — §3 still
+  permits it for a small isolated overlay, and deleting the one correct
+  dark-surface implementation would guarantee the next one is hand-rolled.
+- Technique signatures, stitch semantics and the 32-photo manifest untouched.
+- `docs/design-system.md` gains a **v5 "Light-first Machine Lab"** section.
+
+Two findings recorded rather than acted on:
+
+- **The footer was never dark.** It is `#e9decd` Raw Silk. Its real defect is
+  1,031px of height on every page, which is Phase 3's work, not a tone change.
+- Four assertions were re-pointed at the new, stricter policy. The one that
+  mattered was `machine-lab-final.test.tsx:52` — `homeSections.length <= 4`
+  would have gone **silently vacuous** at zero rather than failing.
+
+New policy tests: `tests/compact-density-system.test.ts` — Steel Mist's
+contrast read out of its own token, the three rhythm tiers evaluated at 390px,
+every type token measured against the plan's band, the 44px tap floor, and the
+**reverse** Gujarati sweep (every uppercased or letterspaced class must have a
+`:lang(gu)` neutraliser — the existing sweep structurally cannot catch a class
+with no `:lang(gu)` rule at all).
 
 ## Phase 3 — Public shell + homepage compactness
 **Status:** ⏳ Pending

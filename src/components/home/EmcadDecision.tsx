@@ -75,21 +75,21 @@ export function EmcadDecision() {
   ];
 
   return (
-    <section className="section on-carbon band-machine" id="emcad">
+    <section className="section band-machine" id="emcad">
       <div className="container-site">
-        <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} rule onDark />
+        <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} rule />
 
         <div className="u-section-body emcad-grid">
           {/* What the course is */}
           <Reveal className="emcad-panel">
-            <MonoNote as="p" tone="ivory">
+            <MonoNote as="p">
               {t("courseLabel")}
             </MonoNote>
             <dl className="emcad-facts">
               {facts.map(([label, value]) => (
                 <div key={label}>
                   <dt>
-                    <MonoNote tone="ivory">{label}</MonoNote>
+                    <MonoNote>{label}</MonoNote>
                   </dt>
                   <dd className="emcad-fact-value">{value}</dd>
                 </div>
@@ -97,7 +97,7 @@ export function EmcadDecision() {
             </dl>
 
             <div className="emcad-timings">
-              <MonoNote as="p" tone="ivory">
+              <MonoNote as="p">
                 {t("timingsLabel")}
               </MonoNote>
               <ul className="emcad-timing-list">
@@ -113,7 +113,7 @@ export function EmcadDecision() {
 
           {/* What it costs, and how that is handled */}
           <Reveal delay={80} className="emcad-panel emcad-panel--fee">
-            <MonoNote as="p" tone="ivory">
+            <MonoNote as="p">
               {t("feeLabel")}
             </MonoNote>
 

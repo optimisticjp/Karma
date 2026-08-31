@@ -90,7 +90,7 @@ export function BriefForm() {
   );
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} className="card space-y-5 p-6 md:p-8" noValidate={false}>
+    <form ref={formRef} onSubmit={onSubmit} className="card space-y-5 p-3.5 md:p-5" noValidate={false}>
       <h3 className="text-h3 font-display">{t("formTitle")}</h3>
       <div className="grid gap-5 md:grid-cols-2">
         {field("name", t("form.name"), { required: true })}

@@ -54,8 +54,20 @@
 /* ============================ dark bands =================================
  * `.on-carbon` is a real surface, not a one-off CTA background: it re-points
  * the palette tokens so cards, rules, chips, eyebrows and secondary buttons
- * nested inside it all invert correctly. Dark sections are the punctuation
- * that keeps a long page from reading as one continuous scroll.
+ * nested inside it all invert correctly.
+ *
+ * LIGHT-FIRST (2026-08-31). No public SECTION uses this any more — the owner
+ * rejected the black-background treatment and the five bands that were dark
+ * (hero, production rail, EMCAD decision, homepage close, B2B chain) are now
+ * Steel Mist. `tests/machine-lab-final.test.tsx` fails if one comes back.
+ *
+ * The definition stays, deliberately, and it is not dead code to delete on
+ * sight. The compact-density plan §3 still permits a dark surface for a small
+ * isolated overlay whose own content needs the contrast — an EMCAD panel over
+ * a machine photograph is the reserved case, and those photographs have not
+ * arrived. Deleting the one correct dark-surface implementation would mean
+ * the next one is hand-rolled, which is precisely the drift this class was
+ * written to prevent. Keeping ~40 lines of unused CSS is the cheaper mistake.
  * ========================================================================= */
 
 .on-carbon {
@@ -94,10 +106,10 @@
 
 .ledger-row {
   display: grid;
-  grid-template-columns: 2.25rem minmax(0, 1fr);
+  grid-template-columns: 2rem minmax(0, 1fr);
   align-items: baseline;
-  gap: 0.1875rem 0.875rem;
-  padding-block: 0.75rem;
+  gap: 0.125rem 0.75rem;
+  padding-block: 0.5rem;
   position: relative;
 }
 .ledger-row > .ledger-meta { grid-column: 2; }
@@ -107,8 +119,8 @@
     grid-template-columns: 2.5rem minmax(0, 1fr) auto;
     /* Row gap and column gap are not the same problem: 1.5rem between a title
        and its own note reads as two separate items. */
-    gap: 0.375rem 1.5rem;
-    padding-block: 1.0625rem;
+    gap: 0.25rem 1.5rem;
+    padding-block: 0.75rem;
   }
   .ledger-row > .ledger-meta { grid-column: auto; text-align: right; }
 }
@@ -126,9 +138,12 @@
 .ledger-title {
   min-width: 0;
   font-weight: 650;
-  font-size: 1rem;
-  line-height: 1.4;
+  font-size: 0.9375rem;   /* 15px — the plan's card/list-title floor */
+  line-height: 1.35;
   color: var(--color-carbon);
+}
+@media (min-width: 640px) {
+  .ledger-title { font-size: 1rem; }
 }
 .ledger-meta {
   min-width: 0;
@@ -140,10 +155,13 @@
 }
 .ledger-note {
   grid-column: 2 / -1;
-  margin-top: 0.125rem;
-  font-size: var(--text-smallmeta);
-  line-height: 1.5;
+  margin-top: 0.0625rem;
+  font-size: 0.8125rem;   /* 13px — secondary metadata */
+  line-height: 1.45;
   color: var(--color-stone);
+}
+@media (min-width: 640px) {
+  .ledger-note { font-size: var(--text-smallmeta); line-height: 1.5; }
 }
 
 /* Label/value variant: a description list rather than an indexed catalogue.
@@ -1278,15 +1296,25 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
   border-radius: var(--radius-feature);
   padding: clamp(1.25rem, 0.95rem + 1.2vw, 2.25rem);
 }
-/* Machine-floor surface: dark, technical, used for specification blocks. */
+/* Machine-floor surface: the LIGHT technical panel for specification blocks.
+ *
+ * Light-first (2026-08-31). This was Steel Indigo with inverted headings and
+ * a light microlabel — a near-black card inside a light page. It is now
+ * Steel Mist, and the six rules that hardcoded light-on-dark values moved
+ * with it as one unit, because lightening only the background would have left
+ * #f4efe4 headings on a pale panel: invisible text, and nothing catches it.
+ *
+ * `tone="machine"` on <Surface> is re-pointed rather than removed, so every
+ * current and future caller converts without touching a call site. Steel
+ * Indigo survives as text, icons and hairlines — 12.20:1 on Steel Mist. */
 .surface-machine {
-  background: var(--color-steel);
-  border-color: color-mix(in srgb, var(--color-steel) 70%, #ffffff);
-  color: #e7e2d6;
+  background: var(--color-mist);
+  border-color: var(--color-mist-line);
+  color: var(--color-carbon);
 }
-.surface-machine :where(h1, h2, h3, h4) { color: #f4efe4; }
+.surface-machine :where(h1, h2, h3, h4) { color: var(--color-carbon); }
 .surface-machine .microlabel,
-.surface-machine .spec-label { color: #a9b6bd; }
+.surface-machine .spec-label { color: var(--color-needle); }
 .surface > :first-child,
 .surface-feature > :first-child { margin-top: 0; }
 
@@ -1312,8 +1340,7 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
   color: var(--color-needle);
   padding-block: 0.5rem;
 }
-.on-carbon .cta-tertiary,
-.surface-machine .cta-tertiary { color: var(--color-needle-light); }
+.on-carbon .cta-tertiary { color: var(--color-needle-light); }
 
 /* --- editorial ------------------------------------------------------------
  * Playfair italic earns its download here and almost nowhere else. */
@@ -2269,9 +2296,9 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
 .project-card .case-fields { margin-top: 0.875rem; }
 .project-card .sample-tag { align-self: flex-start; }
 
-/* On the machine surface the checklist rules have to be visible against
-   Steel Indigo, not against cream. */
-.surface-machine .stack-lines > * { border-bottom-color: color-mix(in srgb, #ffffff 18%, transparent); }
+/* On the machine surface the checklist rules take the surface's own hairline,
+   which is a shade cooler than the cream `--color-line` around it. */
+.surface-machine .stack-lines > * { border-bottom-color: var(--color-mist-line); }
 
 /* ============================== Machine Notes =============================
  * Phase 7. Reference notes, not blog posts — so no date, no byline, no card

@@ -9,20 +9,25 @@ import { Reveal } from "./Reveal";
  *
  * Interaction 1 lives here: the brand thread draws beneath the heading as it
  * scrolls into view, reusing the shared observer in <Reveal>.
+ *
+ * There is deliberately no `onDark` escape hatch any more. It existed so a
+ * dark band could be added anywhere for free, and it was the thing that broke
+ * silently when a band was lightened: `text-ivory` on a pale ground is
+ * invisible and nothing catches it. With the public site light-first there
+ * are no callers, and removing the prop means a future dark band is a
+ * TypeScript error rather than white text on Steel Mist.
  */
 export function SectionHeading({
   eyebrow,
   title,
   sub,
   className,
-  onDark = false,
   rule = false
 }: {
   eyebrow?: string;
   title: ReactNode;
   sub?: ReactNode;
   className?: string;
-  onDark?: boolean;
   /**
    * The stitched rule is a signature, not a default. It used to render under
    * every heading — about twenty per page — which made it read as mechanical
@@ -34,9 +39,9 @@ export function SectionHeading({
   return (
     <Reveal className={cn("max-w-3xl", className)}>
       {eyebrow ? <p className="eyebrow u-eyebrow-gap">{eyebrow}</p> : null}
-      <h2 className={cn("text-h2", onDark && "text-ivory")}>{title}</h2>
+      <h2 className="text-h2">{title}</h2>
       {rule ? <span aria-hidden="true" className="rule-stitch" /> : null}
-      {sub ? <p className={cn("u-lede", onDark && "!text-ivory/80")}>{sub}</p> : null}
+      {sub ? <p className="u-lede">{sub}</p> : null}
     </Reveal>
   );
 }

@@ -216,20 +216,38 @@ describe("page rhythm", () => {
     }
   });
 
-  it("has no second dark-surface implementation: bands never re-point the palette", () => {
+  it("has no second surface implementation: bands never re-point the palette", () => {
     const bandBlock = css.slice(css.indexOf(".band-machine {"), css.indexOf(".band-info {"));
     expect(bandBlock).not.toContain("--color-carbon:");
     expect(bandBlock).not.toContain("--color-ivory:");
-    /* The dark hero composes with .on-carbon, which owns that inversion. */
-    expect(heroSource).toContain("on-carbon");
+    /* A band sets its own background and texture and nothing else. Steel Mist
+       is a token it USES; re-pointing one here is what would fork the
+       palette. */
+    expect(bandBlock).toContain("var(--color-mist)");
   });
 
-  it("follows the dark hero with a light band", () => {
+  it("gives the hero the light technical band, not a black slab", () => {
+    /* This required `on-carbon` on the hero until 2026-08-31 — it was the one
+       assertion that positively demanded the public site's loudest surface be
+       near-black. The owner rejected that treatment. The rule it was really
+       protecting, that the hero is a deliberate SURFACE rather than an
+       unstyled page top, survives intact and is asserted directly. */
+    expect(stripComments(heroSource)).not.toContain("on-carbon");
+    expect(heroSource).toContain("band-machine");
+  });
+
+  it("follows the hero with a different surface", () => {
+    /* The durable rule was never "dark, then light" — it was that the section
+       after the hero changes surface, which is what stops a long scroll
+       reading as one continuous slab. Light-on-light keeps that true: the
+       hero is Steel Mist, the trust rail is Cotton. */
     const heroAt = homeSource.indexOf("<Hero />");
     const trustAt = homeSource.indexOf("<TrustRail />");
     expect(heroAt).toBeGreaterThan(-1);
     expect(trustAt).toBeGreaterThan(heroAt);
-    expect(read("src/components/home/TrustRail.tsx")).toContain("band-info");
+    const trust = read("src/components/home/TrustRail.tsx");
+    expect(trust).toContain("band-info");
+    expect(trust).not.toContain("band-machine");
   });
 });
 

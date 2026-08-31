@@ -570,6 +570,67 @@ eight technical notes, no invented specification or cursor-coordinate theatre,
 dark surfaces capped and never adjacent (and none at all in the console), and
 no decorative `infinite` animation outside the loading skeleton.
 
+### v5 — "Light-first Machine Lab" (from 2026-08-31)
+
+The owner's compact-density brief
+(`docs/karma-compact-density-redesign-plan.md`) made two decisions: **the
+public site stops using large black surfaces**, and **both products get
+materially denser on a phone**. v5 is the first; it extends v4 on the same
+terms — no token renamed, `globals.css` still shared with the Console.
+
+Measured first (`docs/compact-density-audit.md`), because the premise turned
+out to be narrower than the impression. `.band-material`, `.band-human` and
+`.band-info` were already light, four public routes had no dark surface at
+all, and **the footer was never dark** — it is Raw Silk `#e9decd`, and its
+real defect is 1,031px of mobile height. Five surfaces were dark, and they
+were the five loudest moments on the site: the hero, the production rail, the
+EMCAD decision block, the homepage close and the B2B chain.
+
+**Steel Mist** `--color-mist: #e6ebee` (hairline `--color-mist-line: #c9d4da`)
+is the new light technical surface, derived from Steel Indigo by lifting
+lightness and dropping saturation, kept marginally warm so it reads as material
+beside Cotton rather than as a cold web-app grey. It is the first surface in
+this palette that needs **no re-pointed token block**: carbon 15.10:1, stone
+5.41, needle 5.67, vermilion-deep 5.26, zari-deep 5.45 — every secondary token
+clears AA, where Sand needed four overrides. Bright vermilion is 4.02 and stays
+large-text-only, exactly as it is on Cotton.
+
+`.band-machine` is re-specified as the **technical** band rather than the
+**dark** band, so the four-band vocabulary survives. The texture inverts to ink
+on light; the steel top edge strengthens, because on a pale ground the edge is
+what says *technical*. `.machine-light`'s alphas halve and its two colours do
+not change — a pale ground is exactly where a lavender gradient becomes
+tempting.
+
+**`.on-carbon` stays defined and is used by no public section.** The plan still
+permits a dark surface for a small isolated overlay whose own content needs the
+contrast (an EMCAD panel over a machine photograph — those photographs have not
+arrived). Deleting the one correct dark-surface implementation would guarantee
+the next one is hand-rolled. Three small dark elements are unchanged and each
+is inside that exception: the modal scrim, the 29px active-locale pill, and the
+focus-only skip link.
+
+**`SectionHeading`'s `onDark` prop and `MonoNote`'s `"ivory"` tone are gone.**
+They existed so a dark band could be added anywhere for free, and they were
+what broke silently when one was lightened. With no callers left, a future dark
+band is now a TypeScript error rather than invisible white text.
+
+**The compact scale**, all values at 390px, with desktop endpoints intact:
+section rhythm 48.5/40.5/28.2 → **32/24/16**; rhythm utilities 12/16/24 →
+**8/12/16**; hero type 44 → **36**, h1 36 → **29**, h2 30 → **22**, h4 20 →
+**17**; `.btn` floor 48 → **44px** (the real WCAG minimum, not below it, with
+Gujarati keeping 48); `.ledger-row` block padding 12 → **8px**. Body copy stays
+16/1.625 and Gujarati stays at 1.8 — **density is bought from headings, padding
+and rhythm, never from the reading size or the leading.**
+
+`tests/compact-density-system.test.ts` asserts each of these by **evaluating
+the clamp at 390px** through `tests/helpers/measure.ts`, not by matching its
+text, so a later session may re-express any of them freely as long as the phone
+value holds. It also carries the **reverse** Gujarati sweep: every uppercased
+or letterspaced class must have a `:lang(gu)` neutraliser, which the existing
+sweep structurally cannot check because it only inspects `:lang(gu)` blocks
+that already exist.
+
 **The 32-photograph manifest.** `src/content/photo-manifest.ts` is the typed
 list of every shot on the owner's final brief, with each slot's intrinsic
 dimensions. `<ManifestPhoto id="…">` reserves the photograph's exact aspect
@@ -2522,8 +2583,14 @@ most expensive thing a future session can do here.
     `docs/admin-architecture.md`.
 24. **`/admin` stays outside the `[locale]` segment**; public URLs stay
     always-prefixed with no browser-language auto-redirect.
-25. **The design system is Screen to Stitch (v3)** — not a generic system, and
-    not the one belonging to the vendored skill template.
+25. **The design system is Screen to Stitch (v3), extended by Machine Lab (v4)
+    and Light-first (v5)** — not a generic system, and not the one belonging to
+    the vendored skill template. **No large black or near-black full-width
+    public surface may come back**: the owner rejected that treatment on
+    2026-08-31, `.band-machine` is Steel Mist now, and
+    `tests/machine-lab-final.test.tsx` fails on any public file wearing
+    `.on-carbon`. The class itself stays defined for the small-overlay
+    exception; what may not return is a public section wearing it.
 26. **`premium.css` stays unlayered**, and design token *names* stay frozen —
     `globals.css` is shared with Karma Console.
 27. **`staff_role` enum values stay in order**, `uq_staff_console_email` keeps

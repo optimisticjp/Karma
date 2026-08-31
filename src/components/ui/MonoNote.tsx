@@ -27,7 +27,7 @@ export function MonoNote({
 }: {
   children: React.ReactNode;
   as?: "span" | "p" | "dt" | "div";
-  tone?: "stone" | "vermilion" | "needle" | "ivory";
+  tone?: "stone" | "vermilion" | "needle";
   className?: string;
 }) {
   return (
@@ -36,7 +36,6 @@ export function MonoNote({
         "mono-note",
         tone === "vermilion" && "text-vermilion-deep",
         tone === "needle" && "text-needle",
-        tone === "ivory" && "text-ivory/70",
         className
       )}
     >

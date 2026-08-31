@@ -170,7 +170,7 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ loc
         </div>
       </section>
 
-      <section className="on-carbon section-compact">
+      <section className="band-info section-compact">
         <div className="container-site flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
           <div>
             <h2 className="text-h3">{t("closeTitle")}</h2>

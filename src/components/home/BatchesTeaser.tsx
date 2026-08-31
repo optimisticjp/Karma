@@ -82,7 +82,7 @@ export function BatchesTeaser() {
               ) : null}
               <ul className="grid gap-4 md:grid-cols-3">
                 {state.rows.map((r) => (
-                  <li key={r.id} className="card card-lift flex flex-col p-6 md:p-8">
+                  <li key={r.id} className="card card-lift flex flex-col p-3.5 md:p-5">
                     <p className="font-semibold">
                       {locale === "gu" ? r.courseNameGu : r.courseNameEn}
                     </p>

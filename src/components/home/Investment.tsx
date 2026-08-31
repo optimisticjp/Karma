@@ -35,7 +35,7 @@ export function Investment() {
 
         <div className="u-section-body grid gap-6 lg:grid-cols-12 lg:gap-8">
           <Reveal className="lg:col-span-7">
-            <div className="card h-full p-5 md:p-6">
+            <div className="card h-full p-3.5 md:p-4">
               <h3 className="text-h4 font-display">{t("includedTitle")}</h3>
               <ul className="mt-4 space-y-2.5">
                 {included.map((item) => (
@@ -59,7 +59,7 @@ export function Investment() {
           </Reveal>
 
           <Reveal delay={80} className="lg:col-span-5">
-            <div className="card flex h-full flex-col p-5 md:p-6">
+            <div className="card flex h-full flex-col p-3.5 md:p-4">
               <Icon name="spool" size={28} className="text-vermilion-deep" />
               <h3 className="text-h4 mt-5 font-display">{t("howTitle")}</h3>
               <p className="u-lede">{t("howBody")}</p>
