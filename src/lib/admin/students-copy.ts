@@ -68,6 +68,7 @@ const en = () => ({
   updateEnrollment: "Update enrollment",
   viewOnly: "You can view student records. Editing requires Students manage permission.",
   seatUnavailable: "That batch has no available seat or is not open for enrollment.",
+  balanceDue: "Due",
   statuses: {
     applied: "Applied",
     active: "Learning",
@@ -158,6 +159,7 @@ const gu = () => ({
   updateEnrollment: "Enrollment સુધારો",
   viewOnly: "તમે student record જોઈ શકો છો. ફેરફાર માટે Students manage permission જોઈએ.",
   seatUnavailable: "આ batchમાં seat ખાલી નથી અથવા નવું enrollment લઈ શકાતું નથી.",
+  balanceDue: "બાકી",
   statuses: {
     applied: "Applied",
     active: "ચાલુ છે",

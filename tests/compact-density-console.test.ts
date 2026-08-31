@@ -239,3 +239,83 @@ describe("every console page uses the compact header", () => {
     expect(clampAt(declaration(metric as string, "padding")?.split(" ")[0] as string)).toBeLessThanOrEqual(14);
   });
 });
+
+/* ------------------------------------------------------------------ *
+ * The core workflows — Today, Admissions, Students, Fees
+ *
+ * Eleven of sixteen console screens showed ZERO complete records at
+ * 390x844. The pattern was one pattern: a `sm:grid-cols-3` metric trio
+ * that stacks to a single column on a phone, then a filter toolbar of
+ * full-width rows, then — finally — the list.
+ * ------------------------------------------------------------------ */
+
+describe("the core admin workflows show records, not chrome", () => {
+  const today = read("src/app/admin/(console)/page.tsx");
+  const admissions = read("src/app/admin/(console)/admissions/page.tsx");
+  const students = read("src/app/admin/(console)/students/page.tsx");
+  const fees = read("src/app/admin/(console)/fees/page.tsx");
+
+  it("replaces every stacked metric trio with the hairline strip", () => {
+    for (const [name, source] of [
+      ["today", today],
+      ["admissions", admissions],
+      ["fees", fees],
+      ["courses", read("src/app/admin/(console)/courses/page.tsx")],
+      ["batches", read("src/app/admin/(console)/batches/page.tsx")]
+    ] as const) {
+      expect(source, name).toContain("console-metrics");
+      expect(source, name).not.toContain("sm:grid-cols-3");
+    }
+  });
+
+  it("gives a fees-only admin something to do", () => {
+    /* Their Today screen was literally empty — every queue was gated on a
+       permission they do not hold, and they still paid for the counts. */
+    expect(today).toContain("canFees");
+    expect(today).toContain('count={c.feesOverdue}');
+    expect(read("src/lib/admin/dashboard.ts")).toContain("feesOverdue");
+  });
+
+  it("derives every fee figure and stores none of them", () => {
+    /* A `status` column would be a second source of truth for a number the
+       ledger already holds, and the two would disagree the first time a
+       receipt was corrected. This holds on the new Today queue as well. */
+    const dashboard = read("src/lib/admin/dashboard.ts");
+    expect(dashboard).toContain("sum(f.received)");
+    expect(dashboard).not.toContain("fee_status");
+    expect(students).toContain("summariseFees");
+  });
+
+  it("keeps the new reads set-based, never per row", () => {
+    /* The student row gained a course, a batch, an enrolment status and a
+       balance. Two grouped queries over the ids already on screen — they
+       shrink with the list rather than multiplying by it. */
+    expect(students).toContain("inArray(schema.enrollments.studentId, visibleIds)");
+    expect(students).toContain(".groupBy(schema.enrollments.studentId)");
+    expect(students).not.toMatch(/for \(const student of students\)[\s\S]{0,200}await db/);
+  });
+
+  it("renders the fields it already fetched", () => {
+    /* `demoSlot` was selected on every load and rendered nowhere: the one
+       field that says when an applicant wants to come in for their free demo.
+       `preferredSchedule` printed its raw storage key. Both now resolve
+       through the course's own timetable — one more column on a SELECT that
+       already runs. */
+    expect(admissions).toContain("slotLabel(application.courseSlug, application.demoSlot)");
+    expect(admissions).toContain("readCourseOperations");
+    /* `latest` was computed on the fees page and read nowhere. It is the last
+       receipt — the thing a parent at the counter is holding. */
+    expect(fees).toContain("/admin/print/receipt/${card.latest.id}");
+  });
+
+  it("never states a status by colour alone, even in a compact row", () => {
+    expect(students).toContain("status-dot");
+    expect(students).toContain("copy.statuses[");
+  });
+
+  it("keeps money tabular wherever a column of it appears", () => {
+    for (const [name, source] of [["fees", fees], ["students", students]] as const) {
+      expect(source, name).toContain("data-num");
+    }
+  });
+});

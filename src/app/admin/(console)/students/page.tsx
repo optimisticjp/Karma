@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { and, asc, desc, eq, inArray, isNull, or } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, or, sum } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
 import { PageHead } from "@/components/admin/PageHead";
@@ -102,6 +102,65 @@ export default async function StudentsPage({ searchParams }: Props) {
   ]);
 
   const students = studentRows.filter((student) => !q || [student.fullName, student.admissionNo, student.phone, student.whatsapp ?? ""].some((v) => v.toLowerCase().includes(q)));
+
+  /*
+   * WHAT A DIRECTORY ROW MUST ANSWER
+   *
+   * The row carried a name, an admission number and a phone — and an ACTIVE
+   * student's row carried no status at all, only an archived one did. So the
+   * directory could not answer the two questions it is opened for: which
+   * course is this person on, and do they owe anything.
+   *
+   * Two set-based reads over the ids already on screen, not a lookup per row.
+   * The current enrolment comes from one grouped query; the balance from one
+   * more that sums the ledger per enrolment. Both shrink with the list, and
+   * both stay one round trip each — never N+1.
+   *
+   * The balance is DERIVED here exactly as `summariseFees` derives it on the
+   * fees page: agreement snapshot minus discount minus received. Nothing
+   * stores a paid flag, and this row must not become the place one appears.
+   */
+  const visibleIds = students.map((student) => student.id);
+  const [currentEnrolments, balances] = visibleIds.length
+    ? await Promise.all([
+        db
+          .select({
+            studentId: schema.enrollments.studentId,
+            status: schema.enrollments.status,
+            batchLabel: schema.batches.label,
+            courseNameEn: schema.courses.nameEn,
+            courseNameGu: schema.courses.nameGu
+          })
+          .from(schema.enrollments)
+          .innerJoin(schema.batches, eq(schema.enrollments.batchId, schema.batches.id))
+          .innerJoin(schema.courses, eq(schema.batches.courseId, schema.courses.id))
+          .where(inArray(schema.enrollments.studentId, visibleIds))
+          .orderBy(desc(schema.enrollments.joinedOn)),
+        db
+          .select({
+            studentId: schema.enrollments.studentId,
+            agreed: sum(schema.enrollments.agreedFeeTotal),
+            discount: sum(schema.feeRecords.discount),
+            received: sum(schema.feeRecords.received)
+          })
+          .from(schema.enrollments)
+          .leftJoin(schema.feeRecords, eq(schema.feeRecords.enrollmentId, schema.enrollments.id))
+          .where(inArray(schema.enrollments.studentId, visibleIds))
+          .groupBy(schema.enrollments.studentId)
+      ])
+    : [[], []];
+
+  const enrolmentByStudent = new Map<number, (typeof currentEnrolments)[number]>();
+  for (const row of currentEnrolments) {
+    if (!enrolmentByStudent.has(row.studentId)) enrolmentByStudent.set(row.studentId, row);
+  }
+  const balanceByStudent = new Map<number, number>();
+  for (const row of balances) {
+    const agreed = Number(row.agreed ?? 0);
+    if (!agreed) continue;
+    const owed = agreed - Number(row.discount ?? 0) - Number(row.received ?? 0);
+    balanceByStudent.set(row.studentId, Math.max(0, owed));
+  }
   const selectedId = requestedStudent && studentRows.some((s) => s.id === requestedStudent)
     ? requestedStudent
     : students[0]?.id ?? null;
@@ -193,7 +252,7 @@ export default async function StudentsPage({ searchParams }: Props) {
       <PageHead title={copy.title} context={copy.lede} />
 
       {canManage ? (
-        <p className="mt-6">
+        <p className="mt-3">
           {/* A walk-in is a conversation at a counter; the record comes after.
               Making staff create a student row before they can print a form to
               fill in by hand gets that order backwards. */}
@@ -201,31 +260,37 @@ export default async function StudentsPage({ searchParams }: Props) {
         </p>
       ) : null}
 
+      {/* Two closed disclosures, each carrying an 86-90 character hint that
+          rendered two lines at 15px whether or not the form was open: 358px of
+          front desk before the directory. The hints belong with the forms they
+          explain. */}
       {canManage ? (
-        <section className="mt-6 grid gap-4 lg:grid-cols-2">
+        <section className="mt-3 grid gap-2 lg:grid-cols-2">
           <details className="panel">
-            <summary className="panel-head cursor-pointer list-none"><div><h2 className="text-h4">{copy.directAdmission}</h2><p className="form-note mt-1">{copy.directAdmissionHint}</p></div><span aria-hidden className="text-h4">＋</span></summary>
-            <div className="panel-body border-t border-rule"><DirectAdmissionForm batches={batches} copy={copy} /></div>
+            <summary className="panel-head cursor-pointer list-none"><h2 className="text-h4">{copy.directAdmission}</h2><span aria-hidden className="text-h4">＋</span></summary>
+            <div className="panel-body border-t border-rule"><p className="form-note mb-3">{copy.directAdmissionHint}</p><DirectAdmissionForm batches={batches} copy={copy} /></div>
           </details>
           <details className="panel">
-            <summary className="panel-head cursor-pointer list-none"><div><h2 className="text-h4">{copy.convertEnquiry}</h2><p className="form-note mt-1">{copy.convertEnquiryHint}</p></div><span aria-hidden className="text-h4">＋</span></summary>
-            <div className="panel-body border-t border-rule"><ConvertEnquiryForm enquiries={enquiryRows} batches={batches} copy={copy} /></div>
+            <summary className="panel-head cursor-pointer list-none"><h2 className="text-h4">{copy.convertEnquiry}</h2><span aria-hidden className="text-h4">＋</span></summary>
+            <div className="panel-body border-t border-rule"><p className="form-note mb-3">{copy.convertEnquiryHint}</p><ConvertEnquiryForm enquiries={enquiryRows} batches={batches} copy={copy} /></div>
           </details>
         </section>
-      ) : <p className="form-note mt-6">{copy.viewOnly}</p>}
+      ) : <p className="form-note mt-3">{copy.viewOnly}</p>}
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
+      <div className="mt-3 grid gap-3 lg:grid-cols-[20rem_minmax(0,1fr)]">
         <aside className="panel self-start lg:sticky lg:top-6">
           <div className="panel-head"><h2 className="text-h4">{copy.directory}</h2></div>
-          <div className="panel-body grid gap-4">
+          <div className="panel-body grid gap-2">
             <form method="get" className="grid gap-2">
-              <label className="label" htmlFor="student-search">{copy.search}</label>
-              <input id="student-search" name="q" className="input" defaultValue={params.q ?? ""} placeholder={copy.searchPlaceholder} />
-              <label className="choice-chip text-smallmeta w-fit">
+              <label className="sr-only" htmlFor="student-search">{copy.search}</label>
+              <div className="grid grid-cols-[1fr_auto] gap-2">
+                <input id="student-search" name="q" className="input" defaultValue={params.q ?? ""} placeholder={copy.searchPlaceholder} />
+                <button className="btn btn-secondary" type="submit">{copy.search}</button>
+              </div>
+              <label className="choice-chip w-fit text-smallmeta">
                 <input type="checkbox" name="archived" value="1" className="size-4 accent-vermilion" defaultChecked={showArchived} />
                 {records.showArchived}
               </label>
-              <button className="btn btn-secondary" type="submit">{copy.search}</button>
             </form>
             {/* A dense list: ~64px a student instead of ~92px, so a phone shows
                 nine at a time instead of five, and each row still carries the
@@ -238,12 +303,41 @@ export default async function StudentsPage({ searchParams }: Props) {
                   className={`data-row ${student.archivedAt ? "is-archived" : ""} ${selectedId === student.id ? "bg-vermilion/5" : ""}`}
                 >
                   <span className="data-row__title">{student.fullName}</span>
-                  {student.archivedAt ? (
-                    <span className="data-row__actions"><span className="chip status-off">{records.archived}</span></span>
-                  ) : null}
+                  <span className="data-row__actions">
+                    {student.archivedAt ? (
+                      <span className="chip status-off">{records.archived}</span>
+                    ) : (
+                      /* A dot AND a word, never colour alone. */
+                      <span
+                        className={`status-light ${
+                          enrolmentByStudent.get(student.id)?.status === "active" ? "is-ok" : "is-neutral"
+                        }`}
+                      >
+                        <span aria-hidden="true" className="status-dot" />
+                        {enrolmentByStudent.get(student.id)
+                          ? copy.statuses[enrolmentByStudent.get(student.id)!.status]
+                          : copy.noEnrollments}
+                      </span>
+                    )}
+                  </span>
                   <span className="data-row__meta">
                     <span>{student.admissionNo}</span>
+                    <span>
+                      {enrolmentByStudent.get(student.id)
+                        ? session.staff.adminLocale === "gu"
+                          ? enrolmentByStudent.get(student.id)!.courseNameGu
+                          : enrolmentByStudent.get(student.id)!.courseNameEn
+                        : "—"}
+                    </span>
+                    <span>{enrolmentByStudent.get(student.id)?.batchLabel ?? "—"}</span>
+                  </span>
+                  <span className="data-row__meta">
                     <span>{student.phone}</span>
+                    {balanceByStudent.get(student.id) ? (
+                      <span className="data-num text-error">
+                        {copy.balanceDue} {money(balanceByStudent.get(student.id)!)}
+                      </span>
+                    ) : null}
                   </span>
                 </Link>
               ))}
@@ -338,3 +432,12 @@ function Fact({ label, value }: { label: string; value: string }) { return <div>
 function Metric({ label, value }: { label: string; value: string }) { return <div className="panel panel-body"><p className="microlabel">{label}</p><p className="text-h3 mt-2">{value}</p></div>; }
 function formatInr(value: number) { return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value); }
 function formatDate(value: string, locale: "en" | "gu") { return new Intl.DateTimeFormat(locale === "gu" ? "gu-IN" : "en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${value}T00:00:00+05:30`)); }
+
+/** Whole rupees, tabular, so a column of balances lines up. */
+function money(value: number) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0
+  }).format(value);
+}
