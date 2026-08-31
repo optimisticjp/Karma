@@ -474,7 +474,10 @@
     0 0 0 7px var(--s-paper),
     0 0 0 8px var(--line);
 }
+/* A definite width AND height override a child's own aspect-ratio, which is
+   what lets a 4:5 photo slot sit inside a square hoop without fighting it. */
 .kds .hoop > * { width: 100%; height: 100%; object-fit: cover; }
+.kds .hoop > .mframe { border: 0; }
 
 /**
  * MACHINE FRAME — the default media frame. Square corners, a hairline, and

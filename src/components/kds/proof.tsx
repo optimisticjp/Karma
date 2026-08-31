@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { pick } from "@/lib/i18n/localized";
 import type { Locale } from "@/i18n/routing";
 import { PhotoFrame } from "./Frame";
-import { NeedlePoint, ThreadLine } from "./marks";
+import { HoopWindow, NeedlePoint, ThreadLine } from "./marks";
 import {
   isSample,
   type Partner,
@@ -118,7 +118,12 @@ export function FeaturedReview({
   className?: string;
 }) {
   return (
-    <figure className={cn("grid gap-6 md:grid-cols-[1fr_0.8fr] md:items-center md:gap-10", className)}>
+    <figure
+      className={cn(
+        "grid items-center gap-7 md:grid-cols-[1fr_auto] md:gap-12",
+        className
+      )}
+    >
       <div className="min-w-0">
         <ThreadLine className="mb-5 w-16" />
         <blockquote className="t-h3 font-normal leading-snug">
@@ -130,8 +135,16 @@ export function FeaturedReview({
           <SampleMark status={item.status} />
         </figcaption>
       </div>
+      {/* THE HOOP, used once.
+          The student-story slots are 4:5 portraits, and a portrait frame
+          beside a quote gives you 600px of column with the text floating in
+          the middle of it. A hoop is square-bounded, so the composition
+          balances — and this is exactly what the primitive was built for: a
+          face, at the one moment on the page that earns a round crop. */}
       {item.photoId ? (
-        <PhotoFrame id={item.photoId} scale="feature" className="w-full" />
+        <HoopWindow className="w-48 justify-self-start md:w-60 md:justify-self-end lg:w-72">
+          <PhotoFrame id={item.photoId} scale="thumb" />
+        </HoopWindow>
       ) : null}
     </figure>
   );
