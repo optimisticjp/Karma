@@ -61,21 +61,21 @@ export const MOTIF = {
   ] as const
 };
 
-export function StageOutline({ uid }: { uid: string }) {
+export function StageOutline({ uid, className }: { uid: string; className?: string }) {
   return (
     <svg
-      className="stage-layer"
+      className={className}
       viewBox="0 0 400 250"
       preserveAspectRatio="xMidYMid meet"
       aria-hidden="true"
     >
       <defs>
         <pattern id={`${uid}-cad`} width="20" height="20" patternUnits="userSpaceOnUse">
-          <path d="M20 0H0v20" fill="none" stroke="var(--color-line)" strokeWidth="0.6" />
+          <path d="M20 0H0v20" fill="none" stroke="var(--line)" strokeWidth="0.6" />
         </pattern>
       </defs>
       <rect width="400" height="250" fill={`url(#${uid}-cad)`} />
-      <g fill="none" stroke="var(--color-carbon)" strokeWidth="1.7" strokeLinejoin="round">
+      <g fill="none" stroke="var(--ink)" strokeWidth="1.7" strokeLinejoin="round">
         <path d={MOTIF.body} />
         <path d={MOTIF.inner} strokeWidth="1.1" />
         {MOTIF.flowers.map((f) => (
@@ -83,7 +83,7 @@ export function StageOutline({ uid }: { uid: string }) {
         ))}
       </g>
       {/* Control points: the giveaway that this is a file, not a photograph. */}
-      <g fill="var(--color-card)" stroke="var(--color-vermilion)" strokeWidth="1.3">
+      <g fill="var(--s-paper)" stroke="var(--brand-accent)" strokeWidth="1.3">
         {MOTIF.nodes.map(([x, y]) => (
           <rect key={`${x}-${y}`} x={x - 3.5} y={y - 3.5} width="7" height="7" />
         ))}
@@ -92,17 +92,17 @@ export function StageOutline({ uid }: { uid: string }) {
   );
 }
 
-export function StagePath() {
+export function StagePath({ className }: { className?: string }) {
   return (
     <svg
-      className="stage-layer"
+      className={className}
       viewBox="0 0 400 250"
       preserveAspectRatio="xMidYMid meet"
       aria-hidden="true"
     >
-      <rect width="400" height="250" fill="var(--color-ivory-2)" />
+      <rect width="400" height="250" fill="var(--s-cloth)" />
       {/* The design, receded: the file is still underneath the path. */}
-      <g fill="none" stroke="var(--color-carbon)" strokeWidth="0.9" opacity="0.22">
+      <g fill="none" stroke="var(--ink)" strokeWidth="0.9" opacity="0.22">
         <path d={MOTIF.body} />
         <path d={MOTIF.inner} />
         {MOTIF.flowers.map((f) => (
@@ -112,7 +112,7 @@ export function StagePath() {
       {/* The travel path, dashed like thread, in the one accent colour. */}
       <g
         fill="none"
-        stroke="var(--color-vermilion)"
+        stroke="var(--brand-accent)"
         strokeWidth="2.3"
         strokeLinejoin="round"
         strokeDasharray="7 5"
@@ -121,7 +121,7 @@ export function StagePath() {
         <path d={MOTIF.inner} strokeWidth="1.7" />
       </g>
       {/* Every point where the needle goes into the cloth. */}
-      <g fill="var(--color-carbon)">
+      <g fill="var(--ink)">
         {MOTIF.stitches.map(([x, y]) => (
           <circle key={`${x}-${y}`} cx={x} cy={y} r="2.8" />
         ))}
@@ -130,10 +130,10 @@ export function StagePath() {
   );
 }
 
-export function StageFinished({ uid }: { uid: string }) {
+export function StageFinished({ uid, className }: { uid: string; className?: string }) {
   return (
     <svg
-      className="stage-layer"
+      className={className}
       viewBox="0 0 400 250"
       preserveAspectRatio="xMidYMid meet"
       aria-hidden="true"
@@ -148,31 +148,31 @@ export function StageFinished({ uid }: { uid: string }) {
           patternUnits="userSpaceOnUse"
           patternTransform="rotate(38)"
         >
-          <rect width="6" height="6" fill="var(--color-vermilion)" />
+          <rect width="6" height="6" fill="var(--brand-accent)" />
           <path d="M0 0v6" stroke="rgb(255 255 255 / 0.32)" strokeWidth="1.7" />
         </pattern>
         {/* The ground cloth. */}
         <pattern id={`${uid}-weave`} width="8" height="8" patternUnits="userSpaceOnUse">
-          <rect width="8" height="8" fill="var(--color-card)" />
-          <path d="M0 4h8M4 0v8" stroke="var(--color-line)" strokeWidth="0.7" opacity="0.65" />
+          <rect width="8" height="8" fill="var(--s-paper)" />
+          <path d="M0 4h8M4 0v8" stroke="var(--line)" strokeWidth="0.7" opacity="0.65" />
         </pattern>
       </defs>
       <rect width="400" height="250" fill={`url(#${uid}-weave)`} />
       <path
         d={MOTIF.body}
         fill={`url(#${uid}-satin)`}
-        stroke="var(--color-vermilion)"
+        stroke="var(--brand-accent)"
         strokeWidth="1.5"
         strokeLinejoin="round"
       />
       <path d={MOTIF.inner} fill="none" stroke="rgb(255 255 255 / 0.6)" strokeWidth="3" />
       {/* Flowers worked in a second colour, beads on the outline. */}
-      <g fill="var(--color-carbon)" opacity="0.88">
+      <g fill="var(--ink)" opacity="0.88">
         {MOTIF.flowers.map((f) => (
           <circle key={`${f.cx}-${f.cy}`} cx={f.cx} cy={f.cy} r={f.r} />
         ))}
       </g>
-      <g fill="var(--color-card)" stroke="var(--color-carbon)" strokeWidth="1.2">
+      <g fill="var(--s-paper)" stroke="var(--ink)" strokeWidth="1.2">
         {MOTIF.stitches.map(([x, y]) => (
           <circle key={`${x}-${y}`} cx={x} cy={y} r="4.2" />
         ))}
@@ -197,7 +197,7 @@ export function StageFinished({ uid }: { uid: string }) {
  *      shift before it comes back to that line
  *   4. the thread broke, because needle, thread and material do not match
  */
-export function StageFailed({ uid }: { uid: string }) {
+export function StageFailed({ uid, className }: { uid: string; className?: string }) {
   /* Four faults, each marked where it happens. */
   const faults = [
     { x: 336, y: 46, n: "1" },
@@ -208,7 +208,7 @@ export function StageFailed({ uid }: { uid: string }) {
 
   return (
     <svg
-      className="stage-layer"
+      className={className}
       viewBox="0 0 400 250"
       preserveAspectRatio="xMidYMid meet"
       aria-hidden="true"
@@ -217,11 +217,11 @@ export function StageFailed({ uid }: { uid: string }) {
         {/* Puckered ground: the same weave, but the grid no longer runs
             straight, which is exactly what a pulled fabric looks like. */}
         <pattern id={`${uid}-pucker`} width="8" height="8" patternUnits="userSpaceOnUse">
-          <rect width="8" height="8" fill="var(--color-card)" />
+          <rect width="8" height="8" fill="var(--s-paper)" />
           <path
             d="M0 4 q2 -1.6 4 0 t4 0 M4 0 q-1.6 2 0 4 t0 4"
             fill="none"
-            stroke="var(--color-line)"
+            stroke="var(--line)"
             strokeWidth="0.8"
           />
         </pattern>
@@ -234,8 +234,8 @@ export function StageFailed({ uid }: { uid: string }) {
           patternUnits="userSpaceOnUse"
           patternTransform="rotate(38)"
         >
-          <rect width="7" height="7" fill="var(--color-card)" />
-          <path d="M1.5 0v7" stroke="var(--color-vermilion)" strokeWidth="2.6" opacity="0.72" />
+          <rect width="7" height="7" fill="var(--s-paper)" />
+          <path d="M1.5 0v7" stroke="var(--brand-accent)" strokeWidth="2.6" opacity="0.72" />
         </pattern>
         {/* Where the fill gave out completely. */}
         <mask id={`${uid}-gap`}>
@@ -251,7 +251,7 @@ export function StageFailed({ uid }: { uid: string }) {
         d={MOTIF.body}
         fill={`url(#${uid}-thin)`}
         mask={`url(#${uid}-gap)`}
-        stroke="var(--color-vermilion)"
+        stroke="var(--brand-accent)"
         strokeWidth="1.1"
         strokeOpacity="0.75"
         strokeLinejoin="round"
@@ -261,7 +261,7 @@ export function StageFailed({ uid }: { uid: string }) {
       <path
         d={MOTIF.inner}
         fill="none"
-        stroke="var(--color-carbon)"
+        stroke="var(--ink)"
         strokeWidth="2.2"
         strokeOpacity="0.5"
         transform="translate(7 -5)"
@@ -271,7 +271,7 @@ export function StageFailed({ uid }: { uid: string }) {
       <path
         d="M336 46 c 14 10, 26 4, 33 16 c 5 9, -3 14, 3 22"
         fill="none"
-        stroke="var(--color-vermilion)"
+        stroke="var(--brand-accent)"
         strokeWidth="1.6"
         strokeLinecap="round"
       />
@@ -284,11 +284,11 @@ export function StageFailed({ uid }: { uid: string }) {
               cy={f.y}
               r="13"
               fill="none"
-              stroke="var(--color-carbon)"
+              stroke="var(--ink)"
               strokeWidth="1.4"
               strokeDasharray="4 3"
             />
-            <circle cx={f.x + 15} cy={f.y - 13} r="8" fill="var(--color-carbon)" />
+            <circle cx={f.x + 15} cy={f.y - 13} r="8" fill="var(--ink)" />
             <text
               x={f.x + 15}
               y={f.y - 13}
@@ -296,7 +296,7 @@ export function StageFailed({ uid }: { uid: string }) {
               dominantBaseline="central"
               fontSize="9.5"
               fontWeight="700"
-              fill="var(--color-card)"
+              fill="var(--s-paper)"
             >
               {f.n}
             </text>
@@ -316,17 +316,17 @@ export function StageFailed({ uid }: { uid: string }) {
  * design — underlay added under the fill, density raised, travel order
  * re-cut — rather than as dials being turned.
  */
-export function StageCorrection({ uid }: { uid: string }) {
+export function StageCorrection({ uid, className }: { uid: string; className?: string }) {
   return (
     <svg
-      className="stage-layer"
+      className={className}
       viewBox="0 0 400 250"
       preserveAspectRatio="xMidYMid meet"
       aria-hidden="true"
     >
       <defs>
         <pattern id={`${uid}-fix`} width="20" height="20" patternUnits="userSpaceOnUse">
-          <path d="M20 0H0v20" fill="none" stroke="var(--color-line)" strokeWidth="0.6" />
+          <path d="M20 0H0v20" fill="none" stroke="var(--line)" strokeWidth="0.6" />
         </pattern>
         {/* Underlay is laid *inside* the shape it supports. Unclipped, the
             lattice ran past the outline and read as stray construction
@@ -338,7 +338,7 @@ export function StageCorrection({ uid }: { uid: string }) {
       <rect width="400" height="250" fill={`url(#${uid}-fix)`} />
 
       {/* The design, held quiet: this panel is about what was added to it. */}
-      <g fill="none" stroke="var(--color-carbon)" strokeWidth="1.3" strokeOpacity="0.45">
+      <g fill="none" stroke="var(--ink)" strokeWidth="1.3" strokeOpacity="0.45">
         <path d={MOTIF.body} />
         <path d={MOTIF.inner} strokeWidth="0.9" />
       </g>
@@ -348,13 +348,13 @@ export function StageCorrection({ uid }: { uid: string }) {
       <path
         d={MOTIF.body}
         fill="none"
-        stroke="var(--color-needle)"
+        stroke="var(--ink-muted)"
         strokeWidth="1.1"
         strokeDasharray="10 7"
         transform="translate(200 125) scale(0.9) translate(-200 -125)"
       />
       <g
-        stroke="var(--color-needle)"
+        stroke="var(--ink-muted)"
         strokeWidth="0.9"
         strokeOpacity="0.75"
         clipPath={`url(#${uid}-inside)`}
@@ -367,7 +367,7 @@ export function StageCorrection({ uid }: { uid: string }) {
       {/* Density raised: the fill strokes are closer together than they were
           in the failed sample, drawn at the same angle so the change reads. */}
       <g
-        stroke="var(--color-vermilion)"
+        stroke="var(--brand-accent)"
         strokeWidth="2"
         strokeOpacity="0.85"
         clipPath={`url(#${uid}-inside)`}
@@ -378,7 +378,7 @@ export function StageCorrection({ uid }: { uid: string }) {
       </g>
 
       {/* Travel order re-cut: the new sequence, with direction. */}
-      <g fill="none" stroke="var(--color-carbon)" strokeWidth="1.6">
+      <g fill="none" stroke="var(--ink)" strokeWidth="1.6">
         <path d="M100 68 L218 84 L300 100 L336 46" strokeDasharray="6 4" />
         <path d="M328 56 l8 -10 l2 12" strokeLinecap="round" strokeLinejoin="round" />
       </g>
@@ -390,7 +390,7 @@ export function StageCorrection({ uid }: { uid: string }) {
         { x: 300, y: 100, n: "3" }
       ].map((m) => (
         <g key={m.n}>
-          <circle cx={m.x} cy={m.y} r="9" fill="var(--color-vermilion)" />
+          <circle cx={m.x} cy={m.y} r="9" fill="var(--brand-accent)" />
           <text
             x={m.x}
             y={m.y}
@@ -398,7 +398,7 @@ export function StageCorrection({ uid }: { uid: string }) {
             dominantBaseline="central"
             fontSize="10"
             fontWeight="700"
-            fill="var(--color-card)"
+            fill="var(--s-paper)"
           >
             {m.n}
           </text>

@@ -221,12 +221,58 @@ inside, the scrim's `inset: 0` resolved against the 56px header, so it measured
 language interstitial. Conversion is contextual — see §Mobile conversion in
 `docs/project-context.md` §6.
 
+### Grounds, and the adjacency rule
+
+A section declares exactly ONE ground — `.on-paper`, `.on-canvas`, `.on-cloth`
+or `.on-mist` — and **two adjacent sections never share one**. That is what
+stops a long scroll reading as a single slab, and on the homepage it is
+asserted rather than trusted.
+
+`.on-mist` is not "the grey one": it is the **cool register**, and it carries
+the cool hairline with it. It belongs to the screen, the file and the process.
+A fee panel is paperwork and sits on cloth, however technical the numbers look.
+
+### A span-rendered primitive MUST declare a display
+
+`.thread`, `.thread-v`, `.needle` and `.hoop` all render on a `<span>`. An
+inline box silently ignores `width`, `height`, `aspect-ratio` and `overflow`,
+so the failure is invisible: the vertical thread rendered as nothing, and the
+hoop rendered as a rounded rectangle the size of whatever it wrapped. Neither
+was catchable by typecheck, lint or a source-reading test — only by measuring
+the rendered box. `tests/kds-foundation.test.ts` asserts it for the family.
+
+### The homepage composition
+
+Ten blocks in `src/components/kds/home/`, each with its own layout class and no
+shared card between them:
+
+| Block | Classes | Shape |
+| --- | --- | --- |
+| `HomeHero` | `.band-hero`, `.split`, `.hero-facts`, `.hero-swatches`, `.hero-scene` | editorial split, photo scene on one thread |
+| `EntryPaths` | `.paths`, `.path-row` | stitched index of three |
+| `SampleBook` | `.strip`, family tabs | horizontal sample rail |
+| `ScreenMachineProof` | `.smp-tabs`, `.smp-panel`, `.smp-figure` | five-state tablist, one motif |
+| `EmcadPanel` | `.emcad`, `.emcad-fee`, `.emcad-schedule` | a document sheet |
+| `ProofWall` | `.wall-lead`, `.wall-masonry` | wide lead + masonry |
+| `HomeVoices` | the proof modules | four different formats |
+| `TrustSignals` | `.trust-stats` + `TrustedByRail` | typographic counters |
+| `BatchesVisit` | `.when`, `.board` | schedule board + address |
+| `HomeClose` | `.close-grid`, `.close-band` | accordion + close |
+
+**`.wall-masonry` rather than `.bento` for the work wall.** The six work
+photographs are at three ratios on purpose, and a fixed-cell grid either crops
+them or leaves holes the size of the tiles. CSS columns (two on a phone, three
+from 48rem, `break-inside: avoid`) pack mixed ratios with no cropping and no
+JavaScript. `.bento` remains the right tool where the children can be told what
+size to be; it is the wrong one where each child brings its own aspect ratio.
+
 ### Where it lives
 
 - `src/app/thread-machine-proof.css` — the system
 - `src/components/kds/` — `StitchSwatch`, `marks` (thread/needle/hoop/progress),
   `Frame` (machine frame + photo placeholder), `proof` (the seven modules)
 - `src/components/kds/shell/` — header, footer, locale switch, brand, dock
+- `src/components/kds/home/` — the ten homepage blocks and the five-state motif
 - `src/lib/brand.ts` — the logo slot contract
 - `src/content/proof.ts` — the proof registry
 - `/design` — the rendered reference, on the new system alone

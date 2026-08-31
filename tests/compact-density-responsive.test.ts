@@ -79,9 +79,6 @@ describe("a control that stands on its own is a control-sized target", () => {
     expect(body).toBeTruthy();
     expect(declaration(body!, "min-height")).toBe("2.75rem");
     for (const file of [
-      "src/components/home/Trainers.tsx",
-      "src/components/home/BatchesTeaser.tsx",
-      "src/components/home/Proof.tsx",
       "src/app/[locale]/courses/[slug]/page.tsx",
       "src/app/[locale]/verify/[id]/page.tsx"
     ]) {
@@ -89,6 +86,11 @@ describe("a control that stands on its own is a control-sized target", () => {
       expect(source, file).toContain("link-more");
       expect(stripComments(source), file).not.toContain("min-h-8 shrink-0");
     }
+    /* The rebuilt surfaces use `.act-quiet` for the same job. It carries the
+       floor in the system rather than at each call site, which is why the
+       list above shrinks as routes are rebuilt rather than growing. */
+    const tmp = read("src/app/thread-machine-proof.css");
+    expect(declaration(ruleBody(tmp, ".kds .act-quiet")!, "min-height")).toBe("2.75rem");
   });
 
   it("floors the links in the hero caption row", () => {

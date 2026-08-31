@@ -356,6 +356,14 @@ Read `docs/design-system.md` before adding spacing.
 
 ### The 10-phase redesign
 
+> **Historical.** This subsection and the v4/v5 records below describe the
+> public site as it was **before** the THREAD / MACHINE / PROOF rebuild (v6,
+> further down this section). The component names in it — `<Hero>`,
+> `<EmcadDecision>`, `<StudentWorkWall>`, `<WhereYouLearn>`, `<Trainers>`,
+> `<TrustRail>` and the rest of `src/components/home/` — are **deleted**. The
+> reasoning is kept because the decisions were expensive to reach and several
+> were carried into the rebuild; the file paths are not current.
+
 Planned in `docs/screen-to-stitch-progress.md` and implemented in PRs **#12–#21**,
 one phase per PR, each with an "Implementation record" written back into that
 document as it landed:
@@ -701,6 +709,77 @@ on every screen. Gujarati remains first-class; only the estimate was wrong.
 `tsconfig.json` sets `jsx: "preserve"` because Next.js runs its own transform;
 without the override a test importing a `.tsx` component sees raw JSX and fails
 to parse. This changes nothing about how the application is built.
+
+### v6 — "THREAD / MACHINE / PROOF" (public only, from 2026-08-31)
+
+**This is the system the public site runs on now.** Everything above it in this
+section describes what it replaces on public routes — and what **Karma Console
+still runs on**, which is explicitly out of scope and must not be touched by
+public visual work.
+
+The owner stopped the "Modern Textile Lab" implementation (PRs #55–#58) because
+it reskinned the existing composition rather than rebuilding it. The evidence
+that it was a reskin is measurable: of everything `src/app/textile-lab.css`
+defined, exactly **one** class was used by any component. That stylesheet is
+deleted.
+
+**One stylesheet, one scope.** `src/app/thread-machine-proof.css`, every rule
+scoped `.kds`, imported by `src/app/[locale]/layout.tsx` after
+`globals.css` → `premium.css` → `machine-lab.css`. `<body className="kds">` on
+the public layout and nowhere else. **No public token is added to
+`globals.css`**, because the Console shares that file, and the isolation was
+verified in a browser twice: `/admin/login` resolves no `--brand-accent`,
+`--s-canvas` or `--t-h2`, and `--color-ivory` reads `#f5f0e6` on both sides —
+the new system declares its own values rather than re-pointing shared ones.
+
+**Four brand variables, and only four.** `--brand-accent`,
+`--brand-accent-strong`, `--brand-accent-soft`, `--brand-on-accent`. The
+owner's logo may arrive in any colour, so no hue is hardcoded anywhere else and
+a test recomputes contrast for red, blue, green, gold and black alternates on
+every run. The bright thread red fails 4.5:1 as a button label, which is why
+there are two reds: the deep one carries white at 5.98:1. Status colours stay
+independent of the brand and are never the only signal.
+
+**Surfaces are grounds, not bands.** `--s-paper` / `--s-canvas` / `--s-cloth`
+are the warm register; `--s-mist` is the **cool** register and means screen,
+file or process — which is why it belongs to the Screen → Proof rail and not to
+a fee panel. A section declares exactly one ground, and **two adjacent sections
+never share one**; the homepage suite asserts it.
+
+**Primitives** live in `src/components/kds/`: `ThreadLine`, `NeedlePoint`,
+`HoopWindow`, `ThreadProgress` (`marks.tsx`), `MachineFrame` / `PhotoFrame`
+(`Frame.tsx`), eleven `StitchSwatch` fabric samples keyed by course slug, and
+the proof formats in `proof.tsx`. **There is deliberately no shared card
+component** — a featured quote, a review rail, a rating and a journey are four
+different objects, and flattening them into one card is the templated look the
+owner rejected.
+
+Three of the marks render on a `<span>`, so **every one of them must declare a
+`display`**: an inline box silently ignores width, height, `aspect-ratio` and
+`overflow`. That mistake shipped twice — `.thread-v` was invisible, and `.hoop`
+was a rounded rectangle the size of whatever it wrapped — and neither was
+visible to typecheck, lint or any source-reading test. `tests/kds-foundation`
+now asserts it for the whole family.
+
+**Proof content has one registry**: `src/content/proof.ts`, every item typed
+`sample | owner_provided | verified`, bilingual, with `remainingSampleProof()`
+enumerating what still has to be replaced before launch. Sample content is
+visibly marked, and **`src/lib/schema.ts` cannot import the registry at all** —
+no `AggregateRating`, no `Review`, no `Person` from preview content, and no
+review count published anywhere.
+
+**A third root layout** exists: `src/app/design/`, loading only `globals.css`
+and the new sheet, `robots: { index: false }`, exempted from the intl
+middleware. It is the rendered reference for the system at `/design`.
+
+**Phase record (2026-08-31):** Phase 0 recovery (PR #61), Phase 1 foundation
+(#62), Phase 2 shell (#63), Phase 3 homepage (#64). The homepage is ten blocks
+in `src/components/kds/home/`, no two of the same shape; the twenty-two
+components in `src/components/home/` are deleted. Measured at 390px it is
+**12,248px against a 18,665px baseline** across half as many sections. The
+authoritative phase-by-phase record — what shipped, what was measured, what was
+carried forward — is in
+`docs/karma-modern-textile-lab-redesign-plan.md`.
 
 ---
 
@@ -2063,14 +2142,13 @@ modules are importable in a test runner while the guard stays real in the app.
 `jsx: "preserve"` for Next.js — without the override a test importing a `.tsx`
 component sees raw JSX and fails to parse.
 
-**46 test files, 656 tests** (`vitest run`, ~5 s). Many encode a *policy* decision rather than a code detail,
+**57 test files, 913 tests** (`vitest run`, ~6 s). Many encode a *policy* decision rather than a code detail,
 which is the point — the policy survives a refactor:
 
 | Test | Guards |
 | --- | --- |
 | `i18n-parity` | EN/GU catalogue keys mirror exactly |
 | `machine-lab-system` | the design system v4 foundation: 32-photo manifest, icon family, eleven technique signatures, stitch semantics, motion levels, Gujarati overrides, reduced motion, no new dependency |
-| `machine-lab-shell` | the hero states EMCAD/machine/Surat/demo without photography; one course's facts never become the site's; one continuous thread and one Level-4 moment; the rail never autoplays, loops or needs a drag; bands never re-point the palette; the mobile bar keeps exactly two actions |
 | `machine-lab-final` | dark bands capped and absent from the console; no invented machine specification, coordinate readout or decorative loop; focus rings drawn inside full-bleed rows; reduced motion covers everything added; eleven courses, named photo frames, six faults and eight notes still present; no new dependency |
 | `machine-lab-audit` | no half-name of the software anywhere; slugs and keys untouched by the rename; no search term lost to it; console reads bounded; no PII in any analytics call; one JSON-LD emitter with no price/rating/review; banned copy phrases absent; Gujarati never uppercased or letterspaced in any stylesheet |
 | `machine-lab-modules` | one page-header implementation across the whole console; the attendance lock, the certificate no-file-pipeline rule, the twelve design statuses, Content Desk staying typed, Reports not becoming BI, and the one-Owner/five-Admin/no-MFA access model all fail the suite if undone; the deletion tombstone is written before the delete |
@@ -2083,7 +2161,11 @@ which is the point — the policy survives a refactor:
 | `machine-lab-admission` | every public-form defence still present; no typed value in any analytics call; progressbar semantics kept; the review step does not animate; demo figures render from the verified record and offer nothing bookable; universal actions keep universal icons |
 | `machine-lab-proof` | one shared material wall with exactly one registration mark; reserved slots and the editable gallery stay separate; the BEFORE→LEARNED→NOW arc and its stitch geometry; portraits mapped by slug and never captioned with a person; no job-placement, salary or earnings claim in any story's data |
 | `machine-lab-courses` | one index component for both surfaces; every course has a signature and only its own photograph; exactly one course carries confirmed duration/fee facts; no two course pages share a produces line, fault list, output list, practice or machine description |
-| `machine-lab-homepage` | the section order; no two dark bands adjacent; the Machine Index carries no fee and only confirmed durations; every EMCAD figure renders from the verified record, never from a message; no payment provider anywhere near the fee block; no invented machine specification; trainer frames name a photograph, never a person |
+| `kds-foundation` | the public design system: four brand variables and no hardcoded hue, contrast recomputed for five logo colours, one type scale, every span-rendered primitive declaring a box, one stitch geometry, reduced motion |
+| `kds-shell` | the header, the mobile menu as a real modal, the EN\|ગુ switch, the footer, the skip link, nothing floating — and that every literal `t("…")` in `src/components/kds/**` resolves in both catalogues |
+| `kds-proof-firewall` | sample and owner-provided proof never reaching structured data: no `AggregateRating`, `Review` or `Person` from the registry, no review count published, `schema.ts` unable to import it |
+| `kds-homepage` | the ten blocks in order and no two adjacent grounds alike; every EMCAD figure rendered from the verified record and never typed into a catalogue; no online payment; no invented machine specification; no student name, outcome or earning on a frame; the signature interaction never autoplaying or needing a drag |
+| `public-locales` | the routed set is exactly `["en","gu"]`; no Hindi catalogue, route, face or string; no unapplied migration in the journal; the teaching languages survive |
 | `auth-guard`, `permissions` | the six-state access chain, owner bypass, grant handling |
 | `admin-seats` | one owner + five admin seats, invitation races |
 | `admin-invite`, `invite-callback`, `invite-persistence` | the token-hash invitation flow |

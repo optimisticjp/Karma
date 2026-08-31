@@ -168,7 +168,13 @@ describe("keyboard and motion", () => {
 describe("does this read as a real studio or as a concept for one", () => {
   it("shows eleven real courses, not a curated shortlist", () => {
     expect(courses).toHaveLength(11);
-    expect(read("src/components/home/CourseCatalogue.tsx")).toContain("coursesByFamily");
+    const book = read("src/components/kds/home/SampleBook.tsx");
+    expect(book).toContain("coursesByFamily");
+    /* The family filter narrows what is SHOWN; it must never narrow what
+       exists. "All" is the default, so a visitor without scripting — and a
+       crawler — sees the whole catalogue rather than one family. */
+    expect(book).toContain('useState<FamilyKey | "all">("all")');
+    expect(book).not.toMatch(/coursesByFamily\.slice\(/);
   });
 
   it("keeps every photograph a named, reserved frame rather than a stand-in", () => {

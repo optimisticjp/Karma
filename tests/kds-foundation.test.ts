@@ -337,12 +337,26 @@ describe("motion", () => {
     expect(block).toContain(".kds .tile:hover img { transform: none; }");
   });
 
-  it("gives both thread orientations a block box", () => {
-    /* Both render on a `<span>`, and an inline box ignores width and height —
-       so the vertical thread was invisible until it declared `display`. */
-    for (const selector of [".kds .thread", ".kds .thread-v"]) {
-      expect(ruleBody(css, selector), selector).toContain("display: block");
+  it("gives every span-rendered primitive a box", () => {
+    /* These all render on a `<span>`, and an inline box silently ignores
+       width, height, aspect-ratio and overflow. The vertical thread was
+       invisible until it declared `display`; the hoop was a rounded rectangle
+       the size of whatever it wrapped. Both failures were invisible to
+       typecheck, lint and every other test, which is why the rule is asserted
+       for the whole family rather than for the two that were caught. */
+    const spanPrimitives = [
+      ".kds .thread",
+      ".kds .thread-v",
+      ".kds .needle",
+      ".kds .hoop"
+    ];
+    for (const selector of spanPrimitives) {
+      const body = ruleBody(css, selector) as string;
+      expect(body, selector).toMatch(/display: (block|inline-block|flex|grid)/);
     }
+    /* Non-vacuity: every one of them is really rendered on a span. */
+    const marks = read("src/components/kds/marks.tsx");
+    expect((marks.match(/<span/g) ?? []).length).toBeGreaterThanOrEqual(4);
   });
 
   it("keeps one stitch geometry across every stitched thing", () => {

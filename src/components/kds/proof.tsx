@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { pick } from "@/lib/i18n/localized";
 import type { Locale } from "@/i18n/routing";
 import { PhotoFrame } from "./Frame";
+import { photoSlot } from "@/content/photo-manifest";
 import { HoopWindow, NeedlePoint, ThreadLine } from "./marks";
 import {
   isSample,
@@ -142,9 +143,19 @@ export function FeaturedReview({
           balances — and this is exactly what the primitive was built for: a
           face, at the one moment on the page that earns a round crop. */}
       {item.photoId ? (
-        <HoopWindow className="w-48 justify-self-start md:w-60 md:justify-self-end lg:w-72">
-          <PhotoFrame id={item.photoId} scale="thumb" />
-        </HoopWindow>
+        /* The hoop's round mask clips the frame's own corner label, so the
+           shot it is holding is named UNDER it. Every other reserved frame on
+           the site says what it is waiting for; an unlabelled empty disc is
+           the one placeholder that reads as a mistake rather than as work in
+           progress. */
+        <div className="justify-self-start md:justify-self-end">
+          <HoopWindow className="w-48 md:w-60 lg:w-72">
+            <PhotoFrame id={item.photoId} scale="thumb" />
+          </HoopWindow>
+          <p className="t-meta mx-auto mt-3 max-w-[24ch] text-center">
+            {photoSlot(item.photoId).label}
+          </p>
+        </div>
       ) : null}
     </figure>
   );

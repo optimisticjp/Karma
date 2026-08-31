@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { globSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { clampAt, declaration, ruleBody, token, PHONE } from "./helpers/measure";
 import { routing } from "@/i18n/routing";
@@ -379,5 +379,63 @@ describe("the layout", () => {
     const root = ruleBody(css, ".kds") as string;
     expect(root).toContain("min-height: 100dvh");
     expect(css).toContain(".kds > main { flex: 1 0 auto; }");
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * The catalogue answers every key the components ask for
+ * ------------------------------------------------------------------ */
+
+describe("message keys resolve", () => {
+  /**
+   * next-intl does not fail a build for a missing key — it logs
+   * `MISSING_MESSAGE` on the server and renders the key path in the page. On a
+   * public marketing site that is a visible defect that ships silently, and it
+   * shipped twice during this rebuild before the running page was checked.
+   *
+   * So: every literal `t("…")` in the new public components is resolved
+   * against BOTH catalogues here. Computed keys (`t(`${p.key}Title`)`) cannot
+   * be checked mechanically and are deliberately skipped rather than
+   * approximated — parity between the two catalogues still covers them.
+   */
+  const en = JSON.parse(read("messages/en.json")) as Record<string, unknown>;
+  const gu = JSON.parse(read("messages/gu.json")) as Record<string, unknown>;
+
+  const lookup = (cat: Record<string, unknown>, path: string) =>
+    path.split(".").reduce<unknown>((node, part) => {
+      if (node && typeof node === "object" && part in (node as Record<string, unknown>)) {
+        return (node as Record<string, unknown>)[part];
+      }
+      return undefined;
+    }, cat);
+
+  const files = globSync("src/components/kds/**/*.tsx");
+
+  it("finds every literal key used by the public components", () => {
+    expect(files.length).toBeGreaterThan(10);
+    const missing: string[] = [];
+    let checked = 0;
+
+    for (const file of files) {
+      const source = code(file);
+      /* Namespaces, in source order, with the name each was bound to. */
+      const bindings = [...source.matchAll(/const (\w+) = (?:await )?(?:use|get)Translations\(\s*"([^"]+)"/g)];
+      if (bindings.length === 0) continue;
+      const nsOf = new Map(bindings.map((m) => [m[1], m[2]]));
+
+      for (const call of source.matchAll(/\b(\w+)\(\s*"([^"]+)"/g)) {
+        const ns = nsOf.get(call[1]);
+        if (!ns) continue;
+        const path = `${ns}.${call[2]}`;
+        checked += 1;
+        if (lookup(en, path) === undefined) missing.push(`en · ${path} (${file})`);
+        if (lookup(gu, path) === undefined) missing.push(`gu · ${path} (${file})`);
+      }
+    }
+
+    /* Non-vacuity: if the scan stopped matching, this fails rather than
+       passing an empty set. */
+    expect(checked).toBeGreaterThan(80);
+    expect(missing).toEqual([]);
   });
 });
