@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "",
     "/courses",
     ...courses.map((c) => `/courses/${c.slug}`),
+    "/batches",
     "/admissions",
     "/admission",
     "/student-work",
@@ -27,7 +28,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     routing.locales.map((locale) => ({
       url: `${site.url}/${locale}${path}`,
       lastModified: CONTENT_LAST_UPDATED,
-      changeFrequency: path === "" || path === "/admissions" ? ("weekly" as const) : ("monthly" as const),
+      /* `/batches` changes as often as the studio opens one, which is the
+         fastest-moving public page there is. */
+      changeFrequency:
+        path === "" || path === "/admissions" || path === "/batches"
+          ? ("weekly" as const)
+          : ("monthly" as const),
       alternates: {
         languages: {
           en: `${site.url}/en${path}`,

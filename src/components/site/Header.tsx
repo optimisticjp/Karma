@@ -8,9 +8,16 @@ import { StitchPath } from "@/components/ui/StitchPath";
 import { StepIndex } from "@/components/ui/MonoNote";
 import { cn } from "@/lib/utils";
 
+/**
+ * Navigation is being rebuilt in Phase 4 (`docs/modern-textile-lab-ia.md` §4):
+ * six desktop links, seven mobile rows, "Studio" instead of "About", and no
+ * "Home" beside a clickable wordmark. This is the interim state — `/batches`
+ * exists as of Phase 2 and a route nobody can reach is a route nobody uses.
+ */
 const NAV = [
   { href: "/", key: "home" },
   { href: "/courses", key: "courses" },
+  { href: "/batches", key: "batches" },
   { href: "/admissions", key: "admissions" },
   { href: "/student-work", key: "work" },
   { href: "/notes", key: "notes" },

@@ -1716,7 +1716,7 @@ Scoping is preferred.
 Execute one clean PR per phase unless two tiny adjacent phases are clearly safer together.
 
 ## Phase 1 — repository + rendered screenshot audit
-**Status:** ✅ Complete — PR #55, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #55, merged as `b5edbf9`
 
 Audit recorded in **`docs/modern-textile-lab-audit.md`**. Measured in Chromium
 against a production build — 100 screenshots at 390/768/1024/1440 across 25
@@ -1755,15 +1755,62 @@ Console, which is why Phase 3 scopes a fourth public-only stylesheet rather than
 retuning shared tokens.
 
 ## Phase 2 — information architecture + public route/navigation model
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #56, merged as `PLACEHOLDER_MERGE`
 
-- finalize 8-section homepage architecture
-- create `/[locale]/batches`
-- define desktop/mobile navigation
-- define contextual sticky CTA policy
-- map old homepage sections to deeper pages
-- preserve working URLs/redirects
-- tests for route integrity
+The IA is recorded in **`docs/modern-textile-lab-ia.md`** — authoritative for
+public routes, navigation and conversion chrome, and it supersedes the
+public-navigation sections of the two previous plans.
+
+**`/[locale]/batches` exists and is server-rendered.** It reads
+`getUpcomingBatches()` directly — one query, no client fetch, no hydration, no
+loading skeleton, because this page *is* about the batches where the homepage
+teaser is a widget on an otherwise static page. `force-dynamic` verified: no
+HTML is emitted for it at build, so every request queries live.
+
+The rule the route is built on is *real rows or nothing*:
+
+- it does not call `sampleBatches()` — the audit found that generator is the
+  only `"Sat-Sun"` string in the repository, i.e. the fake weekend §5.5 forbids
+  by name, along with fabricated seats, dates and per-batch language;
+- every uncertain field renders conditionally — no `days`, no days line; no
+  `language`, nothing said about language;
+- **`seats` of 0 means "not tracked", not "full"**, so it renders no seat line
+  rather than manufacturing "0 seats left" out of a null;
+- the empty state offers demo, WhatsApp and a call instead of a fabricated
+  batch, and the error state says the list could not be loaded rather than
+  showing something possibly stale.
+
+**The homepage map from 20 sections to 8** is in the IA doc §2, with each
+removal named and its content's new home. Twelve sections leave: four that
+argue the machine claim (3,816px between them), three that render only
+`sample: true` content, and five that duplicate another section. Nothing
+verified is lost — every fact moves to the page that owns it.
+
+**Navigation** is defined in §4: six desktop links (Home drops — the wordmark
+is the home link; Admissions and Contact move to the footer and mobile menu,
+which §12 permits explicitly), a 56px mobile header of Logo | language | menu,
+and a seven-row mobile menu with Book free demo anchored at the bottom.
+Implementation lands in Phase 4; Phase 2 adds `/batches` to the existing header
+and footer so the new route is reachable in every merged state.
+
+**The contextual sticky CTA policy** is §6: Book free demo | WhatsApp on
+`/courses/[slug]`, `/batches`, `/admissions`; the admission form keeps its own
+`.form-nav` rather than stacking a second bar; `/contact` gets none, because a
+fixed bar duplicating the three buttons already in its first viewport is chrome
+covering content. The doc separates what the owner changed (which actions,
+which routes) from the five contracts that survive verbatim — separate phone
+roles, no PII, one token for height and reservation, 44px targets, and
+actions-not-navigation.
+
+**No URL is renamed or removed.** `/about` keeps its slug while displaying as
+"Studio". `/admissions` and `/batches` both exist and neither redirects to the
+other. The footer's `/admissions#batches` anchor — which pointed two thirds of
+the way down another page — becomes a link to the route.
+
+New suite: `tests/mtl-routes.test.ts` (15 assertions) covering the route map,
+that nothing is renamed, sitemap parity, that **no public `href` points at a
+route that does not exist**, the batches data contract, and the locale
+routing contract. **809 tests pass.**
 
 ## Phase 3 — Modern Textile Lab design system
 **Status:** ⏳ Pending
