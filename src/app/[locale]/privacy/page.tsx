@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
+import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import { privacySections } from "@/content/legal";
+import { pick, pickList } from "@/lib/i18n/localized";
+import { asLocale } from "@/i18n/routing";
 import { site } from "@/lib/site";
 import { pageMeta } from "@/lib/seo";
-import { PageIntro } from "@/components/ui/PageIntro";
+import { PageHead } from "@/components/kds/PageHead";
+import { Icon } from "@/components/ui/Icon";
 
 export async function generateMetadata({
   params
@@ -10,122 +15,87 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const gu = locale === "gu";
+  const t = await getTranslations({ locale, namespace: "privacyPage" });
   return pageMeta({
     locale,
     path: "/privacy",
-    title: gu ? "પ્રાઇવસી પોલિસી | Karma Design Studio" : "Privacy Policy | Karma Design Studio",
-    description: gu
-      ? "અમે કઈ વિગત લઈએ છીએ, શા માટે, અને તમારા હક્કો."
-      : "What we collect, why, and your rights."
+    title: `${t("title")} | Karma Design Studio`,
+    description: t("sub")
   });
 }
 
 /**
- * DPDP-aligned draft (plan 15.1). ⚠ Owner + legal review required before
- * launch; this is a working draft, honest and plain, not legal advice.
+ * PRIVACY, AS A DOCUMENT.
+ *
+ * DPDP-aligned working draft — honest and plain, not legal advice. ⚠ Owner and
+ * legal review are still open in `docs/content-checklist.md`.
+ *
+ * The copy lives in `src/content/legal.ts` and is read through `pick()` /
+ * `pickList()`. It used to be two inline arrays chosen with
+ * `locale === "gu" ? … : …`, which CLAUDE.md non-negotiable #1 rules out
+ * everywhere: the else-branch of that ternary renders a MISSING Gujarati
+ * string as English and is indistinguishable from a translated one.
+ *
+ * Set as a numbered document rather than as cards. Somebody reads this page
+ * once, with a specific question, and the clause number is how they point at
+ * the answer over the phone.
  */
 export default async function PrivacyPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const gu = locale === "gu";
-
-  const sections: Array<{ h: string; p: string[] }> = gu
-    ? [
-        {
-          h: "અમે કઈ વિગત લઈએ છીએ",
-          p: [
-            "એડમિશન ફોર્મ: નામ, WhatsApp નંબર, ઇમેઇલ (વૈકલ્પિક), પસંદ કરેલો કોર્સ અને સમય, ઉંમરનો ગાળો, વ્યવસાય, અનુભવ, વિસ્તાર, અને 18થી નાના માટે વાલીની વિગત.",
-            "ડિઝાઇન બ્રીફ: નામ, ફોન, કંપની, પ્રોજેક્ટની વિગત અને તમે અપલોડ કરેલી ફાઇલ."
-          ]
-        },
-        {
-          h: "શા માટે",
-          p: [
-            "માત્ર તમારી અરજી કે બ્રીફ અંગે તમારો સંપર્ક કરવા. અમે વિગત વેચતા નથી અને જાહેરાત માટે વાપરતા નથી.",
-            "18થી નાના અરજદાર માટે વાલીની સંમતિ ફોર્મમાં જ લેવાય છે."
-          ]
-        },
-        {
-          h: "ડિઝાઇન ફાઇલો",
-          p: [
-            "બિઝનેસ બ્રીફની ફાઇલ પ્રાઇવેટ સ્ટોરેજમાં રહે છે અને ક્યારેય પબ્લિક લિંકથી ખૂલતી નથી."
-          ]
-        },
-        {
-          h: "કેટલો સમય",
-          p: [
-            "એડમિશન અરજી: પ્રવેશ પ્રક્રિયા પૂરી થયા પછી વ્યાજબી સમય સુધી (નિયમ પ્રમાણે નક્કી થાય છે).",
-            "તમે કહો એટલે અમે તમારી વિગત કાઢી નાખીએ છીએ, સિવાય કે કાયદા મુજબ રાખવી પડે."
-          ]
-        },
-        {
-          h: "તમારા હક્કો",
-          p: [
-            `તમારી વિગત જોવા, સુધારવા કે કઢાવવા ${site.email} પર 'Data request' લખીને મેઇલ કરો. અમે વ્યાજબી સમયમાં જવાબ આપીશું.`
-          ]
-        }
-      ]
-    : [
-        {
-          h: "What we collect",
-          p: [
-            "Admission form: name, WhatsApp number, optional email, chosen course and timing, age band, occupation, experience, area, and guardian details for applicants under 18.",
-            "Design briefs: name, phone, company, project details and any files you upload."
-          ]
-        },
-        {
-          h: "Why",
-          p: [
-            "Only to contact you about your application or brief. We do not sell data and do not use it for advertising.",
-            "For applicants under 18, guardian consent is collected in the form itself."
-          ]
-        },
-        {
-          h: "Design files",
-          p: [
-            "Business brief files live in private storage and are never served from public links."
-          ]
-        },
-        {
-          h: "How long",
-          p: [
-            "Admission applications: kept for a reasonable period after the admission cycle (finalised with policy review).",
-            "Ask, and we delete your data, unless the law requires keeping it."
-          ]
-        },
-        {
-          h: "Your rights",
-          p: [
-            `To access, correct or erase your data, email ${site.email} with the subject 'Data request'. We respond within a reasonable time.`
-          ]
-        }
-      ];
+  const [t, rawLocale] = await Promise.all([getTranslations("privacyPage"), getLocale()]);
+  const l = asLocale(rawLocale);
 
   return (
     <>
-      <PageIntro
-        eyebrow={gu ? "કાનૂની" : "Legal"}
-        title={gu ? "પ્રાઇવસી પોલિસી" : "Privacy Policy"}
-        lede={
-          gu
-            ? "અમે કઈ વિગત લઈએ છીએ, શા માટે લઈએ છીએ, કેટલો સમય રાખીએ છીએ, અને તમે એ કઢાવી કઈ રીતે શકો."
-            : "What we collect, why we collect it, how long we keep it, and how you get it removed."
+      <PageHead
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        lede={t("sub")}
+        aside={
+          <>
+            <p className="t-micro">{t("asideTitle")}</p>
+            <p className="t-body mt-2">{t("asideBody")}</p>
+          </>
         }
       />
-      <section className="section">
-        <div className="container-site reading-shell">
-          {sections.map((s, i) => (
-            <div key={s.h} className={i === 0 ? "" : "mt-6"}>
-              <h2 className="text-h3 font-display">{s.h}</h2>
-              <span aria-hidden="true" className="rule-stitch" />
-              {s.p.map((p) => (
-                <p key={p} className="mt-4 text-stone">
-                  {p}
-                </p>
+
+      <section className="band on-canvas" aria-labelledby="privacy-doc">
+        <div className="wrap">
+          <div className="reading-shell">
+            <h2 id="privacy-doc" className="sr-only">
+              {t("title")}
+            </h2>
+
+            <div className="legal-doc">
+              {privacySections.map((section, i) => (
+                <section key={section.id} className="legal-section" aria-labelledby={section.id}>
+                  <p className="t-micro legal-index numeric" aria-hidden="true">
+                    {String(i + 1).padStart(2, "0")}
+                  </p>
+                  <div className="min-w-0">
+                    <h3 id={section.id} className="t-h4">
+                      {pick(section, "heading", l)}
+                    </h3>
+                    {pickList(section, "body", l).map((line) => (
+                      <p key={line} className="t-body mt-2">
+                        {/* The studio's contact route lives in `src/lib/site.ts`
+                            alone, so the clause carries a token rather than a
+                            second copy of the address. */}
+                        {line.replace("{email}", site.email)}
+                      </p>
+                    ))}
+                  </div>
+                </section>
               ))}
             </div>
-          ))}
+
+            <p className="legal-updated t-meta">
+              <Link href="/contact" className="act-quiet">
+                {t("contactCta")} <Icon name="arrow" size={15} className="arrow" />
+              </Link>
+            </p>
+          </div>
         </div>
       </section>
     </>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { StitchRule } from "@/components/ui/StitchPath";
+import { ThreadLine } from "@/components/kds/marks";
 
 /**
  * Route transition state.
@@ -20,10 +20,10 @@ export default function Loading() {
   const t = useTranslations("common");
 
   return (
-    <div className="container-site section-compact" role="status" aria-live="polite">
+    <div className="wrap band-tight" role="status" aria-live="polite">
       <p className="loading-note">
-        <StitchRule tone="vermilion" className="loading-stitch" />
-        <span>{t("loadingNote")}</span>
+        <ThreadLine className="w-16" />
+        <span className="t-micro">{t("loadingNote")}</span>
       </p>
       <div className="skeleton mt-3 h-7 w-2/3 max-w-md" />
       <div className="skeleton mt-2 h-4 w-full max-w-xl" />
@@ -33,7 +33,7 @@ export default function Loading() {
           /privacy, which all land as hairline row lists. A skeleton whose
           shape is wrong guarantees the layout jump it exists to prevent,
           which is the one job stated in this file's own docstring. */}
-      <div className="u-section-body grid gap-2 md:grid-cols-3 md:gap-5">
+      <div className="mt-6 grid gap-2 md:grid-cols-3 md:gap-5">
         <div className="skeleton h-12 md:h-40" />
         <div className="skeleton h-12 md:h-40" />
         <div className="skeleton h-12 md:h-40" />

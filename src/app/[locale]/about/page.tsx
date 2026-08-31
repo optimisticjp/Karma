@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { PageIntro } from "@/components/ui/PageIntro";
-import { SectionHeading } from "@/components/ui/SectionHeading";
-import { TechniqueSignature } from "@/components/ui/TechniqueSignature";
-import { ManifestPhoto } from "@/components/ui/PhotoSlot";
-import { MonoNote } from "@/components/ui/MonoNote";
-import { TrainerProfile } from "@/components/site/TrainerProfile";
-import { Icon } from "@/components/ui/Icon";
 import { courses, coursesByFamily, families } from "@/content/courses";
-import { trainers } from "@/content/collections";
+import { photosInGroup } from "@/content/photo-manifest";
+import { trainers as proofTrainers } from "@/content/proof";
+import { pick } from "@/lib/i18n/localized";
+import { asLocale, routing } from "@/i18n/routing";
 import { site, verifiedFacts } from "@/lib/site";
 import { pageMeta } from "@/lib/seo";
+import { PageHead } from "@/components/kds/PageHead";
+import { PhotoFrame } from "@/components/kds/Frame";
+import { StitchSwatch } from "@/components/kds/StitchSwatch";
+import { SampleMark } from "@/components/kds/proof";
+import { CtaBand } from "@/components/kds/CtaBand";
+import { NeedlePoint, ThreadLine } from "@/components/kds/marks";
+import { Icon } from "@/components/ui/Icon";
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export async function generateMetadata({
   params
@@ -24,29 +31,36 @@ export async function generateMetadata({
 }
 
 /**
- * About.
+ * THE STUDIO.
  *
- * The founding story is the owner's to tell and has not been collected yet
- * (content checklist Q6/Q7), so it stays a marked placeholder — but the page
- * no longer *consists* of placeholders. Everything else here is verifiable
- * from the studio's own catalogue and hours, which is enough to answer the
- * question this page really gets asked: is this a real floor with real
- * machines, or a computer classroom with a nice name.
+ * The question this page really gets asked is: *is this a real floor with real
+ * machines, or a computer classroom with a nice name?* So it answers with the
+ * floor — the studio photographs at full width — and with facts that are
+ * checkable against the catalogue and the studio's own hours.
+ *
+ * **The founding story and the meaning of the name are the owner's to tell**
+ * and have not been collected (content checklist Q6/Q7). They are deliberately
+ * absent rather than rendered as an "awaiting the owner" block on a live page.
+ *
+ * The trainer profiles are preview content and say so on each card. A labelled
+ * placeholder that answers "what would I be told about a trainer" is more
+ * useful than an empty section, and it is the shape the real profiles drop
+ * straight into — with the photographs, not before.
  */
 export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, tc, tp, l] = await Promise.all([
+  const [t, tc, tp, rawLocale] = await Promise.all([
     getTranslations("aboutPage"),
     getTranslations("common"),
     getTranslations("proof.trainers"),
     getLocale()
   ]);
-  const gu = l === "gu";
+  const l = asLocale(rawLocale);
 
-  /* Built as a list, not as fixed cells: the grid takes its column count from
-     the number of verified facts, so an unverified one can never leave an
-     empty box on the page. */
+  /* Built as a list, not as fixed cells: the row takes its count from the
+     number of VERIFIED facts, so an unverified one can never leave an empty
+     box on the page. */
   const stats = [
     ...(verifiedFacts.studentsTrained500 ? [{ label: t("n1"), value: "500+" }] : []),
     { label: t("n2"), value: String(courses.length) },
@@ -54,156 +68,178 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
     { label: t("n3"), value: "10:30" }
   ];
 
+  const studio = photosInGroup("studio");
+
   return (
     <>
-      <PageIntro
+      <PageHead
         eyebrow={t("eyebrow")}
         title={t("title")}
         lede={t("intro")}
         actions={
           <>
-            <Link href="/courses" className="btn btn-primary">
-              {tc("exploreCourses")} <Icon name="arrow" size={18} className="arrow" />
-            </Link>
-            <Link href="/contact" className="btn btn-secondary">
-              {t("visitCta")}
+            <a
+              href={site.mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="act act-primary"
+            >
+              <Icon name="pin" size={17} /> {t("visitCta")}
+            </a>
+            <Link href="/admission" className="act act-secondary">
+              {tc("bookDemo")}
             </Link>
           </>
         }
         aside={
           <>
-            <p className="microlabel !text-vermilion-deep">{t("whereLabel")}</p>
-            <p className="mt-1.5">{gu ? site.addressGu : site.addressEn}</p>
-            <p className="mt-1.5">
-              <strong>{gu ? site.hoursGu : site.hoursEn}</strong>
-            </p>
+            <p className="t-micro">{t("whereLabel")}</p>
+            <address className="when-address mt-2">
+              <p>{pick(site, "address", l)}</p>
+              <p className="font-bold">{pick(site, "landmark", l)}</p>
+              <p className="t-meta">{pick(site, "hours", l)}</p>
+            </address>
+            <ThreadLine className="my-5" />
+            <dl className="trust-stats !mt-0">
+              {stats.map((stat) => (
+                <div key={stat.label}>
+                  <dt className="t-h3 numeric leading-none">{stat.value}</dt>
+                  <dd className="t-meta mt-1">{stat.label}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="t-meta mt-3">{t("numbersNote")}</p>
           </>
         }
       />
 
-      {/* The two halves of the business, stated plainly. This is the thing
-          that actually distinguishes Karma from a coaching class. */}
-      <section className="section">
-        <div className="container-site">
-          <SectionHeading title={t("twoSidesTitle")} sub={t("twoSidesSub")} />
-          <div className="u-section-body grid gap-4 md:grid-cols-2 md:gap-6 lg:gap-8">
-            <article className="card p-3.5 md:p-5">
-              <Icon name="hoop" size={28} className="text-vermilion-deep" />
-              <h3 className="text-h3 mt-5 font-display">{t("academyTitle")}</h3>
-              <p className="u-lede">{t("academyBody")}</p>
-              <p className="u-actions">
-                <Link
-                  href="/courses"
-                  className="stitch-link inline-flex items-center gap-1.5 font-semibold text-vermilion-deep"
-                >
-                  {t("academyCta")} <Icon name="arrow" size={16} className="arrow" />
+      {/* The floor, at full width. For somebody deciding whether a real place
+          exists, one wide shot of the machines does more than any adjective —
+          which is why these frames are large and not a strip of thumbnails. */}
+      <section className="band on-canvas" aria-labelledby="place-heading">
+        <div className="wrap">
+          <header className="max-w-prose">
+            <h2 id="place-heading" className="t-h2">
+              {t("placeTitle")}
+            </h2>
+            <p className="t-lede mt-3">{t("placeBody")}</p>
+          </header>
+
+          <div className="place-lead">
+            <figure>
+              <PhotoFrame id="F1_STUDIO_FLOOR_WIDE" scale="lead" />
+              <figcaption className="t-meta mt-2">{t("placeFloorCaption")}</figcaption>
+            </figure>
+          </div>
+
+          <div className="wall-masonry mt-4">
+            {studio.map((slot) => (
+              <figure key={slot.id} className="wall-piece">
+                <PhotoFrame id={slot.id} scale="thumb" register="machine" />
+                <figcaption className="t-meta mt-2">{slot.label}</figcaption>
+              </figure>
+            ))}
+          </div>
+
+          <p className="t-meta mt-4">{t("placeNote")}</p>
+        </div>
+      </section>
+
+      {/* Two sides of one floor. */}
+      <section className="band on-paper" aria-labelledby="two-sides-heading">
+        <div className="wrap">
+          <header className="max-w-prose">
+            <h2 id="two-sides-heading" className="t-h2">
+              {t("twoSidesTitle")}
+            </h2>
+            <p className="t-lede mt-3">{t("twoSidesSub")}</p>
+          </header>
+
+          <div className="split split-even mt-7">
+            <div className="fee-sheet">
+              <p className="t-micro">{t("academyTitle")}</p>
+              <p className="t-body mt-3">{t("academyBody")}</p>
+              <p className="mt-4">
+                <Link href="/courses" className="act-quiet">
+                  {t("academyCta")} <Icon name="arrow" size={15} className="arrow" />
                 </Link>
               </p>
-            </article>
-            <article className="card p-3.5 md:p-5">
-              <Icon name="spool" size={28} className="text-vermilion-deep" />
-              <h3 className="text-h3 mt-5 font-display">{t("labTitle")}</h3>
-              <p className="u-lede">{t("labBody")}</p>
-              <p className="u-actions">
-                <Link
-                  href="/services"
-                  className="stitch-link inline-flex items-center gap-1.5 font-semibold text-vermilion-deep"
-                >
-                  {t("labCta")} <Icon name="arrow" size={16} className="arrow" />
+            </div>
+            <div className="fee-sheet">
+              <p className="t-micro">{t("labTitle")}</p>
+              <p className="t-body mt-3">{t("labBody")}</p>
+              <p className="mt-4">
+                <Link href="/services" className="act-quiet">
+                  {t("labCta")} <Icon name="arrow" size={15} className="arrow" />
                 </Link>
               </p>
-            </article>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* The machine wall: every technique on the floor, named, each with its
-          OWN mark. Three shared family swatches told a visitor which of three
-          buckets a course sat in; eleven technique signatures tell them what
-          the stitch actually does, which is the thing they came to find out.
-          Still drawn, not stand-in photographs — the real wall is shot later. */}
-      <section className="section bg-ivory-2">
-        <div className="container-site">
-          <SectionHeading title={t("machinesTitle")} sub={t("machinesBody")} />
-          <ul className="u-section-body spec-grid">
+      {/* The machines, named by the technique each one runs and by nothing
+          else. No head count, no speed, no model number — none of those has
+          been verified, and inventing one is the same lie as a stock
+          photograph. */}
+      <section className="band on-cloth" aria-labelledby="machines-heading">
+        <div className="wrap">
+          <header className="max-w-prose">
+            <h2 id="machines-heading" className="t-h2">
+              {t("machinesTitle")}
+            </h2>
+            <p className="t-lede mt-3">{t("machinesBody")}</p>
+          </header>
+
+          <ul className="capability-grid" role="list">
             {coursesByFamily.map((c) => (
               <li key={c.slug}>
-                <div className="about-technique-mark">
-                  <TechniqueSignature slug={c.slug} />
-                </div>
-                <span className="spec-label">
-                  {gu ? families[c.family].nameGu : families[c.family].nameEn}
-                </span>
-                <Link
-                  href={`/courses/${c.slug}`}
-                  className="stitch-link spec-value mt-1 !inline-flex min-h-8 items-center"
-                >
-                  {gu ? c.nameGu : c.nameEn}
-                </Link>
+                <StitchSwatch slug={c.slug} />
+                <p className="t-h4 mt-2">{pick(c, "name", l)}</p>
+                <p className="t-meta mt-1">{pick(c.production, "machine", l)}</p>
               </li>
             ))}
           </ul>
         </div>
       </section>
 
-      {/* The place itself. A visitor deciding whether to travel across Surat
-          is asking one question — is there a real floor with machines on it —
-          and the honest answer is a wide frame of the floor and the entrance
-          they will actually look for from the road. Named by technique only:
-          no head count, no model, no speed, because the studio has not
-          supplied any of those and inventing them to look authoritative is the
-          same lie as a stock photograph. */}
-      <section className="section band-human">
-        <div className="container-site">
-          <SectionHeading title={t("placeTitle")} sub={t("placeBody")} />
-          <div className="about-place u-section-body">
-            <figure>
-              <ManifestPhoto id="F1_STUDIO_FLOOR_WIDE" editorial />
-              <figcaption className="about-place-caption">{t("placeFloorCaption")}</figcaption>
-            </figure>
-            <figure>
-              <ManifestPhoto id="A2_ENTRANCE_SIGNBOARD" editorial />
-              <figcaption className="about-place-caption">{t("placeEntranceCaption")}</figcaption>
-            </figure>
-          </div>
-          <MonoNote as="p" className="mt-6">
-            {t("placeNote")}
-          </MonoNote>
-        </div>
-      </section>
+      {/* Who teaches. Preview content, marked as such on every card, in the
+          shape the real profiles drop into. */}
+      <section className="band on-canvas" aria-labelledby="trainers-heading">
+        <div className="wrap">
+          <header className="max-w-prose">
+            <p className="t-micro">{tp("eyebrow")}</p>
+            <h2 id="trainers-heading" className="t-h2 mt-1.5">
+              {tp("h2")}
+            </h2>
+            <p className="t-lede mt-3">{tp("sub")}</p>
+          </header>
 
-      {/* Who teaches. Every profile is still sample data and says so on its
-          own card — but a labelled placeholder that answers "what would I be
-          told about a trainer" is more useful than an empty section, and it
-          is the shape the real profiles drop straight into.
-
-          The founding story and the meaning of the name are still the owner's
-          to give and are deliberately absent rather than rendered as
-          "awaiting the owner" blocks on a live page. */}
-      <section className="section">
-        <div className="container-site">
-          <SectionHeading eyebrow={tp("eyebrow")} title={tp("h2")} sub={tp("sub")} rule />
-          <div className="trainer-grid u-section-body">
-            {trainers.map((tr) => (
-              <TrainerProfile key={tr.slug} trainer={tr} />
+          <ul className="cat-grid" role="list">
+            {proofTrainers.map((tr) => (
+              <li key={tr.id}>
+                <article className="cat-item">
+                  <span className="cat-media">
+                    {tr.photoId ? (
+                      <PhotoFrame id={tr.photoId} scale="thumb" />
+                    ) : null}
+                  </span>
+                  <h3 className="cat-name t-h4">{tr.name}</h3>
+                  <p className="cat-produces t-meta">{pick(tr, "role", l)}</p>
+                  <p className="t-body mt-2">{pick(tr, "focus", l)}</p>
+                  <SampleMark status={tr.status} className="mt-3" />
+                </article>
+              </li>
             ))}
-          </div>
+          </ul>
+
+          <p className="t-meta mt-6 max-w-prose">
+            <NeedlePoint state="todo" /> {t("trainersNote")}
+          </p>
         </div>
       </section>
 
-      <section className="section border-t border-line bg-ivory-2">
-        <div className="container-site">
-          <SectionHeading title={t("numbersTitle")} sub={t("numbersNote")} />
-          <dl className="u-section-body spec-grid" style={{ "--spec-cols": stats.length } as React.CSSProperties}>
-            {stats.map((stat) => (
-              <div key={stat.label}>
-                <dt className="spec-label">{stat.label}</dt>
-                <dd className="tabular mt-1 font-display text-h3">{stat.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      </section>
+      <CtaBand title={t("storyTitle")} sub={t("storySub")} ground="on-paper" />
     </>
   );
 }

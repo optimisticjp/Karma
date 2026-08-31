@@ -1403,3 +1403,58 @@ is dead — silently, with valid CSS and passing tests. This happened to the
 whole hero thread block and was only found by measuring a rendered box. Keep
 override blocks below what they override; `tests/compact-density-responsive.test.ts`
 asserts the order for the hero.
+
+---
+
+## The verdict and the document (Phase 7, 2026-08-31)
+
+Two blocks joined the public sheet with the secondary routes. Both exist
+because the page they serve is read once, under pressure, for one answer.
+
+### `.verdict` — the certificate result
+
+An employer with a photocopy in their hand and a binary question. The block is
+a left-ruled panel with a squared icon box and the verdict as a **word**:
+
+```
+.verdict          the panel; 4px left rule, hairline elsewhere
+.verdict-ok       --ok      .verdict-bad  --bad     .verdict-wait  --warn
+.verdict-mark     2.5rem square, bordered, holding the icon
+.cert-fields      the record itself; two columns from 34rem
+.cert-no          mono, tabular, letter-spaced, breakable
+```
+
+**Four signals, and colour is the fourth.** Word, icon, rule, then hue — the
+page gets printed, forwarded and read on a cracked phone in daylight, and
+`--ok` / `--bad` are the status family that is never the only signal
+(CLAUDE.md non-negotiable #8).
+
+**The mark is a square, not a circle.** A round badge with a tick in it is the
+gesture every certificate mill uses, and the previous version animated it in
+with `seal-in`. Nothing in this flow moves.
+
+### `.legal-doc` — Privacy and Terms
+
+```
+.legal-doc        the reading column; 2rem between clauses
+.legal-section    2.25rem notation column + the clause
+.legal-index      the number, `.t-micro .numeric`, aria-hidden
+.legal-updated    the hairline foot
+```
+
+The number is navigation, not decoration: "clause 4" has to be something
+somebody can point at over the phone. It is `aria-hidden` because an ordered
+list already numbers itself for a screen reader, and reading "04, four" is
+worse than reading neither.
+
+### The desktop header band splits twice
+
+`.site-nav` appears at **64rem** with a `0.875rem` gap and no header CTA;
+`.site-head-cta` and the comfortable `1.5rem` gap arrive at **75rem**.
+
+Measured at 1024 in both languages before the split: brand 197px + six links
+545px + language switch and CTA 250px = 992px against 928px of usable row. It
+neither wrapped nor scrolled — every box is `nowrap` inside a shrinkable flex
+child — so the header **overlapped itself** on every page. A row that cannot
+wrap must be given a width it fits in; shrinking the type would only have moved
+the failure a few pixels away.

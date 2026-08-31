@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { photosInGroup } from "../src/content/photo-manifest";
 import { trainers, machineCases, stories } from "../src/content/collections";
+import { trainers as proofTrainers } from "../src/content/proof";
 import { courses } from "../src/content/courses";
 
 const read = (p: string) => readFileSync(join(process.cwd(), p), "utf8");
@@ -13,10 +14,14 @@ const gu = JSON.parse(read("messages/gu.json")) as any;
 const wall = read("src/components/kds/work/WorkWall.tsx");
 const workPage = read("src/app/[locale]/student-work/page.tsx");
 const storiesPage = read("src/app/[locale]/success-stories/page.tsx");
-const storyCase = read("src/components/site/StoryCase.tsx");
-const trainerProfile = read("src/components/site/TrainerProfile.tsx");
 const aboutPage = read("src/app/[locale]/about/page.tsx");
-const css = read("src/app/machine-lab.css");
+const css = read("src/app/thread-machine-proof.css");
+
+/* <StoryCase> and <TrainerProfile> were deleted in the rebuild: the story arc
+   is now composed on the stories page itself out of the system's `.pathway`,
+   and the trainer previews are read from the one proof registry on /about.
+   Every rule below is the rule those components carried, repointed at whatever
+   renders it today — none of them was dropped with the file. */
 
 /**
  * Policy tests read what a surface RENDERS, not what a comment explains. The
@@ -91,26 +96,38 @@ describe("the story grammar", () => {
         expect(cat.proof.stories[key], key).toBeTruthy();
       }
     }
-    expect(storyCase).toContain('t("before")');
-    expect(storyCase).toContain('t("learned")');
-    expect(storyCase).toContain('t("now")');
+    /* The three keys are the arc, and the page builds them as data so a
+       missing one drops the step instead of rendering a blank label. */
+    for (const key of ["before", "learned", "now"]) {
+      expect(storiesPage, key).toContain(`["${key}"`);
+    }
+    expect(storiesPage).toContain("tv(key)");
   });
 
   it("draws the arc on one stitch path with the brand geometry", () => {
-    const block = css.slice(css.indexOf(".story-arc-steps::before"));
-    expect(block).toContain("var(--color-vermilion) 0 9px, transparent 9px 15px");
-    expect(block).toContain("background-size: 5px 15px, 2px 15px");
+    /* The arc used to own a bespoke `.story-arc-steps::before`. It now runs on
+       the system's vertical running stitch — the SAME 9-on/6-off geometry as
+       every other thread on the site, taken from the brand accent rather than
+       a hardcoded vermilion. One mark, one set of numbers. */
+    expect(storiesPage).toContain('className="pathway module-points"');
+    expect(storiesPage).toContain("<ThreadLine vertical");
+    const block = css.slice(css.indexOf(".kds .thread-v {"));
+    expect(block).toContain("var(--brand-accent) 0 9px, transparent 9px 15px");
+    expect(block).toContain("background-size: 2px 15px");
   });
 
-  it("ends the arc on a knot, which is the mark for completion", () => {
-    expect(storyCase).toContain("KnotPoint");
-    expect(storyCase).toContain("i === steps.length - 1");
+  it("ends the arc on the mark for a step still ahead, not on a full stop", () => {
+    /* <KnotPoint> closed the arc when the last step was "now". The needle
+       point carries it in the rebuilt system, and the LAST step is the one
+       drawn as `todo`: where somebody is now is not a finished thing. */
+    expect(storiesPage).toContain("j === steps.length - 1");
+    expect(storiesPage).toContain('<NeedlePoint state={j === steps.length - 1 ? "todo" : "done"} />');
   });
 
   it("survives a story that has no LEARNED field", () => {
     /* A Content Desk story may not have filled it in. The arc drops the step
        rather than rendering an empty one. */
-    expect(storyCase).toContain("filter(([, v]) => Boolean(v))");
+    expect(storiesPage).toContain("filter(([, v]) => Boolean(v))");
   });
 
   it("claims no earning, salary or placement in any story's content", () => {
@@ -122,7 +139,7 @@ describe("the story grammar", () => {
       JSON.stringify(stories) +
       JSON.stringify(en.proof.stories) +
       JSON.stringify(gu.proof.stories) +
-      stripComments(storyCase)
+      stripComments(storiesPage)
     ).toLowerCase();
     /* Ban the CLAIM, not the trade word. "Placement, tack-down and cover
        stitching" is appliqué vocabulary and belongs in a story about what
@@ -158,23 +175,28 @@ describe("reserved portraits", () => {
     expect(en.storiesPage.portraitsNote.toLowerCase()).toContain("consent");
   });
 
-  it("maps trainer portraits by slug, never by list position", () => {
-    expect(trainerProfile).toContain("PORTRAIT_SLOT[trainer.slug]");
-    expect(trainerProfile).not.toMatch(/PORTRAIT_SLOT\[\s*index/);
-    /* A profile with no mapping keeps its own label rather than borrowing a
-       frame briefed for someone else. */
-    expect(trainerProfile).toContain("PhotoSlot label={trainer.photoLabel}");
+  it("maps trainer portraits by record, never by list position", () => {
+    /* The mapping moved from a lookup table inside <TrainerProfile> into the
+       registry row itself: each trainer names the frame briefed for them, so
+       /about renders `tr.photoId` and can no longer hand trainer two the
+       photograph shot for trainer one by reordering the array. */
+    expect(aboutPage).toContain("tr.photoId");
+    expect(aboutPage).not.toMatch(/photoId=\{[^}]*index/);
+    /* A trainer with no frame reserved renders no frame at all. */
+    expect(aboutPage).toContain("tr.photoId ? (");
   });
 
   it("maps only to trainer slots that exist", () => {
     const trainerSlots = photosInGroup("trainer").map((s) => s.id);
-    for (const match of trainerProfile.matchAll(/"(T\d_[A-Z_]+)"/g)) {
-      expect(trainerSlots, match[1]).toContain(match[1]);
+    for (const tr of proofTrainers) {
+      if (!tr.photoId) continue;
+      expect(trainerSlots, tr.id).toContain(tr.photoId);
     }
   });
 
   it("still publishes no Person structured data for an unconfirmed trainer", () => {
     expect(trainers.every((tr) => tr.sample)).toBe(true);
+    expect(proofTrainers.every((tr) => tr.status !== "verified")).toBe(true);
     const schema = read("src/lib/schema.ts");
     expect(schema).not.toContain('"@type": "Person"');
   });
@@ -188,14 +210,23 @@ describe("studio and technique proof", () => {
   it("gives each of the eleven techniques its own mark on /about", () => {
     /* Three shared family swatches told a visitor which bucket a course sat
        in; eleven signatures tell them what the stitch does. */
-    expect(aboutPage).toContain("TechniqueSignature");
+    /* Three shared family swatches told a visitor which bucket a course sat
+       in; eleven of the course's OWN marks tell them what the stitch does.
+       The mark changed with the rebuild — a stitch swatch rather than a drawn
+       signature — and the rule did not. */
+    expect(aboutPage).toContain("<StitchSwatch slug={c.slug} />");
+    expect(aboutPage).toContain("coursesByFamily.map");
     expect(aboutPage).not.toContain("TechniquePlate");
     expect(courses).toHaveLength(11);
   });
 
   it("shows the floor and the entrance as evidence of a real place", () => {
+    /* The floor leads at full width; the rest of the studio group follows it,
+       entrance included, from the manifest rather than from a hand-written
+       list that could quietly drop one. */
     expect(aboutPage).toContain("F1_STUDIO_FLOOR_WIDE");
-    expect(aboutPage).toContain("A2_ENTRANCE_SIGNBOARD");
+    expect(aboutPage).toContain('photosInGroup("studio")');
+    expect(photosInGroup("studio").map((s) => s.id)).toContain("A2_ENTRANCE_SIGNBOARD");
   });
 
   it("invents no machine specification on any proof surface", () => {

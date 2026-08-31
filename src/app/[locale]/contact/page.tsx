@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { PageIntro } from "@/components/ui/PageIntro";
-import { SectionHeading } from "@/components/ui/SectionHeading";
-import { ManifestPhoto } from "@/components/ui/PhotoSlot";
-import { Icon } from "@/components/ui/Icon";
+import { pick } from "@/lib/i18n/localized";
+import { asLocale, routing } from "@/i18n/routing";
 import { site, waLink } from "@/lib/site";
 import { pageMeta } from "@/lib/seo";
+import { PageHead } from "@/components/kds/PageHead";
+import { PhotoFrame } from "@/components/kds/Frame";
+import { ThreadLine } from "@/components/kds/marks";
+import { Icon } from "@/components/ui/Icon";
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export async function generateMetadata({
   params
@@ -19,31 +25,38 @@ export async function generateMetadata({
 }
 
 /**
- * Contact.
+ * CONTACT.
  *
  * This audience reaches for WhatsApp first and a form last, so the channels
- * are ranked rather than presented as equal options, and each one says what
- * it is actually for. Every target is a full-width row: this page gets opened
- * on a phone, one-handed, usually while standing somewhere noisy.
+ * are RANKED rather than presented as equal options, and each one says what it
+ * is actually for. Every target is a full-width row: this page gets opened on
+ * a phone, one-handed, usually while standing somewhere noisy.
  *
- * The icons here are deliberately ordinary — a phone, an envelope, a map.
- * Branded concepts get niche icons; universal actions keep universal ones, and
- * nobody standing on a footpath should have to decode an embroidery symbol to
- * find "email". (The email row used to carry a thread spool.)
+ * **Two mobile numbers, two roles, kept apart.** The owner has not confirmed
+ * which number answers which channel, so each row names its own and nothing on
+ * this site labels the call number as WhatsApp. See `src/lib/site.ts` §37.
+ *
+ * The icons are deliberately ordinary — a phone, an envelope, a map. Branded
+ * concepts get niche icons; universal actions keep universal ones, and nobody
+ * standing on a footpath should have to decode an embroidery symbol to find
+ * "email".
  *
  * The entrance frame is the last thing that actually decides a visit: the
- * address gets someone to the road and the signboard gets them through the
- * door. It is a reserved manifest slot, not a stand-in photograph.
+ * address gets somebody to the road, the signboard gets them through the door.
+ * It is a reserved manifest slot, never a stand-in photograph.
+ *
+ * **No dock here.** This page puts call, WhatsApp and directions in its own
+ * first viewport, which is better than a bar covering them.
  */
 export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, tc, l] = await Promise.all([
+  const [t, tc, rawLocale] = await Promise.all([
     getTranslations("contactPage"),
     getTranslations("common"),
     getLocale()
   ]);
-  const gu = l === "gu";
+  const l = asLocale(rawLocale);
 
   const channels = [
     {
@@ -98,45 +111,47 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
 
   return (
     <>
-      <PageIntro
+      <PageHead
         eyebrow={t("eyebrow")}
         title={t("title")}
         lede={t("sub")}
         actions={
           <>
-            <Link href="/admission" className="btn btn-primary">
-              {tc("bookDemo")} <Icon name="arrow" size={18} className="arrow" />
+            <Link href="/admission" className="act act-primary">
+              {tc("bookDemo")} <Icon name="arrow" size={17} className="arrow" />
             </Link>
             <a
               href={site.mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn btn-secondary"
+              className="act act-secondary"
             >
-              <Icon name="map" size={18} /> {t("mapCta")}
+              <Icon name="map" size={17} /> {t("mapCta")}
             </a>
           </>
         }
         aside={
           <>
-            <p className="microlabel !text-vermilion-deep">{t("hoursLabel")}</p>
-            <p className="mt-1.5">
-              <strong>{gu ? site.hoursGu : site.hoursEn}</strong>
-            </p>
-            <p className="mt-1.5">{t("demoNote")}</p>
+            <p className="t-micro">{t("hoursLabel")}</p>
+            <p className="t-h4 mt-1">{pick(site, "hours", l)}</p>
+            <ThreadLine className="my-5" />
+            <p className="t-body">{t("demoNote")}</p>
           </>
         }
       />
 
-      <section className="section band-info">
-        <div className="container-site grid gap-4 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
-          <div>
-            <SectionHeading title={t("reachTitle")} sub={t("reachSub")} />
-            {/* Rows, not cards. Each was 108px — 16px of padding, a 16/26px
-                title and a value-plus-note line that wrapped to three lines at
-                15px — so the first channel opened at ~906px on a phone and the
-                page's whole job was below the fold. */}
-            <ul className="u-section-body space-y-1.5">
+      {/* The channels, ranked. Each row is a whole tap target. */}
+      <section className="band on-canvas" aria-labelledby="reach-heading">
+        <div className="wrap">
+          <div className="split">
+            <div className="min-w-0">
+              <h2 id="reach-heading" className="t-h2">
+                {t("reachTitle")}
+              </h2>
+              <p className="t-lede mt-3 max-w-[42ch]">{t("reachSub")}</p>
+            </div>
+
+            <ul className="channels" role="list">
               {channels.map((c) => (
                 <li key={c.label}>
                   <a
@@ -144,70 +159,70 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
                     {...(c.external
                       ? { target: "_blank", rel: "noopener noreferrer" }
                       : {})}
-                    className="card card-lift flex min-h-11 items-center gap-3 p-2.5 md:p-3.5"
+                    className={c.primary ? "channel channel-primary" : "channel"}
                   >
-                    <Icon
-                      name={c.icon}
-                      size={20}
-                      className={c.primary ? "shrink-0 text-vermilion" : "shrink-0 text-stone"}
-                    />
-                    <span className="min-w-0 flex-1">
-                      <span className="card-title block text-smallmeta font-semibold">{c.label}</span>
-                      <span className="block break-all text-[0.8125rem] leading-snug text-stone">
-                        {c.value} · {c.note}
-                      </span>
+                    <Icon name={c.icon} size={20} className="channel-icon" />
+                    <span className="min-w-0">
+                      <span className="t-micro">{c.label}</span>
+                      <span className="t-h4 numeric mt-0.5 block">{c.value}</span>
+                      <span className="t-meta mt-1 block">{c.note}</span>
                     </span>
-                    <Icon name="arrow" size={18} className="arrow shrink-0 text-vermilion-deep" />
+                    <Icon name="arrow" size={17} className="channel-arrow arrow" />
                   </a>
                 </li>
               ))}
             </ul>
           </div>
+        </div>
+      </section>
 
-          <div>
-            <SectionHeading title={t("visitTitle")} sub={t("visitSub")} />
-            <dl className="u-section-body ledger">
-              <div className="ledger-row is-labelled">
-                <dt className="ledger-title">{t("addressLabel")}</dt>
-                <dd className="ledger-note">
-                  {gu ? site.addressGu : site.addressEn}
-                  <span className="mt-1 block font-semibold text-carbon">
-                    {gu ? site.landmarkGu : site.landmarkEn}
-                  </span>
-                </dd>
-              </div>
-              <div className="ledger-row is-labelled">
-                <dt className="ledger-title">{t("hoursLabel")}</dt>
-                <dd className="ledger-note">{gu ? site.hoursGu : site.hoursEn}</dd>
-              </div>
-            </dl>
-            {/* People in Mota Varachha navigate by landmark, not by PIN code.
-                Both landmarks are verified: Dhara Arcade from the studio's own
-                Google pin, Krishna Township Road from its JustDial listing. */}
-            {/* What to look for from the road. */}
-            <figure className="contact-entrance mt-6">
-              <ManifestPhoto id="A2_ENTRANCE_SIGNBOARD" editorial />
-              <figcaption className="contact-entrance-caption">{t("entranceCaption")}</figcaption>
-            </figure>
+      {/* Where to come, and what to look for from the road. */}
+      <section className="band on-cloth" aria-labelledby="visit-heading">
+        <div className="wrap">
+          <div className="split">
+            <div className="min-w-0">
+              <h2 id="visit-heading" className="t-h2">
+                {t("visitTitle")}
+              </h2>
+              <p className="t-lede mt-3 max-w-[42ch]">{t("visitSub")}</p>
 
-            <div className="card mt-6 p-3.5 md:p-4">
-              {/* The landmark already sits with the address above; repeating it
-                  here would be emphasis by duplication. This card carries the
-                  part the address cannot: which floor, and what to do if you
-                  are outside and still cannot see it. */}
-              <p className="microlabel !text-vermilion-deep">{t("directionsTitle")}</p>
-              <p className="mt-3 text-stone">{t("directionsBody")}</p>
-              <p className="mt-4">
+              <dl className="before-grid !mt-6">
+                <div>
+                  <dt className="t-h4">{t("addressLabel")}</dt>
+                  <dd className="t-body mt-2">
+                    <address className="when-address">
+                      <p>{pick(site, "address", l)}</p>
+                      <p className="font-bold">{pick(site, "landmark", l)}</p>
+                    </address>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="t-h4">{t("hoursLabel")}</dt>
+                  <dd className="t-body mt-2">{pick(site, "hours", l)}</dd>
+                </div>
+              </dl>
+
+              <p className="mt-6">
                 <a
                   href={site.mapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="stitch-link inline-flex min-h-8 items-center gap-1.5 font-semibold text-vermilion-deep"
+                  className="act act-secondary"
                 >
-                  {t("mapCta")} <Icon name="arrow" size={15} className="arrow" />
+                  <Icon name="pin" size={17} /> {tc("directions")}
                 </a>
               </p>
             </div>
+
+            <figure className="min-w-0">
+              <PhotoFrame id="A2_ENTRANCE_SIGNBOARD" scale="feature" />
+              <figcaption className="t-meta mt-2">{t("entranceCaption")}</figcaption>
+            </figure>
+          </div>
+
+          <div className="fee-sheet mt-8">
+            <p className="t-micro">{t("directionsTitle")}</p>
+            <p className="t-body mt-2 max-w-prose">{t("directionsBody")}</p>
           </div>
         </div>
       </section>

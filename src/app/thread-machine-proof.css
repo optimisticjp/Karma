@@ -1738,6 +1738,51 @@
 
 /* ---- the studio's capability wall ---------------------------------------- */
 
+/* ---- route states -------------------------------------------------------
+ *
+ * The loading state reserves roughly the shape of what is coming so the page
+ * does not jump when content lands, and it never holds the render back for a
+ * decorative animation: the thread here is a static mark.
+ */
+.kds .loading-note { display: flex; align-items: center; gap: 0.625rem; }
+/* A static block, deliberately. A shimmering skeleton is a looping animation,
+   and this system loops nothing — it also tells a visitor on a slow connection
+   that something is happening when what is actually happening is waiting. The
+   reserved SHAPE is the whole job. */
+.kds .skeleton {
+  border-radius: var(--r-ui);
+  background-color: var(--s-cloth);
+}
+
+/* ---- contact channels ---------------------------------------------------
+ *
+ * Ranked, not presented as equal options: this audience reaches for WhatsApp
+ * first and a form last. Every row is a whole tap target, because the page is
+ * opened one-handed, usually while standing somewhere noisy.
+ */
+.kds .channels { display: grid; gap: 0.625rem; }
+.kds .channel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.875rem;
+  min-height: 3.5rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background-color: var(--s-paper);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 140ms ease;
+}
+.kds .channel:hover { border-color: var(--ink); }
+.kds .channel-primary { border-color: var(--brand-accent-strong); }
+.kds .channel-icon { color: var(--brand-accent-strong); }
+.kds .channel-arrow { color: var(--ink-muted); }
+
+/* The studio floor, at full width, before the rest of the group. */
+.kds .place-lead { margin-top: 1.75rem; }
+
 .kds .capability-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1750,10 +1795,98 @@
 @media (min-width: 64rem) {
   .kds .capability-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }
-/** An even two-track split, for two panels of equal weight. */
+/**
+ * An even two-track split, for two panels of equal weight.
+ *
+ * It divides at 48rem, not 64rem: two equal panels are exactly the case where
+ * a tablet has the width for both, and holding them in one column until a
+ * laptop is how a wider screen ends up a TALLER page.
+ */
 .kds .split-even { grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 64rem) {
+@media (min-width: 48rem) {
   .kds .split-even { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ---- the certificate check ----------------------------------------------
+ *
+ * The one public surface where the design gets out of the way. Somebody here
+ * is an employer with a photocopy in their hand and a binary question, so the
+ * page answers it in a word before it explains anything — and it answers with
+ * a WORD, an icon and a rule, never with colour alone. Colour-blind or
+ * printed, the verdict still reads.
+ *
+ * There is no reveal, no seal stamping itself in, no motion of any kind. A
+ * verification screen that performs is a verification screen nobody trusts.
+ */
+.kds .verdict {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.875rem;
+  align-items: start;
+  padding: 1.125rem;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--line-strong);
+  border-radius: var(--r-card);
+  background-color: var(--s-paper);
+}
+@media (min-width: 48rem) { .kds .verdict { padding: 1.5rem; } }
+.kds .verdict-ok { border-left-color: var(--ok); }
+.kds .verdict-bad { border-left-color: var(--bad); }
+.kds .verdict-wait { border-left-color: var(--warn); }
+/* The icon sits in a square, not a circle: a round badge with a tick in it is
+   the gesture every certificate mill uses. */
+.kds .verdict-mark {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-ui);
+}
+.kds .verdict-ok .verdict-mark { border-color: var(--ok); color: var(--ok); }
+.kds .verdict-bad .verdict-mark { border-color: var(--bad); color: var(--bad); }
+.kds .verdict-wait .verdict-mark { border-color: var(--warn); color: var(--warn); }
+
+/* The certificate's own fields, read as a record rather than as marketing. */
+.kds .cert-fields {
+  display: grid;
+  gap: 0.875rem 1.25rem;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+@media (min-width: 34rem) {
+  .kds .cert-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.kds .cert-no {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  word-break: break-all;
+}
+
+/* ---- the legal documents ------------------------------------------------
+ *
+ * Privacy and Terms are DOCUMENTS, so they are set as one: a single reading
+ * column, numbered clauses, and nothing competing with the sentence. The
+ * number is the navigation — "clause 4" has to be a thing a person can point
+ * at over the phone.
+ */
+.kds .legal-doc { display: grid; gap: 2rem; margin-top: 2rem; }
+.kds .legal-section {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  gap: 0.75rem;
+}
+.kds .legal-index {
+  padding-top: 0.25rem;
+  color: var(--ink-muted);
+}
+.kds .legal-section p + p { margin-top: 0.75rem; }
+.kds .legal-updated {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
 }
 
 /* ==========================================================================
@@ -1983,11 +2116,26 @@
   color: var(--ink);
 }
 
+/**
+ * THE LAPTOP BAND, 1024–1199px.
+ *
+ * Measured at 1024: brand 197 + six links 545 + language and CTA 250 = 992,
+ * plus two 16px gaps, against 928px of usable row. It overflowed by ~96px —
+ * and because `.brand-word` and every nav link are `nowrap` inside shrinkable
+ * flex boxes, the row did not scroll or wrap, it OVERLAPPED: "Courses" sat on
+ * top of "Design Studio", and the language switch covered the last link.
+ *
+ * So the band is split. From 64rem the six links appear at a tighter gap and
+ * the header CTA stays off; from 75rem there is room for the CTA and the
+ * comfortable gap returns. The demo call-to-action is never lost — it is the
+ * first action in every page head and in the close band — it just does not
+ * force an overlap to sit in the bar.
+ */
 @media (min-width: 64rem) {
   .kds .site-nav {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 0.875rem;
     min-width: 0;
   }
   .kds .site-nav-link {
@@ -2006,9 +2154,18 @@
     inset-inline: 0;
     bottom: -0.15rem;
   }
-  .kds .site-head-cta { display: inline-flex; min-height: 2.5rem; padding-inline: 0.95rem; }
   /* The menu button is a phone control; from here the row is the navigation. */
   .kds .site-menu-btn { display: none; }
+}
+
+@media (min-width: 75rem) {
+  .kds .site-nav { gap: 1.5rem; }
+  .kds .site-head-cta {
+    display: inline-flex;
+    min-height: 2.5rem;
+    padding-inline: 0.95rem;
+    white-space: nowrap;
+  }
 }
 
 /* ---- the two-language switch ----------------------------------------- */

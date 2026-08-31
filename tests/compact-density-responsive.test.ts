@@ -78,16 +78,20 @@ describe("a control that stands on its own is a control-sized target", () => {
     const body = ruleBody(premium, ".link-more");
     expect(body).toBeTruthy();
     expect(declaration(body!, "min-height")).toBe("2.75rem");
-    for (const file of ["src/app/[locale]/verify/[id]/page.tsx"]) {
-      const source = read(file);
-      expect(source, file).toContain("link-more");
-      expect(stripComments(source), file).not.toContain("min-h-8 shrink-0");
-    }
-    /* The rebuilt surfaces use `.act-quiet` for the same job. It carries the
-       floor in the system rather than at each call site, which is why the
-       list above shrinks as routes are rebuilt rather than growing. */
+    /* The list of call sites that needed `.link-more` is now EMPTY: the
+       certificate result page was the last one, and it was rebuilt onto
+       `.act-quiet` / `.act` in Phase 7. `.link-more` stays defined because
+       the Console still uses it; nothing public spells the affordance by hand
+       any more, which was the point.
+
+       The rebuilt surfaces carry the floor in the SYSTEM rather than at each
+       call site — so this reads the two classes that do the job now. */
+    const publicSeeAll = read("src/app/[locale]/verify/[id]/page.tsx");
+    expect(publicSeeAll).not.toContain("link-more");
+    expect(stripComments(publicSeeAll)).not.toContain("min-h-8 shrink-0");
     const tmp = read("src/app/thread-machine-proof.css");
     expect(declaration(ruleBody(tmp, ".kds .act-quiet")!, "min-height")).toBe("2.75rem");
+    expect(declaration(ruleBody(tmp, ".kds .act")!, "min-height")).toBe("2.875rem");
   });
 
   it("floors the links in the hero caption row", () => {
@@ -144,9 +148,14 @@ describe("a wider screen is never a taller page", () => {
     expect(lab).not.toContain("@media (min-width: 900px) {\n  .work-wall {");
   });
 
-  it("splits the About cards at md rather than lg", () => {
-    const about = read("src/app/[locale]/about/page.tsx");
-    expect(about).toContain("md:grid-cols-2");
-    expect(stripComments(about)).not.toContain("lg:grid-cols-2");
+  it("splits two equal panels at md rather than lg", () => {
+    /* Two equal panels are exactly the case where a tablet has the width for
+       both; holding them in one column until a laptop is how a wider screen
+       ends up a taller page. The About page's two sides, the services
+       exchange and everything else that needs it share one class now. */
+    const tmp = read("src/app/thread-machine-proof.css");
+    const block = tmp.slice(tmp.indexOf(".kds .split-even {"));
+    expect(block.slice(0, 200)).toContain("@media (min-width: 48rem)");
+    expect(read("src/app/[locale]/about/page.tsx")).toContain("split split-even");
   });
 });

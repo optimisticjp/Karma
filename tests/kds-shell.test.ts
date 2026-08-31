@@ -383,6 +383,51 @@ describe("the layout", () => {
 });
 
 /* ------------------------------------------------------------------ *
+ * The laptop band — where the header row ran out of room
+ * ------------------------------------------------------------------ */
+
+describe("the header fits the row it is given", () => {
+  /**
+   * Found by measuring the rendered header during the Phase 7 audit, at 1024
+   * in both languages: brand 197 + six nav links 545 + language switch and
+   * CTA 250 = 992px, plus gaps, against 928px of usable row.
+   *
+   * It did not wrap and it did not scroll. Every one of those boxes is
+   * `nowrap` inside a shrinkable flex child, so the row OVERLAPPED — "Courses"
+   * printed on top of "Design Studio", and the language switch covered the
+   * last nav link. A header that overlaps itself is the first thing a visitor
+   * sees on a 1024px laptop, which is not a rare width.
+   *
+   * The fix splits the desktop band rather than shrinking type: from 64rem the
+   * links appear at a tight gap with no header CTA; from 75rem there is room
+   * for both. The rule this test protects is the ORDER of those two — the CTA
+   * must never switch on at the same width as the six links.
+   */
+  const css = read("src/app/thread-machine-proof.css");
+
+  it("turns the nav on before the header CTA, not with it", () => {
+    const navAt = css.indexOf(".kds .site-nav {\n    display: flex;");
+    /* `lastIndexOf`: the first `.site-head-cta` in the sheet is the base
+       `display: none`, which is exactly where it should be. */
+    const ctaAt = css.lastIndexOf(".kds .site-head-cta {");
+    expect(navAt).toBeGreaterThan(-1);
+    expect(ctaAt).toBeGreaterThan(navAt);
+    /* The CTA lives in its own, later breakpoint. */
+    const band = css.slice(0, ctaAt);
+    expect(band.lastIndexOf("@media (min-width: 75rem)")).toBeGreaterThan(
+      band.lastIndexOf("@media (min-width: 64rem)")
+    );
+  });
+
+  it("keeps the demo action reachable at every width", () => {
+    /* Hiding it in the bar is only acceptable because it is the FIRST action
+       in every page head and in the closing band. */
+    expect(read("src/components/kds/PageHead.tsx")).toContain("actions");
+    expect(read("src/components/kds/CtaBand.tsx")).toContain("act act-primary");
+  });
+});
+
+/* ------------------------------------------------------------------ *
  * The catalogue answers every key the components ask for
  * ------------------------------------------------------------------ */
 

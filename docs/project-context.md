@@ -777,7 +777,8 @@ middleware. It is the rendered reference for the system at `/design`.
 
 **Phase record (2026-08-31):** Phase 0 recovery (PR #61), Phase 1 foundation
 (#62), Phase 2 shell (#63), Phase 3 homepage (#64), Phase 4 courses (#65),
-Phase 5 conversion routes (#66), Phase 6 work and notes (#67). The homepage
+Phase 5 conversion routes (#66), Phase 6 work and notes (#67), Phase 7
+secondary routes. The homepage
 is ten blocks
 in `src/components/kds/home/`, no two of the same shape; the twenty-two
 components in `src/components/home/` are deleted. Measured at 390px it is
@@ -785,6 +786,28 @@ components in `src/components/home/` are deleted. Measured at 390px it is
 authoritative phase-by-phase record — what shipped, what was measured, what was
 carried forward — is in
 `docs/karma-modern-textile-lab-redesign-plan.md`.
+
+**Three things Phase 7 changed that outlive it:**
+
+1. **`src/content/legal.ts`** now holds the Privacy and Terms copy as suffixed
+   records read through `pick()` / `pickList()`. Both pages previously chose
+   their language with `locale === "gu" ? … : …` — four of them — which
+   renders a missing Gujarati string as English and looks identical to a
+   translated one. `/terms` stays `noIndex` until the owner approves the text;
+   that is a content decision recorded in `docs/content-checklist.md`, not a
+   styling one.
+2. **The certificate verify flow carries no motion at all**, and its result has
+   three states rather than two: verified, not found, and **unavailable** when
+   the records system is unreachable — because answering "not found" because
+   the database is unconfigured would call a real certificate fake. The verdict
+   is a word, an icon and a rule; colour is never the only signal. A
+   per-certificate result stays `index: false`.
+3. **The desktop header band is split at 64rem and 75rem.** Measured at 1024 in
+   both languages, brand + six nav links + language switch + CTA came to 992px
+   against 928px of usable row, and because each box is `nowrap` inside a
+   shrinkable flex child the header OVERLAPPED itself on every page rather than
+   wrapping. From 64rem the links appear at a tighter gap with no header CTA;
+   from 75rem there is room for both.
 
 ---
 
@@ -2175,6 +2198,7 @@ which is the point — the policy survives a refactor:
 | `kds-work-notes` | the archive and the Content Desk feed staying two different things; the case notes carrying no sample marker because they claim nothing about a person; the notes search matching the question, fault and tags but never the answer; a note page answering before it explains, emitting `TechArticle` and never a `Person` |
 | `kds-admissions` | the batch board's filters built from the rows, its three distinct empty states and its bounded query; the admissions page carrying no second batch list; the form at a reading measure with 44px controls, the system's primitives and no console palette; none of the three routes offering a way to pay online |
 | `kds-courses` | the catalogue's five blocks and the course template's nine, in order and with no two adjacent grounds alike; no fee on a tile or in the hero; a duration only where the owner confirmed one; the same media box photographed or not; no payment provider, machine specification, unconfirmed trainer or week/month inside a syllabus module title |
+| `kds-secondary` | the eight secondary routes on the rebuilt system and none of the superseded primitives; no two neighbouring grounds alike; no locale ternary; `/services` quoting no turnaround, price or guarantee and drawing the commercial chain without the school's photographs; `/contact` ranking its channels, never labelling the call number as WhatsApp and taking every number from `site.ts`; the verify flow carrying no motion, answering with a word and a mark rather than colour alone, and degrading to "unavailable" rather than "not found"; both legal documents fully translated, stating no fee, refund window or duration, and `/terms` staying out of the index — plus every literal `t("…")` on every public ROUTE resolving in both catalogues |
 | `kds-homepage` | the ten blocks in order and no two adjacent grounds alike; every EMCAD figure rendered from the verified record and never typed into a catalogue; no online payment; no invented machine specification; no student name, outcome or earning on a frame; the signature interaction never autoplaying or needing a drag |
 | `public-locales` | the routed set is exactly `["en","gu"]`; no Hindi catalogue, route, face or string; no unapplied migration in the journal; the teaching languages survive |
 | `auth-guard`, `permissions` | the six-state access chain, owner bypass, grant handling |

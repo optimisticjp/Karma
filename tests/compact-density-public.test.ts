@@ -115,9 +115,9 @@ describe("secondary public surfaces", () => {
        The frames stay — labelled, honest, and never filled with stock — they
        just stop standing in front of the content they illustrate. */
     const page = stripComments(read("src/app/[locale]/success-stories/page.tsx"));
-    expect(page.indexOf("<StoryCase")).toBeLessThan(page.indexOf("portraitsLabel"));
+    expect(page.indexOf("casesTitle")).toBeLessThan(page.indexOf("portraitsLabel"));
     /* And the reserved frames are still there, still named, still honest. */
-    expect(page).toContain("<ManifestPhoto");
+    expect(page).toContain("<PhotoFrame");
     expect(page).toContain("portraitsNote");
   });
 
@@ -132,11 +132,15 @@ describe("secondary public surfaces", () => {
   });
 
   it("sets six body terms as body, not as six headlines", () => {
+    /* Six sentences set as titles read as six headlines, and the page looked
+       like an index of things it does not have. `.ledger.is-prose` carried the
+       rule before the rebuild; the clauses are now plain `.t-body` inside a
+       numbered document, so the rule is simply that no clause is a heading. */
     const terms = stripComments(read("src/app/[locale]/terms/page.tsx"));
-    expect(terms).toContain("ledger is-prose");
-    const prose = ruleBody(premium, ".ledger.is-prose .ledger-title");
-    expect(prose, ".ledger.is-prose must exist").not.toBeNull();
-    expect(declaration(prose as string, "font-weight")).toBe("400");
+    expect(terms).toContain('<p className="t-body min-w-0">{pick(item, "text", l)}</p>');
+    expect(terms).not.toMatch(/<h[34][^>]*>\{pick\(item/);
+    /* The number beside each clause is notation, not a title. */
+    expect(terms).toContain('className="t-micro legal-index numeric" aria-hidden="true"');
   });
 });
 

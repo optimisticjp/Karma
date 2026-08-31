@@ -2908,7 +2908,7 @@ GROUNDS, which is the same rule in the new vocabulary.
 
 # Phase 7 — Services + Studio + Contact + secondary public pages
 
-**Status:** ⏳ Pending
+**Status:** ✅ Complete
 
 Required:
 
@@ -2922,6 +2922,157 @@ Required:
 - Privacy/Terms styling without changing approval/noIndex policy;
 - 404/loading/error niche treatment;
 - no dark hero.
+
+## One shared opening, eight different pages
+
+`<PageHead>` is the only thing these eight routes have in common, and that is
+deliberate. A page opening genuinely IS the same object every time — it names
+the page, says what it is for, offers the next step — and giving each secondary
+route a bespoke first screen would make the site feel unrelated to itself
+rather than varied. The variety lives underneath: a commercial workflow on
+`/services`, full-width photography on `/about`, ranked tap targets on
+`/contact`, disclosed case studies on `/success-stories`, a single field on
+`/verify`, numbered clauses on the two legal pages.
+
+The routes that earn a bespoke opening — the homepage, the catalogue, a course,
+the notes archive — already have one, and none of them uses `<PageHead>`.
+
+## Services — the commercial side, promising nothing unconfirmed
+
+Eight blocks: the offer, what you bring against what comes back, the chain, the
+problems the studio actually solves, the capability wall, past projects, how it
+works, and the brief form.
+
+**No turnaround, no file format, no price.** The studio has confirmed none of
+the three, and a B2B page that invents a delivery window is writing a cheque
+the floor has to cash. The copy asks for the buyer's deadline and their
+machine's format instead of announcing ours; `tests/kds-secondary.test.ts`
+fails on a turnaround figure, a rupee sign or the word "guarantee".
+
+`<StudioChain>` draws REFERENCE → DIGITISING → SAMPLE → CORRECTION →
+MACHINE-READY as a seam rather than as five photographs, because the owner's
+32-shot list covers the school and not the commercial pipeline: borrowing a
+classroom frame would caption commercial work with a photograph of a class.
+
+The brief form keeps every defence it had — honeypot, minimum-time,
+Turnstile-when-activated, per-IP throttle — and no file uploader was added.
+
+## About — is this a real place?
+
+That is the only question this page gets asked, so it answers with the floor:
+`F1_STUDIO_FLOOR_WIDE` at full width, then the rest of the studio group as
+masonry, then the two sides of the business, then the eleven techniques by the
+machine each runs, then the trainers.
+
+The stats row is built FROM the verified facts rather than as fixed cells, so
+an unverified one cannot leave an empty box. The founding story and the meaning
+of the name are the owner's to tell (checklist Q6/Q7) and stay absent rather
+than becoming an "awaiting the owner" panel on a live page.
+
+## Contact — five channels, ranked
+
+This audience reaches for WhatsApp first and a form last, so the channels are
+ranked rather than presented as five equal options, and each row is a whole tap
+target. **Two mobile numbers, two roles, kept apart**: the owner has not
+confirmed which answers which, so each row names its own channel and nothing on
+the site labels the call number as WhatsApp. Every number comes from
+`src/lib/site.ts`; the test fails on a ten-digit literal in the page.
+
+## Verify — the surface that must not perform
+
+Somebody here is an employer with a photocopy in their hand and a binary
+question. The result answers in a WORD, with an icon and a rule down its left
+edge — colour is the fourth signal and never the only one, because this page
+gets printed, forwarded and read on a cracked phone in daylight.
+
+`seal-in` is gone: the result used to arrive inside a stamping animation on a
+dashed circle, which is precisely the gesture a fake certificate would make.
+The whole flow — page, form, result — is banned from motion by test.
+
+Three states, not two. A number that does not resolve while the records system
+is unreachable says **unavailable**, never "not found": answering "not found"
+because the database is unconfigured would call a real certificate fake. And
+"not found" itself is not an accusation — the studio's phone is on the page
+whatever the verdict, because a number that does not resolve can be a typo, an
+old paper certificate, or a record not yet entered.
+
+A per-certificate result stays `index: false`. It carries a named person's
+completion record; that is a privacy decision, not an SEO one.
+
+## Privacy and Terms — documents, not cards
+
+Both pages held their English and Gujarati copy inline, chosen with
+`locale === "gu" ? … : …` — four of them. CLAUDE.md non-negotiable #1 rules
+that shape out everywhere, because the else-branch renders a MISSING Gujarati
+string as English and looks exactly like a translated one. The copy moved to
+**`src/content/legal.ts`** and is read through `pick()` / `pickList()`.
+
+It is a content module rather than a catalogue namespace because these are
+documents: ordered clauses whose numbering is part of the reading, and whose
+next revision is an edit to a document rather than to a UI string. The clause
+number is how somebody points at an answer over the phone.
+
+**`/terms` stays `noIndex`.** It is a draft pending the owner's review, that is
+recorded in `docs/content-checklist.md`, and a styling phase does not publish
+it. Neither document states a fee, a refund window or a course duration — those
+are the owner's to state, and a terms page is the worst possible place to guess
+one. The email address appears as a `{email}` token so `src/lib/site.ts` stays
+the only place it is written.
+
+## The header overlapped itself at 1024, and nobody had measured it
+
+Found by measuring the rendered header during this phase's audit, at 1024 in
+both languages: brand 197px + six nav links 545px + language switch and CTA
+250px = 992px, plus gaps, against 928px of usable row.
+
+It did not wrap and it did not scroll. Every one of those boxes is `nowrap`
+inside a shrinkable flex child, so the row **overlapped** — "Courses" printed
+on top of "Design Studio" and the language switch covered the last nav link, on
+every page, at a width a great many laptops use.
+
+The desktop band is now split rather than shrunk: from 64rem the six links
+appear at a tighter gap with no header CTA; from 75rem there is room for both.
+Losing the CTA from the bar between those widths costs nothing — booking a demo
+is the first action in every page head and in the closing band.
+
+## Deleted, not orphaned
+
+`StoryCase`, `TrainerProfile`, `ReviewWall`, `SocialAuthority` and `PullQuote`.
+Every rule those files carried was repointed at whatever renders it today: the
+story arc is composed on the stories page out of the system's `.pathway` and
+`<ThreadLine vertical>`, the trainer previews read the one proof registry on
+`/about` and map by record rather than by list position, and the sample-marker
+rule became `<SampleMark status={…}>` — the same guarantee expressed as a
+status, since the marker hides for `verified` alone and an unverified item
+therefore cannot render unmarked.
+
+## Measured
+
+| Width | `/services` | `/about` | `/contact` | `/success-stories` | `/verify` | a result | `/privacy` | `/terms` |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 390 | 12,964px | 7,799px | 3,468px | 5,533px | 1,845px | 1,491px | 2,577px | 2,396px |
+| 768 | 10,002px | 5,906px | 3,275px | 5,083px | 1,612px | 1,259px | 2,130px | 1,993px |
+| 1024 | 8,959px | 5,833px | 2,970px | 4,117px | 1,479px | 1,209px | 2,004px | 1,888px |
+| 1440 | 8,977px | 6,440px | 3,045px | 4,399px | 1,540px | 1,253px | 2,078px | 1,954px |
+
+No sideways drag at any of 390 / 768 / 820 / 1024 / 1440 in either language,
+across all sixteen route-locale pairs plus the homepage, catalogue and
+admission form. Gujarati is within 2.6% of English everywhere.
+
+`/about` grows 607px between 1024 and 1440. That is the photography: the lead
+studio frame and the masonry are aspect-ratio boxes inside a wrap that widens
+by 23%, so the page gets taller because the pictures get bigger. It is not the
+stacking defect the density pass fixed.
+
+## Verified
+
+**1,001 tests** across 61 files, including a new `tests/kds-secondary.test.ts`
+(22). The new suite resolves every literal `t("…")` on every public ROUTE
+against both catalogues — scope-aware, because `generateMetadata` binds the
+same `t` to a `meta.*` namespace that the component below binds to the page's.
+next-intl does not fail a build on a missing key; it renders the key path into
+the page, and that shipped twice during this rebuild before a running page was
+read.
 
 ---
 
