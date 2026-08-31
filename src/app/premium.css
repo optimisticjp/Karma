@@ -676,10 +676,6 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
    heading styled here has to restate it. */
 :lang(gu) .hero-title,
 :lang(gu) .page-intro-title,
-:lang(gu) .console-page-title {
-  line-height: 1.3;
-  letter-spacing: 0;
-}
 
 /* ---------------------- pending-content placeholder ----------------------
  * Content the owner still has to supply must look deliberately reserved, not
@@ -760,6 +756,161 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
 
 /* ------------------------------ Karma Console ----------------------------- */
 
+/*
+ * The mobile shell: a compact app bar, a permanent bottom navigation, and a
+ * More sheet that opens above the bar.
+ *
+ * The console is used standing up, between a machine and a counter. Before
+ * this every module switch cost a full-viewport drawer — the owner's measured
+ * 795px, opened and closed dozens of times a shift to reach four or five
+ * destinations. The bar is the single largest motion saving in the product.
+ *
+ * The public site deliberately does NOT get one of these. A visitor navigates
+ * twice and converts once, so the bottom of their screen is worth two actions,
+ * not five destinations. Staff are the opposite. Same rule, opposite answer.
+ */
+
+.console-appbar { height: var(--console-header-h); }
+
+.console-bar {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 35;
+  border-top: var(--hairline);
+  background: color-mix(in srgb, var(--color-card) 97%, transparent);
+  backdrop-filter: blur(10px);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.console-bar-list {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: stretch;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* Compact visual, comfortable target: a 20px icon and an 11px label inside a
+   44px box. Density and tappability are separate boxes, which is the same
+   resolution `.tap` uses inside a dense row. */
+.console-tab {
+  display: flex;
+  width: 100%;
+  min-height: 2.75rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  padding: 0.25rem 0.125rem;
+  color: var(--color-stone);
+  text-decoration: none;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: color var(--dur-l1, 140ms) var(--ease-out-soft);
+}
+.console-tab-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Gujarati tab labels are wider and must never be letterspaced. */
+:lang(gu) .console-tab-label { letter-spacing: 0; font-size: 0.625rem; }
+.console-tab[aria-current="page"] {
+  color: var(--color-vermilion-deep);
+}
+/* The current tab is marked by a stitch, not by a filled pill: it is the one
+   place in the console the brand's own mark does an interface job. */
+.console-tab[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--color-vermilion) 0 9px,
+    transparent 9px 15px
+  );
+}
+.console-bar-list > li { position: relative; }
+.console-tab:focus-visible { outline-offset: -3px; }
+
+/* More: the full sectioned navigation, opening above the bar rather than
+   filling the viewport from the top. */
+.console-sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 36;
+  background: rgb(17 23 22 / 0.35);
+  border: 0;
+}
+.console-sheet {
+  position: fixed;
+  inset: auto 0 calc(var(--console-bar-h) + env(safe-area-inset-bottom)) 0;
+  z-index: 37;
+  max-height: calc(100dvh - var(--console-header-h) - var(--console-bar-h) - 2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-top: var(--hairline);
+  background: var(--color-card);
+  padding: 0.75rem 0.75rem 1rem;
+}
+
+/* The record-action sheet is fixed to the bottom too, so it has to clear the
+   bar — otherwise the console's own navigation would sit on top of a
+   destructive confirmation. */
+@media (max-width: 1023px) {
+  .rec-menu__panel {
+    bottom: calc(var(--console-bar-h) + env(safe-area-inset-bottom));
+  }
+}
+
+/* Horizontally scrollable filters. Eleven course names wrap to four rows in
+   Gujarati; one scrollable line costs one row at any language and any count. */
+.chip-scroller {
+  display: flex;
+  gap: 0.375rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  padding-block: 0.125rem;
+}
+.chip-scroller::-webkit-scrollbar { display: none; }
+.chip-filter {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  min-height: 2.25rem;
+  padding: 0.25rem 0.625rem;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-card);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-stone);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.chip-filter.is-on {
+  border-color: var(--color-vermilion);
+  color: var(--color-vermilion-deep);
+  background: rgb(197 72 50 / 0.06);
+}
+/* The visible pill is 36px; the hit area is 44px, using padding that overflows
+   the row rather than a taller row. */
+.chip-filter::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+.chip-scroller > * { position: relative; }
+
 .console-root { background: var(--color-ivory); }
 .console-rail { background: #f3eee4; }
 .console-rail-brand {
@@ -769,24 +920,6 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
   width: 100%;
   max-width: 100rem;
   margin-inline: auto;
-}
-.console-page-head {
-  display: grid;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: var(--hairline);
-}
-.console-page-title {
-  max-width: 20ch;
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 1.7rem + 1.3vw, 3rem);
-  line-height: 1.08;
-  font-weight: 540;
-}
-.console-page-sub {
-  max-width: 68ch;
-  color: var(--color-stone);
 }
 .console-actions {
   display: flex;
@@ -801,9 +934,20 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
   border: var(--hairline);
   background: var(--color-card);
 }
+/* A hairline strip, not a grid of cards. On a phone it is a label/value ROW
+   per figure, because three `panel panel-body` tiles at `sm:grid-cols-3` went
+   single-column at 390px and cost 300px on nine different console screens
+   before the first record. */
 .console-metrics > * {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
   border-bottom: var(--hairline);
-  padding: 1.125rem 1.25rem;
+  padding: 0.5rem 0.75rem;
+}
+@media (min-width: 640px) {
+  .console-metrics > * { display: block; padding: 0.75rem 0.875rem; }
 }
 .console-metrics > :last-child { border-bottom: 0; }
 @media (min-width: 640px) {
@@ -966,10 +1110,13 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
 :lang(gu) .kv-label { letter-spacing: 0; text-transform: none; font-size: 0.75rem; }
 .kv-value { font-weight: 700; font-variant-numeric: tabular-nums; }
 
-/* Search and filters stay reachable while a long list scrolls under them. */
+/* Search and filters stay reachable while a long list scrolls under them.
+   The anchor reads the app bar's own token: it was hand-matched to a
+   `min-h-16` in the shell component, two files apart, and a 4px change to
+   either would have left a gap or an overlap that nothing caught. */
 .toolbar {
   position: sticky;
-  top: 4rem;
+  top: var(--console-header-h);
   z-index: 20;
   display: grid;
   gap: 0.5rem;
@@ -1080,11 +1227,19 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
 /* Phones: give the work surface the whole width and shorten the chrome. */
 @media (max-width: 767px) {
   .console-main { padding-inline: 0.75rem; padding-block: 1rem; }
-  .console-page-head { margin-bottom: 1.25rem; padding-bottom: 1rem; gap: 0.625rem; }
-  .console-page-title { font-size: clamp(1.5rem, 1.2rem + 2vw, 2rem); }
-  .console-metrics > * { padding: 0.75rem 0.875rem; }
+  .console-metrics > * { padding: 0.5rem 0.625rem; }
   /* The last row of a list sits above the home indicator, not under it. */
   .console-main > :last-child { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+/* The work surface reserves exactly the chrome the shell draws. Below 1024px
+   that is the bottom navigation plus the home indicator; from 1024 the rail is
+   on screen and there is no bar to clear. Both numbers come from the bar's own
+   token, so the reservation cannot drift away from the thing it reserves for —
+   which is precisely what happened on the public side, where a 4rem
+   reservation sat under a 3.5rem bar. */
+@media (max-width: 1023px) {
+  .console-main { padding-bottom: calc(var(--console-bar-h) + env(safe-area-inset-bottom) + 0.75rem); }
 }
 
 /* -------------------------- accessibility/performance --------------------- */

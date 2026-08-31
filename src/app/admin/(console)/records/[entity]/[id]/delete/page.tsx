@@ -6,6 +6,7 @@ import { recordsCopy } from "@/lib/admin/records-copy";
 import { preflight } from "@/lib/admin/destructive";
 import { RECORD_ENTITIES, policyFor, type RecordEntity } from "@/lib/admin/record-actions";
 import { DeleteConfirmForm } from "./DeleteForm";
+import { PageHead } from "@/components/admin/PageHead";
 
 export const dynamic = "force-dynamic";
 
@@ -57,13 +58,10 @@ export default async function DeleteRecordPage({
 
   return (
     <div className="max-w-[46rem]">
-      <div className="console-page-head">
-        <div>
-          <p className="microlabel">{entityName}</p>
-          <h1 className="console-page-title">{copy.deleteTitle}</h1>
-        </div>
-        <p className="console-page-sub">{copy.deleteLede}</p>
-      </div>
+      {/* The last console page on the legacy heading. Its title rendered 27px
+          at 390px — above the plan's 22-26px band — while every other page's
+          <PageHead> renders 22. One header implementation, one size. */}
+      <PageHead title={copy.deleteTitle} context={`${entityName} · ${copy.deleteLede}`} />
 
       <p className="kv-label">{entityName}</p>
       <p className="text-h4 mt-1 font-mono">{report.identifier}</p>

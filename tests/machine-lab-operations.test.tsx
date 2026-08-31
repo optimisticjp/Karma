@@ -8,6 +8,10 @@ const PAGES = {
   admissions: "src/app/admin/(console)/admissions/page.tsx",
   students: "src/app/admin/(console)/students/page.tsx",
   courses: "src/app/admin/(console)/courses/page.tsx",
+  /* Batches became a destination of their own on 2026-08-31. They were nested
+     two <details> deep inside a course row, which is why Today deep-linked
+     /admin/courses#batch-N to reach them. */
+  batches: "src/app/admin/(console)/batches/page.tsx",
   fees: "src/app/admin/(console)/fees/page.tsx"
 } as const;
 
@@ -47,14 +51,14 @@ describe("the console page header", () => {
 describe("queue rows reach the record", () => {
   it("anchors every deep-linkable row in its module list", () => {
     expect(read(PAGES.admissions)).toContain("id={`app-${application.id}`}");
-    expect(read(PAGES.courses)).toContain("id={`batch-${batch.id}`}");
+    expect(read(PAGES.batches)).toContain("id={`batch-${batch.id}`}");
     expect(read(PAGES.courses)).toContain("id={`course-${course.id}`}");
     expect(read(PAGES.fees)).toContain("id={`fee-${card.enrollmentId}`}");
   });
 
   it("links the queues to those anchors", () => {
     expect(today).toContain("/admin/admissions#app-${row.id}");
-    expect(today).toContain("/admin/courses#batch-${row.id}");
+    expect(today).toContain("/admin/batches#batch-${row.id}");
   });
 
   it("keeps a record id out of the path, where it would 404", () => {
@@ -138,15 +142,18 @@ describe("courses and batches stay two different things", () => {
     /* A batch is a DATED run with seats; a schedule option is a STANDING
        timetable slot a visitor can ask for. Collapsing them would make the
        public admission form offer a seat on a date nobody opened.
-       The separation is visible in where each is edited: the course form
-       owns the standing timetable, the courses page lists the dated runs. */
+       The separation is visible in where each is edited: the course form owns
+       the standing timetable, and the dated runs now have a page of their own —
+       which makes the distinction more legible, not less. */
     const form = read("src/app/admin/(console)/courses/CatalogForms.tsx");
     expect(form).toContain("scheduleStart");
     expect(form).toContain("scheduleEnd");
 
-    const page = read(PAGES.courses);
+    const page = read(PAGES.batches);
     expect(page).toContain("batch");
     expect(page).toContain("startDate");
+    /* The catalogue keeps no dated run: it counts them and links out. */
+    expect(read(PAGES.courses)).not.toContain("startDate");
 
     /* And in the model itself. */
     expect(read("src/lib/admin/course-operations.ts")).toContain("scheduleOptions");

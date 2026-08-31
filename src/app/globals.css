@@ -165,6 +165,11 @@
   --tabbar-item-h: 2.75rem;   /* 44px — the WCAG 2.5.5 floor, not below it */
   --tabbar-h: 3rem;           /* 48px — item plus its own padding           */
   --header-h: 3.5rem;         /* 56px — the public sticky header            */
+  /* Karma Console. The app bar and the bottom navigation are one fact each,
+     and each was previously a literal repeated across the shell component,
+     the drawer's `top` and `max-h`, and the sticky toolbar's anchor. */
+  --console-header-h: 3.25rem; /* 52px */
+  --console-bar-h: 3.5rem;     /* 56px — a 44px tab plus its label padding */
 
   --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
 

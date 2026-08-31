@@ -46,9 +46,34 @@ describe("courses and batches console", () => {
   });
 
   it("only enables the navigation link when the signed-in staff can use the module", () => {
-    expect(layout).toContain("const canUseCatalog");
-    expect(layout).toContain('href: canUseCatalog ? "/admin/courses" : null');
-    expect(layout).toContain("available: canUseCatalog");
+    /* Courses and batches were one nav entry behind a four-key OR
+       (`canUseCatalog`). Batches became its own destination on 2026-08-31 —
+       the plan's bottom navigation needs one, and `batches.*` was already a
+       permission key distinct from `courses.*` — so the gate splits with it.
+       The rule is unchanged and now applies twice: a link appears only when
+       the signed-in staff member can actually open what is behind it. */
+    expect(layout).toContain("const canUseCourses");
+    expect(layout).toContain("const canUseBatches");
+    expect(layout).toContain('href: canUseCourses ? "/admin/courses" : null');
+    expect(layout).toContain("available: canUseCourses");
+    expect(layout).toContain('href: canUseBatches ? "/admin/batches" : null');
+    expect(layout).toContain("available: canUseBatches");
+  });
+
+  it("builds the bottom navigation from the same permission booleans", () => {
+    /* The bar may not compute its own idea of what the caller can reach: one
+       source of truth for navigation, and the server checks again anyway. */
+    expect(layout).toContain("tabCandidates");
+    expect(layout).toContain("allowed: canUseAdmissions");
+    expect(layout).toContain("allowed: canUseStudents");
+    expect(layout).toContain("allowed: canUseBatches");
+    /* Four destinations plus More, never more. */
+    expect(layout).toContain(".slice(0, 4)");
+    /* Team is Owner-only with no permission key, and never a tab: a bar that
+       differs between the Owner and every Admin teaches the wrong muscle
+       memory for a destination used a handful of times a year. */
+    const tabs = layout.slice(layout.indexOf("tabCandidates"), layout.indexOf(".slice(0, 4)"));
+    expect(tabs).not.toContain("/admin/team");
   });
 });
 

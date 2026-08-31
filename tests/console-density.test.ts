@@ -42,7 +42,13 @@ describe("density and touch size are not in tension", () => {
     expect(toolbar).toContain("position: sticky");
     // Clears the mobile console header, and sits at the top on desktop where
     // there is no header to clear.
-    expect(toolbar).toContain("top: 4rem");
+    /* The anchor was a literal hand-matched to a `min-h-16` in the shell
+       component, two files apart. It reads the app bar's own token now, so a
+       change to the bar height cannot leave a gap or an overlap that nothing
+       catches — which is a stricter rule than the number ever was. */
+    expect(toolbar).toContain("top: var(--console-header-h)");
+    expect(read("src/app/globals.css")).toContain("--console-header-h:");
+    expect(read("src/app/premium.css")).toContain(".console-appbar { height: var(--console-header-h); }");
     expect(premium).toContain(".toolbar { top: 0; }");
   });
 

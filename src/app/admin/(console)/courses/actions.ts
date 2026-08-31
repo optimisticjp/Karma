@@ -89,6 +89,7 @@ function mapDbError(error: unknown, tag: string): CatalogState {
 
 function revalidateCatalog() {
   revalidatePath("/admin/courses");
+  revalidatePath("/admin/batches");
   revalidatePath("/admin");
   revalidatePath("/api/batches");
 }

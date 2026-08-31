@@ -7,6 +7,7 @@ import { authorizeAction } from "@/lib/auth/guard";
 import { auditValues, STUDENT_AUDIT_ACTIONS } from "@/lib/admin/audit";
 import { agreementAuditValues, agreementForBatch } from "@/lib/admin/enrollment-agreement";
 import { pad } from "@/lib/utils";
+import { kolkataDate } from "@/lib/admin/dates";
 import {
   positiveId,
   validateApplicationConversion,
@@ -527,13 +528,10 @@ function formObject(formData: FormData): Record<string, unknown> {
   return result;
 }
 
-function kolkataDate(): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
-}
-
 function revalidateStudentPaths() {
   revalidatePath("/admin/students");
   revalidatePath("/admin/courses");
+  revalidatePath("/admin/batches");
   revalidatePath("/admin");
 }
 

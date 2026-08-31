@@ -8,6 +8,7 @@ import { PrintLink } from "@/components/admin/PrintLink";
 import { printCopy } from "@/lib/admin/print-copy";
 import { attendanceCopy } from "@/lib/admin/attendance-copy";
 import { isAttendanceStatus, positiveAttendanceId, sessionIsLocked, validIsoDate } from "@/lib/admin/attendance";
+import { kolkataDate } from "@/lib/admin/dates";
 import { AttendanceRegister } from "./AttendanceForm";
 
 type Props = { searchParams: Promise<{ batch?: string; date?: string }> };
@@ -114,5 +115,4 @@ export default async function AttendancePage({ searchParams }: Props) {
 }
 
 function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) { return <div><label className="label" htmlFor={htmlFor}>{label}</label>{children}</div>; }
-function kolkataDate() { return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date()); }
 function formatDate(value: string, locale: "en" | "gu") { return new Intl.DateTimeFormat(locale === "gu" ? "gu-IN" : "en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${value}T00:00:00+05:30`)); }
