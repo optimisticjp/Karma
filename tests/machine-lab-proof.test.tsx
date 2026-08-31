@@ -91,9 +91,13 @@ describe("the material wall", () => {
 
 describe("the story grammar", () => {
   it("uses the three-step arc", () => {
+    /* The labels moved to `home.voices` with the rebuild — the block that
+       renders them is shared with the homepage's voices section, and the
+       unused `proof.stories.*` copies were removed rather than left to drift
+       out of step with the ones on screen. */
     for (const cat of [en, gu]) {
       for (const key of ["before", "learned", "now"]) {
-        expect(cat.proof.stories[key], key).toBeTruthy();
+        expect(cat.home.voices[key], key).toBeTruthy();
       }
     }
     /* The three keys are the arc, and the page builds them as data so a

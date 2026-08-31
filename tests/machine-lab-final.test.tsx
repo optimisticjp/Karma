@@ -188,12 +188,27 @@ describe("does this read as a real studio or as a concept for one", () => {
   });
 
   it("still answers a working operator with faults, not adjectives", () => {
-    /* Six named production faults on the homepage and eight technical notes
-       are the things no competing institute has. If these ever thin out, the
-       site has drifted back to being a brochure. */
-    for (const n of [1, 2, 3, 4, 5, 6]) {
-      expect(en.home.problems[`p${n}f`], `p${n}`).toBeTruthy();
+    /* Named production faults and eight technical notes are the things no
+       competing institute has. If these ever thin out, the site has drifted
+       back to being a brochure.
+
+       The six `home.problems.p{n}f` entries carried this before the rebuild.
+       The homepage now names its faults where it SHOWS them — the failed
+       stitch-out marks four, each with the file change that fixes it — so the
+       rule reads the block that renders them rather than a catalogue entry no
+       page asks for. */
+    const failed = en.home.smp.failedNote.toLowerCase();
+    for (const fault of ["pucker", "gapping", "register", "broken thread"]) {
+      expect(failed, fault).toContain(fault);
     }
+    expect(gu.home.smp.failedNote.length).toBeGreaterThan(40);
+    /* Scoped to the failed stitch-out: other stages carry marker arrays of
+       their own, and counting all of them would pass while the faults
+       themselves disappeared. */
+    const motif = read("src/components/kds/home/motif.tsx");
+    const stage = motif.slice(motif.indexOf("export function StageFailed"));
+    const marks = stage.slice(0, stage.indexOf("return ("));
+    expect((marks.match(/\{ x: \d+, y: \d+, n: "\d" \}/g) ?? []).length).toBe(4);
     expect(machineNotes.length).toBeGreaterThanOrEqual(8);
   });
 

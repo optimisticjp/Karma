@@ -15,6 +15,7 @@ import { BeforeYouCome } from "@/components/kds/admissions/BeforeYouCome";
 import { CtaBand } from "@/components/kds/CtaBand";
 import { ActionDock } from "@/components/kds/shell/ActionDock";
 import { Icon } from "@/components/ui/Icon";
+import { PageCrumbs } from "@/components/kds/PageCrumbs";
 
 /* Published FAQs are database-backed with a source fallback. */
 export const dynamic = "force-dynamic";
@@ -75,6 +76,7 @@ export default async function AdmissionsPage({
 
   return (
     <>
+      <PageCrumbs page="admissions" path="/admissions" />
       {/* Only the questions actually published get structured data, and the
           builder emits no rating, price or offer — see `src/lib/schema.ts`. */}
       <JsonLd

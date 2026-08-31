@@ -8,6 +8,7 @@ import { asLocale } from "@/i18n/routing";
 import { NeedlePoint } from "@/components/kds/marks";
 import { pageMeta } from "@/lib/seo";
 import { ActionDock } from "@/components/kds/shell/ActionDock";
+import { PageCrumbs } from "@/components/kds/PageCrumbs";
 
 export async function generateMetadata({
   params
@@ -68,6 +69,7 @@ export default async function AdmissionFormPage({
 
   return (
     <>
+      <PageCrumbs page="admission" path="/admission" />
       {/* The form's own opening. Short on purpose: everything here is a
           reassurance somebody needs BEFORE they start typing, and anything
           longer is a wall between a visitor and the first field. */}

@@ -7,6 +7,7 @@ import { CoursePathway } from "@/components/kds/courses/CoursePathway";
 import { CtaBand } from "@/components/kds/CtaBand";
 import { routing } from "@/i18n/routing";
 import { pageMeta } from "@/lib/seo";
+import { PageCrumbs } from "@/components/kds/PageCrumbs";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -59,6 +60,7 @@ export default async function CoursesPage({ params }: { params: Promise<{ locale
 
   return (
     <>
+      <PageCrumbs page="courses" path="/courses" />
       <CoursesIntro />
       {/* `cues` is plain data. A render function would be a function crossing
           the server/client boundary, which React refuses — the client

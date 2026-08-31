@@ -13,6 +13,7 @@ import { RatingBlock, ReviewRail, SampleMark, SocialProof } from "@/components/k
 import { CtaBand } from "@/components/kds/CtaBand";
 import { NeedlePoint, ThreadLine } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
+import { PageCrumbs } from "@/components/kds/PageCrumbs";
 
 /* Stories are database-backed with a source fallback. */
 export const dynamic = "force-dynamic";
@@ -79,6 +80,7 @@ export default async function StoriesPage({ params }: { params: Promise<{ locale
 
   return (
     <>
+      <PageCrumbs page="stories" path="/success-stories" />
       <PageHead
         eyebrow={t("eyebrow")}
         title={t("title")}

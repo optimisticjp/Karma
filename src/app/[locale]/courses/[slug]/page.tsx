@@ -96,7 +96,11 @@ export default async function CourseDetailPage({
   const course = courseBySlug(slug);
   if (!course) notFound();
 
-  const [t, rawLocale] = await Promise.all([getTranslations("courseDetail"), getLocale()]);
+  const [t, tcr, rawLocale] = await Promise.all([
+    getTranslations("courseDetail"),
+    getTranslations("crumbs"),
+    getLocale()
+  ]);
   const l = asLocale(rawLocale);
   const name = pick(course, "name", l);
 
@@ -106,10 +110,14 @@ export default async function CourseDetailPage({
     .filter((c) => c.slug !== course.slug)
     .slice(0, 3);
 
-  const crumbs = breadcrumbSchema(l, [
-    [t("breadcrumbCourses"), "/courses"],
-    [name, `/courses/${course.slug}`]
-  ]);
+  const crumbs = breadcrumbSchema(
+    l,
+    [
+      [t("breadcrumbCourses"), "/courses"],
+      [name, `/courses/${course.slug}`]
+    ],
+    tcr("home")
+  );
 
   /* No offers, no price, no rating — see `src/lib/schema.ts`. `timeRequired`
      appears only where the owner has confirmed a duration in writing. */

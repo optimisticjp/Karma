@@ -203,13 +203,23 @@ export function noteSchema(opts: {
   };
 }
 
-/** Breadcrumbs. `trail` is [name, path] pairs after the home crumb. */
-export function breadcrumbSchema(locale: Locale, trail: Array<[string, string]>) {
+/**
+ * Breadcrumbs. `trail` is [name, path] pairs after the home crumb.
+ *
+ * `home` is passed in rather than hardcoded: the crumb used to read the
+ * English word "Home" on a Gujarati page, which is a structured-data
+ * description of a page in a language the page is not written in.
+ */
+export function breadcrumbSchema(
+  locale: Locale,
+  trail: Array<[string, string]>,
+  home = "Home"
+) {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: `${site.url}/${locale}` },
+      { "@type": "ListItem", position: 1, name: home, item: `${site.url}/${locale}` },
       ...trail.map(([name, path], i) => ({
         "@type": "ListItem",
         position: i + 2,
