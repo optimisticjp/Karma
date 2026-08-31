@@ -83,7 +83,7 @@ export default async function VerifyResultPage({
         )}
 
         <p className="mt-8">
-          <Link href="/verify" className="stitch-link font-semibold text-vermilion-deep">← {t("button")}</Link>
+          <Link href="/verify" className="stitch-link link-more">← {t("button")}</Link>
         </p>
       </div>
     </section>

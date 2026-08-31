@@ -1026,3 +1026,41 @@ measuring every secondary token against it before putting body copy there.**
 That was already the rule `.bg-sand` established. Steel Mist is the first
 surface to pass it without needing an override block — which is a fact worth
 knowing, not a licence to skip the measurement next time.
+
+---
+
+## Measured floors, and the one clause that decides them (2026-08-31)
+
+Two touch-target floors apply, and the difference is a WCAG clause rather than
+a preference. Get this wrong in either direction and the site is either
+inaccessible or 250px taller than it needs to be.
+
+- **A control that stands on its own gets 44px.** `.btn`, `.tap`,
+  `.console-tab`, `.site-brand-mark`, `.cta-tertiary`, `.link-more`,
+  `summary.data-row`, `.hero-thread-foot a`.
+- **A link inside a sentence is judged at 24px**, because WCAG 2.5.8 exempts it
+  by name. The consent sentence in the brief form is the canonical example; do
+  not "fix" it.
+
+`.link-more` is the section-level "see all X" link. It exists because six call
+sites spelled the same affordance five different ways and measured 26px, 32px
+and 32px. Pair it with `.stitch-link`, which supplies the underline.
+
+**Set a floor, not padding alone.** `.cta-tertiary` took its height from the
+line box plus `padding-block`, so it measured 44px in English and 41.2px in
+Gujarati on the same hero at the same width. A height that comes from font
+metrics is a height that changes when the language does.
+
+**`scroll-padding` on `html`, not `scroll-margin-top` on `[id]`.** The latter
+covers an anchor jump and nothing else; the browser also scrolls for
+`scrollIntoView()` and for keyboard focus, and there it had nothing — tabbing
+to the last card on `/contact` at 390px put it half behind the fixed tab bar.
+The public site and the Console get separate blocks, because their chrome
+heights are different and one constant would be wrong on one of them.
+
+**A media query adds no specificity.** If a phone override is declared above
+the base rule it overrides, the base rule wins on source order and the override
+is dead — silently, with valid CSS and passing tests. This happened to the
+whole hero thread block and was only found by measuring a rendered box. Keep
+override blocks below what they override; `tests/compact-density-responsive.test.ts`
+asserts the order for the hero.

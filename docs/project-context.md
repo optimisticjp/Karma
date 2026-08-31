@@ -644,6 +644,17 @@ machine ratio, CAD coordinate, machine model or head count appears anywhere in
 the signature or icon geometry, and tests fail if one does. A drawing that
 invents a number is the same lie as a stock photograph, only harder to spot.
 
+**Gujarati is not systematically taller — measured 2026-08-31.** The density
+audit asserted it was "6–11% taller everywhere" and Phase 9 checked that in a
+browser at 390px. It is *shorter* on seven of nine public routes, by up to
+5.6%, and taller on exactly two: `/admission` (+5.4%) and `/contact` (+0.6%).
+Gujarati's line-height is taller (1.8 against 1.625) but its copy is shorter in
+glyph count, and on a prose page the second effect wins. The two exceptions are
+the two screens that are mostly **labels** rather than prose, where there is no
+copy length to save. So the rule to carry forward is the narrower one: measure
+Gujarati first on **label-dense** screens — forms, ledgers, the console — not
+on every screen. Gujarati remains first-class; only the estimate was wrong.
+
 **Testing note.** `vitest.config.ts` now sets `oxc.jsx.runtime = "automatic"`.
 `tsconfig.json` sets `jsx: "preserve"` because Next.js runs its own transform;
 without the override a test importing a `.tsx` component sees raw JSX and fails

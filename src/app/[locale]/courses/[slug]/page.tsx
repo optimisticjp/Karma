@@ -479,7 +479,7 @@ export default async function CourseDetailPage({
               <SectionHeading title={t("relatedTitle")} />
               <Link
                 href="/courses"
-                className="stitch-link mb-1 inline-flex min-h-8 shrink-0 items-center gap-1.5 font-semibold text-vermilion-deep"
+                className="stitch-link link-more mb-1 shrink-0"
               >
                 {t("relatedAll")} <Icon name="arrow" size={16} className="arrow" />
               </Link>

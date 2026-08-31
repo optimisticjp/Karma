@@ -693,10 +693,15 @@
   width: 5px;
   z-index: 0;
 }
-/* Horizontal at phone widths, where the three frames sit side by side. Still
-   one continuous thread spanning the whole track — three connectors that
-   happened to line up would not be the same claim. */
-@media (max-width: 639px) {
+/* Horizontal below 960px, where the three frames sit side by side. Still one
+   continuous thread spanning the whole track — three connectors that happened
+   to line up would not be the same claim.
+
+   It used to stop at 639px, which left 640-959px falling back to the vertical
+   base layout: at 768px the hero measured 2,128px against 1,139px at 1024,
+   the single worst block in the tablet range. 960px is where the staggered
+   composition takes over, so that is where this stops. */
+@media (max-width: 959px) {
   .hero-thread-rail {
     top: 0.4375rem;
     bottom: auto;
@@ -726,7 +731,7 @@
   list-style: none;
 }
 /*
- * Below 640px the three frames run ACROSS rather than down.
+ * Below 960px the three frames run ACROSS rather than down.
  *
  * They were a single column, so each 4:3 frame was 314px wide and 235px tall
  * and the story cost 933px — more than a whole 844px viewport, for the part
@@ -738,30 +743,6 @@
  * thread stays continuous — it just runs horizontally through the knots
  * instead of vertically down them.
  */
-@media (max-width: 639px) {
-  .hero-thread-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.5rem;
-    padding-left: 0;
-    padding-top: 1.25rem;
-  }
-  .hero-frame-step {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.125rem;
-    margin-bottom: 0.25rem;
-  }
-  .hero-frame-knot {
-    left: 0;
-    top: -1.25rem;
-  }
-  .hero-frame-label { font-size: 0.625rem; letter-spacing: 0.06em; }
-  /* The tighter label re-applies tracking on top of `.mono-note`, so it needs
-     its own neutraliser. Caught by the reverse Gujarati sweep, which is what
-     that sweep exists for: a density pass adds exactly this kind of rule. */
-  :lang(gu) .hero-frame-label { letter-spacing: 0; font-size: 0.6875rem; }
-  .hero-thread-foot { padding-left: 0; margin-top: 0.75rem; }
-}
 .hero-frame {
   position: relative;
 }
@@ -800,10 +781,49 @@
   color: var(--color-stone);
 }
 .hero-thread-foot a {
-  min-height: 2rem;
+  /* 2rem measured 32px, and this is a standalone link in a caption row, not
+     one inside a sentence. The row already wraps, so the extra 12px is paid
+     once rather than per link. */
+  min-height: 2.75rem;
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
+}
+
+/* The phone overrides for everything above.
+ *
+ * They used to sit ABOVE the base rules they override. A media query adds no
+ * specificity, so `left: -2.25rem` on `.hero-frame-knot`, `flex-direction: row`
+ * on `.hero-frame-step` and `padding-left: 2.25rem` on `.hero-thread-foot` all
+ * won on source order and the whole three-across phone layout was silently
+ * half-applied — the knot rendered 36px off the left edge of the viewport,
+ * entirely out of sight, and the step label never stacked. Found by measuring
+ * a real browser at 390px, not by reading the file: the CSS is valid, the
+ * cascade is just the wrong way round. Keep this block last.
+ */
+@media (max-width: 959px) {
+  .hero-thread-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    padding-left: 0;
+    padding-top: 1.25rem;
+  }
+  .hero-frame-step {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.125rem;
+    margin-bottom: 0.25rem;
+  }
+  .hero-frame-knot {
+    left: 0;
+    top: -1.25rem;
+  }
+  .hero-frame-label { font-size: 0.625rem; letter-spacing: 0.06em; }
+  /* The tighter label re-applies tracking on top of `.mono-note`, so it needs
+     its own neutraliser. Caught by the reverse Gujarati sweep, which is what
+     that sweep exists for: a density pass adds exactly this kind of rule. */
+  :lang(gu) .hero-frame-label { letter-spacing: 0; font-size: 0.6875rem; }
+  .hero-thread-foot { padding-left: 0; margin-top: 0.75rem; }
 }
 
 /* On a laptop the frames stagger off the thread. The rail stays straight —
@@ -1323,7 +1343,11 @@
   list-style: none;
   padding: 0;
 }
-@media (min-width: 900px) {
+/* Three across from 768, not 900. Two columns at 768 made each tile ~350px
+   wide against ~200px on a 430px phone, so the wall was the one block on
+   /student-work that grew as the screen did: 967px at 430, 1,623px at 820.
+   Three columns at 768 put the tile back at ~226px. */
+@media (min-width: 768px) {
   .work-wall {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -1611,7 +1635,9 @@
   display: grid;
   gap: clamp(0.75rem, 0.5rem + 1vw, 1.5rem);
 }
-@media (min-width: 800px) {
+/* 768px, not 800: at exactly 768 the two 4:3 frames were still stacked and
+   the band measured 1,076px, taller than the same band on a 430px phone. */
+@media (min-width: 768px) {
   .about-place {
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
     align-items: start;

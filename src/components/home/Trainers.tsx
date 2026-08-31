@@ -59,7 +59,7 @@ export function Trainers() {
           <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} />
           <Link
             href="/about"
-            className="stitch-link mb-1 inline-flex items-center gap-1.5 font-semibold text-vermilion-deep"
+            className="stitch-link link-more mb-1"
           >
             {t("more")} <Icon name="arrow" size={16} className="arrow" />
           </Link>
