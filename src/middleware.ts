@@ -1,6 +1,7 @@
-import type { NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
+import { isKnownPublicPath } from "./i18n/public-paths";
 import { updateAdminSession } from "./lib/supabase/middleware";
 
 const handleIntl = createMiddleware(routing);
@@ -21,7 +22,16 @@ const handleIntl = createMiddleware(routing);
  *    is not in the sitemap.
  *
  *  - everything else keeps the existing next-intl behaviour untouched:
- *    always-prefixed `/en` and `/gu`, no browser-language auto-redirect.
+ *    always-prefixed `/en` and `/gu`, no browser-language auto-redirect —
+ *    except that a locale-prefixed path which matches no public route is
+ *    rewritten to ITSELF with `status: 404`.
+ *
+ *    That last part is the fix for a soft 404 confirmed on the deployed
+ *    Worker: `notFound()` inside a route that matched renders the branded page
+ *    but leaves the status at 200, and deleting the catch-all trades the
+ *    branded bilingual 404 for a real status. Rewriting to self keeps both —
+ *    the same HTML, with the right status — and `src/i18n/public-paths.ts`
+ *    explains why the route list lives there.
  */
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -31,6 +41,16 @@ export default async function middleware(request: NextRequest) {
   if (pathname === "/design" || pathname.startsWith("/design/")) {
     return;
   }
+  /* Only a path that already carries a locale: an unprefixed one is
+     next-intl's redirect to handle, not a 404. */
+  const [, maybeLocale, ...rest] = pathname.split("/");
+  if ((routing.locales as readonly string[]).includes(maybeLocale)) {
+    const withoutLocale = `/${rest.join("/")}`;
+    if (!isKnownPublicPath(withoutLocale)) {
+      return NextResponse.rewrite(request.url, { status: 404 });
+    }
+  }
+
   return handleIntl(request);
 }
 

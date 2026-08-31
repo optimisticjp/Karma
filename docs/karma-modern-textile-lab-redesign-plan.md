@@ -3309,7 +3309,7 @@ line in both scripts and **zero `role="img"`** on any placeholder.
 
 # Phase 10 — Responsive, accessibility, performance hardening
 
-**Status:** ⏳ Pending
+**Status:** ✅ Complete
 
 Use real Chromium.
 
@@ -3354,6 +3354,131 @@ out of scope for a recovery PR, do not lose:
   deployed Worker and make it a real `404`; a soft 404 costs crawl budget and
   is the kind of thing Search Console reports months later. Pre-existing, not
   introduced by the rebuild.
+
+## The soft 404, fixed without losing the branded page
+
+Confirmed on the deployed Worker first, not only under `next start`:
+`/en/nope`, `/gu/nope` and `/en/courses/nope` all answered **200**.
+
+The cause is a framework limitation rather than a bug in this app.
+`notFound()` inside a route that MATCHED renders the not-found boundary and
+leaves the status at 200 — and it is not the nested `not-found.tsx` doing it,
+which was tested by removing that file and measuring again.
+
+Deleting the catch-all DOES produce a real 404. It was tried, and it works —
+and it costs the branded bilingual 404, replacing it with Next's default
+"This page could not be found", in English, with no shell. For the human who
+followed a broken link that is the worse outcome, and there is no root layout
+to hang a branded root `not-found.tsx` on: this app deliberately has three
+independent root layouts and no shared one.
+
+So the status is set where it CAN be set. `src/middleware.ts` rewrites an
+unknown localized path **to itself with `status: 404`**, which Next honours:
+the page renders exactly as before — branded, localized, `noindex` — and the
+response says 404. Measured after the fix on a production server:
+
+| URL | before | after | renders |
+| --- | --- | --- | --- |
+| `/en/nope` | 200 | **404** | "The thread ends here." |
+| `/gu/nope` | 200 | **404** | "દોરો અહીં પૂરો થાય છે." |
+| `/en/courses/nope` | 200 | **404** | the branded 404 |
+| `/en/notes/nope` | 200 | **404** | the branded 404 |
+| `/nope` | 307 | 307 | next-intl's redirect, then a 404 |
+
+`src/i18n/public-paths.ts` holds the route table. The slugs are **literals**
+rather than imports because middleware runs on every request and importing
+`src/content/courses.ts` for eleven strings would pull the whole catalogue —
+curricula, fault lists, both languages — into that bundle.
+`tests/kds-routing.test.ts` asserts the list equals the content modules
+exactly, so a course added without a line there fails a test rather than
+404ing a real page.
+
+**Known and left alone:** the tab title on a 404 is the home page's, because a
+not-found boundary cannot export metadata and Next discards the metadata of
+the page that called `notFound()`. Exporting `generateMetadata` from the
+catch-all was tried and has no effect. The page is `noindex`, so this shows in
+a browser tab and a history entry and nowhere else.
+
+## 306 combinations, measured in Chromium
+
+Nine widths — 320 / 360 / 390 / 430 / 768 / 820 / 1024 / 1280 / 1440 — across
+seventeen routes in both languages, checking every item the phase asked for:
+sideways drag, any element wider than the viewport, clipped text, standalone
+touch targets under 24px, anything hidden behind the sticky header, a line
+height too tight for Gujarati, a missing `h1`, and the HTTP status.
+
+**Three defects, all at 320, and all the same bug.** A grid or flex child's
+default `min-width: auto` letting unbreakable content push its container wider
+than the screen. Nothing scrolled sideways, which is exactly why none of it had
+been noticed: the overflow was simply cut off.
+
+1. **`.cases` measured 425px inside a 280px column** on `/success-stories` and
+   `/services` → `grid-template-columns: minmax(0, 1fr)`.
+2. **The fixed dock on `/batches` hung 13px off the right edge** — and the
+   dock was innocent. The DOCUMENT was 333px wide because a filter chip
+   carrying a full course name could not wrap, and a fixed element resolves
+   against the initial containing block. A chip inside a filter row may now
+   wrap; a chip anywhere else still refuses to, because a pill broken
+   mid-label reads as two pills.
+3. **A course link in the family list was a 22px target.** It is a list of
+   links, not a link inside a sentence, so WCAG 2.5.8's inline exception does
+   not cover it → the 44px floor, on the anchor so the target IS the text.
+
+After the fixes: **zero findings across all 306 combinations.**
+
+## Motion and focus
+
+- **Reduced motion** is honoured everywhere: the sweep found every animation
+  running at `0.01ms`, which is the override doing its job, and nothing
+  looping.
+- **Focus**: 26 tab stops on each of five routes, in Chromium — **zero**
+  focused elements without a visible ring. The skip link is the first stop,
+  becomes visible, and points at `#main`.
+- Two categories of apparent finding were false positives worth recording so
+  the next sweep does not re-raise them: `.sr-only` elements are 1px by design,
+  and a visually-hidden radio inside a `.choice-chip` label is the standard
+  accessible pattern — the tap target is the label, which measures 44px.
+
+## Performance
+
+`npx wrangler deploy --dry-run`: **2,055 KiB gzip** against the 3 MB free-plan
+limit, roughly 945 KiB of headroom. 186 files in the assets directory, which is
+a separate budget from the script.
+
+## Page heights, at every width
+
+| Route | 320 | 390 | 768 | 1024 | 1440 |
+| --- | --- | --- | --- | --- | --- |
+| `/` | 13,349 | 12,370 | 10,580 | 9,530 | 10,235 |
+| `/courses` | 8,216 | 7,689 | 6,083 | 5,683 | 6,178 |
+| a course | 7,461 | 7,102 | 6,669 | 5,376 | 5,791 |
+| `/batches` | 4,508 | 4,171 | 3,401 | 3,107 | 3,358 |
+| `/admissions` | 7,573 | 6,897 | 5,787 | 5,248 | 5,301 |
+| `/admission` | 2,733 | 2,586 | 2,292 | 2,127 | 2,152 |
+| `/student-work` | 9,102 | 8,524 | 6,910 | 6,281 | 6,825 |
+| `/notes` | 4,274 | 4,044 | 3,436 | 3,189 | 3,369 |
+| a note | 5,151 | 4,571 | 3,880 | 3,166 | 3,249 |
+| `/services` | 14,070 | 12,964 | 10,002 | 8,959 | 8,977 |
+| `/about` | 7,971 | 7,799 | 5,906 | 5,833 | 6,440 |
+| `/success-stories` | 5,894 | 5,660 | 5,083 | 4,117 | 4,399 |
+| `/contact` | 3,711 | 3,468 | 3,275 | 2,970 | 3,045 |
+| `/verify` | 1,946 | 1,845 | 1,612 | 1,479 | 1,540 |
+| `/privacy` | 2,910 | 2,577 | 2,130 | 2,004 | 2,078 |
+| `/terms` | 2,601 | 2,396 | 1,993 | 1,888 | 1,954 |
+
+Gujarati runs between 4.6% shorter and 1.5% taller than English at 390 —
+never the 10–15% swing that would mean one language had been laid out and the
+other merely translated into it.
+
+`/services` is the tallest page on the site at 14,070px on a 320px phone. It is
+the only route carrying eight blocks including a form, and it is flagged here
+rather than trimmed because every block on it answers a question a business
+actually asks. Phase 11 gets the final word.
+
+## Verified
+
+**1,043 tests** across 64 files, including a new `tests/kds-routing.test.ts`
+(11).
 
 ---
 
