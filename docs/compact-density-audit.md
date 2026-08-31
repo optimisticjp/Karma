@@ -822,3 +822,75 @@ overflow** on any route at any width, **no element rendering past the viewport
 edge**, **no text clipped by a fixed height** that was not a deliberate line
 clamp, and **no focusable without a visible focus ring**.
 
+---
+
+## 11. The final matrix, 2026-08-31
+
+Every public route plus the two reachable console screens, at every viewport,
+after all ten phases. Page height in CSS pixels; the 390px column is the one
+the brief is about.
+
+| Route | 320 | 360 | 375 | 390 | 430 | 768 | 820 | 1024 | 1280 | 1440 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `/en` | 22442 | 22001 | 21806 | **18381** | 17816 | 16642 | 16791 | 16625 | 16625 | 17009 |
+| `/en/about` | 8790 | 8703 | 8684 | **8477** | 8530 | 8503 | 8750 | 5025 | 5318 | 5461 |
+| `/en/admission` | 2370 | 2266 | 2246 | **2126** | 2071 | 2053 | 2029 | 1856 | 1866 | 1923 |
+| `/en/admissions` | 6990 | 6534 | 6452 | **6352** | 6086 | 5547 | 5518 | 4958 | 4965 | 5087 |
+| `/en/contact` | 3029 | 2915 | 2879 | **2826** | 2711 | 2717 | 2724 | 2015 | 2081 | 2130 |
+| `/en/courses` | 5446 | 5214 | 5094 | **4940** | 4769 | 4621 | 4629 | 4172 | 4232 | 4345 |
+| `/en/courses/emcad-embroidery-design` | 10006 | 9496 | 9324 | **9207** | 8800 | 7637 | 7806 | 6791 | 6794 | 6968 |
+| `/en/courses/zardosi-machine-embroidery` | 6995 | 6681 | 6563 | **6418** | 6074 | 5573 | 5706 | 5173 | 5248 | 5405 |
+| `/en/notes` | 3325 | 3209 | 3171 | **3109** | 2979 | 2815 | 2791 | 2100 | 2157 | 2205 |
+| `/en/notes/why-one-software` | 4085 | 3786 | 3703 | **3571** | 3434 | 3117 | 3079 | 2341 | 2335 | 2397 |
+| `/en/privacy` | 2391 | 2274 | 2255 | **2193** | 2093 | 1931 | 1907 | 1808 | 1868 | 1918 |
+| `/en/services` | 13517 | 12776 | 12488 | **11653** | 11282 | 9133 | 9143 | 7382 | 7552 | 7734 |
+| `/en/student-work` | 9441 | 9392 | 9440 | **7311** | 7225 | 7110 | 7262 | 6992 | 6373 | 6489 |
+| `/en/success-stories` | 7840 | 7414 | 7217 | **6821** | 6495 | 5941 | 5896 | 4557 | 4269 | 4391 |
+| `/en/terms` | 1814 | 1731 | 1711 | **1604** | 1531 | 1485 | 1435 | 1318 | 1355 | 1398 |
+| `/en/verify` | 1609 | 1548 | 1528 | **1465** | 1413 | 1363 | 1334 | 1133 | 1171 | 1215 |
+| `/gu` | 21075 | 20575 | 20586 | **17319** | 16933 | 16012 | 16241 | 16134 | 16004 | 16289 |
+| `/gu/about` | 8190 | 8251 | 8292 | **8286** | 8458 | 8479 | 8769 | 4909 | 5201 | 5319 |
+| `/gu/admission` | 2349 | 2264 | 2249 | **2212** | 2180 | 2116 | 2135 | 1874 | 1858 | 1916 |
+| `/gu/contact` | 2913 | 2827 | 2815 | **2808** | 2763 | 2709 | 2758 | 1944 | 1894 | 1943 |
+| `/gu/courses` | 5121 | 4983 | 4920 | **4876** | 4786 | 4567 | 4547 | 3932 | 3942 | 4071 |
+| `/gu/courses/emcad-embroidery-design` | 9377 | 9062 | 8924 | **8835** | 8557 | 7500 | 7639 | 6426 | 6402 | 6576 |
+| `/gu/notes` | 3218 | 3129 | 3131 | **3133** | 3056 | 2843 | 2860 | 2061 | 2060 | 2107 |
+| `/gu/services` | 12393 | 11825 | 11690 | **11025** | 10677 | 8856 | 8882 | 6922 | 6956 | 7162 |
+| `/gu/student-work` | 8909 | 8894 | 8932 | **6984** | 6853 | 6942 | 7039 | 6828 | 6065 | 6206 |
+| `/gu/success-stories` | 7353 | 6962 | 6896 | **6530** | 6373 | 5851 | 5899 | 4483 | 4093 | 4227 |
+| `/admin/login` | 568 | 740 | 667 | **844** | 932 | 1024 | 1180 | 768 | 800 | 900 |
+| `/admin/no-access` | 568 | 740 | 667 | **844** | 932 | 1024 | 1180 | 768 | 800 | 900 |
+
+Both console screens fit their viewport exactly at every width — the height
+column *is* the viewport height, so neither scrolls.
+
+### What the final run returned clean
+
+280 route×viewport combinations, zero errors:
+
+- **No horizontal overflow** — `scrollWidth` equals `clientWidth` everywhere.
+- **No element rendering past the viewport edge**, inside a scroller or out.
+- **No text clipped by a fixed height** that was not a deliberate line clamp.
+- **No focusable without a visible focus ring** (checked separately, sixty
+  `Tab` stops per route).
+
+### The two remaining sub-44px targets, and why
+
+- `.stitch-link` in the footer, **31.7px**, 1,040 instances across the matrix
+  (about eight per page × every mobile combination). Clears WCAG 2.5.8's 24px
+  with margin; padded deliberately to do so; raising them would add ~250px to a
+  footer on twenty-one pages.
+- `.stitch-link font-semibold` in the brief form's consent sentence, **17px**,
+  ten instances. An inline link **inside a sentence**, exempt by 2.5.8's own
+  inline exception.
+
+Every other control on every public route and both reachable console screens
+measures at least 44px tall.
+
+### The one thing a density pass should not decide
+
+`/en` is **18,381px at 390px — 21.8 viewports — across nineteen sections.**
+Section padding is 4% of that; the rest is content the owner chose to put on a
+homepage. Shortening it further means *removing sections*, which is an
+editorial decision about what a homepage should carry, not a compactness one.
+It is raised in the final report for the owner rather than resolved here.

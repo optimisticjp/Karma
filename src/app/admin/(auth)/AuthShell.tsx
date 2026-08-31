@@ -46,8 +46,12 @@ export function AuthShell({
 
         {footer ? <div className="mt-6 text-smallmeta text-stone">{footer}</div> : null}
 
+        {/* The way back to the public site. Its `<p>` holds nothing else, so
+            it is a standalone control rather than a link inside a sentence,
+            and WCAG 2.5.8's inline exception does not cover it. Measured at
+            19px before `.tap`. */}
         <p className="mt-8 text-smallmeta text-stone">
-          <Link href="/en" className="stitch-link">
+          <Link href="/en" className="tap stitch-link">
             karmadesignstudio
           </Link>
         </p>

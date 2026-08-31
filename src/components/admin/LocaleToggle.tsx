@@ -22,7 +22,14 @@ export function LocaleToggle({
   return (
     <form action={setAdminLocaleCookie}>
       <input type="hidden" name="locale" value={other} />
-      <button type="submit" className="stitch-link text-smallmeta font-semibold">
+      {/* A standalone control, so it takes the 44px floor. Measured at 21.7px
+          tall and 44.6px wide on `/admin/login` — the only control on that
+          screen besides the form itself, on the product every staff member
+          signs into. `.tap` supplies the hit area without a taller row. */}
+      <button
+        type="submit"
+        className="tap stitch-link inline-flex items-center px-1 text-smallmeta font-semibold"
+      >
         <span className="sr-only">{label}: </span>
         {other === "gu" ? "ગુજરાતી" : "English"}
       </button>
