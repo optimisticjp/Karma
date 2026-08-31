@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
+import { clampAt, declaration, ruleBody, token } from "./helpers/measure";
 import { join } from "node:path";
 import { site } from "../src/lib/site";
 
@@ -67,9 +68,27 @@ describe("the mobile bar is two actions, not navigation", () => {
   });
 
   it("keeps clear of the home indicator and never covers content", () => {
+    /* This pinned the literal `calc(4rem + env(safe-area-inset-bottom))` — and
+       the bar it was reserving for was 3.5rem, so the assertion passed while
+       8px of Cotton showed under the footer of every public page. A bar's
+       height and the space reserved for it are ONE fact, so the rule is now
+       that both read the same token, which the literal could never check. */
     const css = read("src/app/premium.css");
+    const globals = read("src/app/globals.css");
     expect(css).toContain("padding-bottom: env(safe-area-inset-bottom)");
-    expect(css).toContain(".site-body { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }");
+    expect(css).toContain(
+      ".site-body { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); }"
+    );
+    const bar = ruleBody(css, ".tabbar");
+    expect(bar, ".tabbar must exist").not.toBeNull();
+    expect(bar as string).toContain("env(safe-area-inset-bottom)");
+    const item = ruleBody(css, ".tabbar-item");
+    expect(declaration(item as string, "min-height")).toBe("var(--tabbar-item-h)");
+    /* And the target may not shrink below the WCAG 2.5.5 floor to buy height. */
+    expect(clampAt(token(globals, "--tabbar-item-h") as string)).toBeGreaterThanOrEqual(44);
+    expect(clampAt(token(globals, "--tabbar-h") as string)).toBeGreaterThanOrEqual(
+      clampAt(token(globals, "--tabbar-item-h") as string)
+    );
   });
 });
 

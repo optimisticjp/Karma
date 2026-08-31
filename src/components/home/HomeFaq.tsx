@@ -16,7 +16,7 @@ export async function HomeFaq() {
 
   return (
     <section className="section-compact border-t border-line bg-ivory-2">
-      <div className="container-site grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+      <div className="container-site grid gap-4 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
         <div>
           <SectionHeading title={t("h2")} sub={t("sub")} />
           <p className="u-actions">

@@ -93,7 +93,7 @@ export function Trainers() {
         ) : null}
 
         {confirmed.length > 0 ? (
-          <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:mt-8 lg:grid-cols-3 lg:gap-8">
             {confirmed.map((tr, i) => (
               <Reveal as="li" key={tr.nameEn} delay={i * 80}>
                 <article className="card card-lift h-full overflow-hidden">

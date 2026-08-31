@@ -33,21 +33,23 @@ export function Investment() {
       <div className="container-site">
         <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} />
 
-        <div className="u-section-body grid gap-6 lg:grid-cols-12 lg:gap-8">
+        <div className="u-section-body grid gap-3 lg:grid-cols-12 lg:gap-8">
           <Reveal className="lg:col-span-7">
             <div className="card h-full p-3.5 md:p-4">
               <h3 className="text-h4 font-display">{t("includedTitle")}</h3>
-              <ul className="mt-4 space-y-2.5">
+              {/* 14px, not the inherited 16/1.625: six items were 518px of
+                  card for a list of what a fee covers. */}
+              <ul className="mt-2 space-y-1.5 text-smallmeta">
                 {included.map((item) => (
-                  <li key={item} className="flex gap-3">
-                    <Icon name="check" size={18} strokeWidth={2} className="mt-1 text-success" />
+                  <li key={item} className="flex gap-2">
+                    <Icon name="check" size={16} strokeWidth={2} className="mt-0.5 shrink-0 text-success" />
                     <span className="text-stone">{item}</span>
                   </li>
                 ))}
               </ul>
-              <div className="mt-5 border-t border-line pt-4">
+              <div className="mt-3 border-t border-line pt-3">
                 <p className="microlabel">{t("notIncludedTitle")}</p>
-                <ul className="mt-3 space-y-2">
+                <ul className="mt-1.5 space-y-1">
                   {notIncluded.map((item) => (
                     <li key={item} className="text-smallmeta text-stone">
                       — {item}
