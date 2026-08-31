@@ -1191,7 +1191,7 @@ The 32 real photographs remain placeholders until the files arrive.
 Execute as separate PRs. Do not wait for owner review between phases unless blocked by an actual owner fact.
 
 ## Phase 1 — Research + density audit
-**Status:** ✅ Complete — PR #43, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #43, merged as `628a1e8`
 
 Delivered:
 

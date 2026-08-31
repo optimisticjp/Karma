@@ -62,6 +62,16 @@
   --color-sand: #ded0b8;         /* deeper warm surface, punctuation */
   --color-card: #fffdf8;         /* Worktable — reading surface     */
   --color-line: #d5cab6;         /* thread grey borders             */
+  /* Steel Mist — the LIGHT technical surface (v5). Derived from Steel Indigo
+     by lifting lightness and dropping saturation, kept a touch warm so it sits
+     beside Cotton rather than reading as a cold web-app grey. It is where the
+     software/EMCAD register lives now that a dark band no longer carries it.
+     Measured, not estimated: carbon 15.10:1, stone 5.41, needle 5.67,
+     vermilion-deep 5.26, zari-deep 5.45 — so unlike Sand it needs NO
+     re-pointed token block. Bright vermilion is 4.02 here, i.e. large text
+     and UI only, exactly the same rule as on Cotton. */
+  --color-mist: #e6ebee;         /* Steel Mist — light technical surface */
+  --color-mist-line: #c9d4da;    /* its hairline — 12.02:1 on carbon     */
   --color-carbon: #111716;       /* Machine Black — 15.97:1 on Cotton */
   --color-steel: #172b35;        /* Steel Indigo — secondary dark   */
   --color-stone: #605e56;        /* secondary text — 5.72:1 on Cotton */
@@ -85,33 +95,45 @@
   --font-accent: "Playfair Display Variable", Georgia, serif;
 
   /* ------ editorial type scale (desktop endpoints per spec) ------ */
-  --text-display-xl: clamp(2.75rem, 1.95rem + 3.9vw, 4.75rem);
-  --text-display-xl--line-height: 1.05;
+  /* Retuned for the compact-density pass (v5). Only the MOBILE end of each
+     clamp moved: every desktop endpoint is within a pixel of what it was, so
+     a laptop reads as it always did. The old scale started a phone at 44px
+     for display-xl and 30px for h2, which is where the site spent its first
+     viewport. The plan's phone bands are: hero 30-36, page title 24-30,
+     section heading 18-22, card title 15-18, body 14-16, metadata 12-14,
+     eyebrow 11-13, buttons 13-16. Values in the comments are computed at
+     390px, the reference phone.
+
+     A --text-* token is THREE values. Setting only font-size drops the paired
+     line-height and letter-spacing and the heading falls back to body 1.625 —
+     that trap is why they travel together here. */
+  --text-display-xl: clamp(2rem, 1.15rem + 4.5vw, 4.75rem);      /* 36 -> 76 */
+  --text-display-xl--line-height: 1.06;
   --text-display-xl--letter-spacing: -0.035em;
-  --text-display: clamp(2.5rem, 1.85rem + 3.1vw, 4rem);
-  --text-display--line-height: 1.06;
+  --text-display: clamp(1.875rem, 1.2rem + 3.6vw, 4rem);         /* 33 -> 64 */
+  --text-display--line-height: 1.08;
   --text-display--letter-spacing: -0.032em;
-  --text-h1: clamp(2.25rem, 1.75rem + 2.4vw, 3.5rem);
-  --text-h1--line-height: 1.1;
+  --text-h1: clamp(1.625rem, 1.05rem + 3vw, 3.5rem);             /* 29 -> 56 */
+  --text-h1--line-height: 1.14;
   --text-h1--letter-spacing: -0.03em;
-  --text-h2: clamp(1.875rem, 1.45rem + 2vw, 2.875rem);
-  --text-h2--line-height: 1.17;
+  --text-h2: clamp(1.1875rem, 0.75rem + 2.6vw, 2.875rem);        /* 22 -> 46 */
+  --text-h2--line-height: 1.2;
   --text-h2--letter-spacing: -0.025em;
-  --text-h3: clamp(1.5rem, 1.32rem + 0.85vw, 2rem);
-  --text-h3--line-height: 1.25;
+  --text-h3: clamp(1.0625rem, 0.9rem + 1.3vw, 2rem);             /* 20 -> 32 */
+  --text-h3--line-height: 1.28;
   --text-h3--letter-spacing: -0.02em;
-  --text-h4: clamp(1.25rem, 1.2rem + 0.25vw, 1.5rem);
-  --text-h4--line-height: 1.33;
-  --text-lead: clamp(1.125rem, 1.06rem + 0.3vw, 1.25rem);
-  --text-lead--line-height: 1.6;
-  --text-bodylg: 1.125rem;
-  --text-bodylg--line-height: 1.67;
-  --text-smallmeta: 0.9375rem;
-  --text-smallmeta--line-height: 1.6;
-  --text-eyebrow: 0.75rem;
+  --text-h4: clamp(1rem, 0.95rem + 0.55vw, 1.5rem);              /* 17 -> 24 */
+  --text-h4--line-height: 1.35;
+  --text-lead: clamp(0.9375rem, 0.9rem + 0.35vw, 1.25rem);       /* 16 -> 20 */
+  --text-lead--line-height: 1.55;
+  --text-bodylg: clamp(0.9375rem, 0.9rem + 0.3vw, 1.125rem);     /* 16 -> 18 */
+  --text-bodylg--line-height: 1.6;
+  --text-smallmeta: 0.875rem;                                    /* 14       */
+  --text-smallmeta--line-height: 1.55;
+  --text-eyebrow: 0.75rem;                                       /* 12       */
   --text-eyebrow--line-height: 1.33;
-  --text-btn: 0.9375rem;
-  --text-btn--line-height: 1.33;
+  --text-btn: 0.875rem;                                          /* 14       */
+  --text-btn--line-height: 1.35;
   --text-btn--letter-spacing: 0.01em;
 
   /* Any string the studio did not write — a YouTube title, a pasted URL, a
@@ -124,10 +146,14 @@
   /* Systematic vertical rhythm. Spacing between related text is a SYSTEM
      value, never a per-component judgment call. This is the single habit
      that separates designed pages from assembled ones. */
-  --space-eyebrow-to-h: 0.75rem; /* 12 */
-  --space-h-to-lede: 1rem;       /* 16 */
-  --space-lede-to-action: 1.5rem; /* 24 */
-  --space-heading-to-content: clamp(1.5rem, 1.2rem + 1.1vw, 2.5rem);
+     Retuned for compact density (v5): the compact scale is
+     4 / 6 / 8 / 12 / 16 / 20 / 24 / 32, and these are the phone values. They
+     still travel together as a system — the point of these tokens was never
+     the numbers, it was that nobody picks a gap by eye per component. */
+  --space-eyebrow-to-h: 0.5rem;  /* 8  */
+  --space-h-to-lede: 0.75rem;    /* 12 */
+  --space-lede-to-action: 1rem;  /* 16 */
+  --space-heading-to-content: clamp(1rem, 0.8rem + 0.75vw, 2rem);  /* 16 -> 32 */
 
   --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -259,9 +285,16 @@
      mostly short text blocks read as dead space rather than breathing room.
      Now 48→88 / 40→72 / 28→48. Density is what earns the space: a three-line
      callout must not occupy the same height as the course catalogue. */
-  .section-major   { padding-block: clamp(3rem, 2.2rem + 3.4vw, 5.5rem); }
-  .section         { padding-block: clamp(2.5rem, 1.9rem + 2.6vw, 4.5rem); }
-  .section-compact { padding-block: clamp(1.75rem, 1.35rem + 1.7vw, 3rem); }
+  /* Retuned again for the compact-density pass (2026-08-31). The previous
+     values computed to 48.5 / 40.5 / 28.2px on a 390px phone against the
+     plan's 20-32px band, so only `section-compact` was inside it. All three
+     TIERS survive — a page needs dynamics, and flattening them is what made
+     the pre-v3 homepage read as one scroll — but their phone ends move onto
+     the compact scale. The desktop ends barely move: this is a mobile
+     compaction, not a shorter website. */
+  .section-major   { padding-block: clamp(2rem, 1.5rem + 2.2vw, 5rem); }    /* 32 -> 80 */
+  .section         { padding-block: clamp(1.5rem, 1.15rem + 1.5vw, 4rem); } /* 24 -> 64 */
+  .section-compact { padding-block: clamp(1rem, 0.8rem + 0.9vw, 2.5rem); }  /* 16 -> 40 */
 
   /* Eyebrow: 12px caps for Latin; weight + colour only for Gujarati */
   .eyebrow {
@@ -318,25 +351,28 @@
   .stitch-link:focus-visible::after,
   .stitch-link[aria-current="page"]::after { transform: scaleX(1); }
 
-  /* Buttons: 48px+ height, 12px radius, 15px medium, arrow shifts 4px */
+  /* Buttons: 44px floor (WCAG 2.5.5), 12px radius, 14px semibold, arrow
+     shifts 4px. The floor was 48px and the compact pass takes it to the real
+     minimum rather than below it — a dense screen may not buy its density
+     from the tap target. Gujarati keeps a taller box for its vowel marks. */
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    min-height: 3rem;
+    min-height: 2.75rem;
     border-radius: 0.75rem;
     font-weight: 600;
     font-size: var(--text-btn);
     line-height: var(--text-btn--line-height);
-    padding: 0.8125rem 1.5rem;
+    padding: 0.625rem 1.125rem;
     transition:
       background-color 200ms var(--ease-out-soft),
       border-color 200ms var(--ease-out-soft),
       color 200ms var(--ease-out-soft);
     cursor: pointer;
   }
-  :lang(gu) .btn { min-height: 3.25rem; padding-block: 0.9375rem; }
+  :lang(gu) .btn { min-height: 3rem; padding-block: 0.75rem; }
   .btn-primary { background: var(--color-vermilion); color: var(--color-card); }
   .btn-primary:hover { background: var(--color-vermilion-deep); }
   .btn-secondary {
