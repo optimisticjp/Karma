@@ -353,7 +353,7 @@ export function AdmissionForm({
           {done.reference}
         </p>
         <p className="prose-measure mx-auto mt-4 text-stone">{t("success.body")}</p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
+        <div className="mt-4 flex flex-wrap justify-center gap-3">
           <a href={done.waUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
             {t("success.waButton")}
           </a>
@@ -868,7 +868,7 @@ export function AdmissionForm({
       </div>
 
       {/* ------------------------------- nav -------------------------------- */}
-      <div className="mt-10 flex items-center justify-between gap-3">
+      <div className="mt-4 flex items-center justify-between gap-3">
         {step > 0 ? (
           <button type="button" onClick={() => go(step - 1)} className="btn btn-ghost">
             ← {t("buttons.back")}

@@ -73,8 +73,8 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         aside={
           <>
             <p className="microlabel !text-vermilion-deep">{t("whereLabel")}</p>
-            <p className="mt-3">{gu ? site.addressGu : site.addressEn}</p>
-            <p className="mt-3">
+            <p className="mt-1.5">{gu ? site.addressGu : site.addressEn}</p>
+            <p className="mt-1.5">
               <strong>{gu ? site.hoursGu : site.hoursEn}</strong>
             </p>
           </>

@@ -120,19 +120,23 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
         aside={
           <>
             <p className="microlabel !text-vermilion-deep">{t("hoursLabel")}</p>
-            <p className="mt-3">
+            <p className="mt-1.5">
               <strong>{gu ? site.hoursGu : site.hoursEn}</strong>
             </p>
-            <p className="mt-3">{t("demoNote")}</p>
+            <p className="mt-1.5">{t("demoNote")}</p>
           </>
         }
       />
 
       <section className="section band-info">
-        <div className="container-site grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
+        <div className="container-site grid gap-4 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
           <div>
             <SectionHeading title={t("reachTitle")} sub={t("reachSub")} />
-            <ul className="u-section-body space-y-3">
+            {/* Rows, not cards. Each was 108px — 16px of padding, a 16/26px
+                title and a value-plus-note line that wrapped to three lines at
+                15px — so the first channel opened at ~906px on a phone and the
+                page's whole job was below the fold. */}
+            <ul className="u-section-body space-y-1.5">
               {channels.map((c) => (
                 <li key={c.label}>
                   <a
@@ -140,16 +144,16 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
                     {...(c.external
                       ? { target: "_blank", rel: "noopener noreferrer" }
                       : {})}
-                    className="card card-lift flex items-center gap-4 p-4 md:p-5"
+                    className="card card-lift flex min-h-11 items-center gap-3 p-2.5 md:p-3.5"
                   >
                     <Icon
                       name={c.icon}
-                      size={22}
+                      size={20}
                       className={c.primary ? "shrink-0 text-vermilion" : "shrink-0 text-stone"}
                     />
                     <span className="min-w-0 flex-1">
-                      <span className="card-title block font-semibold">{c.label}</span>
-                      <span className="mt-0.5 block break-all text-smallmeta text-stone">
+                      <span className="card-title block text-smallmeta font-semibold">{c.label}</span>
+                      <span className="block break-all text-[0.8125rem] leading-snug text-stone">
                         {c.value} · {c.note}
                       </span>
                     </span>

@@ -56,7 +56,10 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
       />
       <section className="section">
         <div className="container-site">
-          <ul className="reading-shell ledger">
+          {/* Each term is a sentence, so it sits in the row's NOTE slot, not
+              its title slot. As titles, six paragraphs read as six headlines
+              and the page looked like an index of things it does not have. */}
+          <ul className="reading-shell ledger is-prose">
             {items.map((item, i) => (
               <LedgerRow
                 as="li"

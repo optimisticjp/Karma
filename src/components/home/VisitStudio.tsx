@@ -23,7 +23,7 @@ export function VisitStudio() {
 
   return (
     <section className="section-compact">
-      <div className="container-site grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-16">
+      <div className="container-site grid gap-4 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-16">
         <div>
           <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} rule />
 

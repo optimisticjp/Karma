@@ -1275,7 +1275,7 @@ every type token measured against the plan's band, the 44px tap floor, and the
 with no `:lang(gu)` rule at all).
 
 ## Phase 3 — Public shell + homepage compactness
-**Status:** ✅ Complete — PR #45, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #45, merged as `a8c1204`
 
 Delivered:
 
@@ -1330,21 +1330,63 @@ footer leads with the phone and shows a phone the links a laptop shows, and the
 hero's thread keeps one continuous stitch when it turns.
 
 ## Phase 4 — Public inner pages
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #46, merged as `PLACEHOLDER_MERGE`
 
-Deliver compact intentional redesign for:
+The audit's finding drove this phase: **`PageIntro` is the public site's cost
+centre**, and the two interior pages that already passed the first-viewport
+test — `/verify/[id]` and the error boundary — are precisely the two that
+decline it. So the phase starts there and works outwards.
 
-- courses index
-- all 11 course pages
-- Machine Notes index/detail
-- student work
-- success stories
-- about/trainers
-- B2B services
-- contact
-- verify
-- legal/secondary pages
-- errors/loading/404
+Delivered:
+
+- **`PageIntro` compacted**: 56 → 20px above the eyebrow, 48 → 16px below,
+  lede gap 20 → 8, actions gap 32 → 14, and the aside — which stacks *between*
+  the page title and the page's own content at every width under 900px — drops
+  to a 13px note on a phone and stays a 15px rail from 900px. Every desktop
+  endpoint is intact.
+- **The course page leads with what the institute has confirmed.**
+  `<CourseOperations>` moved ahead of the who-is-it-for essay: on EMCAD DAHAO,
+  the only course with a confirmed duration and a published fee, those figures
+  sat behind the intro, the drawn signature and a two-column essay — about
+  **3,900px, roughly 4.6 phone screens**, to reach the number a visitor came
+  for.
+- **Related courses became Machine Index rows** (1,476px → ~250), and
+  `CourseCard` was **deleted**: it was superseded, not reserved, and leaving a
+  working card-grid implementation of a decision the project deliberately made
+  the other way is one import away from undoing it. Its two policy assertions
+  moved to the surfaces that still carry the rule.
+- The course aside pairs its photograph and signature side by side on a phone
+  (514px → ~230), with the manifest ratio untouched. Nine stitched rules on one
+  page became two — a mark that repeats under every heading is a separator, not
+  a signature. `ModuleAccordion` stops opening a panel for the reader.
+  `.problem-fault` 20px → 15px: six faults were reading as six sections.
+- **The notes archive clamps its answer to two lines.** Rows printed the
+  complete answer — 196 to 355 characters each — so eight notes filled ~1,150px
+  and the archive stopped being scannable. The full answer is still on the
+  note. The note aside's drawn plate goes from a 233px 3:2 box to 80px on a
+  phone, so "what to check" is reachable.
+- **Success stories put a story before the frames reserved for its
+  photographs.** The page opened with 470 characters of caveat and two empty
+  frames, and the first story began ~1,350px down. The frames stay — labelled,
+  honest, never filled with stock — they just stop standing in front of the
+  content they illustrate.
+- **The loading skeleton reserves the shape a page actually lands as**: rows on
+  a phone, three cards from `md:`. It held 616px of card grid for `/notes`,
+  `/terms`, `/services` and `/privacy`, which all land as hairline row lists —
+  so it guaranteed the layout jump it exists to prevent.
+- Contact channel rows 108px → ~64 (rows, not cards). `/terms` sets its six
+  body terms as body via a new `.ledger.is-prose`, instead of six headlines.
+  `.stack-lines` 16 → 8px on a phone. `.split` and the two-column page gaps
+  40 → 16px. Privacy section gaps 48 → 24px.
+- `GalleryGrid` **deleted** — a client-side masonry `/student-work` never used
+  (`WorkLedger` is the gallery), carrying the last `bg-carbon` filter pill on
+  the public side.
+
+New policy tests in `tests/compact-density-public.test.ts`, including the
+**compact-scale sweep**: no unprefixed vertical spacing utility above step 8
+anywhere in the public tree, scanned inside `className` literals after
+stripping comments, with breakpoint-prefixed variants exempt because §21
+explicitly allows more room on a larger screen.
 
 ## Phase 5 — Admission/conversion compactness
 **Status:** ⏳ Pending

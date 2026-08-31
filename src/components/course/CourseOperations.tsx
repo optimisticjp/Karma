@@ -63,8 +63,7 @@ export function CourseOperations({
     <section className="section bg-ivory-2">
       <div className="container-site">
         <p className="microlabel">{copy.factsTitle}</p>
-        <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-
+        
         <dl className="ledger mt-7">
           <div className="ledger-row is-labelled">
             <dt className="ledger-title !text-smallmeta">{copy.durationLabel}</dt>
@@ -86,10 +85,10 @@ export function CourseOperations({
         </dl>
 
         {ops.scheduleOptions.length ? (
-          <div className="mt-12">
+          <div className="mt-4 md:mt-8">
             <h2 className="text-h3 font-display">{copy.batchTitle}</h2>
             <p className="u-section-body text-stone">{copy.batchSub}</p>
-            <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {ops.scheduleOptions.map((slot) => (
                 <li key={slot.key} className="border border-line bg-card p-4">
                   <p className="font-display text-h4 leading-tight">
@@ -105,10 +104,10 @@ export function CourseOperations({
         ) : null}
 
         {ops.demo && ops.demo.slots.length ? (
-          <div className="mt-12">
+          <div className="mt-4 md:mt-8">
             <h2 className="text-h3 font-display">{copy.demoTitle}</h2>
             <p className="u-section-body text-stone">{copy.demoSub}</p>
-            <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {ops.demo.slots.map((slot) => (
                 <li key={slot.key} className="border border-line bg-card p-4">
                   <p className="font-semibold">
@@ -121,11 +120,10 @@ export function CourseOperations({
         ) : null}
 
         {ops.curriculum.length ? (
-          <div className="mt-12 split">
+          <div className="mt-4 split md:mt-8">
             <div>
               <h2 className="text-h3 font-display">{copy.teachTitle}</h2>
-              <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-              <p className="u-section-body text-stone">{copy.teachSub}</p>
+                            <p className="u-section-body text-stone">{copy.teachSub}</p>
               <ul className="mt-5 grid gap-2.5 sm:grid-cols-2">
                 {ops.curriculum.map((item) => (
                   <li key={item.en} className="flex gap-3">
@@ -142,8 +140,7 @@ export function CourseOperations({
             </div>
             <div>
               <h2 className="text-h3 font-display">{copy.practicalTitle}</h2>
-              <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-              <ul className="mt-5 space-y-3">
+                            <ul className="mt-2 space-y-1.5">
                 {ops.practical.map((item) => (
                   <li key={item.en} className="flex gap-3">
                     <Icon
@@ -160,9 +157,9 @@ export function CourseOperations({
           </div>
         ) : null}
 
-        <div className="mt-12">
+        <div className="mt-4 md:mt-8">
           <h2 className="text-h3 font-display">{copy.feeTitle}</h2>
-          <StitchRule draw className="mt-4 max-w-[4.5rem]" />
+          <StitchRule draw className="mt-2 max-w-[4.5rem]" />
           <dl className="ledger mt-6 max-w-2xl">
             <div className="ledger-row is-labelled">
               <dt className="ledger-title !text-smallmeta">{copy.feeTotal}</dt>

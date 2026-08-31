@@ -18,7 +18,6 @@ const gu = JSON.parse(read("messages/gu.json")) as any;
 
 const indexPage = read("src/app/[locale]/courses/page.tsx");
 const detailPage = read("src/app/[locale]/courses/[slug]/page.tsx");
-const cardSource = read("src/components/course/CourseCard.tsx");
 
 const stripComments = (source: string) =>
   source.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/^\s*\/\/.*$/gm, " ");
@@ -89,11 +88,16 @@ describe("photography policy across the catalogue", () => {
       expect(TECHNIQUE_SIGNATURES[course.slug], course.slug).toBeDefined();
     }
     expect(detailPage).toContain("TechniqueSignature");
-    expect(cardSource).toContain("TechniqueSignature");
+    /* This also asserted on <CourseCard>, which was deleted on 2026-08-31 when
+       the related-courses grid became the Machine Index. The rule is unchanged
+       and now has one home instead of two: every surface that lists a course
+       leads with a photograph where the shoot covers it and the technique
+       signature where it does not. */
+    expect(read("src/components/courses/MachineIndex.tsx")).toContain("TechniqueSignature");
   });
 
   it("leads a card or a page with this course's own photograph, never another's", () => {
-    for (const source of [detailPage, cardSource, read("src/components/courses/MachineIndex.tsx")]) {
+    for (const source of [detailPage, read("src/components/courses/MachineIndex.tsx")]) {
       expect(source).toContain("coursePhotoFor(course.slug)");
     }
   });

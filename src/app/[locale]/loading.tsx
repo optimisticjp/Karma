@@ -25,13 +25,20 @@ export default function Loading() {
         <StitchRule tone="vermilion" className="loading-stitch" />
         <span>{t("loadingNote")}</span>
       </p>
-      <div className="skeleton mt-6 h-10 w-2/3 max-w-md" />
-      <div className="skeleton mt-4 h-5 w-full max-w-xl" />
-      <div className="skeleton mt-2 h-5 w-5/6 max-w-lg" />
-      <div className="u-section-body grid gap-5 md:grid-cols-3">
-        <div className="skeleton h-48" />
-        <div className="skeleton h-48" />
-        <div className="skeleton h-48" />
+      <div className="skeleton mt-3 h-7 w-2/3 max-w-md" />
+      <div className="skeleton mt-2 h-4 w-full max-w-xl" />
+      <div className="skeleton mt-1.5 h-4 w-5/6 max-w-lg" />
+      {/* Rows on a phone, three cards from `md:`. This reserved 616px of
+          three-card shape at every width — for /notes, /terms, /services and
+          /privacy, which all land as hairline row lists. A skeleton whose
+          shape is wrong guarantees the layout jump it exists to prevent,
+          which is the one job stated in this file's own docstring. */}
+      <div className="u-section-body grid gap-2 md:grid-cols-3 md:gap-5">
+        <div className="skeleton h-12 md:h-40" />
+        <div className="skeleton h-12 md:h-40" />
+        <div className="skeleton h-12 md:h-40" />
+        <div className="skeleton h-12 md:hidden" />
+        <div className="skeleton h-12 md:hidden" />
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { BatchTable } from "@/components/course/BatchTable";
-import { CourseCard } from "@/components/course/CourseCard";
+import { MachineIndex } from "@/components/courses/MachineIndex";
 import { ModuleAccordion } from "@/components/course/ModuleAccordion";
 import { FaqList } from "@/components/site/FaqList";
 import { PageIntro } from "@/components/ui/PageIntro";
@@ -12,12 +12,11 @@ import { ManifestPhoto } from "@/components/ui/PhotoSlot";
 import { MonoNote } from "@/components/ui/MonoNote";
 import { coursePhotoFor } from "@/content/photo-manifest";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { StitchRule } from "@/components/ui/StitchPath";
 import { SampleTag } from "@/components/ui/SampleTag";
 import { TrackedLink } from "@/components/site/TrackedLink";
 import { TrackView } from "@/components/site/TrackView";
 import { JsonLd } from "@/components/site/JsonLd";
-import { courseBySlug, coursesByFamily, coursesInFamily, families } from "@/content/courses";
+import { courseBySlug, coursesInFamily, families } from "@/content/courses";
 import { verifiedOperationsFor } from "@/content/course-operations";
 import { CourseOperations } from "@/components/course/CourseOperations";
 import { notesForCourse } from "@/content/notes";
@@ -222,33 +221,17 @@ export default async function CourseDetailPage({
         }
       />
 
-      {/* 2 + 7. Who it is for, and what you will be able to do. */}
-      <section className="section">
-        <div className="container-site split">
-          <div>
-            <h2 className="text-h3 font-display">{t("whoTitle")}</h2>
-            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-            <p className="prose-measure mt-5 text-stone">{gu ? course.whoGu : course.whoEn}</p>
-          </div>
-          <div>
-            <h2 className="text-h3 font-display">{t("skillsTitle")}</h2>
-            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-            <ul className="mt-5 space-y-3">
-              {(gu ? course.outcomesGu : course.outcomesEn).map((o) => (
-                <li key={o} className="flex gap-3">
-                  <Icon name="check" size={18} className="mt-1.5 shrink-0 text-success" strokeWidth={2} />
-                  <span>{o}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* 2b. The facts the institute publishes about this course: duration,
+      {/* 2. The facts the institute publishes about this course: duration,
              software, batch timings, the free demo, what is taught, and the
              complete fee plan. Rendered only where the owner has confirmed
-             them in writing — see src/content/course-operations.ts. */}
+             them in writing — see src/content/course-operations.ts.
+
+             Moved ahead of the essay on 2026-08-31. On the one course that
+             HAS a confirmed duration and a published fee, those figures sat
+             behind the intro, the drawn signature and a two-column essay —
+             about 3,900px, roughly 4.6 phone screens, to reach the number a
+             visitor came for. Who it is for reads better after you know
+             what it costs. */}
       {verified ? (
         <CourseOperations
           verified={verified}
@@ -282,6 +265,27 @@ export default async function CourseDetailPage({
         />
       ) : null}
 
+      {/* 2 + 7. Who it is for, and what you will be able to do. */}
+      <section className="section">
+        <div className="container-site split">
+          <div>
+            <h2 className="text-h3 font-display">{t("whoTitle")}</h2>
+                        <p className="prose-measure mt-2 text-stone">{gu ? course.whoGu : course.whoEn}</p>
+          </div>
+          <div>
+            <h2 className="text-h3 font-display">{t("skillsTitle")}</h2>
+                        <ul className="mt-2 space-y-1.5">
+              {(gu ? course.outcomesGu : course.outcomesEn).map((o) => (
+                <li key={o} className="flex gap-2 text-smallmeta">
+                  <Icon name="check" size={16} className="mt-0.5 shrink-0 text-success" strokeWidth={2} />
+                  <span>{o}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
       {/* 3. The production problems this technique's training exists to fix.
              Named faults, not adjectives: an operator who recognises one of
              these has just been told what this course is for. */}
@@ -313,8 +317,7 @@ export default async function CourseDetailPage({
           </div>
           <div>
             <h2 className="text-h3 font-display">{t("practiceTitle")}</h2>
-            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-            <p className="prose-measure mt-5 text-stone">{gu ? p.practiceGu : p.practiceEn}</p>
+                        <p className="prose-measure mt-2 text-stone">{gu ? p.practiceGu : p.practiceEn}</p>
             <p className="mt-5 text-smallmeta text-stone">{t("practiceNote")}</p>
           </div>
         </div>
@@ -343,8 +346,7 @@ export default async function CourseDetailPage({
         <div className="container-site split">
           <div>
             <h2 className="text-h3 font-display">{t("proofTitle")}</h2>
-            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-            <p className="prose-measure mt-5 text-stone">{t("proofBody")}</p>
+                        <p className="prose-measure mt-2 text-stone">{t("proofBody")}</p>
             <p className="u-actions action-row">
               <Link href="/student-work" className="btn btn-secondary">
                 {t("proofCta")} <Icon name="arrow" size={18} className="arrow" />
@@ -383,11 +385,10 @@ export default async function CourseDetailPage({
         <div className="container-site split">
           <div>
             <h2 className="text-h3 font-display">{t("feeTitle")}</h2>
-            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-            {/* A course with a published, owner-verified fee plan states it in
+                        {/* A course with a published, owner-verified fee plan states it in
                 full above; repeating "there is no public price list" underneath
                 would contradict the block a reader has just read. */}
-            <p className="prose-measure mt-5 text-stone">
+            <p className="prose-measure mt-2 text-stone">
               {verified ? to("feeOffline") : t("feeBody")}
             </p>
             <p className="mt-4 text-smallmeta text-stone">{t("feeNote")}</p>
@@ -483,14 +484,14 @@ export default async function CourseDetailPage({
                 {t("relatedAll")} <Icon name="arrow" size={16} className="arrow" />
               </Link>
             </div>
-            <div className="u-section-body grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
-              {related.map((c) => (
-                <CourseCard
-                  key={c.slug}
-                  course={c}
-                  index={coursesByFamily.findIndex((x) => x.slug === c.slug)}
-                />
-              ))}
+            {/* The Machine Index, not three cards. Three <CourseCard>s in a
+                mobile single column were 1,476px at the very bottom of the
+                page — more than a full viewport of "here are other courses"
+                after everything the visitor came for. The index is the same
+                component /courses uses, so a related row and a catalogue row
+                cannot drift in what they may claim. */}
+            <div className="u-section-body">
+              <MachineIndex courses={related} locale={gu ? "gu" : "en"} />
             </div>
           </div>
         </section>
