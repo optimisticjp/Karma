@@ -5,8 +5,10 @@ import { declaration, ruleBody, stripComments } from "./helpers/measure";
 
 const read = (p: string) => readFileSync(join(process.cwd(), p), "utf8");
 
-const premium = read("src/app/premium.css");
-const storyCase = read("src/components/site/StoryCase.tsx");
+/* `<StoryCase>` was deleted with the rebuild; the page renders the arc
+   itself, behind the same disclosure. */
+const storyCase = read("src/app/[locale]/success-stories/page.tsx");
+const tmp = read("src/app/thread-machine-proof.css");
 const services = read("src/app/[locale]/services/page.tsx");
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const en = JSON.parse(read("messages/en.json")) as any;
@@ -26,9 +28,9 @@ describe("a long story is scannable before it is readable", () => {
     /* Six full cases measured 5,004px on /success-stories at 390px — six
        viewports to read six stories nobody can compare, because only one fits
        on screen at a time. */
-    expect(storyCase).toContain('<details className="story-more">');
-    expect(storyCase).toContain('<summary className="story-more-toggle">{t("readMore")}</summary>');
-    const body = ruleBody(premium, ".story-more-toggle");
+    expect(storyCase).toContain('<details className="module mt-4">');
+    expect(storyCase).toContain('{ts("readMore")}');
+    const body = ruleBody(tmp, ".kds .module-summary");
     expect(body).toBeTruthy();
     /* It is a control, so it takes the standalone-control floor. */
     expect(declaration(body!, "min-height")).toBe("2.75rem");
@@ -42,8 +44,9 @@ describe("a long story is scannable before it is readable", () => {
        not become a line clamp. */
     expect(storyCase).not.toContain("line-clamp");
     expect(storyCase).not.toContain("slice(0,");
-    expect(storyCase).toContain("story-arc-steps");
-    expect(storyCase).toContain("story-steps");
+    /* The arc is still an ordered seam rather than a paragraph. */
+    expect(storyCase).toContain("pathway-step");
+    expect(storyCase).toContain("pathway-thread");
   });
 
   it("names the disclosure in both languages", () => {
@@ -54,11 +57,10 @@ describe("a long story is scannable before it is readable", () => {
     expect(gu.proof.stories.readMore).not.toBe(en.proof.stories.readMore);
   });
 
-  it("does not restate the arrow it already drew", () => {
-    /* The teaser's head carries `before → after` on one line, and the numbered
-       arc below it repeated BEFORE and NOW: 354px of restatement on a homepage
-       that runs nineteen sections. */
-    expect(storyCase).toContain("compact ? [] : [");
+  it("drops a step a story has not filled in, rather than printing an empty one", () => {
+    /* A story published through Content Desk may carry only before → now. The
+       arc renders the steps it has. */
+    expect(storyCase).toContain("filter(([, v]) => Boolean(v))");
   });
 });
 

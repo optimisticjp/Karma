@@ -13,7 +13,27 @@ export async function generateMetadata(): Promise<Metadata> {
   return { robots: { index: false, follow: false } };
 }
 
-/** Public certificate check: the anti-fraud page every cert QR points to (plan 10.4). */
+/**
+ * THE ANSWER.
+ *
+ * The anti-fraud page every certificate QR points to. It says one word first —
+ * verified, not found, or unavailable — and then shows the record behind it.
+ *
+ * THREE SIGNALS, NEVER ONE
+ * ------------------------
+ * The verdict carries a word, an icon and a rule down its left edge. Colour is
+ * the fourth signal and never the only one, because this page gets printed,
+ * forwarded and read on a cracked phone in daylight.
+ *
+ * NOTHING MOVES. The result used to arrive inside a `seal-in` animation on a
+ * dashed circle: a certificate stamping itself is precisely the gesture a fake
+ * one would make. `tests/machine-lab-secondary.test.tsx` holds the rule.
+ *
+ * "NOT FOUND" IS NOT AN ACCUSATION. A number that does not resolve can be a
+ * typo, an old paper certificate, or a record not yet entered — so the copy
+ * sends the reader to the studio's phone rather than concluding anything about
+ * the person holding the certificate.
+ */
 export default async function VerifyResultPage({
   params
 }: {
@@ -28,63 +48,76 @@ export default async function VerifyResultPage({
   const dbConfigured = getDb() !== null;
   const cert = dbConfigured ? await getCertificate(certNo) : null;
 
+  const state = !dbConfigured ? "wait" : cert ? "ok" : "bad";
+  /* The heading is a WORD, and the sentence sits under it. Setting the long
+     "records system is coming online" line as the heading made a paragraph
+     look like a verdict. */
+  const heading =
+    state === "wait"
+      ? t("unavailableTitle")
+      : state === "ok"
+        ? t("validTitle")
+        : t("invalidTitle");
+  const body = state === "wait" ? t("unavailable") : state === "ok" ? t("validBody") : t("invalidBody");
+  const mark = state === "wait" ? "phone" : state === "ok" ? "check" : "misregistration";
+
   return (
-    <section className="section-compact">
-      <div className="container-site max-w-2xl">
-        <h1 className="text-h2 font-display">{t("title")}</h1>
+    <section className="band on-mist" aria-labelledby="verdict-heading">
+      <div className="wrap">
+        <div className="reading-shell">
+          <p className="t-micro">{t("eyebrow")}</p>
 
-        {!dbConfigured ? (
-          <div className="card mt-8 border-marigold p-3.5 md:p-5">
-            <p className="font-semibold">{t("unavailable")}</p>
-            <p className="mt-2 font-mono text-smallmeta text-stone">{certNo}</p>
-            <p className="mt-3 text-smallmeta">
-              <a className="stitch-link font-semibold" href={`tel:+${site.whatsapp}`}>{site.phoneDisplay}</a>
-            </p>
-          </div>
-        ) : cert ? (
-          <div className="card mt-8 border-success p-3.5 md:p-5">
-            <div className="flex items-center gap-4">
-              <span className="seal-in flex h-14 w-14 flex-none items-center justify-center rounded-full border-2 border-dashed border-success">
-                <Icon name="check" size={26} className="text-success" strokeWidth={2} />
-              </span>
-              <div>
-                <p className="text-h3 font-display text-success">{t("validTitle")}</p>
-                <p className="mt-1 text-stone">{t("validBody")}</p>
-              </div>
+          <div className={`verdict verdict-${state} mt-4`}>
+            <span className="verdict-mark" aria-hidden="true">
+              <Icon name={mark} size={22} strokeWidth={2} />
+            </span>
+            <div className="min-w-0">
+              <h1 id="verdict-heading" className="t-h3">
+                {heading}
+              </h1>
+              <p className="t-body mt-2">{body}</p>
+              <p className="t-meta cert-no mt-3">{certNo}</p>
+
+              {cert ? (
+                <dl className="cert-fields">
+                  <div>
+                    <dt className="t-micro">{t("fields.name")}</dt>
+                    <dd className="t-body mt-1">{cert.studentName}</dd>
+                  </div>
+                  <div>
+                    <dt className="t-micro">{t("fields.course")}</dt>
+                    <dd className="t-body mt-1">{cert.courseName}</dd>
+                  </div>
+                  <div>
+                    <dt className="t-micro">{t("fields.date")}</dt>
+                    <dd className="t-body numeric mt-1">{formatDate(cert.issuedOn, l)}</dd>
+                  </div>
+                  <div>
+                    <dt className="t-micro">{t("fields.certNo")}</dt>
+                    <dd className="t-body cert-no mt-1">{cert.certNo}</dd>
+                  </div>
+                </dl>
+              ) : null}
+
+              {cert?.status === "revoked" ? (
+                <p className="form-callout mt-4">{t("revoked")}</p>
+              ) : null}
             </div>
-            <dl className="mt-6 grid gap-4 sm:grid-cols-2">
-              <div>
-                <dt className="text-smallmeta font-bold text-stone">{t("fields.name")}</dt>
-                <dd className="font-semibold">{cert.studentName}</dd>
-              </div>
-              <div>
-                <dt className="text-smallmeta font-bold text-stone">{t("fields.course")}</dt>
-                <dd className="font-semibold">{cert.courseName}</dd>
-              </div>
-              <div>
-                <dt className="text-smallmeta font-bold text-stone">{t("fields.date")}</dt>
-                <dd className="font-semibold">{formatDate(cert.issuedOn, l)}</dd>
-              </div>
-              <div>
-                <dt className="text-smallmeta font-bold text-stone">{t("fields.certNo")}</dt>
-                <dd className="font-mono font-semibold">{cert.certNo}</dd>
-              </div>
-            </dl>
-            {cert.status === "revoked" ? (
-              <p className="mt-5 rounded-lg bg-error/10 p-3 font-semibold text-error">{t("revoked")}</p>
-            ) : null}
           </div>
-        ) : (
-          <div className="card mt-8 border-error p-3.5 md:p-5">
-            <p className="text-h3 font-display text-error">{t("invalidTitle")}</p>
-            <p className="mt-2 font-mono text-smallmeta text-stone">{certNo}</p>
-            <p className="u-lede">{t("invalidBody")}</p>
-          </div>
-        )}
 
-        <p className="mt-8">
-          <Link href="/verify" className="stitch-link link-more">← {t("button")}</Link>
-        </p>
+          {/* Whatever the verdict, the studio's phone is the next step. */}
+          <p className="t-meta mt-5">
+            <a className="act-quiet" href={`tel:+${site.whatsapp}`}>
+              <Icon name="phone" size={15} /> {site.phoneDisplay}
+            </a>
+          </p>
+
+          <p className="mt-6">
+            <Link href="/verify" className="act act-secondary">
+              {t("again")}
+            </Link>
+          </p>
+        </div>
       </div>
     </section>
   );

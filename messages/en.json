@@ -1101,6 +1101,7 @@
     "title": "Verify a certificate",
     "sub": "Every Karma Design Studio certificate carries a number and a QR code that points here.",
     "inputLabel": "Certificate number",
+    "lookupTitle": "Enter the number on the certificate",
     "inputPh": "e.g. KDS-C-0231",
     "button": "Verify",
     "validTitle": "Verified",
@@ -1108,6 +1109,7 @@
     "invalidTitle": "Not found",
     "invalidBody": "This number doesn't match an issued certificate. Check the number, or contact the studio: hiring managers are welcome to call.",
     "unavailable": "Verification is coming online with the studio's records system. Please contact the studio to verify this certificate directly.",
+    "unavailableTitle": "Check with the studio",
     "fields": {
       "name": "Issued to",
       "course": "Course",
@@ -1118,7 +1120,24 @@
     "revoked": "This certificate has been revoked. Contact the studio for details.",
     "eyebrow": "Certificate check",
     "asideTitle": "For employers",
-    "asideBody": "Anyone can check a Karma certificate here — no account, no login. If the number does not resolve, call the studio before drawing a conclusion."
+    "asideBody": "Anyone can check a Karma certificate here — no account, no login. If the number does not resolve, call the studio before drawing a conclusion.",
+    "again": "Check another number"
+  },
+  "privacyPage": {
+    "eyebrow": "Legal",
+    "title": "Privacy Policy",
+    "sub": "What we collect, why we collect it, how long we keep it, and how you get it removed.",
+    "asideTitle": "Working draft",
+    "asideBody": "This text is written plainly and is pending the studio's legal review. Nothing here describes a practice the studio does not follow today.",
+    "contactCta": "Ask a data question"
+  },
+  "termsPage": {
+    "eyebrow": "Legal",
+    "title": "Terms",
+    "sub": "The key terms for training and business services, in plain language.",
+    "asideTitle": "Working draft",
+    "asideBody": "These terms are pending the studio's review, which is why this page is not published to search engines yet. Fees, timings and admission rules are confirmed at the studio.",
+    "contactCta": "Ask about a term"
   },
   "notFound": {
     "eyebrow": "Page not found",
