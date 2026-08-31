@@ -2284,6 +2284,26 @@ Two changes came out of looking at the renders rather than the code:
   turns ninety degrees to run through them horizontally. Same mark, same job,
   other direction.
 
+## Console isolation, measured in a browser rather than asserted
+
+One build, three routes, reading the computed style of `<body>`:
+
+| | `/admin/login` | `/en` | `/design` |
+| --- | --- | --- | --- |
+| body class | `console-root` | `site-body kds` | `kds` |
+| background | `#f5f0e6` Cotton | `#faf8f5` Canvas | `#faf8f5` Canvas |
+| `--brand-accent` | **unset** | `#d4462e` | `#d4462e` |
+| `--s-canvas` | **unset** | `#faf8f5` | `#faf8f5` |
+| `--t-h2` | **unset** | the clamp | the clamp |
+| `--color-ivory` | `#f5f0e6` | **`#f5f0e6`** | **`#f5f0e6`** |
+
+The Console sees none of the new system. The last row is the one that matters
+most: `--color-ivory` reads the same on both sides, because this system
+**declares its own values and re-points nothing**. `textile-lab.css` made that
+same token report `#f7f4ee` on a public page and `#f5f0e6` in the Console from
+one build — a token name meaning two things depending on where you stood,
+which is what a bridge costs and what this replaces.
+
 ## Verified
 
 **891 tests** across 58 files, of which 62 are new (`kds-foundation` 41,
