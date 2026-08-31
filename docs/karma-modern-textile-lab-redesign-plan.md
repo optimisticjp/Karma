@@ -2126,7 +2126,7 @@ decision, and that is where it should be made rather than discovered.
 
 # Phase 1 — New THREAD / MACHINE / PROOF foundation
 
-**Status:** ✅ Complete — PR #62, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #62, merged as `79b28d8`
 
 A real public design system, in one file, that declares its own values instead
 of re-pointing somebody else's.
@@ -2318,28 +2318,129 @@ checklist carries the proof-replacement gate.
 
 # Phase 2 — Header, menu, locale switch, footer
 
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #63, merged as `PLACEHOLDER_MERGE`
 
-Goal:
+The shell is the one thing on every page, so this is the phase where the site
+starts to feel like a different product before a single page is rebuilt.
 
-Create the new shell.
+## The header
 
-Required:
+Six destinations — Courses, Batches, Student Work, Machine Notes, Services,
+Studio — 56px on a phone and 64px from `lg`. Home is not among them because the
+brand mark is the home link, and Admissions and Contact moved to the footer and
+the mobile menu, which §14 permits when contact is prominent elsewhere. It is.
 
-- logo-neutral header;
-- EN/Gujarati switch;
-- desktop navigation;
-- purpose-built mobile menu;
-- Book Free Demo action;
-- light compact footer;
-- no Hindi option;
-- route-preserving locale switch;
-- accessible menu/dialog behaviour;
-- remove old shell components no longer used.
+"Studio" is a **label**, not a route: it points at `/about`, which keeps its
+URL. A display name is a decision; a URL is a promise to everyone who has
+already shared it.
 
-Acceptance:
+The active link is marked with a **running stitch** rather than an underline,
+because the site already has one repeated mark and a second signal would be a
+second vocabulary.
 
-Header/footer must already make the site feel like a different product.
+## The logo slot
+
+`src/lib/brand.ts` is the one place a future asset is configured, and the
+contract is written so that any colour works:
+
+- a reserved **height**, not a box — the width follows the asset's own ratio,
+  so a wide horizontal lockup and a compact square mark both drop in;
+- the container stays **neutral** — a red block is wrong for a red logo and
+  wrong again for a green one;
+- **nothing recolours it** — no filter, no mask, no forced monochrome, so an
+  owner who supplies a multicolour mark gets the multicolour mark;
+- the alt text is the studio's name, not "logo".
+
+All four are asserted. Until an asset arrives the fallback is a designed
+wordmark carrying the site's own needle mark — good enough to ship, because a
+visibly temporary logo teaches visitors that the business is provisional.
+
+## The language switch
+
+A segmented `EN | ગુ` pair, and each option is a **link** rather than a button:
+it is the same page in the other language, which is a destination. That means
+it works with no JavaScript, opens in a new tab on a middle click, is announced
+as a link, and gives a crawler the same alternate `hreflang` already declares.
+Remembering the choice is layered on top; nothing auto-redirects.
+
+It replaces a popover-on-desktop, bottom-sheet-on-mobile dialog with focus
+trapping, scroll locking and a native-script preview per option — built for
+three locales. With two, a focus-trapping dialog to choose between two things
+you can already see is a dialog too many (§14).
+
+## Conversion is contextual now
+
+**The permanent Call/Directions bar is gone.** It sat at the bottom of every
+public page including the privacy policy, the terms page and the Machine Notes
+archive, where neither action is anybody's next step.
+
+`<ActionDock>` — *Book Free Demo | WhatsApp* — is rendered by the four
+high-intent routes and by nothing else. `/contact` is deliberately excluded: a
+bar would cover the three channels that page exists to offer. There is no route
+list inside the component, because a component that decides where it belongs
+from a hardcoded array of paths goes stale the moment a route is renamed; a
+route opts in.
+
+The **one-time language banner went too**. It existed because the language
+control used to be a small pill in a crowded header, so a Gujarati speaker
+landing on `/en` might never find it. The header now carries a visible switch
+in the first viewport of every page — and the banner was colliding with the
+dock, which is how the redundancy was noticed. The decision it implemented is
+unchanged: offer the other language, never auto-redirect, remember an explicit
+choice.
+
+The WhatsApp floating button went with them. **The shell now floats nothing.**
+
+The phone-role protections survived intact and are still asserted: the call
+action dials `callPhone`, the WhatsApp action opens `whatsapp`, and neither is
+ever labelled as the other. So did the no-PII analytics rules.
+
+## The footer
+
+Reordered by what somebody at the bottom of a page actually wants: **where you
+are and how to reach you first**, then where else to go, then the legal line.
+The previous one opened with a full-viewport restatement of the brand promise
+and put the phone number 686px down a 1,031px slab — it had to be dragged up
+with `order-first` to be reachable at all. Here the visit block is simply
+first.
+
+Measured at 390: **984px**, with the first phone number at roughly 350px. Two
+fixes came from looking at the render rather than the markup — the three
+numbers were wrapping *between the digits* in a three-column row (a phone
+number broken across two lines is unreadable and is no longer one tap target),
+and the two link columns were stacking into 500px of short lists when pairing
+them saves about 250px.
+
+## The bug a browser found and the source could not
+
+`.site-head` carries a `backdrop-filter`, and **a filtered element becomes the
+containing block for its `position: fixed` descendants.** With the menu
+rendered inside the header, the scrim's `inset: 0` resolved against the 56px
+header instead of the viewport: measured at a 390×844 viewport it was
+**390×56**, and `document.elementFromPoint` in the middle of the contextual
+dock returned the dock's own button. `aria-modal` hid the page from assistive
+technology; nothing hid it from a thumb.
+
+The menu is now a sibling of the header. After the fix the scrim measures
+390×844 and the same probe returns `sheet-scrim`. Two regression tests hold it,
+one of which also catches the related mistake in the same area — a
+`.site-menu ~ .sheet-scrim` selector that could never match, because the scrim
+precedes the panel in the DOM.
+
+## Verified
+
+**928 tests** across 59 files, including a new `tests/kds-shell.test.ts` (43).
+`tests/compact-density-shell.test.ts` was deleted — it measured chrome that no
+longer exists — and the mobile-conversion suite's bar contract was rewritten
+for the dock, deliberately, while its phone-role and analytics blocks were left
+untouched.
+
+Browser sweep across **25 width × route combinations** (320/390/768/1024/1440 ×
+`/en`, `/gu`, `/en/batches`, `/en/contact`, `/en/courses`): no horizontal
+overflow anywhere, and the page cannot be dragged sideways at any of them. The
+mobile menu was driven end to end: opens as a modal dialog, focus lands on the
+first link, the page locks, Escape closes it, focus returns to the trigger and
+the page unlocks.
 
 ---
 

@@ -3,11 +3,8 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
-import { Header } from "@/components/site/Header";
-import { Footer } from "@/components/site/Footer";
-import { WhatsAppFab } from "@/components/site/WhatsAppFab";
-import { MobileTabBar } from "@/components/site/MobileTabBar";
-import { LangBanner } from "@/components/site/LangBanner";
+import { SiteHeader } from "@/components/kds/shell/SiteHeader";
+import { SiteFooter } from "@/components/kds/shell/SiteFooter";
 import { UnveilWatcher } from "@/components/ui/Reveal";
 import { JsonLd } from "@/components/site/JsonLd";
 import { site } from "@/lib/site";
@@ -64,29 +61,39 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      {/* Column layout so the footer sits at the bottom of short pages (404,
-          verify results) instead of floating mid-viewport. Scoped to the
-          public shell: Karma Console has its own root layout. */}
-      {/* `site-body` still carries the shell's flex column and the mobile
-          tab-bar offset from `premium.css`; `kds` scopes the new public design
-          system. The shell itself is rebuilt in the next phase, at which point
-          the first class goes. */}
-      <body className="site-body kds">
+      {/* `kds` scopes the public design system and carries the shell's own
+          column layout, so the footer sits at the bottom of a short page (404,
+          verify results) rather than floating mid-viewport.
+
+          The `site-body` class is GONE. It existed to reserve space for a
+          permanent Call/Directions bar at the bottom of every phone screen;
+          that bar is superseded by the contextual `<ActionDock>`, which
+          reserves its own space on the routes that carry it. */}
+      <body className="kds">
         {/* Marks JS availability so reveal animations never hide no-JS content */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
         <NextIntlClientProvider>
           <a
             href="#main"
-            className="sr-only z-[60] focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:rounded-lg focus:bg-carbon focus:px-4 focus:py-2 focus:text-ivory"
+            className="skip-link"
           >
             {t("skipToContent")}
           </a>
-          <Header />
+          <SiteHeader />
           <main id="main">{children}</main>
-          <Footer />
-          <WhatsAppFab />
-          <MobileTabBar />
-          <LangBanner />
+          <SiteFooter />
+          {/* NO FLOATING CHROME. Conversion is contextual — the high-intent
+              routes render `<ActionDock>` themselves and the header's Book
+              Free Demo is on every page (plan §15) — and the one-time
+              language banner is gone with it.
+
+              That banner existed because the language control used to be a
+              small pill in a crowded header, so a Gujarati speaker landing on
+              `/en` might never find it. The header now carries a permanent,
+              visible `EN | ગુ` switch in the first viewport of every page, so
+              the offer is always on screen instead of interrupting once. The
+              decision it implemented is unchanged: offer the other language,
+              never auto-redirect, and remember an explicit choice. */}
           <UnveilWatcher />
         </NextIntlClientProvider>
         <JsonLd data={businessLd} />

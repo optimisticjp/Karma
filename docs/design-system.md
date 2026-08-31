@@ -189,11 +189,45 @@ Nothing loops, nothing follows the cursor, nothing hijacks the scroll.
 a thread that has not drawn is an invisible rule, so it is given its full size
 back explicitly.
 
+### The shell
+
+`SiteHeader` · `SiteFooter` · `LocaleSwitch` · `BrandMark` · `ActionDock`, in
+`src/components/kds/shell/`.
+
+**The header** is 56px on a phone and 64px from `lg`, carrying brand · language
+· menu on a phone and brand · six links · language · Book Free Demo on a
+laptop. The active link is marked with a running stitch rather than an
+underline, because the site already has one repeated mark.
+
+**The logo slot** is a reserved HEIGHT, not a box: `src/lib/brand.ts` is the
+single place a future asset is configured, the width follows the asset's own
+ratio so a horizontal lockup and a square mark both fit, the container stays
+neutral, and nothing recolours the asset. Until one arrives the fallback is a
+designed wordmark carrying the site's own needle mark.
+
+**The language switch** is a segmented `EN | ગુ` pair of LINKS — each option is
+the same page in the other language, so it works with no JavaScript, opens in
+a new tab on a middle click and is announced as a link. It replaced a
+three-locale focus-trapping bottom sheet, which is a dialog too many for a
+choice between two visible things.
+
+**The mobile menu is a sibling of the header, not a child** — and that is
+load-bearing. `.site-head` carries a `backdrop-filter`, and a filtered element
+becomes the containing block for its `position: fixed` descendants: nested
+inside, the scrim's `inset: 0` resolved against the 56px header, so it measured
+390×56 and the contextual dock stayed tappable under an open modal dialog.
+
+**No floating chrome.** No site-wide bottom bar, no floating action button, no
+language interstitial. Conversion is contextual — see §Mobile conversion in
+`docs/project-context.md` §6.
+
 ### Where it lives
 
 - `src/app/thread-machine-proof.css` — the system
 - `src/components/kds/` — `StitchSwatch`, `marks` (thread/needle/hoop/progress),
   `Frame` (machine frame + photo placeholder), `proof` (the seven modules)
+- `src/components/kds/shell/` — header, footer, locale switch, brand, dock
+- `src/lib/brand.ts` — the logo slot contract
 - `src/content/proof.ts` — the proof registry
 - `/design` — the rendered reference, on the new system alone
 

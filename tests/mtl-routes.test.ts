@@ -175,8 +175,8 @@ describe("the public batches route", () => {
   });
 
   it("is reachable from navigation", () => {
-    expect(read("src/components/site/Header.tsx")).toContain('href: "/batches"');
-    expect(read("src/components/site/Footer.tsx")).toContain('href="/batches"');
+    expect(read("src/components/kds/shell/SiteHeader.tsx")).toContain('href: "/batches"');
+    expect(read("src/components/kds/shell/SiteFooter.tsx")).toContain('href: "/batches"');
   });
 });
 

@@ -114,7 +114,7 @@ describe("notes are discoverable", () => {
   });
 
   it("reaches the notes from the header and the footer", () => {
-    expect(read("src/components/site/Header.tsx")).toContain('href: "/notes"');
-    expect(read("src/components/site/Footer.tsx")).toContain('href="/notes"');
+    expect(read("src/components/kds/shell/SiteHeader.tsx")).toContain('href: "/notes"');
+    expect(read("src/components/kds/shell/SiteFooter.tsx")).toContain('href: "/notes"');
   });
 });

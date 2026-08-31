@@ -24,6 +24,13 @@
 /** The moments worth counting. Adding one is a deliberate act. */
 export type KarmaEvent =
   | "call_demo_click"
+  /**
+   * The contextual action dock's demo button. Distinct from `demo_start`,
+   * which fires when the form itself is begun: the gap between the two is
+   * exactly the drop-off between "tapped the dock" and "started filling it
+   * in", which is the number worth knowing per surface.
+   */
+  | "demo_click"
   | "directions_click"
   | "whatsapp_click"
   | "demo_start"

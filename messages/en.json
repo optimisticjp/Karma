@@ -74,10 +74,6 @@
     "skipToContent": "Skip to content",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "langBanner": {
-      "question": "આ પેજ ગુજરાતીમાં વાંચવું છે?",
-      "dismiss": "Stay in English"
-    },
     "waPrefillDemo": "Hi Karma Design Studio! 👑 મને ફ્રી ડેમો ક્લાસ બુક કરવો છે. નામ: ____ | કોર્સ: ____ | ટાઇમ: સવાર/સાંજ",
     "waPrefillBusiness": "Hi! I need embroidery design / digitizing / job work. Product: ____ | Qty: ____ | Deadline: ____",
     "loadingNote": "Preparing stitch path…"
@@ -1001,9 +997,10 @@
     "terms": "Terms",
     "dataRequest": "Data request",
     "rights": "© {year} Karma Design Studio, Surat. All rights reserved.",
-    "callFor": "— call for a demo",
-    "waFor": "— WhatsApp",
-    "landlineFor": "— studio landline"
+    "callFor": "Call for a demo",
+    "waFor": "WhatsApp",
+    "landlineFor": "Studio landline",
+    "follow": "Follow"
   },
   "errorPage": {
     "eyebrow": "Something broke",

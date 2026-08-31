@@ -74,10 +74,6 @@
     "skipToContent": "સીધા કન્ટેન્ટ પર જાઓ",
     "openMenu": "મેનૂ ખોલો",
     "closeMenu": "મેનૂ બંધ કરો",
-    "langBanner": {
-      "question": "Read this page in English?",
-      "dismiss": "ગુજરાતીમાં જ રહો"
-    },
     "waPrefillDemo": "Hi Karma Design Studio! 👑 મને ફ્રી ડેમો ક્લાસ બુક કરવો છે. નામ: ____ | કોર્સ: ____ | ટાઇમ: સવાર/સાંજ",
     "waPrefillBusiness": "Hi! મને એમ્બ્રોઇડરી ડિઝાઇન / ડિજિટાઇઝિંગ / જોબ વર્ક જોઈએ છે. પ્રોડક્ટ: ____ | જથ્થો: ____ | ડેડલાઇન: ____",
     "loadingNote": "સ્ટિચ પાથ તૈયાર થાય છે…"
@@ -1001,9 +997,10 @@
     "terms": "શરતો",
     "dataRequest": "ડેટા વિનંતી",
     "rights": "© {year} Karma Design Studio, સુરત. સર્વ હક્ક સુરક્ષિત.",
-    "callFor": "— ડેમો માટે કૉલ",
-    "waFor": "— WhatsApp",
-    "landlineFor": "— સ્ટુડિયો લેન્ડલાઇન"
+    "callFor": "ડેમો માટે કૉલ",
+    "waFor": "WhatsApp",
+    "landlineFor": "સ્ટુડિયો લેન્ડલાઇન",
+    "follow": "ફૉલો કરો"
   },
   "errorPage": {
     "eyebrow": "કંઈક બગડ્યું",

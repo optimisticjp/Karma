@@ -257,13 +257,29 @@ Routes under `src/app/[locale]/`, each existing at both `/en/…` and `/gu/…`:
 **Locale routing.** `src/i18n/routing.ts`: locales `["en","gu"]`,
 `defaultLocale: "en"`, **`localeDetection: false`**. The URL alone decides the
 language; there is no browser-language auto-redirect (Google's i18n guidance).
-A one-time dismissible banner (`LangBanner`) offers the other language instead.
+The header carries a permanent, visible `EN | ગુ` switch in the first viewport
+of every page, so the offer is always on screen. (A one-time dismissible banner
+did that job until the shell rebuild; it was removed once the switch became
+permanently visible, and because it collided with the contextual action dock.)
 Making Gujarati the default is a one-line change and an open owner question
 (§39, Q5).
 
 **`/admin` sits outside `[locale]` on purpose** — staff type `/admin`, not
 `/en/admin`. `src/middleware.ts` splits on the path: `/admin/*` gets a Supabase
-session refresh and nothing else; every other path goes to next-intl unchanged.
+session refresh and nothing else, `/design` (the design-system reference) is
+passed through untouched, and every other path goes to next-intl unchanged.
+A route with its own root layout MUST be exempted there: without it, next-intl
+rewrites `/design` to `/en/design`, which reaches the localized catch-all and
+renders the 404.
+
+**Mobile conversion is contextual, not permanent.** There is no site-wide
+bottom bar and no floating action button. `<ActionDock>` — *Book Free Demo |
+WhatsApp* — is rendered by the four high-intent routes (`/admission`,
+`/admissions`, `/batches`, a course detail) and by nothing else; `/contact`
+is deliberately excluded because a bar would cover the three channels that
+page exists to offer. General pages rely on the header's action, an inline
+call to action and the footer. `tests/mobile-conversion.test.ts` asserts both
+halves — that the four carry it and that the layout does not.
 Middleware is explicitly **not** an access check.
 
 **API routes** (`src/app/api/`): `admission` and `brief` (public form intake,

@@ -273,15 +273,12 @@ describe("button microinteractions", () => {
   });
 });
 
-describe("the mobile conversion bar keeps its two actions", () => {
-  it("offers call and directions, and nothing else", () => {
-    const bar = read("src/components/site/MobileTabBar.tsx");
-    expect((bar.match(/tabbar-item/g) ?? [])).toHaveLength(2);
-    for (const cat of [en, gu]) {
-      expect(Object.keys(cat.tabbar).sort()).toEqual(["call", "directions", "label"]);
-    }
-  });
-});
+/* The permanent Call/Directions bar this suite used to guard is GONE. It was
+   pinned to every public page including the privacy policy and the notes
+   archive, and the plan's §15 replaces it with the contextual `<ActionDock>`
+   on the four high-intent routes. What that dock must do — and the phone-role
+   protections that survived the change intact — is asserted in
+   `tests/mobile-conversion.test.ts` and `tests/kds-shell.test.ts`. */
 
 describe("the shell adds no dependency", () => {
   it("uses no animation or carousel library", () => {
