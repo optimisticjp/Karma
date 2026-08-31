@@ -15,14 +15,18 @@ import { studioSchema } from "@/lib/schema";
 import "../globals.css";
 import "../premium.css";
 import "../machine-lab.css";
-/* Modern Textile Lab, and the reason it is last and the reason it is here.
-   There is no shared root layout in this project — `admin/layout.tsx` is a
+/* THREAD / MACHINE / PROOF — the public design system, and the reason it is
+   last and the reason it is here.
+
+   There is no shared root layout in this project: `admin/layout.tsx` is a
    second, independent root that imports the three sheets above. This one is
-   imported by the public root ONLY, so nothing in it can reach the Console
-   even by accident, and the Devanagari face it declares is never downloaded
-   by a staff member. Everything inside is additionally scoped to
-   `.site-body`. See the file header. */
-import "../textile-lab.css";
+   imported by the PUBLIC root only, so nothing in it can reach Karma Console
+   even by accident — and every rule inside is additionally scoped to `.kds`,
+   so a future stray import could not restyle a staff screen either.
+
+   It replaces `textile-lab.css`, deleted in the same commit. See the file
+   header for why a token bridge was not a redesign. */
+import "../thread-machine-proof.css";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -63,7 +67,11 @@ export default async function LocaleLayout({
       {/* Column layout so the footer sits at the bottom of short pages (404,
           verify results) instead of floating mid-viewport. Scoped to the
           public shell: Karma Console has its own root layout. */}
-      <body className="site-body">
+      {/* `site-body` still carries the shell's flex column and the mobile
+          tab-bar offset from `premium.css`; `kds` scopes the new public design
+          system. The shell itself is rebuilt in the next phase, at which point
+          the first class goes. */}
+      <body className="site-body kds">
         {/* Marks JS availability so reveal animations never hide no-JS content */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
         <NextIntlClientProvider>

@@ -1,138 +1,201 @@
-# Design system v6: "Modern Textile Lab" (public) · v5 "Machine Lab" (Console)
+# Design system: THREAD / MACHINE / PROOF (public) · "Machine Lab" (Console)
 
-> **Read this first.** Since 2026-08-31 there are **two** systems, and which
-> one applies depends on which side of the product you are on.
+> **Read this first.** There are **two** systems, and which one applies depends
+> on which side of the product you are on.
 >
-> - **The public site** runs **Modern Textile Lab**, defined in
->   `src/app/textile-lab.css` and summarised in the section directly below.
-> - **Karma Console** runs the system the rest of this document describes,
->   unchanged. It was tuned across PRs #43–#53 and is explicitly out of scope
->   for the public redesign.
+> - **The public site** runs **THREAD / MACHINE / PROOF**, defined in
+>   `src/app/thread-machine-proof.css` and described in the section below.
+>   Live reference: **`/design`** — a rendered page of every primitive, not
+>   indexed and not linked from the site.
+> - **Karma Console** runs the "Machine Lab" system the rest of this document
+>   describes, unchanged. It was tuned across PRs #43–#53 and is explicitly
+>   **out of scope** for the public rebuild.
 >
 > The two do not share a root layout — `src/app/[locale]/layout.tsx` and
-> `src/app/admin/layout.tsx` are independent roots — so `textile-lab.css` is
-> imported by the public one only and cannot reach `/admin`.
+> `src/app/admin/layout.tsx` are independent roots — so the public sheet is
+> imported by the public one only. Every rule in it is additionally scoped to
+> `.kds`, so even a stray import could not restyle a staff screen.
+>
+> **Superseded:** "Modern Textile Lab" (`src/app/textile-lab.css`, PR #57) was
+> rejected by the owner as a reskin and the file is deleted. It re-pointed the
+> v3 `--color-*` tokens to warmer values inside `.site-body` and added a
+> handful of classes, of which almost none were ever used by a component. That
+> is the distinction worth carrying forward: **re-pointing a colour token is
+> not a redesign.**
 
 ---
 
-## Modern Textile Lab — the public system (v6, 2026-08-31)
+## THREAD / MACHINE / PROOF — the public system
 
-Authoritative plan: `docs/karma-modern-textile-lab-redesign-plan.md`.
-The brand sits between **craft and machine precision**, and the permanent
-spine is unchanged:
+Authoritative plan: `docs/karma-modern-textile-lab-redesign-plan.md`, with
+`docs/karma-creative-freedom-trust-proof-addendum.md` taking precedence on
+visual creativity, trust modules, sample placeholders and photography.
 
 > **FROM SCREEN TO STITCH.**
 > Design on screen. Prove it on the machine.
 
-### Seven colours, measured
+### The one idea
 
-| Token | Hex | Role | Measured |
+A thread leaves a screen, passes through a machine, and becomes proof on
+fabric. That is why the system has **two material registers** rather than one
+palette:
+
+- a **WARM CLOTH** register — work, samples, studio, people;
+- a **COOL MACHINE** register — EMCAD, files, digitising, process, diagnostics.
+
+The previous public palette was warm everywhere, which is how a site about
+digital design files reads as a craft blog. Anything to do with the screen now
+sits on the cool ground, and the visitor learns the distinction without being
+told it.
+
+### The brand accent adapter — four variables, logo-neutral
+
+The owner may supply a logo in any colour. Exactly four variables carry every
+chromatic decision in the interface, and **nothing else in the stylesheet
+hardcodes a hue** — a test enumerates every hex in the file and fails on a
+stray one.
+
+| Token | Default | Role | Measured |
 | --- | --- | --- | --- |
-| `--mtl-canvas` | `#F7F4EE` | the public ground | — |
-| `--mtl-paper` | `#FFFFFF` | forms, cards, image mats | — |
-| `--mtl-ink` | `#171918` | primary text, strong linework | 16.09:1 on canvas · 17.67 on paper · 13.62 on sand |
-| `--mtl-ink-muted` | `#666864` | secondary copy | 5.13 canvas · 5.63 paper · **4.34 sand** |
-| `--mtl-ink-muted-deep` | `#5E605C` | secondary copy **on sand** | 5.79 · 6.36 · **4.90** |
-| `--mtl-thread` | `#D44B35` | THE accent: fills, active stitch, large text | **3.94** canvas — large text and fills only |
-| `--mtl-thread-deep` | `#B03522` | small-text links and hovers | 5.66 · 6.22 · 4.79 |
-| `--mtl-sand` | `#E9E1D5` | secondary material surface | — |
-| `--mtl-charcoal` | `#202321` | **the `/services` hero, and nothing else** | white 15.86 · canvas 14.45 · thread 3.67 |
+| `--brand-accent` | `#D4462E` | thread, marks, fills, large type | 3.57–4.45 across the five grounds — **fills and large text only** |
+| `--brand-accent-strong` | `#B8321C` | actions, accent body text, focus | 4.80–5.98 across all five · white on it **5.98** |
+| `--brand-accent-soft` | `#FBEAE6` | selected state, wash | ink 15.43 · muted ink 5.38 |
+| `--brand-on-accent` | `#FFFFFF` | text on an accent fill | 5.98 on strong |
 
-**Two rules follow from the measurements, and both are the same rule.**
-Thread Red fails AA for body-size text on canvas, and Muted Ink fails it on
-Warm Sand. Neither is fixed by brightening the accent or lightening the
-ground — each has a **deep step**, and the sand surface swaps its own in
-automatically so no caller has to remember.
+**Why two reds.** A primary button label is normal-size text by WCAG, so 4.5:1
+is the floor and the bright thread red does not clear it. The split is also
+true to the subject: the brighter red is the **thread**, the deeper red is the
+**decision**.
 
-**Eleven public colours became seven.** Needle Blue and Zari Copper do not
-exist in this palette; the technical register comes from texture and
-annotation rather than a second and third hue. They are **mapped** into the
-seven rather than deleted, because ninety files reference them and an
-undefined Tailwind v4 token silently falls back to `currentColor` — which is
-how `border-rule` already went wrong in the Console.
+**To re-brand:** change those four. Verified alternates, recomputed by
+`tests/kds-foundation.test.ts` on every run — blue `#1F5FA8` (6.08 on canvas,
+6.44 with white), green `#1F6B43` (6.11 / 6.48), gold `#8A6A12` (4.77 / 5.06),
+black `#14171A` (16.97 / 17.99).
 
-### The token bridge
+### Surfaces and ink, measured
 
-`textile-lab.css` re-points the shared `--color-*` tokens **inside
-`.site-body` only**. `bg-ivory` on a public page paints Canvas; the same class
-in the Console still paints Cotton. Verified in a browser: `/en` reports
-`--color-ivory: #f7f4ee` and `/admin/login` reports `#f5f0e6`, from the same
-build.
-
-The alternative was renaming across ninety files for no visual difference. The
-cost is that a token name means one thing inside the scope and another outside
-it, which is why every mapping in the file states both values.
-
-### Type scale — rendered, not intended
-
-| | 390px | 1440px | plan asks |
+| Token | Hex | Register | Role |
 | --- | --- | --- | --- |
-| h1 | **32.5** | **56** | 32–38 / 52–64 |
-| h2 | **24.3** | **38** | 24–28 / 34–42 |
-| h3 | **20** | **24** | 18–21 / 22–26 |
-| h4 | 18 | 21 | — |
-| lead / bodylg | 17 | 18.3 | — |
-| body | **16** | **16** | 15–16 |
-| smallmeta | 14 | 14.6 | — |
-| eyebrow | 12 | 12.4 | 12–13 |
-| button | 14 | 14.8 | 14–15 |
+| `--s-paper` | `#FFFFFF` | — | forms, sheets, media mats |
+| `--s-canvas` | `#FAF8F5` | warm | the main ground |
+| `--s-cloth` | `#F0EBE3` | warm | work, samples, people |
+| `--s-mist` | `#EEF1F3` | **cool** | EMCAD, files, process |
+| `--s-mist-deep` | `#E2E7EA` | **cool** | an inset machine panel |
+| `--ink` | `#14171A` | — | headings, body, linework — **14.44–17.99** on all five |
+| `--ink-muted` | `#5A6169` | — | secondary copy — **5.03–6.27** on all five |
 
-Strictly ascending at both ends. `lead` and `bodylg` are deliberately the
-**same clamp**: they are one size role wearing two names, and as separate
-clamps they landed 0.04px apart at 390px, which is not a distinction.
+**One muted ink, no per-surface variant.** It clears the 4.5 body floor on the
+deepest ground, which is precisely so there is nothing for a caller to
+remember. The previous system needed a "deep step" on its sand surface; this
+one does not.
 
-`smallmeta` sits at 14 rather than the plan's 12–13 band because it is the
-site's caption size, and a 12px caption under a photograph is the technical
-manual the same section forbids. The 12–13 band is `eyebrow`.
+**Status stays independent of brand** (`--ok` `#1C6B45`, `--warn` `#8A5A08`,
+`--bad` `#B3261E`, all ≥4.99:1 everywhere). "This batch is full" must not
+change colour because a logo arrived. Status is never the only signal — it
+always carries an icon or a word.
 
-### Texture — four treatments, each with one job
+**No full-width dark surface anywhere**, including `/services`. Absolute for
+this redesign.
 
-`.tex-weave` (behind a finished embroidery proof) · `.tex-cad` (behind an
-EMCAD/screen visual) · `.tex-grain` (a hero object that must read as a sheet)
-· `.thread-divider` (the running stitch, as a rule). Every alpha is ≤ 0.09.
-No page ground carries texture; nothing repeats behind body copy.
+### Type — clamps computed, not chosen
 
-### One dark public surface
+Every value interpolates between the plan's mobile target at 390px and its
+desktop target at 1440px, so these are the plan's numbers rather than numbers
+that resemble them. A test asserts the targets AND that no level ever crosses
+the one below it at any of ten widths.
 
-`.surface-business` — the `/services` hero, as the commercial studio-mode
-switch. It is a **single named class and deliberately not a `band-*`**, so it
-cannot be reached for by habit: a section either is the services hero or it is
-not. It re-points its own tokens so children need no `onDark` prop, and Thread
-is large-text-only there too (3.67:1).
+| Token | 390px | 1440px | plan asks |
+| --- | --- | --- | --- |
+| `--t-display` | 44 | 88 | — |
+| `--t-h1-hero` | **36** | **62** | 34–40 / 54–68 |
+| `--t-h1` | **31** | **50** | 28–34 / 44–56 |
+| `--t-h2` | **25** | **37** | 23–28 / 32–42 |
+| `--t-h3` | **19.5** | **25** | 18–21 / 22–27 |
+| `--t-h4` | 17 | 20 | — |
+| `--t-lede` | 17 | 21 | — |
+| `--t-body` | **16** | **17** | 15.5–17 |
+| `--t-meta` | **13.5** | **14.5** | 12–14 |
+| `--t-micro` | 12 | 12.5 | technical labels only |
+| `--t-btn` | **15** | **15.5** | 14–15 |
 
-### Scripts
+Large Latin type tightens (`--track-display: -0.03em`); small type does not.
+**Gujarati never does** — `:lang(gu)` zeroes the tracking tokens, removes
+uppercase from every label class and raises the line height to 1.75, so the
+protection is in the system rather than at each call site.
 
-Each script gets its **own font stack**, selected by the element's language.
-The Gujarati face claims the Devanagari-shared danda and stress marks, so one
-shared stack would draw a Hindi danda from the Gujarati font — the right glyph
-from the wrong face, mid-sentence. Re-cutting the Gujarati range is the wrong
-fix, because Gujarati uses the danda too.
+### Rhythm, containers, radius
 
-`:lang(hi)` gets Manrope + Noto Sans Devanagari; `:lang(gu)` gets Manrope +
-Noto Sans Gujarati, declared **after** so an embedded `<span lang="gu">` on a
-Hindi page wins on source order. Neither script is ever uppercased or
-letterspaced — Latin tracking on a conjunct script is the same mistake in a
-different alphabet.
+`--sp-hero` 56→112 · `--sp-section` 40→80 · `--sp-tight` 28→52. Not every
+section gets the same gap.
 
-The Devanagari face is declared in `textile-lab.css`, so a staff member never
-downloads it, and its `unicode-range` claims the Devanagari block and nothing
-decorative — the same discipline that stopped the Gujarati face being fetched
-to draw a "→".
+`.wrap` 1220px · `.wrap-wide` 1440px · `.prose` 68ch · `.bleed` breaks the
+gutter deliberately. Gutter 20 → 32 → 48.
 
-### Motion
+**A photograph is a physical print, so media frames are square**
+(`--r-media: 0`). Interactive surfaces get 6px (`--r-ui`) — squarer than a
+pill, so controls read as machine controls rather than app chrome. Cards, where
+one is genuinely needed, get 10px. Structure comes from hairlines; there is
+exactly **one** shadow token and it is for things that genuinely float.
 
-A button's arrow moves 2.5px. A gallery image scales 1.02, on hover-capable
-devices only. The bottom sheet slides 12px in 240ms. That is the entire
-budget. No loop, no parallax, no marquee, no cursor follower, no
-`background-attachment: fixed`; `prefers-reduced-motion` disables all of it.
+### The niche grammar
+
+| Primitive | Where | What it is |
+| --- | --- | --- |
+| **Thread Line** | `.thread` / `.thread-v`, `<ThreadLine>` | a running stitch, 9 on / 6 off — the one repeated mark, and the same geometry as the progress bar and the link underline |
+| **Needle Point** | `.needle`, `<NeedlePoint>` | the penetration mark: done / current / to come |
+| **Hoop Window** | `.hoop`, `<HoopWindow>` | a round crop with the frame's two rings. Once per page at most |
+| **Machine Frame** | `.mframe`, `<MachineFrame>` | square media frame, hairline, two registration ticks at one corner |
+| **Stitch Swatch** | `<StitchSwatch>` | eleven techniques as **filled fabric samples**, edge to edge, with a pinked bottom edge |
+| **Sample Strip** | `.strip` | the scroll-snap rail those swatches live on — a sample book, not a carousel library |
+| **Work Tile** | `.tile` | image-first, caption secondary, own aspect ratio |
+| **Batch Board** | `.board` | the schedule as a production board; every field optional |
+| **Thread Progress** | `.progress`, `<ThreadProgress>` | form steps: stitched, needle, construction line |
+
+**Stitch Swatches are not the old technique signatures.** The geometry is
+inherited — beads attach to a path, sequins overlap and are perforated, chain
+is interlocking loops, cording is couched at intervals, EMCAD is nodes and
+handles — because that is domain knowledge and it was correct. What changed is
+that it is filled rather than stroked, tiled rather than centred, and sized to
+be flicked through rather than studied. EMCAD is the one swatch on the cool
+register, because it is the one technique that happens on a screen.
+
+### Proof modules — five shapes, deliberately
+
+`FeaturedReview` · `ReviewRail` · `RatingBlock` · `StoryJourney` ·
+`TrustedByRail` · `SocialProof` · `MicroProof`. **There is no shared
+`ProofCard`.** A large editorial quote, a swipeable snippet, a garment label
+and a follower figure have nothing in common except the word "proof", and
+giving them one class is how a site ends up with the same card six times.
+
+All of them read `src/content/proof.ts`, which carries a
+`sample | owner_provided | verified` status on every item. Every module renders
+its own `<SampleMark>` — a disclosure a caller can forget is a disclosure that
+will be forgotten. Nothing unverified can reach structured data;
+`tests/kds-proof-firewall.test.ts` asserts the schema builders cannot even
+import the registry.
+
+### Light effects, allowed and scoped
+
+`.glass` for a caption ON a photograph (blur is progressive; the fallback is an
+opaque mat). `.glow-screen` for the light coming off a monitor — a cool bloom
+behind EMCAD and process content, named for its job so it cannot become a
+generic gradient. `.bento` for genuinely heterogeneous content only.
+
+### Motion — four grammars, one job each
+
+`thread-draw` (Level 3, once per page), `needle-in`, `media-in`, `rise-in`.
+Nothing loops, nothing follows the cursor, nothing hijacks the scroll.
+**Reduced motion renders the COMPLETE final state**, not a shorter animation —
+a thread that has not drawn is an invisible rule, so it is given its full size
+back explicitly.
 
 ### Where it lives
 
-`src/app/textile-lab.css`, imported by `src/app/[locale]/layout.tsx` only.
-Guarded by `tests/mtl-design-system.test.ts`, which asserts the import
-boundary, that **every selector in the file is scoped to `.site-body`**, the
-measured contrast of every pair, both ends of the type scale, the script
-stacks and their order, texture alphas, and the motion budget.
+- `src/app/thread-machine-proof.css` — the system
+- `src/components/kds/` — `StitchSwatch`, `marks` (thread/needle/hoop/progress),
+  `Frame` (machine frame + photo placeholder), `proof` (the seven modules)
+- `src/content/proof.ts` — the proof registry
+- `/design` — the rendered reference, on the new system alone
 
 ---
 

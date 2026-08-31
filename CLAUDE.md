@@ -64,7 +64,7 @@ Cloudflare production deployment currently uses the dashboard command `OPEN_NEXT
 
 7. **Never `export const runtime = "edge"`.** OpenNext handles runtime selection.
 
-8. **Design tokens are law.** Use the Screen to Stitch tokens/scale. Vermilion is the one interface accent; green/amber/red are status-only. Borders over decorative shadows. No admin component kit or chart library just for convenience.
+8. **Design tokens are law, and there are two sets.** The PUBLIC site runs **THREAD / MACHINE / PROOF** (`src/app/thread-machine-proof.css`, every rule scoped to `.kds`, live reference at `/design`); **Karma Console** runs the Machine Lab system in `globals.css` / `premium.css` / `machine-lab.css` and is out of scope for the public rebuild. Never let public CSS reach `/admin`, and never add a public token to `globals.css` — the Console shares that file. On the public side, all colour flows through four replaceable brand variables (`--brand-accent`, `--brand-accent-strong`, `--brand-accent-soft`, `--brand-on-accent`) because the owner's logo may arrive in any colour; hardcoding a hue there fails a test. Status colours (`--ok`/`--warn`/`--bad`) stay independent of the brand and are never the only signal. Borders over decorative shadows; media frames are square. Read `docs/design-system.md` before adding a primitive.
 
 9. **Audit sensitive mutations.** Status changes, admissions, enrollment, attendance edits/locks, certificates, fee records, design-job transitions, website publishing and every team/account mutation write `audit_logs` with actor/action/entity/old/new/reason where relevant. NEVER audit a password, access/refresh token, Supabase secret, database credential, SMTP credential, or raw invitation link.
 
@@ -125,6 +125,8 @@ Then: **feature branch → PR → CI + Cloudflare preview green → merge.** Do 
 - Karma Console: `src/app/admin/…` (outside `[locale]`; authenticated pages are dynamic)
 - A4 print sheets: `src/app/admin/(print)/…` — their own route group and stylesheet, no console shell. Every sheet re-checks the permission its data needs; never print an operational screen instead.
 - API: `src/app/api/...`
+- Public design system: `src/app/thread-machine-proof.css` · primitives in `src/components/kds/` · rendered reference at `/design`
+- Proof, testimonials, reviews, partners, social counts: `src/content/proof.ts` — one registry, every item carrying `sample | owner_provided | verified`
 - Message copy: `messages/{en,gu}.json`
 - Structured/source fallback content: `src/content/*.ts`
 - Verified course operations (duration, fees, timetable, demo, curriculum): `src/content/course-operations.ts`; validators in `src/lib/admin/course-operations.ts`
