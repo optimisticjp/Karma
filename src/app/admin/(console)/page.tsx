@@ -47,12 +47,18 @@ export default async function TodayPage() {
     hasPermission(session.staff, "attendance.view") ||
     hasPermission(session.staff, "attendance.manage");
   const canDesign = hasPermission(session.staff, "design.view") || hasPermission(session.staff, "design.manage");
+  const canFees = hasPermission(session.staff, "fees.view") || hasPermission(session.staff, "fees.manage");
   const canAudit = hasPermission(session.staff, "audit.view");
 
   const [dashboard, activity, queues] = await Promise.all([
     getDashboardCounts(),
     canAudit ? getRecentActivity() : Promise.resolve([]),
-    getTodayQueues({ admissions: canAdmissions, batches: canClasses, design: canDesign })
+    getTodayQueues({
+      admissions: canAdmissions,
+      batches: canClasses,
+      design: canDesign,
+      fees: canFees
+    })
   ]);
 
   if (!dashboard.available) {
@@ -99,8 +105,47 @@ export default async function TodayPage() {
         context={`${t("today.greeting", { name: session.staff.name })} · ${t("today.workDesk")}`}
       />
 
-      {canAdmissions || canClasses || canDesign ? (
-        <div className="queue-grid mt-8">
+      {/* A compact strip of the day's figures, directly under the head. The
+          counts were only ever visible one at a time at the head of their own
+          queue, so three of the seven fetched were never shown at all and
+          seeing four numbers meant scrolling three viewports. Rows on a phone,
+          cells from 640px — not a wall of metric cards, which is what this
+          screen replaced and must not become again. */}
+      <div className="console-metrics mt-3">
+        {canAdmissions ? (
+          <div>
+            <span className="kv-label">{t("today.queueNewApplications")}</span>
+            <span className="kv-value">{c.newApplications}</span>
+          </div>
+        ) : null}
+        {canAdmissions ? (
+          <div>
+            <span className="kv-label">{t("today.queueFollowUps")}</span>
+            <span className="kv-value">{c.followUpsDue}</span>
+          </div>
+        ) : null}
+        {canClasses ? (
+          <div>
+            <span className="kv-label">{t("today.queueBatches")}</span>
+            <span className="kv-value">{c.runningBatches}</span>
+          </div>
+        ) : null}
+        {canFees ? (
+          <div>
+            <span className="kv-label">{t("today.queueFees")}</span>
+            <span className="kv-value">{c.feesOverdue}</span>
+          </div>
+        ) : null}
+        {canDesign ? (
+          <div>
+            <span className="kv-label">{t("today.queueBriefs")}</span>
+            <span className="kv-value">{c.openBriefs}</span>
+          </div>
+        ) : null}
+      </div>
+
+      {canAdmissions || canClasses || canDesign || canFees ? (
+        <div className="queue-grid mt-3">
           {canAdmissions ? (
             <>
               <Queue
@@ -167,6 +212,28 @@ export default async function TodayPage() {
             </Queue>
           ) : null}
 
+          {canFees ? (
+            <Queue
+              title={t("today.queueFees")}
+              count={c.feesOverdue}
+              urgent
+              emptyLabel={t("today.queueEmptyFees")}
+              moreHref="/admin/fees?pending=1"
+              moreLabel={t("today.queueMore")}
+            >
+              {queues.fees.map((row) => (
+                <QueueRow
+                  key={row.enrollmentId}
+                  href={`/admin/fees#fee-${row.enrollmentId}`}
+                  title={row.fullName}
+                  meta={`${row.admissionNo} · ${money(row.balance)} · ${t("today.dueOn", { date: day(row.dueOn) })}`}
+                  status={t("today.queueFees")}
+                  statusTone="warn"
+                />
+              ))}
+            </Queue>
+          ) : null}
+
           {canDesign ? (
             <Queue
               title={t("today.queueBriefs")}
@@ -193,34 +260,51 @@ export default async function TodayPage() {
         </div>
       ) : null}
 
-      {canAdmissions || canClasses || canDesign ? (
-        <p className="form-note mt-4">{t("today.queueNote")}</p>
+      {canAdmissions || canClasses || canDesign || canFees ? (
+        <p className="form-note mt-2">{t("today.queueNote")}</p>
       ) : null}
 
       {canAudit ? (
-        <section className="mt-10" aria-labelledby="activity-heading">
-          <h2 id="activity-heading" className="text-h4">{t("today.recentActivity")}</h2>
+        <section className="mt-6" aria-labelledby="activity-heading">
+          <h2 id="activity-heading" className="kv-label">{t("today.recentActivity")}</h2>
           {activity.length === 0 ? (
-            <p className="empty-state mt-4">{t("today.noActivity")}</p>
+            <p className="empty-state mt-2">{t("today.noActivity")}</p>
           ) : (
-            <ol className="panel mt-4 divide-y divide-line">
+            <div className="data-list mt-2">
               {activity.map((row) => (
-                <li key={row.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-5 py-3">
-                  <span className="text-smallmeta font-semibold">{humanAction(row.action)}</span>
-                  <span className="form-note">{row.entity}{row.entityId ? ` #${row.entityId}` : ""}</span>
-                  <time className="form-note ml-auto" dateTime={new Date(row.createdAt).toISOString()}>{formatIst(row.createdAt, session.staff.adminLocale)}</time>
-                </li>
+                <div key={row.id} className="data-row">
+                  <span className="data-row__title">{humanAction(row.action)}</span>
+                  <span className="data-row__meta">
+                    <span>
+                      {row.entity}
+                      {row.entityId ? ` #${row.entityId}` : ""}
+                    </span>
+                    <time dateTime={new Date(row.createdAt).toISOString()}>
+                      {formatIst(row.createdAt, session.staff.adminLocale)}
+                    </time>
+                  </span>
+                </div>
               ))}
-            </ol>
+            </div>
           )}
         </section>
       ) : null}
 
+      {/* Chips, not ten full-size buttons. This was ~439px of wrapped
+          `.btn btn-secondary` duplicating the navigation — and since the bottom
+          bar landed, the first four of these are the bar. It stays because the
+          bar holds four and this holds the rest, but at the size of a shortcut
+          rather than the size of a decision. Each chip keeps a 44px hit area
+          through padding that overflows the row. */}
       {quickActions.length > 0 ? (
-        <section className="mt-10" aria-labelledby="actions-heading">
-          <h2 id="actions-heading" className="text-h4">{t("today.quickActions")}</h2>
-          <div className="u-actions flex flex-wrap gap-3">
-            {quickActions.map((item) => <Link key={item.href} href={item.href} className="btn btn-secondary">{item.label}</Link>)}
+        <section className="mt-6" aria-labelledby="actions-heading">
+          <h2 id="actions-heading" className="kv-label">{t("today.quickActions")}</h2>
+          <div className="chip-scroller mt-1.5">
+            {quickActions.map((item) => (
+              <Link key={item.href} href={item.href} className="chip-filter">
+                {item.label}
+              </Link>
+            ))}
           </div>
         </section>
       ) : null}
@@ -236,6 +320,15 @@ function formatIst(value: Date | string, locale: "en" | "gu") {
     hour: "2-digit",
     minute: "2-digit"
   }).format(new Date(value));
+}
+
+/** Whole rupees with tabular figures, so a column of balances does not jitter. */
+function money(value: number) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0
+  }).format(value);
 }
 
 function humanAction(value: string) {

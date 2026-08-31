@@ -1428,7 +1428,7 @@ focus-to-field, the still consent step, and the demo times staying a preference
 with nothing on the surface that could reserve a seat.
 
 ## Phase 6 — Admin shell + mobile navigation
-**Status:** ✅ Complete — PR #48, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #48, merged as `218363c`
 
 Delivered:
 
