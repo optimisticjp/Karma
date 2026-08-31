@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { PageIntro } from "@/components/ui/PageIntro";
-import { SectionHeading } from "@/components/ui/SectionHeading";
-import { WorkLedger } from "@/components/work/WorkLedger";
-import { MaterialWall } from "@/components/work/MaterialWall";
-import { MachineCases } from "@/components/work/MachineCases";
 import { Link } from "@/i18n/navigation";
-import { Icon } from "@/components/ui/Icon";
 import { getPublicGallery } from "@/lib/content/public";
-import { waLink } from "@/lib/site";
+import { photosInGroup } from "@/content/photo-manifest";
 import { pageMeta } from "@/lib/seo";
+import { site, waLink } from "@/lib/site";
+import { WorkWall } from "@/components/kds/work/WorkWall";
+import { PublishedWork } from "@/components/kds/work/PublishedWork";
+import { MachineCaseNotes } from "@/components/kds/work/MachineCaseNotes";
+import { CtaBand } from "@/components/kds/CtaBand";
+import { ThreadLine } from "@/components/kds/marks";
+import { Icon } from "@/components/ui/Icon";
 
+/* The published gallery is database-backed with a source fallback. */
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
@@ -20,118 +22,111 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta.work" });
-  return pageMeta({ locale, path: "/student-work", title: t("title"), description: t("description") });
+  return pageMeta({
+    locale,
+    path: "/student-work",
+    title: t("title"),
+    description: t("description")
+  });
 }
 
 /**
- * Student work and machine notes.
+ * STUDENT WORK — five blocks.
  *
- * The page used to filter every sample out, which — with nothing published —
- * left an intro above a "come and look instead" card, and made the absence of
- * photography the loudest thing on the site.
+ *  1  Intro     what this page is, and what is honestly not on it yet
+ *  2  Archive   the six reserved shoot frames, at their real ratios
+ *  3  Published whatever staff have published through Content Desk
+ *  4  Cases     the machine case notes  ← the proof that carries most weight
+ *  5  Close     the one action
  *
- * Three things fix that without inventing anything. The page opens with the
- * material archive — the six reserved frames from the studio shoot, at their
- * real ratios, as a mixed-ratio editorial wall rather than six identical
- * tiles. The gallery below shows its shoot-list rows as what they are: a
- * named planned shot in a photo slot, with a visible sample tag. And the page
- * carries the proof the studio genuinely does have — the machine case notes,
- * which are trade facts rather than claims about anyone, and which are more
- * persuasive to a working operator than a photograph would be.
+ * The page this replaces filtered every sample out, which — with nothing
+ * published — left an intro above a "come and look instead" card and made the
+ * absence of photography the loudest thing on the site.
  *
- * THE TWO GALLERIES ARE NOT THE SAME THING, AND SHOULD NOT BE MERGED
- * ------------------------------------------------------------------
- * `<MaterialWall>` is the six photographs the owner's shoot is for: fixed
- * slots, fixed ratios, no attribution, no captions beyond the shoot brief.
- * `<WorkLedger>` is whatever staff have published through Content Desk, with
- * its technique, course, production note and sample tags intact. One is the
- * studio's own record of its work; the other is an editable feed. Collapsing
- * them would mean either the shoot slots become deletable from an admin
- * screen, or published items lose their consent metadata.
+ * **The archive and the published feed are not the same thing and must not be
+ * merged.** The archive is the six photographs the owner's shoot is for: fixed
+ * slots, fixed ratios, no attribution. The feed is editable, with its
+ * technique, course, note and consent metadata intact. Collapsing them would
+ * mean either the shoot slots become deletable from an admin screen, or
+ * published items lose the metadata that makes them publishable at all.
+ *
+ * The case notes are here because they are the proof the studio genuinely has
+ * today, and they are more persuasive to a working operator than a photograph
+ * would be — while claiming nothing about any person.
  */
 export default async function StudentWorkPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
+
   const [t, tc, items] = await Promise.all([
     getTranslations("workPage"),
     getTranslations("common"),
     getPublicGallery()
   ]);
-  const anySample = items.some((g) => g.sample);
+  const reserved = photosInGroup("work").length;
 
   return (
     <>
-      <PageIntro
-        eyebrow={t("eyebrow")}
-        title={t("title")}
-        lede={t("sub")}
-        actions={
-          <>
-            <Link href="/admission" className="btn btn-primary">
-              {t("cta")} <Icon name="arrow" size={18} className="arrow" />
-            </Link>
-            <Link href="/courses" className="btn btn-secondary">
-              {t("coursesCta")}
-            </Link>
-          </>
-        }
-        aside={
-          <>
-            <p className="microlabel !text-vermilion-deep">
-              {anySample ? t("pendingLabel") : t("consentTitle")}
-            </p>
-            <p className="mt-1.5">{anySample ? t("pendingNote") : t("consentBody")}</p>
-          </>
-        }
-      />
+      <section className="band-hero on-paper" aria-labelledby="work-heading">
+        <div className="wrap">
+          <div className="split">
+            <div className="min-w-0">
+              <p className="t-micro">{t("eyebrow")}</p>
+              <h1 id="work-heading" className="t-h1 mt-3">
+                {t("title")}
+              </h1>
+              <p className="t-lede mt-4 max-w-[46ch]">{t("sub")}</p>
 
-      {/* The material archive: the six reserved frames, at their real ratios. */}
-      <section className="section band-material">
-        <div className="container-site">
-          <SectionHeading title={t("archiveTitle")} sub={t("archiveSub")} />
-          <MaterialWall className="u-section-body" />
-        </div>
-      </section>
+              <ThreadLine draw className="my-6 w-28" />
 
-      {/* The grid used to sit directly under the page H1, so the piece titles
-          were the next heading on the page and the hierarchy jumped H1 -> H3.
-          A real section heading fixes the outline and gives the gallery the
-          one line of framing it was missing. */}
-      <section className="section">
-        <div className="container-site">
-          <SectionHeading title={t("galleryTitle")} sub={t("gallerySub")} />
-          <div className="u-section-body">
-            <WorkLedger items={items} />
+              <div className="flex flex-wrap items-center gap-3">
+                <Link href="/admission" className="act act-primary">
+                  {tc("bookDemo")} <Icon name="arrow" size={17} className="arrow" />
+                </Link>
+                <Link href="/courses" className="act act-secondary">
+                  {t("coursesCta")}
+                </Link>
+                <a
+                  href={site.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="act-quiet"
+                >
+                  <Icon name="pin" size={16} /> {t("visitCta")}
+                </a>
+              </div>
+            </div>
+
+            {/* How anything gets onto this page. Stated up front rather than
+                as a footnote, because it is the reason the page is honest
+                about being unfinished. */}
+            <aside className="courses-aside">
+              <p className="t-micro">{t("consentTitle")}</p>
+              <p className="t-body mt-2">{t("consentBody")}</p>
+              <ThreadLine className="my-5" />
+              <p className="t-micro">{t("reservedLabel")}</p>
+              <p className="t-h3 numeric mt-1">{reserved}</p>
+              <p className="t-meta mt-1">{t("reservedNote")}</p>
+              <p className="mt-4">
+                <a
+                  href={waLink(tc("waPrefillDemo"))}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="act-quiet"
+                >
+                  <Icon name="whatsapp" size={16} /> {tc("whatsapp")}
+                </a>
+              </p>
+            </aside>
           </div>
         </div>
       </section>
 
-      {/* The proof that does not need a camera. */}
-      <MachineCases />
+      <WorkWall />
+      <PublishedWork items={items} />
+      <MachineCaseNotes />
 
-      <section className="section-compact">
-        <div className="container-site">
-          <div className="surface surface-feature grid gap-6 md:grid-cols-[1.2fr_0.8fr] md:items-center md:gap-10">
-            <div>
-              <h2 className="text-h3 font-display">{t("meanwhileTitle")}</h2>
-              <p className="u-lede">{t("meanwhileBody")}</p>
-            </div>
-            <div className="flex flex-wrap gap-3 md:justify-end">
-              <a
-                href={waLink(tc("waPrefillDemo"))}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-primary"
-              >
-                <Icon name="whatsapp" size={18} /> {tc("whatsapp")}
-              </a>
-              <Link href="/contact" className="btn btn-secondary">
-                {t("visitCta")}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <CtaBand title={t("meanwhileTitle")} sub={t("meanwhileBody")} ground="on-canvas" />
     </>
   );
 }

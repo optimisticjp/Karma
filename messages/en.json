@@ -875,7 +875,17 @@
     "galleryTitle": "Pieces from the studio",
     "gallerySub": "Each one names the technique, the course it came from, and what it demonstrates.",
     "archiveTitle": "The material archive",
-    "archiveSub": "Six pieces from this floor, photographed as they came off the machine. The frames are reserved at the exact shapes the photographs will be — a bridal panel is tall, a dupatta is square, and forcing both into the same tile would throw away the point."
+    "archiveSub": "Six pieces from this floor, photographed as they came off the machine. The frames are reserved at the exact shapes the photographs will be — a bridal panel is tall, a dupatta is square, and forcing both into the same tile would throw away the point.",
+    "archiveEyebrow": "The archive",
+    "archivePending": "Studio photography is being shot. Every frame above is reserved at the exact size its photograph will occupy, so nothing moves when the files arrive.",
+    "publishedEyebrow": "Published pieces",
+    "publishedTitle": "Pieces from the studio",
+    "publishedSub": "Each one names the technique, the course it came from, and what it demonstrates.",
+    "publishedEmptyTitle": "Nothing is published here yet.",
+    "publishedEmptyBody": "Finished student pieces are photographed on this floor and published with the student's consent, labelled by technique. Nothing on this page will ever be stock or a supplier sample, which is why it stays empty until the first shoot.",
+    "casesEyebrow": "From the floor",
+    "reservedLabel": "Frames reserved",
+    "reservedNote": "Shot list agreed with the studio. Each frame already holds its photograph's exact shape."
   },
   "servicesPage": {
     "title": "Design development and production embroidery for garment businesses.",

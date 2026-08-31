@@ -10,7 +10,7 @@ const read = (p: string) => readFileSync(join(process.cwd(), p), "utf8");
 const en = JSON.parse(read("messages/en.json")) as any;
 const gu = JSON.parse(read("messages/gu.json")) as any;
 
-const wall = read("src/components/work/MaterialWall.tsx");
+const wall = read("src/components/kds/work/WorkWall.tsx");
 const workPage = read("src/app/[locale]/student-work/page.tsx");
 const storiesPage = read("src/app/[locale]/success-stories/page.tsx");
 const storyCase = read("src/components/site/StoryCase.tsx");
@@ -35,9 +35,9 @@ describe("the material wall", () => {
     /* The ARRANGEMENTS differ on purpose — the archive is a material wall and
        the homepage is a bento anchored by the studio panorama — but both are
        the manifest's six work photographs and neither invents a seventh. */
-    expect(workPage).toContain("MaterialWall");
+    expect(workPage).toContain("WorkWall");
     expect(read("src/components/kds/home/ProofWall.tsx")).toContain('photosInGroup("work")');
-    expect(read("src/components/work/MaterialWall.tsx")).toContain('photosInGroup("work")');
+    expect(read("src/components/kds/work/WorkWall.tsx")).toContain('photosInGroup("work")');
   });
 
   it("uses the six work slots and lets each keep its own shape", () => {
@@ -47,20 +47,26 @@ describe("the material wall", () => {
     expect(wall).not.toContain("aspect-");
   });
 
-  it("marks exactly one frame, not every frame", () => {
-    /* A registration mark means "precision / reference". On every image it
-       would mean nothing at all. */
-    expect(wall).toContain("RegistrationPoint");
-    expect(wall).toContain("i === anchorAt");
-    expect((wall.match(/<RegistrationPoint/g) ?? [])).toHaveLength(1);
+  it("adds no per-frame decoration of its own", () => {
+    /* The old wall singled ONE frame out with a registration mark, because a
+       mark that appears on every image means nothing at all. The rebuilt frame
+       settles it in the system instead: the two hairline registration ticks
+       are drawn once, in CSS, as part of `.mframe` — so a caller cannot
+       sprinkle them, and the wall carries no mark of its own. */
+    expect(wall).not.toContain("RegistrationPoint");
+    expect(wall).not.toContain("StitchMark");
+    expect((wall.match(/<PhotoFrame/g) ?? []).length).toBeGreaterThan(0);
+    const css = read("src/app/thread-machine-proof.css");
+    expect((css.match(/\.kds \.mframe::after \{/g) ?? [])).toHaveLength(1);
   });
 
   it("keeps the reserved slots and the editable feed as two different things", () => {
     /* One is the studio's own shoot record; the other is a Content Desk feed
        carrying consent metadata. Merging them would lose one or the other. */
-    expect(workPage).toContain("MaterialWall");
-    expect(workPage).toContain("WorkLedger");
+    expect(workPage).toContain("WorkWall");
+    expect(workPage).toContain("PublishedWork");
     expect(wall).not.toContain("getPublicGallery");
+    expect(read("src/components/kds/work/PublishedWork.tsx")).toContain("ManagedGalleryItem");
   });
 
   it("attaches no name, outcome or earning to a reserved frame", () => {

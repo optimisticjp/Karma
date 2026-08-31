@@ -2711,7 +2711,7 @@ repointed at the blocks that render them.
 
 # Phase 5 — Batches + admissions + admission form
 
-**Status:** ✅ Complete — PR #66
+**Status:** ✅ Complete — PR #66, merged as ea11ab8
 
 Required:
 

@@ -64,12 +64,14 @@ describe("page rhythm holds across the whole public site", () => {
   });
 
   it("still varies its surface, so a long scroll is not one flat ground", () => {
-    /* The danger on the other side of light-first is a beige monotone. The
-       four-band vocabulary is what prevents it, and every one of the four
-       must still be in use somewhere on the public site. */
+    /* The danger on the other side of light-first is a beige monotone, and a
+       four-surface vocabulary is what prevents it. The vocabulary changed with
+       the public rebuild — `band-machine` / `-material` / `-human` / `-info`
+       became the four GROUNDS — and the rule is the one it always was: all
+       four must still be in use somewhere on the public site. */
     const all = [...publicComponents, ...publicPages].map((f) => read(f)).join("\n");
-    for (const band of ["band-machine", "band-material", "band-human", "band-info"]) {
-      expect(all, band).toContain(band);
+    for (const ground of ["on-canvas", "on-paper", "on-cloth", "on-mist"]) {
+      expect(all, ground).toContain(ground);
     }
   });
 

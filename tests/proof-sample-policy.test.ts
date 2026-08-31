@@ -125,8 +125,7 @@ describe("every public surface that renders a sample also renders its tag", () =
   const surfaces = [
     "src/components/site/StoryCase.tsx",
     "src/components/site/TrainerProfile.tsx",
-    "src/components/site/ReviewWall.tsx",
-    "src/components/work/WorkLedger.tsx"
+    "src/components/site/ReviewWall.tsx"
   ];
 
   /* These are the surfaces still reading the older `sample: true` arrays in
@@ -141,6 +140,15 @@ describe("every public surface that renders a sample also renders its tag", () =
       expect(source).toContain("SampleTag");
       expect(source).toMatch(/sample \?/);
     }
+  });
+
+  it("keeps the rule on the rebuilt gallery, with the newer marker", () => {
+    /* `<WorkLedger>` moved across to `<PublishedWork>` and the marker moved
+       with it. The rule is unchanged: a row flagged sample renders its
+       disclosure, and the component decides that rather than its caller. */
+    const published = read("src/components/kds/work/PublishedWork.tsx");
+    expect(published).toContain("SampleMark");
+    expect(published).toMatch(/g\.sample \?/);
   });
 });
 
