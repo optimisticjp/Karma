@@ -36,7 +36,11 @@ describe("machine notes are complete and bilingual", () => {
     const note = machineNotes[0];
     expect(noteBySlug(note.slug)).toBe(note);
     expect(notesForCourse(note.courseSlug)).toContain(note);
-    expect(read("src/app/[locale]/courses/[slug]/page.tsx")).toContain("notesForCourse");
+    /* The course side of the link moved into the block that renders it when
+       the course template was rebuilt. The RULE is unchanged: a course page
+       still surfaces the notes that answer questions about its technique. */
+    expect(read("src/components/kds/courses/CourseBatches.tsx")).toContain("notesForCourse");
+    expect(read("src/app/[locale]/courses/[slug]/page.tsx")).toContain("CourseBatches");
   });
 });
 

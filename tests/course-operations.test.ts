@@ -133,7 +133,9 @@ describe("there is still no way to pay online", () => {
     // moment a provider appears in this tree, someone has crossed the line.
     const sources = [
       "src/content/course-operations.ts",
-      "src/components/course/CourseOperations.tsx",
+      "src/components/kds/FeeSheet.tsx",
+      "src/components/kds/courses/CourseFacts.tsx",
+      "src/components/kds/home/EmcadPanel.tsx",
       "src/app/[locale]/courses/[slug]/page.tsx",
       "src/lib/schema.ts"
     ].map(read).join("\n").toLowerCase();

@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
-import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import { PageIntro } from "@/components/ui/PageIntro";
-import { SectionHeading } from "@/components/ui/SectionHeading";
-import { MachineIndex } from "@/components/courses/MachineIndex";
-import { Ledger, LedgerRow } from "@/components/ui/Ledger";
-import { Icon, type IconName } from "@/components/ui/Icon";
-import { Reveal } from "@/components/ui/Reveal";
-import { coursesByFamily, coursesInFamily, families } from "@/content/courses";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { CoursesIntro } from "@/components/kds/courses/CoursesIntro";
+import { CourseCatalogue } from "@/components/kds/courses/CourseCatalogue";
+import { FamilyMap } from "@/components/kds/courses/FamilyMap";
+import { CoursePathway } from "@/components/kds/courses/CoursePathway";
+import { CtaBand } from "@/components/kds/CtaBand";
+import { routing } from "@/i18n/routing";
 import { pageMeta } from "@/lib/seo";
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export async function generateMetadata({
   params
@@ -21,169 +23,50 @@ export async function generateMetadata({
 }
 
 /**
- * The machine floor catalogue.
+ * THE CATALOGUE.
  *
- * This page used to be eleven cards in a grid, which asks a visitor to compare
- * eleven things on the only axis a card offers — the name. The catalogue now
- * leads with what each technique *produces*, because that is what someone is
- * actually choosing between: bridal zardosi panels, sequin dupattas by the
- * metre, tufted rugs, machine-ready files.
+ * Five blocks, and each answers a different question:
  *
- * Two cues are marked, and both are facts rather than opinions:
+ *  1  Intro       what is on offer, and what is true of all of it
+ *  2  Catalogue   the eleven, filterable by family, compared side by side
+ *  3  Families    how they divide up and why — and every course as a link
+ *  4  Pathway     where they lead, as a sequence rather than a list
+ *  5  Close       the one action
  *
- *  - **Flat Embroidery is the foundation.** Underlay, density and stitch
- *    direction are the vocabulary every other machine technique is written in.
- *  - **Zardosi leads.** The owner confirmed it is what most enquiries ask for
- *    (2026-08-29), which is also why it heads `COURSE_DISPLAY_ORDER`.
+ * The page it replaces opened with a full-height intro and then repeated a
+ * family heading, an icon plate and a section rule three times before any
+ * course appeared. The eleven courses ARE the page; everything else is
+ * context, and context goes after the thing it contextualises.
  *
- * No course carries an invented "beginner" or "advanced" label. Every course
- * here is taught from zero, which is stated once rather than eleven times.
- *
- * The rows are `<MachineIndex>`, the same component the homepage uses, so the
- * two surfaces cannot drift apart in what a course row is allowed to claim:
- * what the technique produces, its family, a duration only where the owner
- * confirmed one, and no fee at all. Photography leads a row where the shoot
- * covers that course; the technique signature leads where it does not, in the
- * same slot at the same size, so the three signature-led courses never read as
- * the leftovers.
+ * **No fee anywhere on this page.** Fees are discussed offline and exactly one
+ * course has a published plan, which lives on that course's own page.
  */
 
-/** Facts, not difficulty ratings. See the note above. */
+/**
+ * Two cues, both FACTS the owner confirmed on 2026-08-29 — never an invented
+ * difficulty rating. No course carries a "beginner" or "advanced" label,
+ * because every one of them is taught from zero.
+ */
 const CUE: Record<string, "foundation" | "leads"> = {
   "flat-embroidery": "foundation",
   "zardosi-machine-embroidery": "leads"
 };
 
-/**
- * One branded mark per family. A family is not a technique, so it gets an icon
- * rather than a technique signature — a signature belongs to exactly one
- * course, and borrowing one to head nine would be a small lie about what the
- * mark means.
- */
-const FAMILY_ICON: Record<string, IconName> = {
-  machine: "machine-head",
-  modern: "laser",
-  software: "node"
-};
-
 export default async function CoursesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, tc, l] = await Promise.all([
-    getTranslations("coursesPage"),
-    getTranslations("common"),
-    getLocale()
-  ]);
-  const gu = l === "gu";
-  const keys = Object.keys(families) as Array<keyof typeof families>;
-  const stages = t.raw("pathway.stages") as Array<{ t: string; d: string }>;
-
-  // One continuous catalogue numbering across all three families, so a
-  // visitor can say "number six" and mean the same course we do.
-  let counter = 0;
+  const t = await getTranslations({ locale, namespace: "coursesPage" });
 
   return (
     <>
-      <PageIntro
-        eyebrow={t("eyebrow")}
-        title={t("title")}
-        lede={t("intro")}
-        actions={
-          <>
-            <Link href="/admission" className="btn btn-primary">
-              {tc("bookDemo")} <Icon name="arrow" size={18} className="arrow" />
-            </Link>
-            <Link href="/admissions#batches" className="btn btn-secondary">
-              {t("batchesCta")}
-            </Link>
-          </>
-        }
-        aside={
-          <>
-            <p className="microlabel !text-vermilion-deep">{t("factsTitle")}</p>
-            <ul className="mt-4 space-y-2.5">
-              {(t.raw("facts") as string[]).map((f) => (
-                <li key={f} className="flex gap-2.5">
-                  <Icon name="check" size={16} strokeWidth={2} className="mt-1 shrink-0 text-vermilion-deep" />
-                  <span>{f}</span>
-                </li>
-              ))}
-            </ul>
-          </>
-        }
-      />
-
-      {keys.map((key, idx) => {
-        const f = families[key];
-        const list = coursesInFamily(key);
-        const startAt = counter + 1;
-        counter += list.length;
-        return (
-          <section key={key} className={idx % 2 === 1 ? "section bg-ivory-2" : "section"}>
-            <div className="container-site">
-              <div className="family-head">
-                <div className="family-plate family-mark">
-                  <Icon name={FAMILY_ICON[key]} size={40} className="text-vermilion-deep" />
-                </div>
-                <SectionHeading
-                  eyebrow={`${String(idx + 1).padStart(2, "0")} · ${t("familyLabel", { count: list.length })}`}
-                  title={gu ? f.nameGu : f.nameEn}
-                  sub={gu ? f.introGu : f.introEn}
-                />
-              </div>
-
-              <div className="u-section-body">
-                <MachineIndex
-                  courses={list}
-                  locale={l}
-                  startAt={startAt}
-                  cues={CUE}
-                  renderCue={(cue) => t(`cue.${cue}` as "cue.foundation")}
-                />
-              </div>
-            </div>
-          </section>
-        );
-      })}
-
-      {/* How the families relate: the one thing a list of eleven cannot say. */}
-      <section className="section-compact bg-sand">
-        <div className="container-site split">
-          <div>
-            <SectionHeading title={t("relate.h2")} sub={t("relate.line")} />
-          </div>
-          <Reveal className="surface surface-feature">
-            <ol className="stack-lines">
-              {(t.raw("relate.points") as Array<{ t: string; d: string }>).map((r) => (
-                <li key={r.t}>
-                  <p className="font-display text-h4">{r.t}</p>
-                  <p className="mt-1.5 text-smallmeta text-stone">{r.d}</p>
-                </li>
-              ))}
-            </ol>
-          </Reveal>
-        </div>
-      </section>
-
-      <section className="section border-t border-line">
-        <div className="container-site split">
-          <div>
-            <SectionHeading title={t("pathway.h2")} sub={t("pathway.line")} />
-          </div>
-          <Ledger as="ol">
-            {stages.map((s, i) => (
-              <LedgerRow
-                key={s.t}
-                index={String(i + 1).padStart(2, "0")}
-                title={s.t}
-                note={s.d}
-              />
-            ))}
-          </Ledger>
-        </div>
-      </section>
-
-      <p className="sr-only">{t("countNote", { count: coursesByFamily.length })}</p>
+      <CoursesIntro />
+      {/* `cues` is plain data. A render function would be a function crossing
+          the server/client boundary, which React refuses — the client
+          component resolves the label from the same catalogue. */}
+      <CourseCatalogue cues={CUE} />
+      <FamilyMap />
+      <CoursePathway />
+      <CtaBand title={t("closeH2")} sub={t("closeSub")} />
     </>
   );
 }

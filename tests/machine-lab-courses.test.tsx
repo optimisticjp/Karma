@@ -18,6 +18,14 @@ const gu = JSON.parse(read("messages/gu.json")) as any;
 
 const indexPage = read("src/app/[locale]/courses/page.tsx");
 const detailPage = read("src/app/[locale]/courses/[slug]/page.tsx");
+/* The pages became compositions of blocks in the THREAD / MACHINE / PROOF
+   rebuild, so the rules below follow the block that renders them. Every rule
+   is the one it always was; only its address changed. */
+const catalogue = read("src/components/kds/courses/CourseCatalogue.tsx");
+const familyMap = read("src/components/kds/courses/FamilyMap.tsx");
+const courseHero = read("src/components/kds/courses/CourseHero.tsx");
+const courseFacts = read("src/components/kds/courses/CourseFacts.tsx");
+const related = read("src/components/kds/courses/RelatedCourses.tsx");
 
 const stripComments = (source: string) =>
   source.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/^\s*\/\/.*$/gm, " ");
@@ -35,30 +43,34 @@ describe("the course index", () => {
 
        What must not diverge is the DATA. Both read `coursesByFamily`, so a
        course cannot exist on one and be missing from the other. */
-    expect(indexPage).toContain("MachineIndex");
-    expect(indexPage).toContain("coursesByFamily");
+    expect(indexPage).toContain("CourseCatalogue");
+    expect(catalogue).toContain("coursesByFamily");
     expect(read("src/components/kds/home/SampleBook.tsx")).toContain("coursesByFamily");
     /* And the old hand-rolled catalogue row is gone. */
     expect(indexPage).not.toContain("course-row");
   });
 
-  it("numbers all eleven continuously across the three families", () => {
+  it("shows all eleven in one list before any filter is touched", () => {
     const total = (Object.keys(families) as Array<keyof typeof families>).reduce(
       (sum, key) => sum + courses.filter((c) => c.family === key).length,
       0
     );
     expect(total).toBe(11);
     expect(coursesByFamily).toHaveLength(11);
-    /* Each family section starts where the previous one ended. */
-    expect(indexPage).toContain("const startAt = counter + 1;");
-    expect(indexPage).toContain("counter += list.length;");
+    /* The catalogue used to be three family sections with a running number.
+       It is one filterable grid now, and the rule that survives is the one
+       that mattered: nothing is hidden behind the filter by default, and
+       nobody may quietly truncate the list. */
+    expect(catalogue).toContain('useState<FamilyKey | "all">("all")');
+    expect(catalogue).not.toContain(".slice(");
   });
 
-  it("heads a family with an icon, never with one course's signature", () => {
-    /* A signature belongs to exactly one technique. Borrowing one to head nine
-       courses would make the mark mean less than it does. */
-    expect(indexPage).toContain("FAMILY_ICON");
-    expect(indexPage).not.toContain("TechniqueSignature");
+  it("heads a family with no course's own mark", () => {
+    /* A signature or a swatch belongs to exactly one technique, and borrowing
+       one to head eight courses would make the mark mean less than it does.
+       A family is not a technique, so the family map carries neither. */
+    expect(familyMap).not.toContain("TechniqueSignature");
+    expect(familyMap).not.toContain("StitchSwatch");
   });
 
   it("marks only facts, never an invented difficulty rating", () => {
@@ -95,17 +107,20 @@ describe("photography policy across the catalogue", () => {
     for (const course of courses) {
       expect(TECHNIQUE_SIGNATURES[course.slug], course.slug).toBeDefined();
     }
-    expect(detailPage).toContain("TechniqueSignature");
-    /* This also asserted on <CourseCard>, which was deleted on 2026-08-31 when
-       the related-courses grid became the Machine Index. The rule is unchanged
-       and now has one home instead of two: every surface that lists a course
-       leads with a photograph where the shoot covers it and the technique
-       signature where it does not. */
-    expect(read("src/components/courses/MachineIndex.tsx")).toContain("TechniqueSignature");
+    /* The mark a course leads with on the rebuilt surfaces is its STITCH
+       SWATCH — the signatures survive on `/about`, `/services` and the notes.
+       The rule is the one it always was: every surface that lists a course
+       leads with a photograph where the shoot covers it and the course's own
+       mark where it does not, in the same box at the same size. */
+    for (const source of [catalogue, related]) {
+      expect(source).toContain("PhotoFrame");
+      expect(source).toContain("StitchSwatch");
+    }
+    expect(courseHero).toContain("StitchSwatch");
   });
 
   it("leads a card or a page with this course's own photograph, never another's", () => {
-    for (const source of [detailPage, read("src/components/courses/MachineIndex.tsx")]) {
+    for (const source of [courseHero, catalogue, related]) {
       expect(source).toContain("coursePhotoFor(course.slug)");
     }
   });
@@ -124,8 +139,8 @@ describe("photography policy across the catalogue", () => {
     /* TECHNIQUE_SIGNATURES[].description is the English spec note the design
        system is written against; the caption a visitor reads comes from the
        message catalogue, so it is bilingual. */
-    expect(detailPage).toContain("signatures.${course.slug}");
-    expect(detailPage).not.toContain("signature.description");
+    expect(courseHero).toContain("signatures.${course.slug}");
+    expect(courseHero).not.toContain("signature.description");
   });
 });
 
@@ -148,8 +163,9 @@ describe("the duration and fee policy", () => {
   });
 
   it("renders operational facts only for a course that has them", () => {
-    expect(detailPage).toContain("verifiedOperationsFor(course.slug)");
-    expect(detailPage).toContain("{verified ? (");
+    expect(courseFacts).toContain("verifiedOperationsFor(course.slug)");
+    expect(courseFacts).toContain("{verified ? (");
+    expect(courseHero).toContain("verifiedOperationsFor(course.slug)");
   });
 
   it("says 'ask the studio' rather than guessing, for the ten", () => {
@@ -169,7 +185,7 @@ describe("the duration and fee policy", () => {
   });
 
   it("offers no way to pay online from a course page", () => {
-    const code = stripComments(detailPage).toLowerCase();
+    const code = stripComments(detailPage + courseFacts + courseHero).toLowerCase();
     for (const provider of ["razorpay", "stripe", "payu", "cashfree", "upi://", "pay now"]) {
       expect(code, provider).not.toContain(provider);
     }
@@ -207,7 +223,9 @@ describe("every course page is specific", () => {
   });
 
   it("links each course to the Machine Notes that answer its questions", () => {
-    expect(detailPage).toContain("notesForCourse(course.slug)");
+    expect(read("src/components/kds/courses/CourseBatches.tsx")).toContain(
+      "notesForCourse(course.slug)"
+    );
     const linked = courses.filter((c) => notesForCourse(c.slug).length > 0);
     expect(linked.length).toBeGreaterThanOrEqual(4);
   });

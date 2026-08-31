@@ -3,9 +3,9 @@ import { Link } from "@/i18n/navigation";
 import { EMCAD_DAHAO, EMCAD_DAHAO_SLUG, KARMA_SOFTWARE } from "@/content/course-operations";
 import { intlLocale } from "@/lib/i18n/localized";
 import type { Locale } from "@/i18n/routing";
-import { NeedlePoint, ThreadLine } from "@/components/kds/marks";
 import { StitchSwatch } from "@/components/kds/StitchSwatch";
 import { MicroProof } from "@/components/kds/proof";
+import { FeeSheet } from "@/components/kds/FeeSheet";
 import { reviews } from "@/content/proof";
 import { pick } from "@/lib/i18n/localized";
 import { Icon } from "@/components/ui/Icon";
@@ -113,38 +113,29 @@ export function EmcadPanel() {
           </div>
 
           {/* The money, as a sheet — the one place on the site that reads as a
-              document rather than a page, because that is what a fee plan is. */}
-          <div className="emcad-fee">
-            <p className="t-micro">{t("feeLabel")}</p>
-            <p className="emcad-total numeric">{money(fees.feeTotal)}</p>
-            <p className="t-meta">{t("feeTotalNote")}</p>
-
-            <ThreadLine className="my-5" />
-
-            <ol className="emcad-schedule" role="list">
-              <li>
-                <NeedlePoint state="done" />
-                <span className="t-h4 numeric">{money(fees.feeAdmission)}</span>
-                <span className="t-meta">{t("feeAtAdmission")}</span>
-              </li>
-              <li>
-                <NeedlePoint state="todo" />
-                <span className="t-h4 numeric">{money(balance)}</span>
-                <span className="t-meta">{t("feeBalance", { days: fees.feeBalanceDueDays })}</span>
-              </li>
-            </ol>
-
-            <p className="t-meta emcad-offline">{t("offline")}</p>
-
-            <div className="emcad-actions">
-              <Link href={`/admission?course=${EMCAD_DAHAO_SLUG}`} className="act act-primary">
-                {tc("bookDemo")} <Icon name="arrow" size={17} className="arrow" />
-              </Link>
-              <Link href={`/courses/${EMCAD_DAHAO_SLUG}`} className="act act-secondary">
-                {t("ctaCourse")}
-              </Link>
-            </div>
-
+              document rather than a page, because that is what a fee plan is.
+              The component is shared with the course page, so the two cannot
+              state the same plan differently. */}
+          <FeeSheet
+            label={t("feeLabel")}
+            total={money(fees.feeTotal)}
+            totalNote={t("feeTotalNote")}
+            rows={[
+              { amount: money(fees.feeAdmission), note: t("feeAtAdmission"), paid: true },
+              { amount: money(balance), note: t("feeBalance", { days: fees.feeBalanceDueDays }) }
+            ]}
+            offline={t("offline")}
+            actions={
+              <>
+                <Link href={`/admission?course=${EMCAD_DAHAO_SLUG}`} className="act act-primary">
+                  {tc("bookDemo")} <Icon name="arrow" size={17} className="arrow" />
+                </Link>
+                <Link href={`/courses/${EMCAD_DAHAO_SLUG}`} className="act act-secondary">
+                  {t("ctaCourse")}
+                </Link>
+              </>
+            }
+          >
             {proofLine ? (
               <MicroProof
                 className="mt-6"
@@ -153,7 +144,7 @@ export function EmcadPanel() {
                 status={proofLine.status}
               />
             ) : null}
-          </div>
+          </FeeSheet>
         </div>
       </div>
     </section>

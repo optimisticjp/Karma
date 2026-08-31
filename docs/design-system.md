@@ -266,6 +266,43 @@ from 48rem, `break-inside: avoid`) pack mixed ratios with no cropping and no
 JavaScript. `.bento` remains the right tool where the children can be told what
 size to be; it is the wrong one where each child brings its own aspect ratio.
 
+### The catalogue and the course template
+
+`/courses` is five blocks and a course page is nine, all in
+`src/components/kds/courses/`:
+
+| Piece | Classes | Note |
+| --- | --- | --- |
+| `CoursesIntro` | `.courses-split`, `.courses-aside`, `.courses-facts`, `.courses-swatches` | the 8 / 2 / 1 split, read from the catalogue |
+| `CourseCatalogue` | `.cat-grid`, `.cat-item`, `.cat-media`, `.cat-cue`, `.cat-meta` | two columns on a phone, three from 48rem |
+| `FamilyMap` | `.fam-grid`, `.fam-list`, `.fam-notes` | every course named again as a link |
+| `CoursePathway` | `.pathway`, `.pathway-mark`, `.pathway-thread` | four stages on one seam |
+| `CourseHero` | `.course-media`, `.course-swatch`, `.hero-facts` | produces line as the lede |
+| `CourseNav` | `.course-nav` | sticky anchors, `lg` and up only |
+| `CourseMake` | `.make-list`, `.make-foot`, `.make-skills` | outputs as objects, not adjectives |
+| `CourseFaults` | `.faults`, `.fault-row` | on the cool register — diagnostic work |
+| `CourseFloor` | `.floor-plate`, `.floor-swatch` | the machine described, never specified |
+| `CourseFacts` | `.fee-sheet` or the honest panel | the money, second on the page |
+| `CourseSyllabus` | `.syllabus`, `.module`, `.module-points` | native `<details>`, nothing open |
+| `CourseBatches` | `.board`, `.course-notes` | real rows or an honest empty state |
+
+**`.cat-media` puts the swatch in the photograph's 4:3 box.** The eight
+photographed courses and the three that are not occupy exactly the same space,
+so nothing moves when the files land and no course reads as a leftover.
+
+**`.fee-sheet` (was `.emcad-fee`) is shared.** The homepage decision panel and
+the one course page with a confirmed plan render the same `<FeeSheet>`, so the
+two can never state the same fee differently. There is no pay button in it and
+there never will be.
+
+**`.course-nav` is `display: none` below 64rem.** A second sticky bar on a
+phone competes with the header and the action dock for the same thumb. Every
+anchored section carries `scroll-margin-top: calc(var(--header-h) + 3.5rem)`.
+
+**A family filter is a group of toggle buttons, not a tablist.** Tab semantics
+promise a tabpanel the control owns and moves focus into; a filter narrows a
+list already on the page. `role="group"` + `aria-pressed`.
+
 ### Where it lives
 
 - `src/app/thread-machine-proof.css` — the system
@@ -273,6 +310,9 @@ size to be; it is the wrong one where each child brings its own aspect ratio.
   `Frame` (machine frame + photo placeholder), `proof` (the seven modules)
 - `src/components/kds/shell/` — header, footer, locale switch, brand, dock
 - `src/components/kds/home/` — the ten homepage blocks and the five-state motif
+- `src/components/kds/courses/` — the catalogue's five blocks and the course
+  template's nine
+- `src/components/kds/FeeSheet.tsx` · `CtaBand.tsx` — the two shared blocks
 - `src/lib/brand.ts` — the logo slot contract
 - `src/content/proof.ts` — the proof registry
 - `/design` — the rendered reference, on the new system alone

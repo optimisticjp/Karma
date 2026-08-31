@@ -76,7 +76,8 @@
     "closeMenu": "Close menu",
     "waPrefillDemo": "Hi Karma Design Studio! 👑 મને ફ્રી ડેમો ક્લાસ બુક કરવો છે. નામ: ____ | કોર્સ: ____ | ટાઇમ: સવાર/સાંજ",
     "waPrefillBusiness": "Hi! I need embroidery design / digitizing / job work. Product: ____ | Qty: ____ | Deadline: ____",
-    "loadingNote": "Preparing stitch path…"
+    "loadingNote": "Preparing stitch path…",
+    "waPrefillCourse": "Hi Karma Design Studio! 👑 મને \"{course}\" કોર્સનો ફ્રી ડેમો બુક કરવો છે. નામ: ____ | ટાઇમ: સવાર/સાંજ"
   },
   "home": {
     "hero": {
@@ -461,12 +462,6 @@
     "intro": "Three families: machine embroidery, the modern techniques, and the EMCAD DAHAO design software behind both. Start wherever you are — most students arrive having never touched a machine.",
     "batchesCta": "See upcoming batches",
     "factsTitle": "In every course",
-    "facts": [
-      "Machine time in every session",
-      "Taught in Gujarati and Hindi",
-      "Certificate with a verifiable QR code",
-      "A free demo class before you commit"
-    ],
     "pathway": {
       "h2": "Where the courses lead",
       "line": "The courses connect. Most students start at one machine technique, add EMCAD DAHAO design, and move into production work or a unit of their own.",
@@ -489,8 +484,6 @@
         }
       ]
     },
-    "familyLabel": "{count, plural, one {# course} other {# courses}}",
-    "countNote": "This catalogue lists {count} courses in three families.",
     "cue": {
       "foundation": "Start here",
       "leads": "Most asked for"
@@ -516,7 +509,24 @@
           "d": "Cut-work and tufted pieces sell to boutiques, interior work and gifting, which is a different order book from garment job work."
         }
       ]
-    }
+    },
+    "catalogueEyebrow": "All eleven",
+    "catalogueH2": "Pick by the work you want to do.",
+    "catalogueSub": "Filter by family, or read straight through. Every course is taught at the machine with a trainer beside you, and every one of them starts from zero.",
+    "filterAll": "All",
+    "filterLabel": "Filter by family",
+    "months": "{count} months",
+    "showingCount": "{count, plural, one {# course shown} other {# courses shown}}",
+    "factMachine": "Machine time in every session",
+    "factLanguages": "Taught in Gujarati and Hindi",
+    "factCertificate": "Certificate with a verifiable QR code",
+    "factDemo": "A free {days}-day demo before you commit",
+    "softwareNote": "The one design software Karma teaches: {software}.",
+    "familiesEyebrow": "Three families",
+    "pathwayEyebrow": "Where this goes",
+    "pathwayNote": "No timetable is attached to this route. Only EMCAD DAHAO has a confirmed duration; the rest depends on the technique and how often you can come.",
+    "closeH2": "Come and see which machine suits your hands.",
+    "closeSub": "The first two days are a free demo. Sit at the machine, try the technique, and decide after."
   },
   "batchesPage": {
     "eyebrow": "When you can come",
@@ -541,24 +551,19 @@
   },
   "courseDetail": {
     "whoTitle": "Who this course is for",
-    "outcomesTitle": "What you'll be able to do",
     "modulesTitle": "What you'll learn, module by module",
     "modulesNote": "Draft syllabus: final module topics are confirmed with the studio (see admissions FAQ).",
     "batchesTitle": "Upcoming batches for this course",
     "certTitle": "Certificate requirements",
     "certBody": "The certificate needs your attendance, completed practicals and a finished final project. Every certificate carries a QR code verifiable on this website.",
-    "faqTitle": "Common questions",
     "relatedTitle": "Related courses",
     "durationLabel": "Duration",
-    "weeks": "{count} weeks",
     "confirmDuration": "Shared at counselling",
     "levelLabel": "Level",
     "levelValue": "Beginner-friendly",
     "langLabel": "Language",
     "langValue": "ગુજરાતી + Hindi + English terms",
-    "demoCta": "Book a free demo of this course",
     "batchesSub": "Seats per batch are limited. If none of these fit, message us — batches for this course open regularly.",
-    "callCta": "Call about this course",
     "skillsTitle": "What you will be able to do",
     "problemsEyebrow": "Why this course exists",
     "problemsTitle": "The production problems this fixes.",
@@ -569,17 +574,12 @@
     "practiceNote": "Practice is on the studio's own production machines, in every session — not a demonstration you watch.",
     "outputsTitle": "What this work sells as",
     "outputsSub": "The orders this technique is actually paid for, in Surat and beyond.",
-    "proofTitle": "Student work",
-    "proofBody": "Work from this course is published as students finish pieces and agree to have them shown. Nothing on this site is stock photography, and nothing is published without consent — which is why the gallery fills up slowly rather than all at once.",
-    "proofCta": "See student work",
-    "trainerTitle": "Who teaches it",
     "feeTitle": "What it costs",
     "feeBody": "Fees are discussed in person, at your demo or on a call. There is no public price list and no online payment on this site — what a course costs depends on the technique and the batch, and quoting a number that turns out not to apply to you helps nobody.",
     "feeNote": "Ask for the current fee when you call or come in. Receipts are issued for every payment.",
     "demoTitle": "Before you decide",
     "demoBody": "Come for a practical demo. Sit at the machine, watch a sample run, and ask whatever you want — there is no obligation and no booking fee.",
     "relatedAll": "See the full catalogue",
-    "signatureLabel": "Technique signature",
     "signatures": {
       "zardosi-machine-embroidery": "A tight parallel satin field with one restrained zari highlight — metallic thread laid in relief, stitch beside stitch.",
       "flat-embroidery": "A precise running field with clean, deliberate direction changes. Every other machine technique is written in this vocabulary.",
@@ -592,7 +592,39 @@
       "laser-work": "A precise trace, then one clean cut edge. No sparks and no scorching — a laser that behaves is a laser you have set correctly.",
       "tufting": "Loops rising from a baseline, each one to the same height, which is the whole difficulty.",
       "emcad-embroidery-design": "Vector nodes, then their handles, then the stitch path they produce. This is what digitising actually is."
-    }
+    },
+    "months": "{count} months",
+    "breadcrumbCourses": "Courses",
+    "navLabel": "On this page",
+    "navMake": "What you make",
+    "navFaults": "Faults",
+    "navFloor": "The floor",
+    "navFees": "Fees",
+    "navSyllabus": "Syllabus",
+    "navBatches": "Batches",
+    "outputsEyebrow": "What comes off the machine",
+    "floorEyebrow": "Where you learn it",
+    "faultsNotesCta": "Read the machine notes",
+    "feesEyebrow": "Fees and timings",
+    "feeVerifiedBody": "This is the only course whose fee the studio has confirmed in writing. What follows is that record, in full.",
+    "feeAskTitle": "Asked at the demo",
+    "feeAskNote": "The fee depends on the course and the batch, and we go through it with you in person.",
+    "feeNoGateway": "There is no online payment on this site — no gateway, no payment link, no UPI request. If a page ever asks you to pay online, it is not us.",
+    "faqCta": "All admission questions",
+    "syllabusEyebrow": "The syllabus",
+    "modulesCount": "{count, plural, one {# module} other {# modules}}",
+    "batchesEyebrow": "When it runs",
+    "batchFull": "Full",
+    "batchSeats": "{count} seats left",
+    "batchesAll": "See every batch",
+    "batchesEmptyTitle": "No batch is open for this course right now.",
+    "batchesEmptyBody": "New batches open through the month. Book the free demo and we will tell you what is starting next, or message the studio and ask.",
+    "notesTitle": "From the machine notes",
+    "notesAll": "The whole archive",
+    "relatedEyebrow": "In the same family",
+    "closeH2": "Sit at the machine before you decide.",
+    "closeSub": "The first two days of {course} are a free demo. Come, try it, and decide after.",
+    "demoFree": "{days} days, free"
   },
   "courseOps": {
     "factsTitle": "The course, as the institute states it",
