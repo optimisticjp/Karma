@@ -15,6 +15,14 @@ import { studioSchema } from "@/lib/schema";
 import "../globals.css";
 import "../premium.css";
 import "../machine-lab.css";
+/* Modern Textile Lab, and the reason it is last and the reason it is here.
+   There is no shared root layout in this project — `admin/layout.tsx` is a
+   second, independent root that imports the three sheets above. This one is
+   imported by the public root ONLY, so nothing in it can reach the Console
+   even by accident, and the Devanagari face it declares is never downloaded
+   by a staff member. Everything inside is additionally scoped to
+   `.site-body`. See the file header. */
+import "../textile-lab.css";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
