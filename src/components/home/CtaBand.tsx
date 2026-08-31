@@ -23,7 +23,7 @@ export function CtaBand() {
     <section className="band-machine">
       <div aria-hidden="true" className="stitch-line" />
       <div className="container-site section">
-        <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:gap-16">
+        <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:gap-16">
           <div>
             <h2 className="text-h2 max-w-2xl">{t("h2")}</h2>
             <p className="u-lede">{t("sub")}</p>

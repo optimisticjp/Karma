@@ -20,7 +20,7 @@ export function BusinessBand() {
 
   return (
     <section className="section-compact band-info business-door">
-      <div className="container-site flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-end">
+      <div className="container-site flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-end lg:gap-8">
         <div className="max-w-2xl">
           <p className="eyebrow">{t("eyebrow")}</p>
           <h2 className="text-h2 mt-4">{t("h2")}</h2>

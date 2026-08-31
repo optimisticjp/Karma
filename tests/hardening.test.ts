@@ -127,7 +127,12 @@ describe("fonts load only what a page needs", () => {
 describe("the public shell cannot leak into Karma Console", () => {
   it("scopes every shell rule to .site-body", () => {
     const css = read("src/app/premium.css");
-    expect(css).toContain(".site-body { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }");
+    expect(css).toContain(
+      ".site-body { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); }"
+    );
+    /* The rule this protects: the public bar's reservation is scoped to
+       `.site-body`. An unscoped `body` rule once reserved 64px at the bottom
+       of every Karma Console screen, which has no bar to clear. */
     expect(css).not.toContain("\n  body { padding-bottom:");
   });
 

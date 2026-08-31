@@ -1275,18 +1275,59 @@ every type token measured against the plan's band, the 44px tap floor, and the
 with no `:lang(gu)` rule at all).
 
 ## Phase 3 — Public shell + homepage compactness
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #45, merged as `PLACEHOLDER_MERGE`
 
-Deliver:
+Delivered:
 
-- compact public header
-- light-first hero
-- improved first viewport
-- compressed homepage rhythm
-- compact EMCAD decision block
-- Screen-to-Stitch without oversized vertical footprint
-- sections reordered/combined if viewport economics improve
-- preserve Call + Directions mobile conversion bar
+- **Chrome heights became tokens.** `--header-h`, `--tabbar-h` and
+  `--tabbar-item-h` replace four hand-matched literals that had already
+  drifted — `.site-body` reserved 4rem under a 3.5rem bar, which rendered as an
+  8px strip of Cotton under the footer of **every** public page. Header 64 →
+  **56px**; bar 56 → **48px** with its item at the real 44px WCAG floor. 24px
+  of every public viewport recovered before any page content.
+- **Two real bugs fixed, both z-index.** `.tabbar` was z-45 against the
+  mobile-menu scrim's z-40, so the Call/Directions bar painted *on top of* an
+  `aria-modal` dialog's scrim and stayed pointer-tappable outside its focus
+  trap — and it covered both of `LangBanner`'s buttons. The bar is z-30 now and
+  the banner docks above it. `hasStickyBar`, which tested for a component that
+  has not existed for two redesigns, is gone from both files; in `WhatsAppFab`
+  it had been suppressing the WhatsApp action on the three highest-intent
+  routes on the site for nothing.
+- **The footer: 1,031px → ~600px, with the phone number first.** The visit
+  block leads on a phone via `order-first` (on screen, not in the DOM, so the
+  desktop composition and the reading order both survive); the spine's headline
+  drops from 60px to ~20px; and the two link columns stop being
+  `hidden md:block`, so the mobile footer is now shorter **and** carries eight
+  more crawlable links than before.
+- **Header menu**: 56px rows → 48px, 605px panel → ~430px.
+- **The hero's first viewport.** At 390×844 the demo CTA used to sit 16px
+  behind the tab bar in English and **entirely below the fold in Gujarati**.
+  The three thread frames now run *across* a phone rather than down it — one
+  column made each 4:3 frame 235px tall, so `01 SCREEN / 02 MACHINE /
+  03 RESULT` cost 933px. Still one markup tree; the rail is redrawn horizontal
+  with the identical 9-on/6-off geometry and penetration dot, and wipes along
+  its own axis.
+- **The homepage reordered** to the plan's §6 rhythm. `<EmcadDecision>` was the
+  **eighth** section: the one course with a confirmed duration and a published
+  fee sat behind five others, so "how long, how much" was four screens away. It
+  is third now, with `<Investment>` — the institute-wide half of the same
+  question — directly after it.
+- The six grids whose multi-column breakpoint was 560–640px now break at
+  380px: the production workflow (1,224px → ~600), the proof strip (1,389 →
+  ~700), the work grid (2,065 → ~1,000), the review wall (1,400 → ~700), the
+  production rail (1,178 → ~400) and the studio grid (957 → ~480). Every
+  manifest aspect ratio is untouched — the column narrows, not the frame.
+- The Machine Index row: 16px → 10px block padding, the name at 15px, the
+  produces line clamped to two lines and the media a thumbnail in the index
+  column. Photography and signature still share one slot at one size.
+- EMCAD decision block compacted throughout; the fee keeps display weight at
+  36px rather than 43.
+
+New policy tests in `tests/compact-density-shell.test.ts`: each chrome height
+is declared exactly once and read by every consumer, no literal survives at the
+call site, the bar ranks below the modal chrome, the banner clears it, the
+footer leads with the phone and shows a phone the links a laptop shows, and the
+hero's thread keeps one continuous stitch when it turns.
 
 ## Phase 4 — Public inner pages
 **Status:** ⏳ Pending

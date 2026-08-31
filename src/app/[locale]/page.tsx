@@ -81,14 +81,28 @@ export async function generateMetadata({
  * does with two more states and a failure, in less height. The component
  * stays for a course detail page, where the interaction has room to earn it.
  *
- * BAND RHYTHM — HUMAN / MACHINE / MATERIAL
- * ----------------------------------------
- * Dark machine bands are punctuation: the hero, the production rail, the
- * EMCAD decision, the audience switch and the close. Every one of them is
- * followed by a light band, because two dark surfaces in a row stop being
- * punctuation and start being wallpaper. Between them the page alternates
- * MATERIAL (the index, the work wall — bright, editorial) and HUMAN (trainers,
- * the studio, visiting — warm), so a long scroll never reads as one surface.
+ * BAND RHYTHM — MACHINE / MATERIAL / HUMAN / INFO
+ * -----------------------------------------------
+ * Since the light-first pass there are no dark bands, so the rule that keeps
+ * a long scroll from reading as one slab is surface CHANGE, not darkness: no
+ * two consecutive banded sections may share a band. MACHINE is Steel Mist
+ * (the hero, the production rail, the EMCAD decision, the close), MATERIAL is
+ * Worktable White (the index, the work wall), HUMAN is Raw Silk (trainers, the
+ * studio, the footer) and INFO is Cotton (facts and decisions). The one
+ * deliberate repeat is the warm chapter — trainers, then where you learn —
+ * which carries a hairline instead of a colour change.
+ *
+ * ORDER — the 30-second decision, compacted
+ * -----------------------------------------
+ * Reordered 2026-08-31 to the compact-density plan's §6 rhythm. The EMCAD
+ * decision block used to be the EIGHTH section: the one course with a
+ * confirmed duration and a published fee sat behind the rail, the workflow,
+ * the catalogue, the problems and the machine proof, and a visitor asking
+ * "how long, how much" travelled four screens to find out. It is third now,
+ * with <Investment> — the institute-wide half of the money question —
+ * immediately after it, so the two halves of one question are one chapter.
+ * The rail and the eleven-course index follow, which is the order the plan
+ * asks for and also the order the questions actually arrive in.
  */
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -98,17 +112,17 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     <>
       <Hero />
       <TrustRail />
-      <ProductionRailSection />
-
-      <ProductionWorkflow />
-      <CourseCatalogue />
-
-      <ProblemsSolved />
-      <MachineProof />
 
       <EmcadDecision />
       <Investment />
+
+      <ProductionRailSection />
+      <CourseCatalogue />
       <BatchesTeaser />
+
+      <ProblemsSolved />
+      <MachineProof />
+      <ProductionWorkflow />
 
       <StudentWorkWall />
       <HomepageStats />

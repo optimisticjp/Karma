@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
 
 /**
  * One-time, dismissible language suggestion (plan decision log #6):
@@ -33,26 +32,21 @@ export function LangBanner() {
     if (target !== locale) router.replace(pathname, { locale: target as "en" | "gu" });
   };
 
-  // Collision management (audit): sit above the sticky action bar where it
-  // exists, and dock bottom-LEFT on desktop so the WhatsApp FAB stays clear.
-  const hasStickyBar =
-    pathname.startsWith("/courses/") ||
-    pathname.startsWith("/admissions") ||
-    pathname.startsWith("/admission");
-
+  /* Collision management. This used to sit at `bottom-0` unless a per-page
+     sticky action bar existed — and that bar has not existed as a component
+     for two redesigns, so the branch never fired and the banner rendered
+     underneath the Call/Directions bar: both of its buttons sat between 12px
+     and 60px from the bottom of a 104px banner, almost entirely covered.
+     `.lang-banner` now clears `--tabbar-h` unconditionally below 1280px and
+     docks bottom-LEFT above it, so the WhatsApp FAB on the right stays clear. */
   return (
-    <div
-      className={cn(
-        "fixed inset-x-0 z-40 border-t border-line bg-card p-3 shadow-lg md:inset-x-auto md:bottom-6 md:left-6 md:right-auto md:max-w-sm md:rounded-xl md:border",
-        hasStickyBar ? "bottom-[4.25rem]" : "bottom-0"
-      )}
-    >
+    <div className="lang-banner fixed inset-x-0 z-40 border-t border-line bg-card p-2.5 shadow-lg md:inset-x-auto md:left-6 md:right-auto md:max-w-sm md:rounded-xl md:border">
       <p className="text-smallmeta font-semibold">{t("question")}</p>
       <div className="mt-2 flex gap-2">
-        <button type="button" onClick={() => choose(other)} className="btn btn-primary !px-4 !py-2 text-sm">
+        <button type="button" onClick={() => choose(other)} className="btn btn-primary !px-3.5 !py-1.5 text-sm">
           {t("action")}
         </button>
-        <button type="button" onClick={() => choose(locale)} className="btn btn-ghost !px-3 !py-2 text-sm">
+        <button type="button" onClick={() => choose(locale)} className="btn btn-ghost !px-3 !py-1.5 text-sm">
           {t("dismiss")}
         </button>
       </div>

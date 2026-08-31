@@ -35,17 +35,26 @@ const isAscending = (xs: number[]) => xs.every((x, i) => i === 0 || (x > xs[i - 
 
 describe("homepage architecture", () => {
   it("answers the questions in order", () => {
+    /* Reordered 2026-08-31 for the compact-density plan's §6 rhythm. The rule
+       this test encodes is unchanged and is the reason to keep it: the order
+       is a DECISION, not an accident. What changed is the decision.
+
+       EmcadDecision was eighth — so the one course with a confirmed duration
+       and a published fee sat behind five other sections, and a visitor asking
+       "how long, how much" travelled roughly four screens. It is third now,
+       with Investment (the institute-wide half of the same question) directly
+       after it. */
     const sequence = orderOf(
       "Hero",
       "TrustRail",
-      "ProductionRailSection",
-      "ProductionWorkflow",
-      "CourseCatalogue",
-      "ProblemsSolved",
-      "MachineProof",
       "EmcadDecision",
       "Investment",
+      "ProductionRailSection",
+      "CourseCatalogue",
       "BatchesTeaser",
+      "ProblemsSolved",
+      "MachineProof",
+      "ProductionWorkflow",
       "StudentWorkWall",
       "Trainers",
       "WhereYouLearn",
@@ -54,6 +63,18 @@ describe("homepage architecture", () => {
       "CtaBand"
     );
     expect(isAscending(sequence)).toBe(true);
+  });
+
+  it("puts the money question inside the first two screens", () => {
+    /* The plan's §6 target rhythm, asserted rather than described: the decision
+       facts come before the catalogue, the proof and the problems, because
+       those are the questions a visitor asks after they have decided the
+       course is plausible — not before. */
+    const at = (tag: string) => home.indexOf(`<${tag} />`);
+    expect(at("EmcadDecision")).toBeGreaterThan(-1);
+    for (const later of ["CourseCatalogue", "MachineProof", "ProblemsSolved", "StudentWorkWall"]) {
+      expect(at("EmcadDecision"), `EmcadDecision before ${later}`).toBeLessThan(at(later));
+    }
   });
 
   it("puts no dark band on the page, and never repeats a surface", () => {

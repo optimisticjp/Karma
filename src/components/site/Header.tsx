@@ -87,10 +87,10 @@ export function Header() {
     <header
       className={cn(
         "site-header sticky top-0 z-50 border-b border-line bg-ivory/96 backdrop-blur-[10px]",
-        condensed ? "is-condensed h-16" : "h-16 md:h-20"
+        condensed ? "is-condensed" : ""
       )}
     >
-      <div className="container-site flex h-full items-center justify-between gap-5">
+      <div className="container-site flex h-full items-center justify-between gap-4">
         <Link
           href="/"
           className="site-brand-mark flex min-w-0 items-center gap-2 leading-none"
@@ -157,15 +157,20 @@ export function Header() {
 
       {open ? (
         <>
-          {/* Offsets must track the header's own height, or the scrim starts
-              16px too high on tablets (where the header is 80px, not 64px). */}
+          {/* The scrim's top offset used to be a hardcoded `top-16 md:top-20`
+              mirroring the header's own `h-16 md:h-20` — two literals that had
+              to be edited together and, on a tablet, had already drifted. Both
+              now read `--header-h`.
+
+              z-40 was also wrong in a way nothing caught: `.tabbar` sat at
+              z-45, so the Call/Directions bar painted ON TOP of the scrim of
+              an aria-modal dialog and stayed tappable outside its focus trap.
+              The bar is z-30 now and this is z-40, which is the order the two
+              were always meant to be in. */}
           <div
             aria-hidden="true"
             onClick={close}
-            className={cn(
-              "fixed inset-x-0 bottom-0 z-40 bg-carbon/45 xl:hidden",
-              condensed ? "top-16" : "top-16 md:top-20"
-            )}
+            className="site-menu-scrim fixed inset-x-0 bottom-0 z-40 bg-carbon/45 xl:hidden"
           />
           <div
             ref={panelRef}
@@ -173,17 +178,18 @@ export function Header() {
             role="dialog"
             aria-modal="true"
             aria-label={tc("openMenu")}
-            className={cn(
-              "absolute inset-x-0 top-full z-50 overflow-y-auto overscroll-contain border-t border-line bg-ivory xl:hidden",
-              condensed ? "max-h-[calc(100dvh-4rem)]" : "max-h-[calc(100dvh-4rem)] md:max-h-[calc(100dvh-5rem)]"
-            )}
+            className="site-menu-panel absolute inset-x-0 top-full z-50 overflow-y-auto overscroll-contain border-t border-line bg-ivory xl:hidden"
           >
-            <nav className="container-site flex flex-col py-4" aria-label="Mobile">
+            <nav className="container-site flex flex-col py-2" aria-label="Mobile">
               {NAV.map((item, index) => (
                 <Link
                   key={item.key}
                   href={item.href}
-                  className="group grid grid-cols-[2rem_1fr_auto] items-center gap-3 border-b border-line/70 py-3.5 text-lg font-semibold"
+                  /* 48px rows, not 56: `text-lg` carried Tailwind's paired
+                     1.75rem line-height, so eight links cost 456px — most of a
+                     phone viewport to show a menu. Still comfortably past the
+                     44px floor. */
+                  className="group grid min-h-12 grid-cols-[1.75rem_1fr_auto] items-center gap-2.5 border-b border-line/70 py-2 text-base font-semibold"
                   aria-current={isActive(item.href) ? "page" : undefined}
                 >
                   {/* Machine notation, not decoration: the menu is an index
@@ -193,7 +199,7 @@ export function Header() {
                   <span aria-hidden="true" className="text-stone transition-transform group-hover:translate-x-1">→</span>
                 </Link>
               ))}
-              <div className="grid gap-3 py-5 sm:grid-cols-[auto_1fr] sm:items-center">
+              <div className="grid gap-2 py-3 sm:grid-cols-[auto_1fr] sm:items-center">
                 <LanguageToggle />
                 <Link href="/admission" className="btn btn-primary w-full text-sm">
                   {t("cta")}

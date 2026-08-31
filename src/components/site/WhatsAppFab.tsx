@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { usePathname } from "@/i18n/navigation";
 import { site } from "@/lib/site";
 
 /**
@@ -12,7 +11,6 @@ import { site } from "@/lib/site";
 export function WhatsAppFab() {
   const [visible, setVisible] = useState(false);
   const t = useTranslations("common");
-  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 600);
@@ -21,9 +19,13 @@ export function WhatsAppFab() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const hasStickyBar =
-    pathname.startsWith("/courses/") || pathname.startsWith("/admissions") || pathname.startsWith("/admission");
-  if (hasStickyBar || !visible) return null;
+  /* This used to hide the FAB on three routes that once carried a per-page
+     sticky action bar. That component has not existed for two redesigns, and
+     the FAB is `xl:flex` — from 1280px up, where the Call/Directions bar is
+     hidden anyway — so the branch could not have prevented a collision even
+     if the bar had still existed. It suppressed the WhatsApp action on the
+     three highest-intent pages on the site for nothing. */
+  if (!visible) return null;
 
   return (
     <a
