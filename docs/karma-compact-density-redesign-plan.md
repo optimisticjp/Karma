@@ -1275,7 +1275,7 @@ every type token measured against the plan's band, the 44px tap floor, and the
 with no `:lang(gu)` rule at all).
 
 ## Phase 3 — Public shell + homepage compactness
-**Status:** ✅ Complete — PR #45, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #45, merged as `a8c1204`
 
 Delivered:
 

@@ -502,7 +502,7 @@
     display: block;
     height: 5px;
     width: 4.5rem;
-    margin-top: 1.25rem;
+    margin-top: 0.625rem;
     background-image:
       radial-gradient(circle 1.75px at 1.75px 50%, var(--color-vermilion) 99%, transparent 100%),
       linear-gradient(90deg, var(--color-vermilion) 0 9px, transparent 9px 15px);

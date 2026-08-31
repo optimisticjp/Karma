@@ -33,7 +33,7 @@ export function ScreenToStitch() {
   return (
     <section className="section bg-blush">
       <div className="container-site">
-        <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-16">
+        <div className="grid gap-4 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-16">
           <div>
             <SectionHeading eyebrow={t("eyebrow")} title={t("h2")} sub={t("sub")} rule />
             <ol className="ledger mt-8">

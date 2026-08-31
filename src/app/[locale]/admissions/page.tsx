@@ -82,7 +82,7 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ loc
 
       {/* The five steps, as a sequence rather than five loose numerals. */}
       <section className="section">
-        <div className="container-site grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+        <div className="container-site grid gap-4 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
           <SectionHeading title={t("stepsTitle")} sub={t("stepsSub")} />
           <Ledger as="ol">
             {steps.map((s, i) => (
@@ -136,7 +136,7 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ loc
       </section>
 
       <section className="section border-t border-line bg-ivory-2">
-        <div className="container-site grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+        <div className="container-site grid gap-4 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
           <SectionHeading title={t("handbookTitle")} sub={t("handbookSub")} />
           <ul className="ledger">
             {handbook.map((h, i) => (
@@ -152,7 +152,7 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ loc
       </section>
 
       <section className="section">
-        <div className="container-site grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+        <div className="container-site grid gap-4 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
           <div>
             <SectionHeading title={t("faqTitle")} sub={t("faqSub")} />
             <p className="u-actions">

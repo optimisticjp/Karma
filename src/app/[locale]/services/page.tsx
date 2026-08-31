@@ -235,7 +235,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
       </section>
 
       <section className="section bg-ivory-2">
-        <div className="container-site grid gap-10 lg:grid-cols-2 lg:gap-16">
+        <div className="container-site grid gap-4 lg:grid-cols-2 lg:gap-16">
           <div>
             <SectionHeading title={t("howTitle")} sub={t("howSub")} />
             <Ledger as="ol" className="mt-8">
@@ -284,7 +284,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
           the questions that otherwise arrive as a follow-up email. Every line
           in the panel is drawn from copy already on this page. */}
       <section className="section-compact bg-ivory-2" id="brief">
-        <div className="container-site grid gap-8 lg:grid-cols-[1.35fr_0.65fr] lg:items-start lg:gap-12">
+        <div className="container-site grid gap-4 lg:grid-cols-[1.35fr_0.65fr] lg:items-start lg:gap-12">
           <div className="card p-3.5 md:p-5">
             <BriefForm />
           </div>
