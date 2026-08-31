@@ -2583,7 +2583,7 @@ and the discrepancy is the owner's to resolve (`docs/content-checklist.md`).
 
 # Phase 4 — Courses + course-detail rebuild
 
-**Status:** ✅ Complete — PR #65
+**Status:** ✅ Complete — PR #65, merged as 7f724a4
 
 Required:
 
