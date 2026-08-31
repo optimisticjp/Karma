@@ -1539,7 +1539,7 @@ reads, the fields that were fetched and discarded, dot-and-word status, and
 tabular money.
 
 ## Phase 8 — Remaining admin workflows
-**Status:** ✅ Complete — PR #50, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #50, merged as `7c76216`
 
 The seven screens Phase 7 did not reach. Two shapes the core workflows did not
 have turned up here: a five-column table with `min-w-[52rem]` scrolling inside a
@@ -1605,22 +1605,74 @@ above. **770 tests pass.**
 bilingual audit headings and the responsive audit list).
 
 ## Phase 9 — Responsive + compactness hardening
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #51, merged as `PLACEHOLDER_MERGE`
 
-Run the full viewport matrix.
+The matrix was run in a **real browser** rather than computed: Chromium (the
+container's own binary, driven by `playwright-core` installed outside the
+repository so `package.json` is untouched) against a production `next start`,
+at 320 / 360 / 375 / 390 / 430 / 768 / 820 / 1024 / 1280 / 1440 across twenty
+routes in both locales. Full numbers: `docs/compact-density-audit.md` §10.
 
-Fix:
+That decision paid for itself immediately — the largest finding of the phase
+was invisible in the source.
 
-- overflow
-- clipping
-- excessive vertical space
-- bad line wrapping
-- poor tablet transitions
-- sticky overlap
-- keyboard conflicts
-- horizontal-scroller accessibility
-- focus states
-- Gujarati density issues
+- **A whole phone layout was silently half-applied.** `machine-lab.css`
+  declared the hero's `@media (max-width: 639px)` overrides *above* the base
+  rules they override. A media query adds no specificity, so source order
+  decided and the base rules won: the knot rendered at left −18px — off the
+  viewport entirely — the step never stacked, and the caption kept its rail
+  indent. The CSS was valid and every test passed. The block moved below the
+  base rules, and the test now asserts the **order**.
+- **The 640–959px dead zone.** The three-across hero stopped at 639px and the
+  staggered composition starts at 960, so the tablet range fell back to the
+  vertical layout Phase 3 replaced *because* it cost 933px. Extending it to
+  959, splitting `.about-place` at 768 rather than 800, taking `.work-wall` to
+  three columns at 768 rather than 900, and splitting the About cards at `md`:
+  `/en` 768 **18,556 → 16,836**, 820 **18,864 → 17,006**; `/gu` 768 **17,990 →
+  16,253**; `/en/about` 768 **9,258 → 8,460**. Every public route now gets
+  *shorter* as the screen widens through the tablet range, which it did not.
+- **Keyboard focus had no bottom reservation.** Sixty `Tab` stops per route
+  found every focusable carrying a visible ring — and found the last card on
+  `/contact` landing half behind the fixed tab bar, because `scroll-margin-top`
+  on `[id]` covers an anchor jump and nothing else. `html` now carries
+  `scroll-padding` at both ends from the chrome tokens, with its own block for
+  the console, whose bars are not the public site's.
+- **Four controls were below their floor**, each found by measurement:
+  `.site-brand-mark` at 28px inside a 56px header, `.cta-tertiary` at 41.2px
+  **in Gujarati only** (its height came from the line box, so it drifted with
+  the font's metrics), the section-level "see all" link at 26–32px across five
+  different ad-hoc spellings — now one `.link-more` class — and
+  `.hero-thread-foot a` at 32px.
+- **Gujarati is not systematically taller.** The Phase 1 audit told this phase
+  it was 6–11% taller everywhere. Measured, it is *shorter* on seven of nine
+  routes (up to −5.6%) and taller on exactly two: `/admission` (+5.4%) and
+  `/contact` (+0.6%) — the two screens that are mostly labels rather than
+  prose. Its line-height is taller; its copy is shorter; on a prose page the
+  second wins. The rule to carry forward is the narrower one: **measure
+  Gujarati first on label-dense screens.**
+
+**Deliberately not changed:** the footer's own links measure 31.7px. They clear
+WCAG 2.5.8's 24px with margin, a previous session padded them to do exactly
+that, and raising twenty of them to 44px would add ~250px to the footer Phase 3
+spent its budget shortening. The 17px `Privacy` link in the brief form's
+consent sentence is an inline link inside a sentence and is exempt by 2.5.8's
+own inline exception.
+
+**Clean across 170 route×viewport combinations after the fixes:** no horizontal
+overflow at any width, no element past the viewport edge, no text clipped by a
+fixed height that was not a deliberate line clamp, no focusable without a
+visible focus ring.
+
+New suite: `tests/compact-density-responsive.test.ts` (12 assertions). The
+browser measurement cannot run in CI, so each assertion pins the CSS fact the
+measurement established.
+
+Two Phase 3 assertions were re-pointed from `max-width: 639px` to
+`max-width: 959px`. The claims they make — three frames across, and the same
+9-on/6-off stitch geometry when the rail turns — are unchanged; only the
+breakpoint the block lives at moved.
+
+**Worker: 2021.78 KiB gzip** against the 3 MB free plan.
 
 ## Phase 10 — Final compactness pass
 **Status:** ⏳ Pending

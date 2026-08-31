@@ -152,8 +152,14 @@ describe("the hero earns its viewport", () => {
   it("runs the three frames across a phone, not down it", () => {
     /* One column made each 4:3 frame 235px tall, so `01 SCREEN / 02 MACHINE /
        03 RESULT` cost 933px — more than a whole viewport for the part of the
-       page that is supposed to be read at a glance. */
-    const narrow = machineLab.split("@media (max-width: 639px)").slice(1).join("\n");
+       page that is supposed to be read at a glance.
+
+       The bound moved from 639px to 959px in Phase 9: measured in a browser,
+       640-959px was falling back to exactly the vertical layout this replaced,
+       and the hero was 2,128px at 768 against 1,139px at 1024. The claim is
+       unchanged — three across below the staggered composition — so the
+       assertion follows the block rather than the number. */
+    const narrow = machineLab.split("@media (max-width: 959px)").slice(1).join("\n");
     expect(narrow).toContain(".hero-thread-list");
     expect(narrow).toContain("repeat(3, minmax(0, 1fr))");
   });
@@ -162,7 +168,7 @@ describe("the hero earns its viewport", () => {
     /* The rail is drawn, not rotated: same 9-on/6-off geometry and the same
        penetration dot at every stitch head, turned through 90 degrees. A mark
        that changes geometry when it changes axis stops being the same mark. */
-    const narrow = machineLab.split("@media (max-width: 639px)").slice(1).join("\n");
+    const narrow = machineLab.split("@media (max-width: 959px)").slice(1).join("\n");
     expect(narrow).toContain("linear-gradient(90deg, var(--stitch-color) 0 9px, transparent 9px 15px)");
     expect(narrow).toContain("circle 1.75px at 1.75px 50%");
     /* And it is laid down along its own axis rather than wiped top-down. */

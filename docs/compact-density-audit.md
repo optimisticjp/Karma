@@ -714,3 +714,111 @@ them:
 | 8 — Remaining admin | Reports' seven stacked metrics are taller than the viewport. Two unbounded selects in Design Desk are worth fixing while the row is rebuilt. |
 | 9 — Hardening | Gujarati is 6–11% taller everywhere and is the first-class locale; measure it first. |
 | 10 — Final pass | The two pages that already pass are the two that decline `PageIntro` — that is the finding to generalise. |
+
+---
+
+## 10. Phase 9 — measured in a real browser, 2026-08-31
+
+Sections 1–9 above were measured by reading the source and computing the
+clamps. Phase 9 drove **Chromium** (the container's own binary, via
+`playwright-core` installed *outside* the repository so `package.json` is
+untouched) against a production `next start`, at
+**320 / 360 / 375 / 390 / 430 / 768 / 820 / 1024 / 1280 / 1440**, over twenty
+routes in both locales — 170–200 route×viewport combinations per run.
+
+Four things came out of it that reading the file could not have found.
+
+### 10.1 A whole phone layout was silently half-applied
+
+`machine-lab.css` declared the hero's `@media (max-width: 639px)` overrides
+**above** the base rules they override. A media query adds no specificity, so
+source order decided, and the base rules won:
+
+| Declaration | Intended below 640px | What actually rendered at 390px |
+| --- | --- | --- |
+| `.hero-frame-knot` | `left: 0` on its frame | `left: -2.25rem` → measured at **left −18px, right −3px** — entirely off the viewport |
+| `.hero-frame-step` | `flex-direction: column` | stayed a row |
+| `.hero-thread-foot` | `padding-left: 0` | kept the 2.25rem rail indent |
+
+The CSS was valid and every test passed. Only a rendered box told the truth.
+The block now sits after the base rules with a comment saying to keep it there,
+and `tests/compact-density-responsive.test.ts` asserts the **order**.
+
+### 10.2 The 640–959px dead zone
+
+The three-across hero stopped at 639px, and the staggered composition starts at
+960px, so 640–959px fell back to the vertical base layout — the one Phase 3
+replaced *because* it cost 933px. Measured, the hero was **2,128px at 768** and
+**1,139px at 1024**. Extending the horizontal layout to 959px, splitting
+`.about-place` at 768 rather than 800, taking `.work-wall` to three columns at
+768 rather than 900, and splitting the About cards at `md` rather than `lg`:
+
+| Route | 430 | 768 before → after | 820 before → after |
+| --- | --- | --- | --- |
+| `/en` | 18,251 | 18,556 → **16,836** | 18,864 → **17,006** |
+| `/gu` | 17,388 | 17,990 → **16,253** | 18,356 → **16,482** |
+| `/en/about` | 8,706 | 9,258 → **8,460** | 8,928 → **8,728** |
+| `/en/student-work` | 7,401 | 7,478 → **7,067** | 7,683 → **7,241** |
+
+Every public route now gets **shorter** as the screen widens through the tablet
+range, which it did not before.
+
+### 10.3 Keyboard focus had no bottom reservation
+
+Walking `Tab` through sixty stops per route found every focusable carrying a
+`2px solid` focus ring — no missing focus states anywhere. It also found that
+tabbing to the last card on `/en/contact` at 390px landed it **half behind the
+fixed tab bar**: `scroll-margin-top` on `[id]` covers an anchor jump and
+nothing else. `html` now carries `scroll-padding` at both ends, from the chrome
+tokens, with a separate block for the console because its bars are not the
+public site's.
+
+### 10.4 Gujarati is not systematically taller
+
+Section 9 above told Phase 9 that "Gujarati is 6–11% taller everywhere". At
+390px, measured, it is **shorter on seven of nine routes**:
+
+| Route | EN | GU | |
+| --- | --- | --- | --- |
+| `/` | 18,778 | 17,720 | −5.6% |
+| `/success-stories` | 9,511 | 9,023 | −5.1% |
+| `/services` | 11,947 | 11,357 | −4.9% |
+| `/student-work` | 7,466 | 7,176 | −3.9% |
+| `/courses/emcad-embroidery-design` | 9,362 | 9,027 | −3.6% |
+| `/about` | 8,640 | 8,486 | −1.8% |
+| `/courses` | 5,095 | 5,068 | −0.5% |
+| `/contact` | 2,981 | 2,999 | **+0.6%** |
+| `/admission` | 2,281 | 2,404 | **+5.4%** |
+
+Gujarati's line-height *is* taller (1.8 against 1.625) but its copy is shorter
+in glyph count, and on a paragraph-heavy page the second effect wins. The two
+routes where it does not are the two that are mostly **labels** rather than
+prose — a form and a contact ledger — where there is no copy length to save.
+So the rule to carry forward is narrower and more useful than the old one:
+**measure Gujarati first on label-dense screens**, not on every screen.
+
+### 10.5 Touch targets, and where the line is
+
+Two floors apply and it is worth being explicit, because the difference is a
+WCAG clause, not a preference:
+
+- A control that stands on its own gets **44px** (`.btn`, `.tap`,
+  `.console-tab`, and — added in this phase — `.site-brand-mark` at 28px,
+  `.cta-tertiary` at 41.2px *in Gujarati only*, `.link-more` at 26–32px across
+  five different ad-hoc spellings, and `.hero-thread-foot a` at 32px).
+- A link **inside a sentence** is exempt from WCAG 2.5.8 by that criterion's
+  own inline exception, and is judged at 24px. The 17px `Privacy` link in the
+  brief form's consent sentence is such a link, and is left alone deliberately.
+
+The footer's own links measure **31.7px**. They clear 2.5.8's 24px with margin,
+they were deliberately padded to do so (`premium.css` says why), and raising
+twenty of them to 44px would add roughly 250px to the footer this project spent
+Phase 3 shortening. They stay, measured and on purpose.
+
+### 10.6 What came back clean
+
+Across 170 route×viewport combinations after the fixes: **no horizontal
+overflow** on any route at any width, **no element rendering past the viewport
+edge**, **no text clipped by a fixed height** that was not a deliberate line
+clamp, and **no focusable without a visible focus ring**.
+

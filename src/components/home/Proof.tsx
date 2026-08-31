@@ -35,7 +35,7 @@ export async function Proof() {
           <SectionHeading title={tw("h2")} sub={tw("sub")} />
           <Link
             href="/student-work"
-            className="stitch-link mb-1 inline-flex min-h-8 shrink-0 items-center gap-1.5 font-semibold text-vermilion-deep"
+            className="stitch-link link-more mb-1 shrink-0"
           >
             {tw("seeAll")} <Icon name="arrow" size={16} className="arrow" />
           </Link>

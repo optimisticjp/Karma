@@ -58,7 +58,7 @@ export function BatchesTeaser() {
           <SectionHeading title={t("h2")} sub={t("sub")} />
           <Link
             href="/admissions"
-            className="stitch-link mb-1 inline-flex items-center gap-1.5 font-semibold text-vermilion-deep"
+            className="stitch-link link-more mb-1"
           >
             {t("seeAll")} <Icon name="arrow" size={16} className="arrow" />
           </Link>
