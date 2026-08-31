@@ -1224,7 +1224,7 @@ Findings that changed the plan's own assumptions:
 No broad visual implementation. Audit tooling and its own tests only.
 
 ## Phase 2 — Light-first public design system
-**Status:** ✅ Complete — PR #44, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #44, merged as `9ae1438`
 
 Delivered:
 

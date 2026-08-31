@@ -156,6 +156,16 @@
   --space-lede-to-action: 1rem;  /* 16 */
   --space-heading-to-content: clamp(1rem, 0.8rem + 0.75vw, 2rem);  /* 16 -> 32 */
 
+  /* Fixed-chrome heights. These were hand-matched literals in four places —
+     the bar's own height, the space reserved for it, the header height and the
+     scrim offset that mirrors it — and they had already drifted: `.site-body`
+     reserved 4rem under a 3.5rem bar, which rendered as a 64px cream strip
+     under the footer of every public page. A bar's height and the space
+     reserved for it are one fact, so they are one token. */
+  --tabbar-item-h: 2.75rem;   /* 44px — the WCAG 2.5.5 floor, not below it */
+  --tabbar-h: 3rem;           /* 48px — item plus its own padding           */
+  --header-h: 3.5rem;         /* 56px — the public sticky header            */
+
   --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* ---------------- design system v4 "Machine Lab" additions ----------------
