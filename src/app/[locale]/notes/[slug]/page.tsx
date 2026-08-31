@@ -2,21 +2,20 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { PageIntro } from "@/components/ui/PageIntro";
-import { SectionHeading } from "@/components/ui/SectionHeading";
-import { StitchRule } from "@/components/ui/StitchPath";
-import { TechniqueSignature } from "@/components/ui/TechniqueSignature";
-import { NoteSpec } from "@/components/notes/NoteSpec";
-import { MonoNote, StepIndex } from "@/components/ui/MonoNote";
 import { JsonLd } from "@/components/site/JsonLd";
 import { TrackedLink } from "@/components/site/TrackedLink";
 import { Icon } from "@/components/ui/Icon";
+import { NeedlePoint, ThreadLine } from "@/components/kds/marks";
+import { StitchSwatch } from "@/components/kds/StitchSwatch";
+import { CtaBand } from "@/components/kds/CtaBand";
 import { machineNotes, noteBySlug } from "@/content/notes";
 import { courseBySlug } from "@/content/courses";
 import { routing } from "@/i18n/routing";
 import { site } from "@/lib/site";
 import { breadcrumbSchema, noteSchema } from "@/lib/schema";
 import { pageMeta } from "@/lib/seo";
+import { pick, pickList } from "@/lib/i18n/localized";
+import { asLocale } from "@/i18n/routing";
 
 export function generateStaticParams() {
   return routing.locales.flatMap((locale) =>
@@ -32,12 +31,12 @@ export async function generateMetadata({
   const { locale, slug } = await params;
   const note = noteBySlug(slug);
   if (!note) return {};
-  const gu = locale === "gu";
+  const l = asLocale(locale);
   return pageMeta({
     locale,
     path: `/notes/${slug}`,
-    title: `${gu ? note.questionGu : note.questionEn} | Karma Design Studio`,
-    description: gu ? note.answerGu : note.answerEn
+    title: `${pick(note, "question", l)} | Karma Design Studio`,
+    description: pick(note, "answer", l)
   });
 }
 
@@ -64,29 +63,29 @@ export default async function NotePage({
   const note = noteBySlug(slug);
   if (!note) notFound();
 
-  const [t, tc, l] = await Promise.all([
+  const [t, tc, rawLocale] = await Promise.all([
     getTranslations("notesPage"),
     getTranslations("common"),
     getLocale()
   ]);
-  const gu = l === "gu";
+  const l = asLocale(rawLocale);
   const course = courseBySlug(note.courseSlug);
   const others = machineNotes.filter((n) => n.slug !== note.slug).slice(0, 3);
   /* The note's own number in the archive. Stable because the array is
      append-only, and it is what the index shows on the same note. */
   const noteIndex = machineNotes.findIndex((n) => n.slug === note.slug) + 1;
-  const question = gu ? note.questionGu : note.questionEn;
-  const answer = gu ? note.answerGu : note.answerEn;
+  const question = pick(note, "question", l);
+  const answer = pick(note, "answer", l);
 
   const articleLd = noteSchema({
     slug: note.slug,
     headline: note.questionEn,
     description: note.answerEn,
-    locale: gu ? "gu" : "en",
+    locale: l,
     courseName: course?.nameEn
   });
 
-  const crumbs = breadcrumbSchema(gu ? "gu" : "en", [
+  const crumbs = breadcrumbSchema(l, [
     ["Machine Notes", "/notes"],
     [note.questionEn, `/notes/${note.slug}`]
   ]);
@@ -96,140 +95,164 @@ export default async function NotePage({
       <JsonLd data={articleLd} />
       <JsonLd data={crumbs} />
 
-      <PageIntro
-        eyebrow={t("eyebrow")}
-        title={question}
-        lede={answer}
-        actions={
-          <>
-            <Link href="/notes" className="btn btn-secondary">
-              {t("allNotes")}
-            </Link>
-            <TrackedLink
-              href={`tel:+${site.callPhone}`}
-              event="call_demo_click"
-              props={{ surface: "note", course: note.courseSlug }}
-              className="cta-tertiary"
-            >
-              <Icon name="phone" size={16} /> {t("askCta")}
-            </TrackedLink>
-          </>
-        }
-        aside={
-          course ? (
-            <>
-              <MonoNote as="p" tone="vermilion">
-                {t("relatedCourse")}
-              </MonoNote>
-              <div className="note-course-plate">
-                <TechniqueSignature slug={course.slug} />
-              </div>
-              <p className="mt-3 font-display text-h4">{gu ? course.nameGu : course.nameEn}</p>
-              <p className="mt-2 text-smallmeta text-stone">
-                {gu ? course.production.producesGu : course.production.producesEn}
+      {/* The question, then the answer in two sentences. Somebody standing at
+          a machine with a bad sample gets what they came for in the first
+          screen; somebody deciding whether to learn this properly reads on. */}
+      <section className="band-hero on-paper" aria-labelledby="note-heading">
+        <div className="wrap">
+          <div className="split">
+            <div className="min-w-0">
+              <p className="t-micro note-issue">
+                {t("issueLabel")} · {pick(note, "issue", l)}
               </p>
-              {/* The note-to-course hop is the conversion this whole content
-                  system exists to produce, so it is the one that is counted. */}
-              <p className="u-actions">
+              <h1 id="note-heading" className="t-h1 mt-3">
+                {question}
+              </h1>
+              <p className="t-lede mt-4 max-w-[52ch]">{answer}</p>
+
+              <ThreadLine draw className="my-6 w-28" />
+
+              <div className="flex flex-wrap items-center gap-3">
+                <Link href="/notes" className="act act-secondary">
+                  {t("allNotes")}
+                </Link>
                 <TrackedLink
-                  href={`/${l}/courses/${course.slug}`}
-                  event="note_course_click"
-                  props={{ note: note.slug, course: course.slug, surface: "note" }}
-                  className="stitch-link inline-flex min-h-8 items-center gap-1.5 font-semibold text-vermilion-deep"
+                  href={`tel:+${site.callPhone}`}
+                  event="call_demo_click"
+                  props={{ surface: "note", course: note.courseSlug }}
+                  className="act-quiet"
                 >
-                  {t("courseCta")} <Icon name="arrow" size={15} className="arrow" />
+                  <Icon name="phone" size={16} /> {t("askCta")}
                 </TrackedLink>
-              </p>
-            </>
-          ) : null
-        }
-      />
+              </div>
+            </div>
 
-      <section className="section band-info">
-        <div className="container-site split">
-          <div className="reading-shell">
-            {/* The archive notation. Full strength here and on the index, and
-                deliberately nowhere else on the site. */}
-            <NoteSpec
-              index={noteIndex}
-              technique={course ? (gu ? course.nameGu : course.nameEn) : undefined}
-              issueLabel={t("issueLabel")}
-              issue={gu ? note.issueGu : note.issueEn}
-              className="note-page-spec"
-            />
-
-            <h2 className="text-h3 mt-8 font-display">{t("whyTitle")}</h2>
-            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-            <p className="mt-5 text-stone">{gu ? note.whyGu : note.whyEn}</p>
-
-            <h2 className="text-h3 u-section-body font-display">{t("detailTitle")}</h2>
-            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-            <p className="mt-5 text-stone">{gu ? note.detailGu : note.detailEn}</p>
-
-            <h2 className="text-h3 u-section-body font-display">{t("exampleTitle")}</h2>
-            <StitchRule draw className="mt-4 max-w-[4.5rem]" />
-            <p className="mt-5 text-stone">{gu ? note.exampleGu : note.exampleEn}</p>
-            <p className="mt-4 text-smallmeta text-stone">{t("exampleNote")}</p>
-          </div>
-
-          <div className="surface surface-feature">
-            <MonoNote as="p" tone="vermilion">
-              {t("checksTitle")}
-            </MonoNote>
-            <ol className="note-checks">
-              {(gu ? note.checksGu : note.checksEn).map((c, i) => (
-                <li key={c}>
-                  <StepIndex n={i + 1} className="note-check-index" />
-                  <span>{c}</span>
-                </li>
-              ))}
-            </ol>
-
-            {/* Video block renders only when the owner has supplied a verified
-                link. Outbound, never an embedded player. */}
-            {note.reelUrl || note.youtubeUrl ? (
-              <p className="u-actions">
-                <a
-                  href={note.reelUrl ?? note.youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-secondary w-full"
-                >
-                  {t("watchCta")}
-                </a>
-              </p>
+            {course ? (
+              <aside className="courses-aside">
+                <p className="t-micro">{t("relatedCourse")}</p>
+                <StitchSwatch slug={course.slug} className="note-course-swatch" />
+                <p className="t-h4 mt-3">{pick(course, "name", l)}</p>
+                <p className="t-meta mt-2">
+                  {pick(course.production, "produces", l)}
+                </p>
+                {/* The note-to-course hop is the conversion this whole content
+                    system exists to produce, so it is the one that is counted. */}
+                <p className="mt-4">
+                  <TrackedLink
+                    href={`/${l}/courses/${course.slug}`}
+                    event="note_course_click"
+                    props={{ note: note.slug, course: course.slug, surface: "note" }}
+                    className="act-quiet"
+                  >
+                    {t("courseCta")} <Icon name="arrow" size={15} className="arrow" />
+                  </TrackedLink>
+                </p>
+              </aside>
             ) : null}
           </div>
         </div>
       </section>
 
-      <section className="section-compact bg-ivory-2">
-        <div className="container-site split">
-          <div>
-            <SectionHeading title={t("demoTitle")} sub={t("demoBody")} />
-            <p className="u-actions action-row">
-              <Link href="/admission" className="btn btn-primary">
-                {tc("bookDemo")} <Icon name="arrow" size={18} className="arrow" />
-              </Link>
-            </p>
-          </div>
-          <div>
-            <p className="microlabel">{t("moreTitle")}</p>
-            <ul className="stack-lines mt-4">
-              {others.map((n) => (
-                <li key={n.slug}>
-                  <Link
-                    href={`/notes/${n.slug}`}
-                    className="stitch-link inline-flex min-h-8 items-center font-semibold"
+      <section className="band on-mist">
+        <div className="wrap">
+          <div className="split">
+            <div className="reading-shell">
+              <p className="t-micro numeric">
+                {t("noteIndexLabel", { n: noteIndex, total: machineNotes.length })}
+              </p>
+
+              <h2 className="t-h3 mt-6">{t("whyTitle")}</h2>
+              <ThreadLine draw className="mt-3 w-16" />
+              <p className="t-body mt-4">{pick(note, "why", l)}</p>
+
+              <h2 className="t-h3 mt-8">{t("detailTitle")}</h2>
+              <ThreadLine draw className="mt-3 w-16" />
+              <p className="t-body mt-4">{pick(note, "detail", l)}</p>
+
+              <h2 className="t-h3 mt-8">{t("exampleTitle")}</h2>
+              <ThreadLine draw className="mt-3 w-16" />
+              <p className="t-body mt-4">{pick(note, "example", l)}</p>
+              <p className="t-meta mt-3">{t("exampleNote")}</p>
+            </div>
+
+            {/* What to check, in the order somebody on the floor would check
+                it. A seam rather than a list, because the order is the
+                method. */}
+            <div className="fee-sheet">
+              <p className="t-micro">{t("checksTitle")}</p>
+              <ol className="pathway mt-4" role="list">
+                {pickList(note, "checks", l).map((c, i, all) => (
+                  <li key={c} className="pathway-step">
+                    <span className="pathway-mark" aria-hidden="true">
+                      <NeedlePoint state={i === all.length - 1 ? "todo" : "done"} />
+                      {i < all.length - 1 ? (
+                        <ThreadLine vertical className="pathway-thread" />
+                      ) : null}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="t-micro numeric">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="t-body mt-0.5 block">{c}</span>
+                    </span>
+                  </li>
+                ))}
+              </ol>
+
+              {/* Renders only when the owner has supplied a verified link.
+                  Outbound, never an embedded player. */}
+              {note.reelUrl || note.youtubeUrl ? (
+                <p className="mt-5">
+                  <a
+                    href={note.reelUrl ?? note.youtubeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="act act-secondary"
                   >
-                    {gu ? n.questionGu : n.questionEn}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+                    {t("watchCta")}
+                  </a>
+                </p>
+              ) : null}
+            </div>
           </div>
         </div>
       </section>
+
+      <section className="band-tight on-canvas" aria-labelledby="more-notes">
+        <div className="wrap">
+          <div className="split">
+            <div className="min-w-0">
+              <p className="t-micro" id="more-notes">
+                {t("moreTitle")}
+              </p>
+              <ul className="notes mt-4" role="list">
+                {others.map((n) => (
+                  <li key={n.slug}>
+                    <Link href={`/notes/${n.slug}`} className="note-row">
+                      <span className="min-w-0">
+                        <span className="t-micro note-issue">{pick(n, "issue", l)}</span>
+                        <span className="t-h4 mt-1 block">
+                          {pick(n, "question", l)}
+                        </span>
+                      </span>
+                      <Icon name="arrow" size={17} className="note-arrow arrow" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="min-w-0">
+              <p className="t-micro">{t("demoTitle")}</p>
+              <p className="t-body mt-2 max-w-[44ch]">{t("demoBody")}</p>
+              <p className="mt-4">
+                <Link href="/admission" className="act act-primary">
+                  {tc("bookDemo")} <Icon name="arrow" size={17} className="arrow" />
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <CtaBand title={t("closeH2")} sub={t("closeSub")} ground="on-cloth" />
     </>
   );
 }
