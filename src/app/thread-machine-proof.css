@@ -202,6 +202,13 @@
   background-color: var(--s-canvas);
   color: var(--ink);
   font-size: var(--t-body);
+
+  /* The shell's column: the footer sits at the bottom of a short page rather
+     than floating mid-viewport. Declared here rather than in a second `.kds`
+     rule further down, so the root has exactly one place to read. */
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
 }
 
 @media (min-width: 48rem) { .kds { --gutter: 2rem; } }
@@ -1032,6 +1039,279 @@
   .kds .split { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 3rem; align-items: start; }
   .kds .split-reverse { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); }
 }
+
+/* ==========================================================================
+ * 11d. THE SHELL — brand, header, menu, footer
+ *
+ * The header is 56px on a phone and 64px from `lg`, carrying three things on a
+ * phone (brand, language, menu) and five on a laptop. It is NOT sticky-heavy:
+ * a hairline and the canvas, so it belongs to the page rather than hovering
+ * over it.
+ * ========================================================================== */
+
+/* ---- the brand slot -------------------------------------------------- */
+
+/**
+ * A reserved HEIGHT, not a reserved box: the width follows the asset's own
+ * ratio so a wide horizontal lockup and a compact square mark both drop in.
+ * The container is neutral and nothing recolours the asset — see
+ * `src/lib/brand.ts` for why each of those is a rule rather than a preference.
+ */
+.kds .brand {
+  --logo-h: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+.kds .brand-lg { --logo-h: 2.25rem; }
+.kds .brand-logo {
+  display: block;
+  height: var(--logo-h);
+  width: auto;
+  max-width: 13rem;
+}
+
+/* The fallback wordmark, until an asset exists. */
+.kds .brand-word {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.kds .brand-lg .brand-word { font-size: 1.375rem; }
+.kds .brand-needle {
+  width: 0.4rem;
+  height: 0.4rem;
+  align-self: center;
+  box-shadow: none;
+}
+.kds .brand-name { font-weight: 800; }
+.kds .brand-tail { font-weight: 500; color: var(--ink-muted); }
+@media (min-width: 64rem) { .kds .brand { --logo-h: 2rem; } .kds .brand-word { font-size: 1.1875rem; } }
+
+/* ---- the shell's own column ------------------------------------------ */
+
+/**
+ * The footer sits at the bottom of a short page rather than floating in the
+ * middle of the viewport — a 404 and the certificate-verify result are both
+ * short enough for this to matter. The column itself is declared on the root
+ * in §1 so `.kds` has exactly one rule.
+ */
+.kds > main { flex: 1 0 auto; }
+.kds > .site-foot { flex-shrink: 0; }
+
+/** Skip link: invisible until focused, then a real target at the top left. */
+.kds .skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: 60;
+}
+.kds .skip-link:focus {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: var(--r-ui);
+  background-color: var(--ink);
+  color: var(--s-paper);
+  font-weight: 700;
+}
+
+/* ---- header ---------------------------------------------------------- */
+
+.kds .site-head {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: color-mix(in srgb, var(--s-canvas) 94%, transparent);
+  backdrop-filter: saturate(1.4) blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.kds .site-head-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: var(--header-h);
+}
+.kds .site-head-end { display: flex; align-items: center; gap: 0.5rem; }
+
+.kds .site-nav { display: none; }
+.kds .site-head-cta { display: none; }
+
+.kds .site-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-right: -0.5rem;
+  border-radius: var(--r-ui);
+  color: var(--ink);
+}
+
+@media (min-width: 64rem) {
+  .kds .site-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    min-width: 0;
+  }
+  .kds .site-nav-link {
+    position: relative;
+    padding-block: 0.35rem;
+    font-size: var(--t-meta);
+    font-weight: 700;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .kds .site-nav-link:hover { color: var(--brand-accent-strong); }
+  /* "You are here" is stitched, because a running stitch is already the site's
+     one repeated mark and a second signal would be a second vocabulary. */
+  .kds .site-nav-mark {
+    position: absolute;
+    inset-inline: 0;
+    bottom: -0.15rem;
+  }
+  .kds .site-head-cta { display: inline-flex; min-height: 2.5rem; padding-inline: 0.95rem; }
+  /* The menu button is a phone control; from here the row is the navigation. */
+  .kds .site-menu-btn { display: none; }
+}
+
+/* ---- the two-language switch ----------------------------------------- */
+
+/**
+ * A segmented pair. Two values fit a segmented control, which is exactly why
+ * the three-locale bottom sheet it replaces is gone.
+ */
+.kds .locale-switch {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-ui);
+  overflow: hidden;
+}
+.kds .locale-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  min-width: 2.75rem;
+  padding-inline: 0.55rem;
+  font-size: var(--t-meta);
+  font-weight: 700;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+.kds .locale-option + .locale-option { border-left: 1px solid var(--line-strong); }
+.kds .locale-option:hover { color: var(--ink); background-color: var(--s-paper); }
+.kds .locale-option[aria-current="true"] {
+  background-color: var(--ink);
+  color: var(--s-paper);
+}
+
+/* ---- the mobile menu -------------------------------------------------- */
+
+.kds .site-menu {
+  position: fixed;
+  inset: var(--header-h) 0 auto 0;
+  z-index: 56;
+  max-height: calc(100dvh - var(--header-h));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background-color: var(--s-canvas);
+  border-bottom: 1px solid var(--line);
+  padding: 0.25rem var(--gutter) calc(1.25rem + env(safe-area-inset-bottom));
+  animation: kds-rise 220ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+.kds .site-menu-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.25rem;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--t-h4);
+  font-weight: 700;
+  color: var(--ink);
+}
+.kds .site-menu-link .arrow { color: var(--ink-muted); transition: transform 160ms ease; }
+.kds .site-menu-link:hover .arrow { transform: translateX(3px); }
+.kds .site-menu-link[aria-current="page"] { color: var(--brand-accent-strong); }
+.kds .site-menu-foot { display: grid; gap: 0.625rem; padding-top: 1rem; }
+.kds .site-menu-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem; }
+.kds .site-menu-locale { justify-self: start; margin-top: 0.25rem; }
+/* Both are phone chrome. The sibling selector this used to rely on could not
+   match — the scrim precedes the panel in the DOM — so each is named. */
+@media (min-width: 64rem) {
+  .kds .site-menu,
+  .kds .sheet-scrim { display: none; }
+}
+
+/* ---- footer ----------------------------------------------------------- */
+
+.kds .site-foot { padding-block: var(--sp-section) var(--sp-tight); }
+.kds .site-foot-spine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1.25rem;
+}
+.kds .site-foot-promise { color: var(--ink-muted); font-weight: 500; }
+.kds .site-foot-rule { margin-block: 1.25rem 1.75rem; }
+
+/**
+ * On a phone the visit block runs full width and the two link columns PAIR,
+ * rather than stacking into 500px of short lists. Measured: stacking them cost
+ * about 250px of a 1,192px footer for no gain — two columns of six short links
+ * are perfectly legible at 390.
+ */
+.kds .site-foot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.75rem 1.25rem;
+}
+.kds .site-foot-visit { grid-column: 1 / -1; }
+@media (min-width: 48rem) {
+  .kds .site-foot-grid { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr); gap: 2.5rem; }
+  .kds .site-foot-visit { grid-column: auto; }
+}
+
+.kds .site-foot-address { font-style: normal; margin-top: 0.5rem; line-height: 1.5; }
+/**
+ * The three numbers, stacked as label-above-value.
+ *
+ * They were a three-column row, which gave each about 130px inside the visit
+ * track — narrow enough that "+91 81605 17429" wrapped between the digits.
+ * A phone number broken across two lines is unreadable and is no longer one
+ * tap target, so `white-space: nowrap` is the rule and stacking is what makes
+ * room for it.
+ */
+.kds .site-foot-numbers { display: grid; gap: 0.75rem; margin-top: 1.125rem; }
+.kds .site-foot-numbers dd a { white-space: nowrap; }
+.kds .site-foot-actions { display: flex; flex-wrap: wrap; gap: 0.625rem; margin-top: 1.25rem; }
+
+.kds .site-foot-nav ul { display: grid; gap: 0.4rem; margin-top: 0.5rem; font-size: var(--t-meta); }
+.kds .site-foot-social-label { margin-top: 1.25rem; }
+.kds .site-foot-social { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; }
+
+.kds .site-foot-legal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+.kds .site-foot-legal-links { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.25rem; }
 
 /* ==========================================================================
  * 12b. OVERLAYS — the sheet and the dock

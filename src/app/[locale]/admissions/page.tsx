@@ -13,6 +13,7 @@ import { getPublicFaqs } from "@/lib/content/public";
 import { site, waLink } from "@/lib/site";
 import { pageMeta } from "@/lib/seo";
 import { faqSchema } from "@/lib/schema";
+import { ActionDock } from "@/components/kds/shell/ActionDock";
 
 export const dynamic = "force-dynamic";
 
@@ -182,6 +183,11 @@ export default async function AdmissionsPage({ params }: { params: Promise<{ loc
         </div>
       </section>
 
+      {/* Contextual conversion (plan §15). This is a high-intent route, so
+          the dock belongs here — and NOT on the privacy policy, the terms
+          page or the notes archive, which is where the permanent bar it
+          replaces used to sit. */}
+      <ActionDock surface={"admissions"} demoHref="/admission" />
     </>
   );
 }

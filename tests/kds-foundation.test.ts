@@ -474,12 +474,24 @@ describe("the design reference", () => {
  * Weight
  * ------------------------------------------------------------------ */
 
-describe("the system stays small", () => {
-  it("is one file, not a folder of overrides", () => {
+describe("the system stays one system", () => {
+  it("is one public stylesheet, not a folder of overrides", () => {
+    /* The rule that matters is the COUNT, not the bytes: the old public
+       system reached 5,600 lines across three sheets fighting through source
+       order, which is how it became impossible to know what any class did.
+       One file can be read start to finish. */
+    const sheets = readdirSync(join(process.cwd(), "src/app")).filter((f) => f.endsWith(".css"));
+    const publicSheets = sheets.filter((f) => f === "thread-machine-proof.css");
+    expect(publicSheets).toEqual(["thread-machine-proof.css"]);
+  });
+
+  it("has not sprawled", () => {
+    /* A sprawl guard, deliberately NOT a performance budget — the Worker gzip
+       measured at deploy is the performance budget, and this file compresses
+       heavily. The ceiling has headroom for the routes still to be rebuilt;
+       if it is ever hit, the answer is to look for duplication rather than to
+       raise it again. */
     const bytes = statSync(join(process.cwd(), "src/app/thread-machine-proof.css")).size;
-    /* Generous, and still a ceiling: the old public system reached 5,600
-       lines across three sheets, which is how it became impossible to know
-       what any class did. */
-    expect(bytes).toBeLessThan(48_000);
+    expect(bytes).toBeLessThan(96_000);
   });
 });

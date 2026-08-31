@@ -7,6 +7,7 @@ import { CURRENT_TERMS_VERSION } from "@/content/admission-terms";
 import { PageIntro } from "@/components/ui/PageIntro";
 import { Icon } from "@/components/ui/Icon";
 import { pageMeta } from "@/lib/seo";
+import { ActionDock } from "@/components/kds/shell/ActionDock";
 
 export async function generateMetadata({
   params
@@ -115,6 +116,11 @@ export default async function AdmissionFormPage({
         languageNote={tn("languageNote")}
         declarationLabel={tn("declarationLabel")}
       />
+      {/* Contextual conversion (plan §15). This is a high-intent route, so
+          the dock belongs here — and NOT on the privacy policy, the terms
+          page or the notes archive, which is where the permanent bar it
+          replaces used to sit. */}
+      <ActionDock surface={"admission"} demoHref="/admission" />
     </>
   );
 }

@@ -9,6 +9,7 @@ import { getUpcomingBatches } from "@/lib/db/queries";
 import { formatDate } from "@/lib/utils";
 import { site, waLink } from "@/lib/site";
 import { pageMeta } from "@/lib/seo";
+import { ActionDock } from "@/components/kds/shell/ActionDock";
 
 /**
  * `/[locale]/batches` — the public batch decision page.
@@ -224,6 +225,11 @@ export default async function BatchesPage({
           </MonoNote>
         </div>
       </section>
+      {/* Contextual conversion (plan §15). This is a high-intent route, so
+          the dock belongs here — and NOT on the privacy policy, the terms
+          page or the notes archive, which is where the permanent bar it
+          replaces used to sit. */}
+      <ActionDock surface={"batches"} demoHref="/admission" />
     </>
   );
 }

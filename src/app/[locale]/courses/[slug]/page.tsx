@@ -25,6 +25,7 @@ import { site, waLink } from "@/lib/site";
 import { breadcrumbSchema, courseSchema } from "@/lib/schema";
 import { Icon } from "@/components/ui/Icon";
 import { pageMeta } from "@/lib/seo";
+import { ActionDock } from "@/components/kds/shell/ActionDock";
 
 // Batch data is live -> per-request rendering.
 export const dynamic = "force-dynamic";
@@ -496,6 +497,11 @@ export default async function CourseDetailPage({
           </div>
         </section>
       ) : null}
+      {/* Contextual conversion (plan §15). A course page is the highest-
+          intent route on the site, and the demo action carries the course
+          the visitor is actually reading about rather than dropping them on
+          an empty form. */}
+      <ActionDock surface="course" demoHref={`/admission?course=${course.slug}`} />
     </>
   );
 }
