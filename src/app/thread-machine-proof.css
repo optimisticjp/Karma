@@ -1830,6 +1830,45 @@
   .kds .split-even { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+/* ---- two rules brought across from the Console sheets --------------------
+ *
+ * Phase 11 stopped the public layout importing `premium.css` and
+ * `machine-lab.css` — 158 KB of the Console's system that the public site was
+ * loading and almost entirely not using, and the last way the old visual
+ * language could still leak onto a public page. These two rules were the only
+ * ones public markup genuinely needed, so they moved rather than being
+ * reinvented, and they are scoped `.kds` like everything else here.
+ */
+
+/** The two reserved story portraits. Two up, never more: they are frames. */
+.kds .story-portraits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.875rem;
+  margin-top: 0.875rem;
+  max-width: 34rem;
+  list-style: none;
+  padding: 0;
+}
+
+/**
+ * The admission form's step controls, held above the fold of a long form on a
+ * phone so Back and Next are always reachable. Static from `md:` — a sticky
+ * bar on a screen that shows the whole step is a bar covering content for no
+ * reason.
+ */
+.kds .form-nav {
+  position: sticky;
+  bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
+  z-index: 5;
+  margin-inline: -0.75rem;
+  padding: 0.5rem 0.75rem 0;
+  background: linear-gradient(to bottom, transparent 0, var(--s-paper) 0.75rem);
+}
+@media (min-width: 48rem) {
+  .kds .form-nav { position: static; margin-inline: 0; padding: 0; background: none; }
+}
+
 /* ---- the certificate check ----------------------------------------------
  *
  * The one public surface where the design gets out of the way. Somebody here

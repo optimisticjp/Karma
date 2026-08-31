@@ -8,7 +8,7 @@ import {
   VERIFIED_COURSE_OPERATIONS
 } from "../src/content/course-operations";
 import { PHOTOGRAPHED_COURSE_SLUGS, coursePhotoFor } from "../src/content/photo-manifest";
-import { TECHNIQUE_SIGNATURES } from "../src/components/ui/TechniqueSignature";
+import { STITCH_SWATCHES } from "../src/components/kds/StitchSwatch";
 import { notesForCourse } from "../src/content/notes";
 
 const read = (p: string) => readFileSync(join(process.cwd(), p), "utf8");
@@ -105,7 +105,7 @@ describe("photography policy across the catalogue", () => {
 
   it("gives every course a technique signature, photographed or not", () => {
     for (const course of courses) {
-      expect(TECHNIQUE_SIGNATURES[course.slug], course.slug).toBeDefined();
+      expect(STITCH_SWATCHES[course.slug], course.slug).toBeDefined();
     }
     /* The mark a course leads with on the rebuilt surfaces is its STITCH
        SWATCH — the signatures survive on `/about`, `/services` and the notes.
@@ -136,7 +136,7 @@ describe("photography policy across the catalogue", () => {
   });
 
   it("keeps the internal signature spec and the visitor-facing caption separate", () => {
-    /* TECHNIQUE_SIGNATURES[].description is the English spec note the design
+    /* STITCH_SWATCHES[].description is the English spec note the design
        system is written against; the caption a visitor reads comes from the
        message catalogue, so it is bilingual. */
     expect(courseHero).toContain("signatures.${course.slug}");

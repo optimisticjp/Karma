@@ -341,18 +341,18 @@ export function AdmissionForm({
   /* ------------------------------- success -------------------------------- */
   if (done) {
     return (
-      <div className="card p-4 text-center md:p-8">
-        <span className="seal-in mx-auto flex h-11 w-11 items-center justify-center rounded-full border-2 border-dashed border-success">
+      <div className="form-shell text-center">
+        <span className="verdict-mark mx-auto" style={{ color: "var(--ok)", borderColor: "var(--ok)" }}>
           <Icon name="check" size={22} className="text-[var(--ok)]" strokeWidth={2} />
         </span>
         <h2 ref={successHeading} tabIndex={-1} className="t-h2 mt-2 outline-none">
           {t("success.title")}
         </h2>
         <p className="mt-2 t-meta">{t("success.refLabel")}</p>
-        <p className="font-mono text-h4 font-bold tracking-wide text-[var(--brand-accent-strong)]">
+        <p className="t-h4 cert-no font-bold text-[var(--brand-accent-strong)]">
           {done.reference}
         </p>
-        <p className="prose-measure mx-auto mt-2 t-meta">{t("success.body")}</p>
+        <p className="t-meta mx-auto mt-2 max-w-prose">{t("success.body")}</p>
         <div className="mt-3 flex flex-wrap justify-center gap-2">
           <a href={done.waUrl} target="_blank" rel="noopener noreferrer" className="act act-primary">
             {t("success.waButton")}

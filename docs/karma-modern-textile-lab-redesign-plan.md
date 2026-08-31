@@ -3484,7 +3484,7 @@ actually asks. Phase 11 gets the final word.
 
 # Phase 11 — Final creative-director audit + old visual cleanup
 
-**Status:** ⏳ Pending
+**Status:** ✅ Complete
 
 This is not a bug-fix-only pass.
 
@@ -3509,6 +3509,111 @@ Ask:
 Delete unused legacy public components/styles created by old redesign generations when no longer needed.
 
 Do not delete shared code Karma Console still uses.
+
+## The public site was still loading the Console's design system
+
+The largest finding of the phase, and it was not visible in any screenshot.
+`src/app/[locale]/layout.tsx` imported **four** stylesheets: `globals.css`,
+`premium.css`, `machine-lab.css` and `thread-machine-proof.css`. The middle two
+are the Karma Console's system.
+
+Measured on a production server:
+
+| | before | after |
+| --- | --- | --- |
+| CSS a public page downloads | **196 KB** | **116 KB** |
+| stylesheets | 4 | 2 |
+
+That is 41% less CSS, and — more importantly — it closes the last route by
+which the old visual language could reach a public page. A public page can no
+longer *accidentally* look right by standing on a stylesheet nobody meant it to
+use, which is exactly how a rebuild half-happens.
+
+`/admin` still imports both, unchanged. `globals.css` stays on the public side
+because it is where Tailwind itself is imported and where the `@theme` tokens
+live.
+
+## Seventeen files deleted, nothing orphaned
+
+`PageIntro`, `SectionHeading`, `MonoNote`, `StitchMark`, `StitchDivider`,
+`StitchPath`, `TechniqueSignature`, `Ledger`, `Surface`, `CountUp` — the whole
+of the previous two public generations, plus the five from Phase 7 and two
+from Phase 9.
+
+An unused component is not harmless: it keeps its CSS alive, it answers "how is
+this done here" wrongly for the next session, and it gets copied.
+`tests/kds-cleanup.test.ts` asserts each file is GONE rather than merely
+unimported, and that nothing — public or Console — still imports it.
+
+Every rule the deleted files carried was repointed, not dropped:
+`TECHNIQUE_SIGNATURES` → `STITCH_SWATCHES` (still eleven, still one per
+course, still no invented specification); `STITCH_SEMANTICS` → the four marks
+`marks.tsx` exports, where the "one mark means one thing" rule is now kept by
+having fewer marks rather than a table of them; the running-stitch geometry →
+the CSS every stitched thing shares, which is stricter than an SVG dash array
+repeated per drawing.
+
+## The two forms were the last markup speaking the old language
+
+`<BriefForm>` still used `card`, `btn btn-primary`, `seam-note`,
+`prose-measure`, `text-stone`, `text-vermilion-deep`, `font-display` — the old
+palette, including a **hardcoded hue** the brand-variable rule exists to
+prevent. `<AdmissionForm>` had five leftovers.
+
+Both are now on the rebuilt system. **Presentation only**: the honeypot, the
+minimum-time check, Turnstile, the persistent live region, the guardian mobile
+and the terms version are all asserted in the cleanup suite, so a future
+restyle cannot quietly drop one.
+
+One defect the restyle exposed: the services page wrapped `<BriefForm>` in a
+`.form-shell` of its own, and the form now brings one — a box inside a box.
+
+## The creative-director questions
+
+Reviewed at 390 and 1280 in both languages, on the rendered pages:
+
+- **Does it look like an AI/template site?** No. There is no card grid
+  repeated across routes: the catalogue is a sample book, the notes are a
+  numbered diagnostic list, the work wall is masonry, the services page is a
+  workflow, the legal pages are documents, the certificate check is one field.
+- **Like a generic design institute?** No. The homepage's first screen names a
+  software, a locality, a teaching method and a free demo, and shows eleven
+  real stitch drawings.
+- **Specifically embroidery?** Yes, and from the mechanics rather than from
+  decoration: a running stitch as the site's one repeated mark, a needle point
+  for a step, technique swatches drawn from each stitch's real structure, and
+  a failed stitch-out with four named faults.
+- **Light but distinctive?** Yes. Four grounds, no dark sections, and the
+  distinctiveness carried by material and notation rather than by contrast.
+- **Arbitrary future logo colour?** Yes — everything flows through the four
+  brand variables, which `tests/kds-foundation.test.ts` enforces.
+- **First phone viewport useful?** Yes: promise, what it is, the demo, and the
+  facts, above the fold at 390.
+- **Tablet composed?** Yes — 768/820 have their own two-column arrangements,
+  and the header now splits at 64rem and 75rem rather than breaking at 1024.
+- **Desktop editorial without waste?** Yes; the wrap caps at 1220px and the
+  asides carry real content rather than filling space.
+- **Old styles leaking?** Not any more — see above.
+- **Copy longer than it needs to be?** The audit found one marketing cliché in
+  the whole catalogue, and it was a disclaimer.
+- **Fake technicality? Fake proof?** No. Every unverified item carries its
+  marker, and none of it reaches structured data.
+
+## What is left, honestly
+
+- **`/services` is the tallest page on the site** — 14,070px at 320px. Every
+  block on it answers a question a business asks, and it is left as it is.
+- **The 404's tab title is the home page's**, because a not-found boundary
+  cannot export metadata (Phase 10 records the detail).
+- **The 32 photographs do not exist**, so several routes are largely reserved
+  frames. That is the shoot, not the design.
+
+## Verified
+
+**1,050 tests** across 65 files, including a new `tests/kds-cleanup.test.ts`
+(7). Zero findings across the 306 route-width-locale combinations after the
+stylesheet cut — the same sweep Phase 10 built, re-run to prove nothing lost
+its styling.
 
 ---
 

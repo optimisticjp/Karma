@@ -9,9 +9,16 @@ import { UnveilWatcher } from "@/components/ui/Reveal";
 import { JsonLd } from "@/components/site/JsonLd";
 import { site } from "@/lib/site";
 import { studioSchema } from "@/lib/schema";
+/* ONE public stylesheet, plus Tailwind.
+ *
+ * `premium.css` and `machine-lab.css` are the KARMA CONSOLE's system and are
+ * imported by `src/app/admin/layout.tsx` alone. The public layout loaded them
+ * too until Phase 11 — 158 KB of rules the rebuilt site had stopped using, and
+ * the last route by which the old visual language could still reach a public
+ * page. `globals.css` stays because it is where Tailwind itself is imported
+ * and where the `@theme` tokens live; CLAUDE.md's rule about not adding a
+ * PUBLIC token to it is unchanged. */
 import "../globals.css";
-import "../premium.css";
-import "../machine-lab.css";
 /* THREAD / MACHINE / PROOF — the public design system, and the reason it is
    last and the reason it is here.
 

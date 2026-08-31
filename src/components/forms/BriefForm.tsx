@@ -54,20 +54,22 @@ export function BriefForm() {
 
   if (done) {
     return (
-      <div className="card p-8 text-center">
-        <p className="text-h3 font-display">✔ {t("success.title")}</p>
-        <p className="mt-3 text-smallmeta text-stone">{t("success.refLabel")}</p>
-        <p className="font-mono text-lead font-bold text-vermilion-deep">{done.reference}</p>
-        <p className="prose-measure mx-auto mt-4 text-stone">{t("success.body")}</p>
-        <p className="mt-2 text-smallmeta text-stone">{t("success.files", { count: done.filesStored })}</p>
-        <a
-          href={waLink(t("success.waMessage", { ref: done.reference }))}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn btn-primary mt-6"
-        >
-          {t("success.waButton")}
-        </a>
+      <div className="form-shell">
+        <p className="t-h3">{t("success.title")}</p>
+        <p className="t-micro mt-4">{t("success.refLabel")}</p>
+        <p className="t-h3 cert-no mt-1">{done.reference}</p>
+        <p className="t-body mt-4 max-w-prose">{t("success.body")}</p>
+        <p className="t-meta mt-2">{t("success.files", { count: done.filesStored })}</p>
+        <p className="mt-6">
+          <a
+            href={waLink(t("success.waMessage", { ref: done.reference }))}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="act act-primary"
+          >
+            {t("success.waButton")}
+          </a>
+        </p>
       </div>
     );
   }
@@ -90,9 +92,9 @@ export function BriefForm() {
   );
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} className="card space-y-5 p-3.5 md:p-5" noValidate={false}>
-      <h3 className="text-h3 font-display">{t("formTitle")}</h3>
-      <div className="grid gap-5 md:grid-cols-2">
+    <form ref={formRef} onSubmit={onSubmit} className="form-shell space-y-5" noValidate={false}>
+      <h3 className="t-h3">{t("formTitle")}</h3>
+      <div className="grid gap-4 md:grid-cols-2">
         {field("name", t("form.name"), { required: true })}
         {field("company", t("form.company"))}
         {field("phone", t("form.phone"), { type: "tel", required: true })}
@@ -119,10 +121,10 @@ export function BriefForm() {
        * anything else posts one. `ACCEPT_ATTR` and the size limits stay
        * imported for exactly that restoration.
        */}
-      <div className="seam-note seam-note-accent">
-        <p className="label">{t("form.files")}</p>
-        <p className="mt-2 text-xs text-stone">{t("form.filesDeferred")}</p>
-        <p className="mt-2 text-xs text-stone">🔒 {t("confidential")}</p>
+      <div className="form-callout">
+        <p className="t-micro">{t("form.files")}</p>
+        <p className="t-meta mt-2">{t("form.filesDeferred")}</p>
+        <p className="t-meta mt-2">{t("confidential")}</p>
       </div>
       {/* Honeypot: hidden from humans, tempting to bots */}
       <div className="hidden" aria-hidden="true">
@@ -137,15 +139,15 @@ export function BriefForm() {
       <div role="alert" aria-live="assertive" className="empty:hidden">
         {error ? <p className="field-error">{error}</p> : null}
       </div>
-      <p className="text-xs text-stone">
+      <p className="t-meta">
         {t("form.privacyNote")}{" "}
-        <Link href="/privacy" className="stitch-link font-semibold">{tf("privacy")}</Link>
+        <Link href="/privacy" className="link-thread">{tf("privacy")}</Link>
       </p>
       <button
         type="submit"
         disabled={busy}
         aria-busy={busy || undefined}
-        className="btn btn-primary w-full md:w-auto"
+        className="act act-primary w-full md:w-auto"
       >
         {busy ? t("form.submitting") : t("form.submit")}
       </button>
