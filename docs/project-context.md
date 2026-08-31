@@ -778,7 +778,8 @@ middleware. It is the rendered reference for the system at `/design`.
 **Phase record (2026-08-31):** Phase 0 recovery (PR #61), Phase 1 foundation
 (#62), Phase 2 shell (#63), Phase 3 homepage (#64), Phase 4 courses (#65),
 Phase 5 conversion routes (#66), Phase 6 work and notes (#67), Phase 7
-secondary routes (#68), Phase 8 copy and SEO. The homepage
+secondary routes (#68), Phase 8 copy and SEO (#69), Phase 9 photography. The
+homepage
 is ten blocks
 in `src/components/kds/home/`, no two of the same shape; the twenty-two
 components in `src/components/home/` are deleted. Measured at 390px it is
@@ -829,6 +830,24 @@ carried forward — is in
    It returns to the sitemap when the owner approves the draft and the
    `noIndex` goes — the two are one decision, and `tests/mtl-routes.test.ts`
    derives it from the page rather than from a list.
+
+**And two from Phase 9:**
+
+7. **A reserved photo frame is not an image.** `<PhotoFrame>` announced itself
+   as `role="img"` labelled with the shoot brief, telling a screen-reader user
+   that a photograph of an EMCAD DAHAO screen exists. It carries a
+   visually-hidden `Photograph pending · ફોટો બાકી: <brief>` instead, at every
+   scale. `PHOTO_PENDING` is one bilingual string because `<PhotoFrame>` also
+   renders on `/design`, which has no intl provider. `altGuidance` in the
+   manifest is an INSTRUCTION for whoever writes the alt when a file lands —
+   never an `alt` itself, and a test bans it as one.
+8. **One empty frame.** `<PhotoSlot>`, `<ManifestPhoto>` and `<SampleTag>` are
+   deleted; `<PhotoFrame>` covers the 32 reserved slots and the new
+   `<EmptyFrame>` covers Content Desk images the manifest knows nothing about.
+   Public photography is same-origin deployed assets served from the Workers
+   Assets binding — a different budget from the 3 MB script — and **R2 stays
+   switched off**: it is for confidential brief files, not for photographs
+   anyone may see.
 
 ---
 
@@ -2219,6 +2238,7 @@ which is the point — the policy survives a refactor:
 | `kds-work-notes` | the archive and the Content Desk feed staying two different things; the case notes carrying no sample marker because they claim nothing about a person; the notes search matching the question, fault and tags but never the answer; a note page answering before it explains, emitting `TechArticle` and never a `Person` |
 | `kds-admissions` | the batch board's filters built from the rows, its three distinct empty states and its bounded query; the admissions page carrying no second batch list; the form at a reading measure with 44px controls, the system's primitives and no console palette; none of the three routes offering a way to pay online |
 | `kds-courses` | the catalogue's five blocks and the course template's nine, in order and with no two adjacent grounds alike; no fee on a tile or in the hero; a duration only where the owner confirmed one; the same media box photographed or not; no payment provider, machine specification, unconfirmed trainer or week/month inside a syllabus module title |
+| `kds-photo` | the manifest holding exactly the owner's 32 slots in the briefed groups, each with the intrinsic size the frame reserves from; every slot placed in a real composition and resolved by slug rather than by position; the three courses with no station falling back to their own stitch swatch; no stock, generated or remote image anywhere; the placeholder honest to a screen reader and the shoot guidance never presented as an alt; no call site imposing its own ratio on a reserved frame |
 | `kds-copy-seo` | no public message the site does not render, and both catalogues the same shape with no empty Gujarati string; every page's title and description unique and inside what a result shows; no outcome, fee or guarantee promised in a search result that the page itself refuses to claim; a breadcrumb on every indexable second-level route, localized on both crumbs; hreflang and the sitemap derived from the one locale list; no route submitted that its own page tells the crawler to ignore; no Wilcom, no rupee figure, no machine specification and no duration for a course the owner has not confirmed one for |
 | `kds-secondary` | the eight secondary routes on the rebuilt system and none of the superseded primitives; no two neighbouring grounds alike; no locale ternary; `/services` quoting no turnaround, price or guarantee and drawing the commercial chain without the school's photographs; `/contact` ranking its channels, never labelling the call number as WhatsApp and taking every number from `site.ts`; the verify flow carrying no motion, answering with a word and a mark rather than colour alone, and degrading to "unavailable" rather than "not found"; both legal documents fully translated, stating no fee, refund window or duration, and `/terms` staying out of the index — plus every literal `t("…")` on every public ROUTE resolving in both catalogues |
 | `kds-homepage` | the ten blocks in order and no two adjacent grounds alike; every EMCAD figure rendered from the verified record and never typed into a catalogue; no online payment; no invented machine specification; no student name, outcome or earning on a frame; the signature interaction never autoplaying or needing a drag |

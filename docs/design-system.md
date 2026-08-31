@@ -1458,3 +1458,75 @@ neither wrapped nor scrolled — every box is `nowrap` inside a shrinkable flex
 child — so the header **overlapped itself** on every page. A row that cannot
 wrap must be given a width it fits in; shrinking the type would only have moved
 the failure a few pixels away.
+
+---
+
+## The 32 photographs: alt text, and the pipeline for the day they arrive (Phase 9, 2026-08-31)
+
+None of the 32 exists yet. `src/content/photo-manifest.ts` is the shoot list as
+a typed record, and `<PhotoFrame>` reserves each slot's **exact** aspect ratio
+from its intrinsic width and height — so the day a file lands is a content
+change, not a layout change, and CLS stays 0 through the swap.
+
+Coverage today: hero 3 · course 8 · work 6 · trainer 3 · studio 6 · story 2 ·
+process 3 · floor 1. Every one is placed in a real composition, and
+`tests/kds-photo.test.ts` fails if a slot is added, dropped, or left unplaced.
+
+### Alt text
+
+Three different strings, and confusing any two of them is the failure mode:
+
+| Field | Who it is for | Where it appears |
+| --- | --- | --- |
+| `label` | the photographer | on the placeholder, as the shot brief |
+| `altGuidance` | whoever writes the alt when the file lands | in the manifest, never on the page |
+| `alt` | the reader who cannot see the photograph | **does not exist yet** |
+
+**`altGuidance` is an instruction, not a description.** "Name the technique
+being stitched and the material" is not alt text; it is what the alt text has
+to accomplish once somebody has looked at the actual photograph. Pasting it
+into an `alt` would describe a picture nobody has seen.
+
+**While a slot is empty it announces itself as pending.** The placeholder used
+to be `role="img"` labelled with the shoot brief, which told a screen-reader
+user that there IS a photograph of an EMCAD DAHAO screen. It now carries a
+visually-hidden `PHOTO_PENDING: <label>` line at every scale — including
+`thumb`, which previously announced a label while showing nothing.
+
+`PHOTO_PENDING` is one bilingual string rather than a catalogue key because
+`<PhotoFrame>` also renders on `/design`, which is its own root layout with no
+intl provider. It is the same exception the WhatsApp prefills take.
+
+When a file arrives: replace the placeholder body with the `<picture>`, write
+the `alt` from what is in the frame, and keep the `width`/`height` from the
+manifest so the reserved box is unchanged. A decorative crop of a photograph
+already described nearby takes `alt=""` — never a repeat of the caption.
+
+### Image pipeline — no R2, and none needed
+
+**Public photography is same-origin deployed assets, not R2.** R2 is for
+confidential B2B brief files and is deferred on purpose (CLAUDE.md #20); a
+public photograph has no reason to be behind an authenticated route. Files go
+in `public/photos/<SLOT_ID>.<ext>`, and `wrangler.jsonc` serves them from the
+**Workers Assets** binding (`.open-next/assets`) — which is a different budget
+from the 3 MB Worker script, so 32 photographs cannot push the script over its
+limit.
+
+Recommended, when the shoot is delivered:
+
+- **AVIF first, WebP second, JPEG last**, in one `<picture>`. AVIF at quality
+  ~50 is roughly a third of the equivalent JPEG on embroidery detail, which is
+  exactly the high-frequency texture that punishes JPEG.
+- **Two widths per slot**: the manifest's own width (already sized for a 2×
+  screen at the largest box it appears in) and half of it, offered through
+  `srcset` with a `sizes` that matches the composition. Nothing needs a third.
+- **A budget of ~150 KB per AVIF at 1600px**, so the whole shoot is 4–6 MB
+  across the entire site and no single page carries more than about six.
+- `loading="lazy"` and `decoding="async"` on everything except the hero's first
+  frame, which takes the `priority` flag `<PhotoFrame>` already reserves.
+- **Strip EXIF on export.** A phone photograph of the studio floor carries GPS
+  coordinates, and the studio's address is a decision the owner publishes
+  deliberately rather than one a camera makes.
+- Do **not** reach for `next/image` optimization here. On Workers it needs a
+  loader this project does not run, and a manifest that already knows every
+  intrinsic size gets the same result from plain `<picture>` with no runtime.
