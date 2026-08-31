@@ -341,19 +341,19 @@ export function AdmissionForm({
   /* ------------------------------- success -------------------------------- */
   if (done) {
     return (
-      <div className="card p-8 text-center md:p-12">
-        <span className="seal-in mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-dashed border-success">
-          <Icon name="check" size={30} className="text-success" strokeWidth={2} />
+      <div className="card p-4 text-center md:p-8">
+        <span className="seal-in mx-auto flex h-11 w-11 items-center justify-center rounded-full border-2 border-dashed border-success">
+          <Icon name="check" size={22} className="text-success" strokeWidth={2} />
         </span>
-        <h2 ref={successHeading} tabIndex={-1} className="text-h2 mt-4 font-display outline-none">
+        <h2 ref={successHeading} tabIndex={-1} className="text-h3 mt-2 font-display outline-none">
           {t("success.title")}
         </h2>
-        <p className="mt-5 text-smallmeta text-stone">{t("success.refLabel")}</p>
-        <p className="font-mono text-h3 font-bold tracking-wide text-vermilion-deep">
+        <p className="mt-2 text-smallmeta text-stone">{t("success.refLabel")}</p>
+        <p className="font-mono text-h4 font-bold tracking-wide text-vermilion-deep">
           {done.reference}
         </p>
-        <p className="prose-measure mx-auto mt-4 text-stone">{t("success.body")}</p>
-        <div className="mt-4 flex flex-wrap justify-center gap-3">
+        <p className="prose-measure mx-auto mt-2 text-smallmeta text-stone">{t("success.body")}</p>
+        <div className="mt-3 flex flex-wrap justify-center gap-2">
           <a href={done.waUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
             {t("success.waButton")}
           </a>
@@ -361,8 +361,11 @@ export function AdmissionForm({
             {t("success.mapButton")}
           </a>
         </div>
-        <p className="mt-6 text-smallmeta text-stone">{t("responseNote")}</p>
-        <p className="mt-1 text-smallmeta text-stone">{t("success.demoNote")}</p>
+        {/* Both notes stay. One is what happens next and the other is what the
+            free demo actually is — neither is decoration, and neither may be
+            collapsed to save height. */}
+        <p className="mt-3 text-[0.8125rem] text-stone">{t("responseNote")}</p>
+        <p className="mt-1 text-[0.8125rem] text-stone">{t("success.demoNote")}</p>
       </div>
     );
   }
@@ -453,7 +456,7 @@ export function AdmissionForm({
   const contextCourse = courses.find((c) => c.slug === data.courseSlug);
 
   return (
-    <div className="card p-4 md:p-7">
+    <div className="card p-3 md:p-5">
       {/* progress stitch */}
       <h2
         ref={stepHeading}
@@ -469,11 +472,11 @@ export function AdmissionForm({
         steps={stepNames}
         current={step}
         label={t("stepLabel", { current: step + 1, total: 4 })}
-        className="mt-4"
+        className="mt-2"
       />
 
       {fromContext && contextCourse && step === 1 ? (
-        <p className="mt-4 flex flex-wrap items-center gap-2 rounded-lg bg-ivory-2 px-4 py-2 text-smallmeta font-semibold">
+        <p className="mt-2 flex flex-wrap items-center gap-2 rounded-lg bg-ivory-2 px-3 py-1.5 text-[0.8125rem] font-semibold">
           {t("contextApplying")}{" "}
           <span className="text-vermilion-deep">
             {uiLocale === "gu" ? contextCourse.nameGu : contextCourse.nameEn}
@@ -489,7 +492,7 @@ export function AdmissionForm({
       ) : null}
 
       {restored ? (
-        <p className="mt-4 rounded-lg bg-ivory-2 px-4 py-2 text-smallmeta font-semibold text-stone">
+        <p className="mt-2 rounded-lg bg-ivory-2 px-3 py-1.5 text-[0.8125rem] font-semibold text-stone">
           ↩ {t("draftRestored")}
         </p>
       ) : null}
@@ -497,7 +500,7 @@ export function AdmissionForm({
       {errKeys.length > 0 ? (
         <div
           role="alert"
-          className="mt-4 rounded-lg border border-error/40 bg-error/5 p-4 text-smallmeta"
+          className="mt-2 rounded-lg border border-error/40 bg-error/5 p-3 text-smallmeta"
         >
           <p className="font-bold text-error">{t("errors.summaryTitle")}</p>
           <ul className="mt-2 space-y-1">
@@ -519,7 +522,7 @@ export function AdmissionForm({
       {/* The review step carries the consents, the admission-norms acceptance
           and every validation error. Motion level 0: nothing a visitor has to
           read carefully and get right should be moving while they read it. */}
-      <div key={step} className={cn("mt-8 space-y-6", step < 3 && "step-in")}>
+      <div key={step} className={cn("mt-4 space-y-3", step < 3 && "step-in")}>
         {/* ---------------------- STEP 1 · WHAT YOU WANT ---------------------- */}
         {step === 0 ? (
           <>
@@ -527,7 +530,7 @@ export function AdmissionForm({
               <legend id="adm-course-legend" tabIndex={-1} className="label outline-none">
                 {t("fields.course")}
               </legend>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 {courses.map((c) => (
                   <label key={c.slug} className="choice-chip !justify-start">
                     <input
@@ -567,7 +570,7 @@ export function AdmissionForm({
                 <legend id="adm-schedule-legend" tabIndex={-1} className="label outline-none">
                   {t("fields.preferredSchedule")}
                 </legend>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-2 gap-1.5">
                   {selectedSchedule.map((o) => (
                     <label key={o.key} className="choice-chip !justify-start">
                       <input
@@ -590,7 +593,7 @@ export function AdmissionForm({
                 <legend id="adm-timing-legend" tabIndex={-1} className="label outline-none">
                   {t("fields.timing")}
                 </legend>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-1.5">
                   {(
                     [
                       { v: "morning", label: t("options.timingMorning") },
@@ -619,7 +622,7 @@ export function AdmissionForm({
             {selectedDemoSlots.length > 0 ? (
               <fieldset>
                 <legend className="label">{t("fields.demoSlot")}</legend>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-2 gap-1.5">
                   {selectedDemoSlots.map((o) => (
                     <label key={o.key} className="choice-chip !justify-start">
                       <input
@@ -646,7 +649,7 @@ export function AdmissionForm({
           <>
             <fieldset>
               <legend className="label">{t("fields.language")}</legend>
-              <div className="flex gap-3">
+              <div className="flex gap-1.5">
                 {(["gu", "en"] as const).map((l) => (
                   <label key={l} className="choice-chip">
                     <input
@@ -722,7 +725,7 @@ export function AdmissionForm({
             ])}
             {textField("area", t("fields.area"), { placeholder: t("fields.areaPh") })}
             {/* Optional on purpose: nobody is asked to invent a reference. */}
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               {textField("referenceName", t("fields.referenceName"))}
               {textField("referencePhone", t("fields.referencePhone"), {
                 type: "tel",
@@ -867,8 +870,14 @@ export function AdmissionForm({
         ) : null}
       </div>
 
-      {/* ------------------------------- nav -------------------------------- */}
-      <div className="mt-4 flex items-center justify-between gap-3">
+      {/* ------------------------------- nav --------------------------------
+          Sticky on a phone. On step 3 the Next control sat roughly 1,630px
+          from the top of the document — about two screens — so a visitor who
+          had filled everything in still had to scroll to say so. Sticky, not
+          fixed: it stays in flow, so it can never cover the last field, and it
+          clears the Call/Directions bar through the same `--tabbar-h` that bar
+          reserves for itself. */}
+      <div className="form-nav mt-4 flex items-center justify-between gap-3">
         {step > 0 ? (
           <button type="button" onClick={() => go(step - 1)} className="btn btn-ghost">
             ← {t("buttons.back")}

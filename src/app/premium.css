@@ -1396,6 +1396,27 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
 }
 .seam-note-accent { border-left-color: var(--color-vermilion); }
 
+/* A multi-step form's action row, kept within a thumb's reach on a phone.
+   Sticky rather than fixed, so it stays in flow and cannot cover the field
+   above it, and it clears the mobile action bar through the same token that
+   bar reserves with. Above 1280px the bar is gone and so is the stickiness —
+   a laptop has the whole form on screen. */
+.form-nav {
+  position: sticky;
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 0.5rem);
+  z-index: 5;
+  margin-inline: -0.75rem;
+  padding: 0.5rem 0.75rem 0;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-card) 0%, transparent) 0,
+    var(--color-card) 0.5rem
+  );
+}
+@media (min-width: 1280px) {
+  .form-nav { position: static; margin-inline: 0; padding: 0; background: none; }
+}
+
 /* --- CTA cluster ---------------------------------------------------------
  * `.action-row` (defined with .page-intro-actions above) is the decision row.
  * It gains a quiet third rank here: primary button, secondary button, and a

@@ -1330,7 +1330,7 @@ footer leads with the phone and shows a phone the links a laptop shows, and the
 hero's thread keeps one continuous stitch when it turns.
 
 ## Phase 4 — Public inner pages
-**Status:** ✅ Complete — PR #46, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #46, merged as `3ebac61`
 
 The audit's finding drove this phase: **`PageIntro` is the public site's cost
 centre**, and the two interior pages that already passed the first-viewport
@@ -1389,16 +1389,43 @@ stripping comments, with breakpoint-prefixed variants exempt because §21
 explicitly allows more room on a larger screen.
 
 ## Phase 5 — Admission/conversion compactness
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #47, merged as `PLACEHOLDER_MERGE`
 
-Deliver:
+Delivered:
 
-- compact multi-step form
-- tighter progress
-- better field grouping
-- progressive disclosure for norms/secondary detail
-- mobile action reachability
-- no regression to validation/security/idempotency
+- **The action row is sticky on a phone.** On step 3 the Next control sat
+  roughly **1,630px** from the top of the document — about two screens — so a
+  visitor who had filled everything in still had to scroll to say so. Sticky,
+  not fixed: it stays in flow, so it can never cover the field above it, and it
+  clears the Call/Directions bar through the same `--tabbar-h` that bar
+  reserves with rather than a second hand-matched number. Above 1280px the bar
+  is gone and so is the stickiness.
+- **The eleven course chips go two-up at every width** — step 1 was a 659px
+  scroll of chips before a visitor could see the options they were choosing
+  between. Every chip grid, the schedule, the demo slots and the language
+  choice follow.
+- Form primitives: `.input` 50 → **44px** with 8/12px padding, `.choice-chip`
+  the same, `.label` 15 → 13px. **The input keeps `font-size: 1rem`
+  deliberately** — below 16px iOS Safari zooms the page on focus, which is a
+  worse experience than a slightly wider field.
+- Form chrome: step gap 32 → 16, field spacing 24 → 12, card padding 16/28 →
+  12/20, progress head 7 → 4px, the context and restored-draft chips to 13px.
+- The success card 470 → ~230px: a 44px seal instead of 64, the heading at h3,
+  the reference at h4. **Both closing notes stay** — what happens next, and
+  what the free demo is.
+- `/admission`'s "before you start" aside was 208px between the page title and
+  the first field; the same three lines are now one wrapped row at the aside's
+  13px, and a stacked list again from `md:`.
+- The fifteen admission clauses: 44px summary, 8px clause gaps, everything at
+  13–14px.
+
+**Nothing that protects a submission moved.** `tests/compact-density-admission.test.ts`
+names each defence rather than trusting a diff: honeypot, the minimum fill-time
+window, the client idempotency key, the versioned norms, the guardian mobile
+and its not-the-same-number rule, the Turnstile widget, the three separate
+consents and their server-side refusals, the announced error summary with
+focus-to-field, the still consent step, and the demo times staying a preference
+with nothing on the surface that could reserve a seat.
 
 ## Phase 6 — Admin shell + mobile navigation
 **Status:** ⏳ Pending
