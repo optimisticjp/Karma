@@ -718,6 +718,28 @@ any permission level. Full reasoning: `docs/admin-architecture.md` §12.
 `/admin/courses#batch-N`. `/admin/courses` is the catalogue alone now, and the
 batch row leads with the register.
 
+**Every module is a list of rows, and a record's body is a disclosure**
+(2026-08-31). The console was built as a page of `<article className="panel">`
+per record: 362px on Certificates, ~900px on the Design Desk, 443px on Team, and
+seven stacked figures on Reports that measured 806px — 42px more than a 390px
+phone's whole content budget. The shape is uniform now: a `.console-metrics`
+hairline strip where a page has figures at all, then a `.data-list` of rows,
+with anything the operator does to a record behind `summary.data-row`. Rows stay
+visually tight while every control inside one keeps a ≥44px hit area, from
+padding that overflows the row rather than a taller row.
+
+Two module-specific rules survived the pass and are worth restating, because
+both are the kind of thing a density edit destroys quietly:
+
+- **The attendance field names are a contract.** `saveAttendanceAction` reads
+  `status:<studentId>` and `note:<studentId>` for the whole roster. The row was
+  rebuilt around them; renaming one would stop saving silently, and the symptom
+  would surface weeks later as a missing register.
+- **Team still has no delete affordance at all.** Accounts are deactivated,
+  never removed, because audit rows must keep pointing at a real staff record.
+  Compacting the page into one list — Owner first, as a plain row — did not add
+  one, and `tests/compact-density-console.test.ts` asserts its absence.
+
 Two product rules that shape every module:
 
 - **Website forms are never a prerequisite.** Authorised staff can add

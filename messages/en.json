@@ -1094,6 +1094,7 @@
     "team": {
       "title": "Team",
       "lede": "The owner account plus up to five admin accounts. Deactivating an admin frees their seat.",
+      "accounts": "Accounts",
       "seatsUsed": "{used} of {total} admin seats in use",
       "seatsFull": "All 5 admin seats are in use. Deactivate an existing admin before inviting another.",
       "invite": "Invite admin",

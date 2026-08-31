@@ -1064,6 +1064,38 @@ a.ledger-row:hover .ledger-title { color: var(--color-vermilion-deep); }
 .data-row.is-archived { background: rgb(17 23 22 / 0.02); }
 .data-row.is-archived .data-row__title { color: var(--color-stone); }
 
+/* A row that IS a disclosure.
+ *
+ * `.data-row` sets `display: grid`, which silently drops the `list-item`
+ * marker a `<summary>` would otherwise draw. Four console modules put their
+ * record body behind such a row, so the affordance has to come back
+ * deliberately: a caret in its own third column, rotating on open, plus the
+ * pointer cursor. Without it the row reads as static text and the operator
+ * never finds the actions underneath.
+ */
+summary.data-row {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  cursor: pointer;
+  list-style: none;
+}
+summary.data-row::-webkit-details-marker { display: none; }
+summary.data-row::after {
+  content: "";
+  grid-row: 1;
+  grid-column: 3;
+  align-self: center;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-right: 2px solid var(--color-stone);
+  border-bottom: 2px solid var(--color-stone);
+  transform: rotate(45deg);
+  transition: transform 140ms ease;
+}
+details[open] > summary.data-row::after { transform: rotate(-135deg); }
+@media (prefers-reduced-motion: reduce) {
+  summary.data-row::after { transition: none; }
+}
+
 /* Numbers read as numbers: tabular figures stop a column of money jittering. */
 .data-num {
   font-variant-numeric: tabular-nums;

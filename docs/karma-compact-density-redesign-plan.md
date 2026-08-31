@@ -1492,7 +1492,7 @@ authorization note). New suite: `tests/compact-density-console.test.ts`.
 **Worker: 2011.09 KiB gzip** against the 3 MB free plan — unchanged.
 
 ## Phase 7 — Core admin workflows
-**Status:** ✅ Complete — PR #49, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #49, merged as `0b27036`
 
 Eleven of sixteen console screens showed **zero complete records** at 390×844,
 and it was one pattern: a `sm:grid-cols-3` metric trio that stacks to a single
@@ -1539,19 +1539,70 @@ reads, the fields that were fetched and discarded, dot-and-word status, and
 tabular money.
 
 ## Phase 8 — Remaining admin workflows
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #50, merged as `PLACEHOLDER_MERGE`
 
-Redesign:
+The seven screens Phase 7 did not reach. Two shapes the core workflows did not
+have turned up here: a five-column table with `min-w-[52rem]` scrolling inside a
+366px panel, and pages whose entire body was one **open** form per record.
 
-- Attendance
-- Certificates
-- Design Desk
-- Content Desk
-- Reports/exports
-- Team/permissions
-- audit/account/security screens
+Delivered:
 
-Preserve module-specific safety/permissions.
+- **Attendance.** Three counts became one meta line **inside** the register
+  rather than a strip above it — the operator reads "34 students, 12 marked"
+  while marking, not before. Each student was a 212px bordered card; it is a
+  ~100px row where the four-up P/A/L/E control is *both* the display and the
+  input, with the note behind a `<details>` that opens itself when a note
+  exists. The field names `status:<id>` and `note:<id>` are unchanged and now
+  carry a comment saying why: `saveAttendanceAction` reads them for the whole
+  roster, and a rename would silently stop saving.
+- **Certificates.** 362px per candidate became a disclosure whose summary is a
+  four-slot row. The issue form was rendered open for every eligible student —
+  254px each, on a screen that is scanned far more often than it is acted on —
+  and moved behind its own disclosure. The R2 note stays, with a comment: it is
+  what stops the next session assuming a private file pipeline exists.
+- **Design Desk.** ~900px per job became a row with status, edit, history and
+  files each behind a disclosure. Two **unbounded** selects — every
+  `serviceStatusHistory` and every `serviceFile` in the database — are scoped
+  with `inArray(…, jobIds)` to the jobs actually on screen.
+- **Content Desk.** The create panel was open for anyone with manage rights,
+  170px of head plus the whole form before a single item; it is a disclosure
+  with its help text inside. Each item's manage body was already one
+  `<details>` — the row **is** the summary now. The 500-row student picker is
+  gated on `content.manage`: a view-only admin paid for it on every load to
+  populate two forms they are never shown.
+- **Reports.** Seven `panel panel-body` figures measured **806px** stacked at
+  390px — 42px taller than the entire phone content budget — and are the
+  hairline strip. Three of them repeated "Last 30 days" under the number while
+  the section heading says it once on the same line; that caption is gone. The
+  sixty-row audit table is a **list below `md`** and stays a table above it,
+  and its five column headings are bilingual for the first time — they were
+  hardcoded English inside the owner's own record of what changed. The five
+  86px export cards, each restating "Download CSV", are rows.
+- **Team.** The Owner was a 280px panel above a second list; each admin was a
+  443px `panel` with three facts, the permission editor and the activate
+  button all rendered open — five admins were 2,215px. It is **one list**:
+  the Owner as a plain row (nothing on the page can act on it), every admin a
+  disclosure whose row already answers "who has access to what". `requireOwner`,
+  the seat invariants and the deliberate **absence of any delete affordance**
+  are unchanged and asserted. Dates were formatted `en-IN` in both locales.
+- **Account & security.** Four label/value pairs took 416px stacked; `.kv-grid`
+  states them in two columns.
+
+**One system change.** `.data-row` sets `display: grid`, which silently drops
+the marker a `<summary>` draws for itself — so the disclosure rows Phase 8
+introduced across four modules had no visible affordance at all. `summary.data-row`
+now carries a caret in its own third column, rotating on open, with the pointer
+cursor and a `prefers-reduced-motion` guard.
+
+Preserved: `requireAdmin`/`requireOwner` on every page, every module permission
+gate, the attendance field contract, the no-delete rule on Team, and the R2
+deferral on Certificates.
+
+New assertions in `tests/compact-density-console.test.ts` covering all of the
+above. **770 tests pass.**
+
+**Worker: 2022.89 KiB gzip** against the 3 MB free plan (+11.8 KiB — the
+bilingual audit headings and the responsive audit list).
 
 ## Phase 9 — Responsive + compactness hardening
 **Status:** ⏳ Pending

@@ -810,6 +810,36 @@ that is one grouped query now.
 permission server-side, and the bar renders from the same booleans as the rail
 rather than computing its own idea of what the caller may reach.
 
+### Reads the compact-density pass tightened (2026-08-31)
+
+Three of the density fixes were really query fixes, and they are recorded here
+rather than in a stylesheet note because they change what the database is asked
+for:
+
+- **The Content Desk student picker is gated on `content.manage`.** It feeds
+  the create and edit forms, both of which need that permission; a view-only
+  admin was paying for 500 student rows on every page load to populate two
+  forms they are never shown.
+- **The Design Desk reads are scoped to the jobs on screen.** It selected
+  *every* `service_status_history` and *every* `service_files` row in the
+  database and filtered in memory; both are `inArray(…, jobIds)` now.
+- **`/admin/courses` counts its batches** instead of selecting every column of
+  every batch with a trainer join in order to render a number.
+
+The rule they share: a read is scoped by what the caller can see and by what
+the screen actually renders. Free-tier discipline is not a nicety here — the
+console is a Supabase free tier reached through Hyperdrive.
+
+### The audit trail is a list on a phone (2026-08-31)
+
+`/admin/reports` rendered its sixty audit rows as a five-column table with
+`min-w-[52rem]` inside a 366px panel: 832px of content the phone operator could
+only read by dragging each row sideways, one column at a time. Below `md` it is
+a `.data-list` — action and record on the title line, time, actor and reason on
+the meta line. From `md` the table fits and is the better scan, so it stays.
+Its five column headings are bilingual as of the same date; they had been
+hardcoded English inside the owner's own record of what changed.
+
 ---
 
 ## 13. Console design
@@ -836,7 +866,9 @@ native `<details>`; the Worker is 1.93 MB gzip against a 3 MB limit).
 New primitives in `premium.css`: `.data-list` / `.data-row` (with `__title`,
 `__meta`, `__actions`), `.chip`, `.kv-grid` / `.kv-label` / `.kv-value`,
 `.toolbar` (sticky search and filters), `.tap`, `.rec-menu` (dropdown on a
-laptop, bottom sheet on a phone, from one element), and `.danger-zone`.
+laptop, bottom sheet on a phone, from one element), and `.danger-zone`. The
+compact-density pass added `summary.data-row` — the same row used as a
+disclosure summary, with the caret `display: grid` takes away.
 
 **Density and touch size are not in tension**, and the resolution is the thing
 to keep: rows are visually tight (a two-line row is ~64px) while every control

@@ -56,7 +56,7 @@ export default async function ContentPage() {
     return (
       <div className="max-w-[72rem]">
         <Header title={copy.title} lede={copy.lede} />
-        <p className="alert alert-error mt-8">Database unavailable.</p>
+        <p className="alert alert-error mt-6">Database unavailable.</p>
       </div>
     );
   }
@@ -87,16 +87,21 @@ export default async function ContentPage() {
     else console.error("[content] list failed", error instanceof Error ? error.message : "unknown");
   }
 
-  const students = await db
-    .select({
-      id: schema.students.id,
-      admissionNo: schema.students.admissionNo,
-      fullName: schema.students.fullName,
-      photoConsent: schema.students.photoConsent
-    })
-    .from(schema.students)
-    .orderBy(asc(schema.students.fullName))
-    .limit(500);
+  /* The student picker feeds the create and edit forms, and both need
+     `content.manage`. A view-only admin was paying for 500 student rows on
+     every page load to populate two forms they are never shown. */
+  const students = canManage
+    ? await db
+        .select({
+          id: schema.students.id,
+          admissionNo: schema.students.admissionNo,
+          fullName: schema.students.fullName,
+          photoConsent: schema.students.photoConsent
+        })
+        .from(schema.students)
+        .orderBy(asc(schema.students.fullName))
+        .limit(500)
+    : [];
   const studentOptions = students.map((student) => ({
     id: student.id,
     label: `${student.fullName} · ${student.admissionNo}`,
@@ -115,42 +120,45 @@ export default async function ContentPage() {
       <Header title={copy.title} lede={copy.lede} />
 
       {!migrationReady ? (
-        <div className="alert alert-error mt-8">
+        <div className="alert alert-error mt-6">
           <p className="font-semibold">{copy.migrationPending}</p>
           <p className="form-note mt-1">Run the next repository Drizzle migration before staff starts using this module.</p>
         </div>
       ) : null}
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        <Metric label={copy.existing} value={validRows.length} />
-        <Metric label={copy.statuses.published} value={published} />
-        <Metric label={copy.statuses.draft} value={drafts} />
+      <div className="console-metrics mt-3">
+        <div><span className="kv-label">{copy.existing}</span><span className="kv-value">{validRows.length}</span></div>
+        <div><span className="kv-label">{copy.statuses.published}</span><span className="kv-value">{published}</span></div>
+        <div><span className="kv-label">{copy.statuses.draft}</span><span className="kv-value">{drafts}</span></div>
       </div>
 
+      {/* The create panel was rendered OPEN for anyone with manage rights —
+          170px of head plus the whole form, before a single content item. It
+          is a disclosure now, and the three-line help sits inside it with the
+          form it explains. */}
       {canManage && migrationReady ? (
-        <section className="panel mt-8" aria-labelledby="content-create-heading">
-          <div className="panel-head">
-            <div>
-              <h2 id="content-create-heading" className="text-h4">{copy.add}</h2>
-              <p className="form-note mt-1 max-w-[58rem]">{copy.addHelp}</p>
-            </div>
-          </div>
-          <div className="panel-body">
+        <details className="panel mt-3" aria-labelledby="content-create-heading">
+          <summary className="panel-head cursor-pointer list-none">
+            <h2 id="content-create-heading" className="text-h4">{copy.add}</h2>
+            <span aria-hidden className="text-h4">＋</span>
+          </summary>
+          <div className="panel-body border-t border-rule">
+            <p className="form-note mb-3 max-w-[58rem]">{copy.addHelp}</p>
             <CreateContentForm students={studentOptions} isOwner={session.role === "owner"} copy={copy} />
           </div>
-        </section>
+        </details>
       ) : null}
 
-      <section className="mt-10" aria-labelledby="content-list-heading">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <h2 id="content-list-heading" className="text-h4">{copy.existing}</h2>
+      <section className="mt-3" aria-labelledby="content-list-heading">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <h2 id="content-list-heading" className="kv-label">{copy.existing}</h2>
           {!canManage ? <p className="form-note">View only</p> : null}
         </div>
 
         {!migrationReady || validRows.length === 0 ? (
           <p className="empty-state mt-4">{migrationReady ? copy.empty : copy.migrationPending}</p>
         ) : (
-          <div className="mt-4 grid gap-4">
+          <div className="data-list mt-2">
             {validRows.map((row) => {
               const item: EditableContent = {
                 id: row.id,
@@ -164,38 +172,31 @@ export default async function ContentPage() {
                 ownerVerified: row.ownerVerified
               };
               return (
-                <article key={row.id} className="panel">
-                  <div className="panel-head flex-wrap gap-4">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="chip">{copy.kinds[row.kind]}</span>
-                        <span className={`status ${statusTone(row.status)}`}>{copy.statuses[row.status]}</span>
-                      </div>
-                      <h3 className="text-h4 mt-2 break-words">{contentSummary(row.kind, row.payload)}</h3>
-                      <p className="form-note mt-1">{row.slug} · #{row.id}</p>
+                /* A 224px `<article class="panel">` whose entire manage-mode
+                   body was one `<details><summary>Edit</summary>` line. The
+                   row IS the summary now. The view-only branch dropped its
+                   three-Fact list: kind and status are already in the row, and
+                   the sort order is not a fact a reader needs. */
+                <details key={row.id}>
+                  <summary className="data-row">
+                    <span className="data-row__title break-words">{contentSummary(row.kind, row.payload)}</span>
+                    <span className="data-row__actions">
+                      <span className="chip">{copy.kinds[row.kind]}</span>
+                      <span className={`chip ${statusTone(row.status)}`}>{copy.statuses[row.status]}</span>
+                    </span>
+                    <span className="data-row__meta">
+                      <span>{row.slug}</span>
+                      <span>#{row.id}</span>
+                      <span>{formatIst(row.updatedAt, session.staff.adminLocale)}</span>
+                      {row.updatedByName ? <span>{row.updatedByName}</span> : null}
+                    </span>
+                  </summary>
+                  {canManage ? (
+                    <div className="border-t border-line px-3 py-3 md:px-4">
+                      <EditContentForm item={item} students={studentOptions} isOwner={session.role === "owner"} copy={copy} />
                     </div>
-                    <p className="form-note ml-auto text-right">
-                      {formatIst(row.updatedAt, session.staff.adminLocale)}
-                      {row.updatedByName ? <><br />{row.updatedByName}</> : null}
-                    </p>
-                  </div>
-                  <div className="panel-body">
-                    {canManage ? (
-                      <details>
-                        <summary className="cursor-pointer font-semibold text-vermilion-deep">{copy.edit}</summary>
-                        <div className="mt-5 border-t border-rule pt-5">
-                          <EditContentForm item={item} students={studentOptions} isOwner={session.role === "owner"} copy={copy} />
-                        </div>
-                      </details>
-                    ) : (
-                      <dl className="grid gap-4 sm:grid-cols-3">
-                        <Fact label={copy.kind} value={copy.kinds[row.kind]} />
-                        <Fact label={copy.status} value={copy.statuses[row.status]} />
-                        <Fact label={copy.sortOrder} value={String(row.sortOrder)} />
-                      </dl>
-                    )}
-                  </div>
-                </article>
+                  ) : null}
+                </details>
               );
             })}
           </div>
@@ -207,14 +208,6 @@ export default async function ContentPage() {
 
 function Header({ title, lede }: { title: string; lede: string }) {
   return <PageHead title={title} context={lede} />;
-}
-
-function Metric({ label, value }: { label: string; value: number }) {
-  return <div className="panel panel-body"><p className="microlabel">{label}</p><p className="text-h3 mt-2">{value}</p></div>;
-}
-
-function Fact({ label, value }: { label: string; value: string }) {
-  return <div><dt className="microlabel">{label}</dt><dd className="mt-1 text-smallmeta">{value}</dd></div>;
 }
 
 function statusTone(status: ContentStatus) {
