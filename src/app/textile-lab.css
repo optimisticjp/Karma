@@ -1,0 +1,584 @@
+/* ==========================================================================
+ * MODERN TEXTILE LAB — the public visual system (v6)
+ *
+ * Imported by `src/app/[locale]/layout.tsx` ONLY.
+ *
+ * WHY THIS FILE EXISTS AT ALL
+ * ---------------------------
+ * There is no shared root layout in this project. `[locale]/layout.tsx` and
+ * `admin/layout.tsx` are two independent roots, and both currently import
+ * globals.css, premium.css and machine-lab.css in that order — so the Console
+ * loads every line of the public site's CSS. Retuning a shared token would
+ * therefore restyle eighteen Console screens that were deliberately tuned four
+ * PRs ago.
+ *
+ * This file is imported by the public root and not the admin one, so nothing
+ * in it can reach `/admin` even by accident. Everything is additionally scoped
+ * to `.site-body`, which is the public `<body>` class (the Console's is
+ * `console-root`) — belt and braces, and the scoping is asserted by a test.
+ *
+ * THE TOKEN BRIDGE, AND WHY IT IS NOT A RENAME
+ * --------------------------------------------
+ * About ninety files use `bg-ivory`, `text-carbon`, `text-stone`,
+ * `text-vermilion-deep` and friends. Tailwind v4 compiles those to
+ * `var(--color-ivory)` etc., so redefining the custom properties on
+ * `.site-body` re-skins the entire public site without editing a single
+ * className — and leaves the Console, which is outside that scope, on the
+ * values it was tuned against.
+ *
+ * The alternative was a repo-wide rename across ninety files with no visual
+ * difference at the end of it. The cost of the bridge is that a token name
+ * means one thing inside `.site-body` and another outside it, which is why
+ * every mapping below states both values.
+ *
+ * ELEVEN PUBLIC COLOURS BECOME SEVEN
+ * ----------------------------------
+ * Needle Blue and Zari Copper do not exist in this palette. They were a
+ * technical cue and a material detail in the Machine Lab system; here the
+ * technical register comes from texture and annotation rather than from a
+ * second and third hue. They are mapped into the seven rather than deleted,
+ * because deleting a token that ninety files reference is a build failure and
+ * mapping it is a design decision.
+ *
+ * EVERY RATIO BELOW IS MEASURED, NOT ESTIMATED.
+ * ========================================================================== */
+
+/* ==========================================================================
+ * 0. Devanagari
+ *
+ * Declared here rather than in globals.css so the Console never downloads it:
+ * this file is imported by the public root layout only.
+ *
+ * WHY A :lang()-SCOPED STACK AND NOT A RE-CUT unicode-range
+ * ---------------------------------------------------------
+ * The Gujarati face in globals.css claims `U+0951-0952` and `U+0964-0965` —
+ * the stress marks and the danda, which Gujarati and Devanagari share. Adding
+ * Devanagari to the same global font stack would mean a danda in a Hindi
+ * sentence gets drawn by the Gujarati font: the right glyph from the wrong
+ * face, with the wrong weight axis, mid-sentence.
+ *
+ * The obvious fix is to re-cut the Gujarati range. It is the wrong one —
+ * Gujarati uses the danda too, so whichever face loses the codepoint has a
+ * hole in it. Instead each script gets its own stack, selected by the
+ * language of the element. A Hindi page never has the Gujarati family in its
+ * stack, so it cannot borrow from it; a `<span lang="gu">` inside a Hindi page
+ * matches `:lang(gu)` and not `:lang(hi)`, because `:lang()` resolves against
+ * the element's own language, so an embedded Gujarati phrase still renders in
+ * Gujarati.
+ *
+ * It also means the Devanagari face is fetched on Hindi pages ONLY. Nothing
+ * in the English or Gujarati stack references it, so the payload is zero
+ * there — the same discipline the Gujarati subset note in globals.css
+ * describes.
+ * ========================================================================== */
+
+@font-face {
+  font-family: "Noto Sans Devanagari Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("~@fontsource-variable/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-wght-normal.woff2")
+    format("woff2-variations");
+  /* The Devanagari block, the joiners a conjunct script needs, the rupee sign,
+     the dotted circle a lone mark renders on, and the Devanagari-shared
+     numerics. Nothing else: arrows and stars fall through to the system font,
+     which is what stopped the Gujarati face being downloaded to draw a "→". */
+  unicode-range: U+0900-097F, U+200C-200D, U+20B9, U+25CC, U+A830-A839;
+}
+
+.site-body {
+  /* ---- the seven ------------------------------------------------------ */
+
+  /** Warm off-white. The primary public ground. */
+  --mtl-canvas: #f7f4ee;
+  /** Forms, cards, image mats, anything that must read as a sheet. */
+  --mtl-paper: #ffffff;
+  /** Primary text and strong linework. 16.09:1 on canvas, 17.67 on paper. */
+  --mtl-ink: #171918;
+  /**
+   * Secondary copy. 5.13:1 on canvas and 5.63 on paper — AA at every size.
+   * On Warm Sand it measures 4.34:1, which is BELOW the 4.5 body-text floor,
+   * so the sand surface swaps in `--mtl-ink-muted-deep` rather than letting
+   * secondary copy fail on a surface built to carry it.
+   */
+  --mtl-ink-muted: #666864;
+  /** The same voice, dark enough for Warm Sand: 4.90:1 there, 5.79 on canvas. */
+  --mtl-ink-muted-deep: #5e605c;
+  /**
+   * Thread Red — THE action accent. Fills, the active stitch, the key path.
+   * 3.94:1 on canvas: large text and UI fills only, never body-size text.
+   * This is the same discipline the previous accent needed, and the same trap:
+   * do not "fix" a contrast failure by making the accent brighter.
+   */
+  --mtl-thread: #d44b35;
+  /** Small-text thread: 5.66:1 on canvas, 6.22 on paper, 4.79 on sand. */
+  --mtl-thread-deep: #b03522;
+  /** Secondary material surface. */
+  --mtl-sand: #e9e1d5;
+  /** Warm Sand's own hairline — the same hue, resolved down. */
+  --mtl-sand-line: #d9cfbe;
+  /**
+   * Deep Charcoal. ONE public surface uses it: the `/services` hero, as the
+   * commercial-studio mode switch. It is not a band to reach for. White reads
+   * 15.86:1 on it, canvas 14.45, sand 12.23, and Thread 3.67 — so on charcoal
+   * the accent is again large-text-and-fills only.
+   */
+  --mtl-charcoal: #202321;
+  /** Secondary copy on charcoal: 8.26:1. */
+  --mtl-charcoal-muted: #b9bcb7;
+
+  /* ---- the bridge to the shared tokens -------------------------------- */
+  /* left: what the token means inside `.site-body`.
+     right: what it still means in Karma Console, untouched. */
+
+  --color-ivory: var(--mtl-canvas);        /* was Cotton      #f5f0e6 */
+  --color-card: var(--mtl-paper);          /* was Worktable   #fffdf8 */
+  --color-carbon: var(--mtl-ink);          /* was Machine Blk #111716 */
+  --color-stone: var(--mtl-ink-muted);     /* was             #605e56 */
+  --color-ivory-2: var(--mtl-sand);        /* was Raw Silk    #e9decd */
+  --color-sand: var(--mtl-sand);           /* was             #ded0b8 */
+  --color-line: var(--mtl-sand-line);      /* was             #d5cab6 */
+  --color-vermilion: var(--mtl-thread);    /* was             #c54832 */
+  --color-vermilion-deep: var(--mtl-thread-deep); /* was      #a93a27 */
+
+  /* The two hues this palette retires. Mapped, not deleted: ninety files
+     reference them and a missing token is a silent `currentColor` fallback,
+     which is how `border-rule` already went wrong in the Console. */
+  --color-needle: var(--mtl-ink-muted-deep);   /* was Needle Blue  #29617a */
+  --color-needle-light: var(--mtl-charcoal-muted);
+  --color-zari: var(--mtl-thread);             /* was Zari Copper  #aa6239 */
+  --color-zari-deep: var(--mtl-thread-deep);   /* was             #8a4e2c */
+
+  /* Steel Mist was the light TECHNICAL surface. This palette carries the
+     technical register in texture and annotation instead, so the token
+     resolves to paper and the surface reads as a sheet under a CAD grid. */
+  --color-mist: var(--mtl-paper);
+  --color-mist-line: var(--mtl-sand-line);
+
+  /* Machine Black stays available for the one charcoal surface. */
+  --mtl-on-dark-ground: var(--mtl-charcoal);
+
+  /* ---- type scale ------------------------------------------------------ *
+   * The compact-density pass cut the mobile scale hard and proved padding was
+   * not the problem. It also left h1 at 29px, which is below the range this
+   * plan asks for. These clamps are tuned to the plan's own numbers and the
+   * value at 390px is stated beside each one, because a clamp whose phone end
+   * nobody has evaluated is a guess.
+   *
+   *          390px      1440px    plan asks
+   *  h1      32.5       56        32-38 / 52-64
+   *  h2      24.3       38        24-28 / 34-42
+   *  h3      20.0       24        18-21 / 22-26
+   *  h4      18.0       21        —
+   *  lead    16.9       20        —
+   *  body    16         16        15-16
+   *  meta    14.0       15        12-13 (see below)
+   *  btn     14.0       15        14-15
+   *
+   * `smallmeta` sits at 14 rather than the plan's 12-13 because it is the
+   * site's caption size, not its label size — a 12px caption under a
+   * photograph is a technical manual, which the same section forbids. The
+   * 12-13 band is `eyebrow` (12.9), which is what the plan's "metadata"
+   * describes: the small uppercase label above a heading.
+   * -------------------------------------------------------------------- */
+
+  --text-display-xl: clamp(2.25rem, 1.55rem + 3vw, 4rem);
+  --text-display: clamp(2.125rem, 1.5rem + 2.7vw, 3.5rem);
+  --text-h1: clamp(2rem, 1.4rem + 2.6vw, 3.5rem);
+  --text-h2: clamp(1.5rem, 1.15rem + 1.5vw, 2.375rem);
+  --text-h3: clamp(1.25rem, 1.1rem + 0.62vw, 1.5rem);
+  --text-h4: clamp(1.125rem, 1.05rem + 0.3vw, 1.3125rem);
+  /* `lead` and `bodylg` are one size role wearing two names — the sentence
+     under a heading. They were separate clamps 0.04px apart at 390px, which
+     is not a distinction, it is drift waiting to be argued about. */
+  --text-lead: clamp(1.0625rem, 1.02rem + 0.14vw, 1.25rem);
+  --text-bodylg: clamp(1.0625rem, 1.02rem + 0.14vw, 1.25rem);
+  --text-body: 1rem;
+  --text-smallmeta: clamp(0.875rem, 0.86rem + 0.06vw, 0.9375rem);
+  --text-eyebrow: clamp(0.75rem, 0.74rem + 0.04vw, 0.8125rem);
+  --text-btn: clamp(0.875rem, 0.86rem + 0.07vw, 0.9375rem);
+
+  /* ---- section rhythm -------------------------------------------------- *
+   * The plan asks for 32-48px between sections on mobile. The compact pass
+   * landed at 32/24/16, which is tight enough that two adjacent sections on
+   * the same surface read as one. These open the top tier back to 40 and keep
+   * the compact tiers where they were.
+   * -------------------------------------------------------------------- */
+  --section-y-major: clamp(2.5rem, 5vw, 5.5rem);   /* 390: 40px */
+  --section-y: clamp(2rem, 4vw, 4.5rem);           /* 390: 32px */
+  --section-y-compact: clamp(1.5rem, 3vw, 3rem);   /* 390: 24px */
+
+  /* ---- chrome ---------------------------------------------------------- */
+  /** The mobile header target from the plan's §12. */
+  --header-h: 3.5rem;
+  /** The contextual action bar: 56-60px including safe area (§32). */
+  --mtl-actionbar-h: 3.5rem;
+
+  background-color: var(--mtl-canvas);
+  color: var(--mtl-ink);
+}
+
+/* ==========================================================================
+ * 1. Surfaces
+ *
+ * Three grounds and one exception. A section states its surface and nothing
+ * else; there is no per-section texture, no per-section border treatment, and
+ * no fourth ground waiting to be invented.
+ * ========================================================================== */
+
+.site-body .surface-canvas { background-color: var(--mtl-canvas); }
+.site-body .surface-paper { background-color: var(--mtl-paper); }
+
+.site-body .surface-sand {
+  background-color: var(--mtl-sand);
+  /* Secondary copy is 4.34:1 on sand at the standard muted ink, which fails
+     the body-text floor. The surface carries its own darker step rather than
+     every caller remembering. */
+  --color-stone: var(--mtl-ink-muted-deep);
+}
+
+/* The one large dark public surface: the `/services` hero, as the commercial
+   studio-mode switch (plan §4.4). It is deliberately a single named class and
+   not a `band-*` in the four-band vocabulary, so it cannot be reached for by
+   habit — a section either IS the services hero or it is not. */
+.site-body .surface-business {
+  background-color: var(--mtl-charcoal);
+  color: var(--mtl-paper);
+  --color-carbon: var(--mtl-paper);
+  --color-stone: var(--mtl-charcoal-muted);
+  --color-line: rgb(255 255 255 / 0.16);
+  --color-card: rgb(255 255 255 / 0.05);
+  /* Thread is 3.67:1 on charcoal — fills and large text only, exactly as it
+     is on canvas. Small text uses the muted light instead of a brighter red. */
+  --color-vermilion-deep: var(--mtl-thread);
+}
+
+/* ==========================================================================
+ * 2. Texture — four moments, and a rule about where they may appear
+ *
+ * The previous system textured whole pages. The instruction here is that
+ * texture should be noticed AFTER the content, so each of these is a small
+ * element treatment rather than a page ground, and each has exactly one job.
+ * ========================================================================== */
+
+/** Faint fabric weave. Behind a finished embroidery proof, nowhere else. */
+.site-body .tex-weave {
+  background-image:
+    repeating-linear-gradient(90deg, rgb(23 25 24 / 0.028) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(0deg, rgb(23 25 24 / 0.028) 0 1px, transparent 1px 4px);
+}
+
+/** CAD dot grid. Behind an EMCAD/screen visual, nowhere else. */
+.site-body .tex-cad {
+  background-image: radial-gradient(circle 1px at 1px 1px, rgb(23 25 24 / 0.09) 99%, transparent 100%);
+  background-size: 12px 12px;
+}
+
+/** Paper grain, for a hero object that needs to read as a sheet. */
+.site-body .tex-grain {
+  background-image:
+    repeating-linear-gradient(37deg, rgb(23 25 24 / 0.016) 0 1px, transparent 1px 3px);
+}
+
+/**
+ * A stitch perforation, as a divider. The same 9-on/6-off running-stitch
+ * geometry the rest of the system uses, so the mark stays one mark.
+ */
+.site-body .thread-divider {
+  display: block;
+  height: 5px;
+  border: 0;
+  margin: 0;
+  background-image:
+    radial-gradient(circle 1.75px at 1.75px 50%, var(--mtl-thread) 99%, transparent 100%),
+    linear-gradient(90deg, var(--mtl-thread) 0 9px, transparent 9px 15px);
+  background-size: 15px 5px, 15px 2px;
+  background-repeat: repeat-x;
+  background-position: 0 50%, 0 50%;
+  opacity: 0.55;
+}
+
+/* ==========================================================================
+ * 3. Buttons
+ *
+ * Two ranks and a quiet third. The floor is 44px on every one of them, which
+ * the compact-density pass established by measurement and this system keeps.
+ * ========================================================================== */
+
+.site-body .btn {
+  border-radius: 0.5rem;
+  font-size: var(--text-btn);
+  letter-spacing: 0;
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.site-body .btn-primary {
+  background-color: var(--mtl-thread);
+  border-color: var(--mtl-thread);
+  color: var(--mtl-paper);
+}
+.site-body .btn-primary:hover { background-color: var(--mtl-thread-deep); border-color: var(--mtl-thread-deep); }
+
+.site-body .btn-secondary {
+  background-color: transparent;
+  border-color: var(--mtl-ink);
+  color: var(--mtl-ink);
+}
+.site-body .btn-secondary:hover { background-color: var(--mtl-ink); color: var(--mtl-paper); }
+
+/* The arrow inside a button moves 2-3px, which is the whole button motion
+   budget (plan §33). Nothing scales, nothing glows, nothing lifts. */
+.site-body .btn .arrow { transition: transform 180ms ease; }
+.site-body .btn:hover .arrow { transform: translateX(2.5px); }
+
+/* ==========================================================================
+ * 4. Cards and rows
+ *
+ * Square-cornered media, lightly rounded containers, hairlines instead of
+ * shadows. A card is a sheet of paper on canvas, not a floating panel.
+ * ========================================================================== */
+
+.site-body .card {
+  background-color: var(--mtl-paper);
+  border: 1px solid var(--mtl-sand-line);
+  border-radius: 0.625rem;
+  box-shadow: none;
+}
+
+/* Hover is a border and 2px of arrow, on hover-capable devices only. The
+   gallery's ~1.02 image scale is the one transform in the system. */
+@media (hover: hover) {
+  .site-body .card-lift { transition: border-color 180ms ease; }
+  .site-body .card-lift:hover { border-color: var(--mtl-thread); }
+  .site-body .card-lift:hover .card-img { transform: scale(1.02); }
+  .site-body .card-img { transition: transform 220ms ease; }
+}
+
+/* A compact list row — the shape most public lists want on a phone, and the
+   thing that stops a catalogue becoming eleven full-viewport cards. */
+.site-body .lab-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.25rem 0.875rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--mtl-sand-line);
+}
+.site-body .lab-row:last-child { border-bottom: 0; }
+.site-body .lab-row__title {
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.site-body .lab-row__meta {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem 0.5rem;
+  font-size: var(--text-smallmeta);
+  line-height: 1.4;
+  color: var(--color-stone);
+}
+.site-body .lab-row__meta > * + *::before {
+  content: "·";
+  margin-inline-end: 0.5rem;
+  color: var(--mtl-sand-line);
+}
+@media (min-width: 768px) {
+  .site-body .lab-row { grid-template-columns: minmax(0, 1fr) auto auto; padding: 0.875rem 0; }
+  .site-body .lab-row__meta { grid-column: 1; }
+}
+
+/* ==========================================================================
+ * 5. Tabs and chips — horizontal, scrollable, keyboard-reachable
+ * ========================================================================== */
+
+.site-body .lab-tabs {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  /* The row bleeds to the gutter so the last chip does not look clipped, then
+     pads itself back — a scroller that ends flush with the text column reads
+     as a broken layout rather than as more content. */
+  margin-inline: calc(var(--gutter, 1rem) * -1);
+  padding-inline: var(--gutter, 1rem);
+  padding-block: 0.125rem;
+}
+.site-body .lab-tabs::-webkit-scrollbar { display: none; }
+
+.site-body .lab-tab {
+  scroll-snap-align: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 0.875rem;
+  border: 1px solid var(--mtl-sand-line);
+  border-radius: 999px;
+  background-color: var(--mtl-paper);
+  font-size: var(--text-smallmeta);
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--color-stone);
+  transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
+}
+.site-body .lab-tab:hover { color: var(--mtl-ink); border-color: var(--mtl-ink); }
+.site-body .lab-tab[aria-selected="true"],
+.site-body .lab-tab[aria-current="true"],
+.site-body .lab-tab.is-active {
+  background-color: var(--mtl-ink);
+  border-color: var(--mtl-ink);
+  color: var(--mtl-paper);
+}
+/* Selection is stated by more than colour: the active chip is also filled and
+   carries aria-selected/aria-current, so it survives a greyscale screenshot. */
+
+/* ==========================================================================
+ * 6. Bottom sheet — the mobile language chooser and anything like it
+ * ========================================================================== */
+
+.site-body .lab-sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgb(23 25 24 / 0.45);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.site-body .lab-sheet {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 56;
+  max-height: 80vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--mtl-paper);
+  border-top: 1px solid var(--mtl-sand-line);
+  border-radius: 0.875rem 0.875rem 0 0;
+  padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom));
+  animation: lab-sheet-in 240ms ease;
+}
+@keyframes lab-sheet-in {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.site-body .lab-sheet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0.5rem 1.125rem;
+  text-align: start;
+  border-bottom: 1px solid var(--mtl-sand-line);
+}
+.site-body .lab-sheet-row:last-child { border-bottom: 0; }
+.site-body .lab-sheet-row[aria-current="true"] { background: var(--mtl-sand); }
+
+/* ==========================================================================
+ * 7. The contextual action bar (plan §32)
+ *
+ * NOT site-wide. It renders on the decision routes named in
+ * `docs/modern-textile-lab-ia.md` §6 and nowhere else, which is why it is a
+ * component that takes a route decision rather than a fixture in the layout.
+ * ========================================================================== */
+
+.site-body .action-bar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.375rem 0.875rem calc(0.375rem + env(safe-area-inset-bottom));
+  background: var(--mtl-paper);
+  border-top: 1px solid var(--mtl-sand-line);
+}
+.site-body .action-bar > * { min-height: 2.75rem; }
+
+/* The page reserves the bar's height from the same token the bar is built
+   from. Two literals that must be edited together is how 8px of ground showed
+   under every footer the last time. */
+.site-body.has-action-bar {
+  padding-bottom: calc(var(--mtl-actionbar-h) + env(safe-area-inset-bottom));
+}
+@media (min-width: 1024px) {
+  .site-body .action-bar { display: none; }
+  .site-body.has-action-bar { padding-bottom: 0; }
+}
+
+/* ==========================================================================
+ * 8. Script-specific typography
+ *
+ * Gujarati is never uppercased and never letterspaced. Devanagari gets the
+ * same protection, because Latin tracking applied to a conjunct script is the
+ * same mistake in a different alphabet.
+ * ========================================================================== */
+
+/* Each script gets its own stack. Latin stays Manrope in all three, because
+   the trade writes emCAD, WhatsApp and batch in Latin inside every sentence
+   and switching face mid-phrase for them would be worse than the mismatch
+   this avoids. */
+.site-body :lang(hi) {
+  --font-display: "Manrope Variable", "Noto Sans Devanagari Variable", system-ui, sans-serif;
+  --font-body: "Manrope Variable", "Noto Sans Devanagari Variable", system-ui, sans-serif;
+  /* Playfair has no Devanagari coverage and Devanagari has no italic
+     convention, so the editorial accent resolves to the body face. */
+  --font-accent: "Manrope Variable", "Noto Sans Devanagari Variable", system-ui, sans-serif;
+  font-style: normal;
+}
+/* Declared after `:lang(hi)` so an embedded `<span lang="gu">` on a Hindi page
+   wins on source order at equal specificity. */
+.site-body :lang(gu) {
+  --font-display: "Manrope Variable", "Noto Sans Gujarati Variable", system-ui, sans-serif;
+  --font-body: "Manrope Variable", "Noto Sans Gujarati Variable", system-ui, sans-serif;
+  --font-accent: "Manrope Variable", "Noto Sans Gujarati Variable", system-ui, sans-serif;
+  font-style: normal;
+}
+
+.site-body :lang(gu),
+.site-body :lang(hi) {
+  letter-spacing: 0;
+}
+.site-body :lang(gu) .eyebrow,
+.site-body :lang(hi) .eyebrow,
+.site-body :lang(gu) .microlabel,
+.site-body :lang(hi) .microlabel {
+  text-transform: none;
+  letter-spacing: 0;
+}
+/* Both scripts carry marks above and below the line, so they need the room. */
+.site-body :lang(gu) { line-height: 1.8; }
+.site-body :lang(hi) { line-height: 1.75; }
+.site-body :lang(gu) h1, .site-body :lang(gu) h2, .site-body :lang(gu) h3,
+.site-body :lang(hi) h1, .site-body :lang(hi) h2, .site-body :lang(hi) h3 {
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+ * 9. Motion
+ *
+ * Everything in this system is a transition on an interactive element or a
+ * one-shot reveal. There is no loop, no parallax, no cursor follower and
+ * nothing that runs while the visitor is reading.
+ * ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .site-body .lab-sheet { animation: none; }
+  .site-body .btn .arrow,
+  .site-body .card-lift,
+  .site-body .card-img,
+  .site-body .lab-tab,
+  .site-body .btn {
+    transition: none !important;
+  }
+  .site-body .card-lift:hover .card-img { transform: none; }
+}

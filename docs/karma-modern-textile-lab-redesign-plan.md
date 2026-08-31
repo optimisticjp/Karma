@@ -1755,7 +1755,7 @@ Console, which is why Phase 3 scopes a fourth public-only stylesheet rather than
 retuning shared tokens.
 
 ## Phase 2 — information architecture + public route/navigation model
-**Status:** ✅ Complete — PR #56, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #56, merged as `e1cd496`
 
 The IA is recorded in **`docs/modern-textile-lab-ia.md`** — authoritative for
 public routes, navigation and conversion chrome, and it supersedes the
@@ -1813,20 +1813,70 @@ route that does not exist**, the batches data contract, and the locale
 routing contract. **809 tests pass.**
 
 ## Phase 3 — Modern Textile Lab design system
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #57, merged as `PLACEHOLDER_MERGE`
 
-- public-scoped palette
-- typography scale
-- Hindi font
-- texture rules
-- buttons
-- cards/rows
-- tabs
-- sheets
-- section rhythm
-- animation rules
-- ensure no Console regression
-- update `docs/design-system.md`
+`src/app/textile-lab.css`, imported by `src/app/[locale]/layout.tsx` **only**.
+
+**The scoping is structural, not a convention.** The Phase 1 audit found there
+is no shared root layout — `[locale]/layout.tsx` and `admin/layout.tsx` are two
+independent roots, and both import the other three stylesheets. A fourth sheet
+imported by one root cannot reach the other. Every selector inside is
+*additionally* scoped to `.site-body`, and a test walks the file asserting that.
+
+**The token bridge.** Re-pointing the shared `--color-*` tokens inside
+`.site-body` re-skins ~90 public files without editing a className, because
+Tailwind v4 compiles `bg-ivory` to `var(--color-ivory)`. Verified in a browser
+from one build: `/en` reports `--color-ivory: #f7f4ee` and `/admin/login`
+reports `#f5f0e6`, with the Console also keeping `#111716`, `#605e56`, needle
+`#29617a`, zari `#aa6239` and its own type scale. The alternative was a
+ninety-file rename with no visual difference at the end of it.
+
+**Every ratio measured, and two of them changed the design.** Thread Red is
+3.94:1 on Canvas and Muted Ink is 4.34:1 on Warm Sand — both below the 4.5
+body-text floor. Neither is fixed by brightening the accent: each gets a deep
+step (`--mtl-thread-deep` #B03522 → 5.66/6.22/4.79; `--mtl-ink-muted-deep`
+#5E605C → 5.79/6.36/4.90), and `.surface-sand` swaps its own in so no caller
+has to remember.
+
+**Eleven public colours became seven.** Needle Blue and Zari Copper are mapped
+into the seven rather than deleted — ninety files reference them and an
+undefined Tailwind v4 token silently falls back to `currentColor`, which is how
+`border-rule` already went wrong in the Console.
+
+**Type scale, rendered at both ends:** h1 **32.5 → 56**, h2 **24.3 → 38**,
+h3 **20 → 24**, body **16**, button 14 → 14.8. Every value inside the plan's
+ranges and the ladder strictly ascending at 390 *and* 1440. `lead` and
+`bodylg` were separate clamps landing 0.04px apart at 390px — one size role
+wearing two names — and are now deliberately identical.
+
+**Hindi typography is a stack decision, not a range decision.** The Gujarati
+face claims the Devanagari-shared danda and stress marks, so one shared stack
+would draw a Hindi danda from the Gujarati font. Re-cutting the Gujarati range
+is the wrong fix — Gujarati uses the danda too. Each script gets its own
+`:lang()`-scoped stack, Gujarati declared second so an embedded
+`<span lang="gu">` on a Hindi page wins on source order. The face is declared
+in this file, so the Console never downloads it, and its `unicode-range` claims
+the Devanagari block and nothing decorative.
+
+Also delivered: four texture treatments each with one job (every alpha ≤ 0.09,
+no page ground textured), `.surface-business` as a **single named class** for
+the one charcoal surface so it cannot be reached for by habit, `.lab-row`,
+`.lab-tabs`/`.lab-tab`, `.lab-sheet`, `.action-bar` with its reservation read
+from the same token as its height, and a motion budget of one 2.5px arrow, one
+1.02 image scale and one 240ms sheet.
+
+Three failures came from the phase's own tests and all three were fixed in the
+CSS rather than the assertion: `--text-h4` rendering 0.008px *below*
+`--text-lead`, the `lead`/`bodylg` duplication, and a texture-alpha sweep that
+was catching the bottom sheet's 45% scrim (that one was the test, and it was
+scoped to the texture rules).
+
+New suite: `tests/mtl-design-system.test.ts` (32 assertions). **841 tests pass.
+Worker 2028.56 KiB gzip** — +2.3 KiB, because the Devanagari face is fetched by
+the browser on Hindi pages only and never enters the Worker bundle.
+
+`docs/design-system.md` now opens by stating that there are two systems and
+which side of the product each governs.
 
 ## Phase 4 — trilingual shell + navigation
 **Status:** ⏳ Pending

@@ -1,3 +1,141 @@
+# Design system v6: "Modern Textile Lab" (public) · v5 "Machine Lab" (Console)
+
+> **Read this first.** Since 2026-08-31 there are **two** systems, and which
+> one applies depends on which side of the product you are on.
+>
+> - **The public site** runs **Modern Textile Lab**, defined in
+>   `src/app/textile-lab.css` and summarised in the section directly below.
+> - **Karma Console** runs the system the rest of this document describes,
+>   unchanged. It was tuned across PRs #43–#53 and is explicitly out of scope
+>   for the public redesign.
+>
+> The two do not share a root layout — `src/app/[locale]/layout.tsx` and
+> `src/app/admin/layout.tsx` are independent roots — so `textile-lab.css` is
+> imported by the public one only and cannot reach `/admin`.
+
+---
+
+## Modern Textile Lab — the public system (v6, 2026-08-31)
+
+Authoritative plan: `docs/karma-modern-textile-lab-redesign-plan.md`.
+The brand sits between **craft and machine precision**, and the permanent
+spine is unchanged:
+
+> **FROM SCREEN TO STITCH.**
+> Design on screen. Prove it on the machine.
+
+### Seven colours, measured
+
+| Token | Hex | Role | Measured |
+| --- | --- | --- | --- |
+| `--mtl-canvas` | `#F7F4EE` | the public ground | — |
+| `--mtl-paper` | `#FFFFFF` | forms, cards, image mats | — |
+| `--mtl-ink` | `#171918` | primary text, strong linework | 16.09:1 on canvas · 17.67 on paper · 13.62 on sand |
+| `--mtl-ink-muted` | `#666864` | secondary copy | 5.13 canvas · 5.63 paper · **4.34 sand** |
+| `--mtl-ink-muted-deep` | `#5E605C` | secondary copy **on sand** | 5.79 · 6.36 · **4.90** |
+| `--mtl-thread` | `#D44B35` | THE accent: fills, active stitch, large text | **3.94** canvas — large text and fills only |
+| `--mtl-thread-deep` | `#B03522` | small-text links and hovers | 5.66 · 6.22 · 4.79 |
+| `--mtl-sand` | `#E9E1D5` | secondary material surface | — |
+| `--mtl-charcoal` | `#202321` | **the `/services` hero, and nothing else** | white 15.86 · canvas 14.45 · thread 3.67 |
+
+**Two rules follow from the measurements, and both are the same rule.**
+Thread Red fails AA for body-size text on canvas, and Muted Ink fails it on
+Warm Sand. Neither is fixed by brightening the accent or lightening the
+ground — each has a **deep step**, and the sand surface swaps its own in
+automatically so no caller has to remember.
+
+**Eleven public colours became seven.** Needle Blue and Zari Copper do not
+exist in this palette; the technical register comes from texture and
+annotation rather than a second and third hue. They are **mapped** into the
+seven rather than deleted, because ninety files reference them and an
+undefined Tailwind v4 token silently falls back to `currentColor` — which is
+how `border-rule` already went wrong in the Console.
+
+### The token bridge
+
+`textile-lab.css` re-points the shared `--color-*` tokens **inside
+`.site-body` only**. `bg-ivory` on a public page paints Canvas; the same class
+in the Console still paints Cotton. Verified in a browser: `/en` reports
+`--color-ivory: #f7f4ee` and `/admin/login` reports `#f5f0e6`, from the same
+build.
+
+The alternative was renaming across ninety files for no visual difference. The
+cost is that a token name means one thing inside the scope and another outside
+it, which is why every mapping in the file states both values.
+
+### Type scale — rendered, not intended
+
+| | 390px | 1440px | plan asks |
+| --- | --- | --- | --- |
+| h1 | **32.5** | **56** | 32–38 / 52–64 |
+| h2 | **24.3** | **38** | 24–28 / 34–42 |
+| h3 | **20** | **24** | 18–21 / 22–26 |
+| h4 | 18 | 21 | — |
+| lead / bodylg | 17 | 18.3 | — |
+| body | **16** | **16** | 15–16 |
+| smallmeta | 14 | 14.6 | — |
+| eyebrow | 12 | 12.4 | 12–13 |
+| button | 14 | 14.8 | 14–15 |
+
+Strictly ascending at both ends. `lead` and `bodylg` are deliberately the
+**same clamp**: they are one size role wearing two names, and as separate
+clamps they landed 0.04px apart at 390px, which is not a distinction.
+
+`smallmeta` sits at 14 rather than the plan's 12–13 band because it is the
+site's caption size, and a 12px caption under a photograph is the technical
+manual the same section forbids. The 12–13 band is `eyebrow`.
+
+### Texture — four treatments, each with one job
+
+`.tex-weave` (behind a finished embroidery proof) · `.tex-cad` (behind an
+EMCAD/screen visual) · `.tex-grain` (a hero object that must read as a sheet)
+· `.thread-divider` (the running stitch, as a rule). Every alpha is ≤ 0.09.
+No page ground carries texture; nothing repeats behind body copy.
+
+### One dark public surface
+
+`.surface-business` — the `/services` hero, as the commercial studio-mode
+switch. It is a **single named class and deliberately not a `band-*`**, so it
+cannot be reached for by habit: a section either is the services hero or it is
+not. It re-points its own tokens so children need no `onDark` prop, and Thread
+is large-text-only there too (3.67:1).
+
+### Scripts
+
+Each script gets its **own font stack**, selected by the element's language.
+The Gujarati face claims the Devanagari-shared danda and stress marks, so one
+shared stack would draw a Hindi danda from the Gujarati font — the right glyph
+from the wrong face, mid-sentence. Re-cutting the Gujarati range is the wrong
+fix, because Gujarati uses the danda too.
+
+`:lang(hi)` gets Manrope + Noto Sans Devanagari; `:lang(gu)` gets Manrope +
+Noto Sans Gujarati, declared **after** so an embedded `<span lang="gu">` on a
+Hindi page wins on source order. Neither script is ever uppercased or
+letterspaced — Latin tracking on a conjunct script is the same mistake in a
+different alphabet.
+
+The Devanagari face is declared in `textile-lab.css`, so a staff member never
+downloads it, and its `unicode-range` claims the Devanagari block and nothing
+decorative — the same discipline that stopped the Gujarati face being fetched
+to draw a "→".
+
+### Motion
+
+A button's arrow moves 2.5px. A gallery image scales 1.02, on hover-capable
+devices only. The bottom sheet slides 12px in 240ms. That is the entire
+budget. No loop, no parallax, no marquee, no cursor follower, no
+`background-attachment: fixed`; `prefers-reduced-motion` disables all of it.
+
+### Where it lives
+
+`src/app/textile-lab.css`, imported by `src/app/[locale]/layout.tsx` only.
+Guarded by `tests/mtl-design-system.test.ts`, which asserts the import
+boundary, that **every selector in the file is scoped to `.site-body`**, the
+measured contrast of every pair, both ends of the type scale, the script
+stacks and their order, texture alphas, and the motion budget.
+
+---
+
 # Design system v3: "Screen to Stitch / The Machine Floor"
 
 This supersedes the visual sections (§4-§7) of karma-master-plan-final.md and
