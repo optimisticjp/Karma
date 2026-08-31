@@ -53,7 +53,11 @@ describe("the studio page promises nothing that has not been confirmed", () => {
 
   it("builds machine capability from the catalogue, so it cannot overclaim", () => {
     expect(page).toContain("coursesByFamily.map");
-    expect(page).toContain("production.machineGu");
+    /* Every technique on the wall is a course the school teaches, named from
+       the catalogue — so the studio cannot advertise a capability the floor
+       does not have, and a twelfth course would appear here without an edit. */
+    expect(page).toContain('pick(c, "name", l)');
+    expect(page).not.toMatch(/\b11 techniques\b/);
   });
 });
 

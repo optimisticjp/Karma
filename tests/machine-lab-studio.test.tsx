@@ -10,8 +10,10 @@ const en = JSON.parse(read("messages/en.json")) as any;
 const gu = JSON.parse(read("messages/gu.json")) as any;
 
 const page = read("src/app/[locale]/services/page.tsx");
-const rail = read("src/components/studio/StudioRail.tsx");
-const railBase = read("src/components/ui/ProductionRail.tsx");
+/* The chain moved onto the design system's seam when the route was rebuilt;
+   `<StudioRail>` and the shared `<ProductionRail>` are deleted. The rules
+   below follow the chain, not the component that used to draw it. */
+const rail = read("src/components/kds/studio/StudioChain.tsx");
 const brief = read("src/components/forms/BriefForm.tsx");
 
 const stripComments = (source: string) =>
@@ -23,37 +25,34 @@ const stripComments = (source: string) =>
 
 describe("the studio production chain", () => {
   it("runs reference → digitising → sample → correction → machine-ready", () => {
-    const order = ["reference", "digitising", "sample", "correction", "ready"];
-    const positions = order.map((key) => rail.indexOf(`key: "${key}"`));
-    expect(positions.every((p) => p > -1)).toBe(true);
-    expect([...positions].sort((a, b) => a - b)).toEqual(positions);
+    /* The stages are keyed s1…s5 in the catalogue, in order, and the chain
+       renders that order. Reordering the copy reorders the chain, which is
+       the point: there is one place the sequence lives. */
+    const order = ["Reference", "Digitising", "Sample", "Correction", "Machine-ready"];
+    const labels = [1, 2, 3, 4, 5].map((n) => en.servicesPage.chain[`s${n}Label`]);
+    expect(labels).toEqual(order);
+    expect(rail).toContain("[1, 2, 3, 4, 5].map");
   });
 
-  it("uses the shared rail rather than forking one of its own", () => {
-    /* The rail is generic — its stages are a prop — which is what let the
-       B2B chain reuse it. The homepage no longer renders it: its signature is
-       now a five-state sequence that carries a failed stitch-out and its
-       correction, which a three-stage rail cannot express. The rail stays for
-       the surfaces whose story genuinely is three stages. */
-    expect(rail).toContain("ProductionRail");
-    expect(railBase).toContain("stages: RailStage[]");
+  it("draws the chain as the same seam the other ordered sequences use", () => {
+    /* The joining steps, the diagnostic checks and this are the same idea —
+       an ordered sequence where the order is the content — so they are the
+       same object rather than three drawings that resemble each other. */
+    expect(rail).toContain("pathway-step");
+    expect(rail).toContain("<NeedlePoint");
+    expect(rail).toContain("pathway-thread");
   });
 
-  it("carries drawn marks, never a borrowed or invented photo slot", () => {
+  it("carries no borrowed or invented photo slot", () => {
     /* The 32-shot list covers the school, not the commercial pipeline. */
     expect(rail).not.toContain("photoId");
-    for (const mark of ["RegistrationPoint", "BrokenPath", "KnotPoint", "StitchRule"]) {
-      expect(rail, mark).toContain(mark);
-    }
+    expect(rail).not.toContain("PhotoFrame");
   });
 
-  it("uses each mark for the thing that mark means", () => {
-    /* correction is the one that must be the broken path: failure /
-       production problem. machine-ready is the knot: completion. */
-    const correction = rail.slice(rail.indexOf('key: "correction"'), rail.indexOf('key: "ready"'));
-    expect(correction).toContain("BrokenPath");
-    const ready = rail.slice(rail.indexOf('key: "ready"'));
-    expect(ready).toContain("KnotPoint");
+  it("marks the last stage as the one still ahead", () => {
+    /* Machine-ready is what the buyer is waiting for, so it is the needle
+       that has not gone in yet rather than a completed stitch. */
+    expect(rail).toContain('state={i === stages.length - 1 ? "todo" : "done"}');
   });
 });
 
@@ -111,8 +110,10 @@ describe("what the studio says it can do", () => {
     expect(courses).toHaveLength(11);
   });
 
-  it("shows each technique's own signature, not a shared family swatch", () => {
-    expect(page).toContain("TechniqueSignature");
+  it("shows each technique's own mark, never a shared family one", () => {
+    /* A mark belongs to exactly one technique. The capability wall draws the
+       course's own stitch swatch, keyed by its slug. */
+    expect(page).toContain("<StitchSwatch slug={c.slug} />");
     expect(page).not.toContain("TechniquePlate");
   });
 
@@ -142,10 +143,15 @@ describe("band rhythm on the services page", () => {
        stitch marks, none of which needed the black. */
     expect((page.match(/on-carbon/g) ?? [])).toHaveLength(0);
     expect(stripComments(rail)).not.toContain("on-carbon");
-    expect(rail).toContain("band-machine");
+    /* The chain is the page's technical moment, and what says so is the COOL
+       REGISTER — the ground that means screen, file and process — rather than
+       a black slab. */
+    expect(rail).toContain("on-mist");
     /* And it must not have quietly become an undifferentiated light section:
-       the technical band is a real surface change from what sits either side
-       of it. */
-    expect(page).toContain("band-human");
+       the cool ground is a real surface change from what sits either side of
+       it, and the page uses every one of the four. */
+    for (const g of ["on-canvas", "on-paper", "on-cloth"]) {
+      expect(page, g).toContain(g);
+    }
   });
 });

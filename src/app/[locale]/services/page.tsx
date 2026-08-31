@@ -1,20 +1,23 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { BriefForm } from "@/components/forms/BriefForm";
-import { PageIntro } from "@/components/ui/PageIntro";
-import { SectionHeading } from "@/components/ui/SectionHeading";
-import { Ledger, LedgerRow } from "@/components/ui/Ledger";
 import { Icon } from "@/components/ui/Icon";
-import { services, studioProblems, studioProjects } from "@/content/collections";
-import { TechniqueSignature } from "@/components/ui/TechniqueSignature";
-import { StudioRail } from "@/components/studio/StudioRail";
-import { MonoNote } from "@/components/ui/MonoNote";
-import { SampleTag } from "@/components/ui/SampleTag";
-import { TrackedLink } from "@/components/site/TrackedLink";
-import { Reveal } from "@/components/ui/Reveal";
+import { studioProblems, studioProjects } from "@/content/collections";
 import { coursesByFamily, families } from "@/content/courses";
+import { pick } from "@/lib/i18n/localized";
+import { asLocale, routing } from "@/i18n/routing";
 import { site, waLink } from "@/lib/site";
 import { pageMeta } from "@/lib/seo";
+import { TrackedLink } from "@/components/site/TrackedLink";
+import { PageHead } from "@/components/kds/PageHead";
+import { StudioChain } from "@/components/kds/studio/StudioChain";
+import { StitchSwatch } from "@/components/kds/StitchSwatch";
+import { SampleMark } from "@/components/kds/proof";
+import { NeedlePoint, ThreadLine } from "@/components/kds/marks";
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export async function generateMetadata({
   params
@@ -27,28 +30,14 @@ export async function generateMetadata({
 }
 
 /**
- * Karma Studio — the business side.
+ * KARMA STUDIO — the business side.
  *
  * The student site and this page are aimed at different people, and the
  * mistake would be to blur them. A student is buying a skill; a boutique or a
- * production unit is buying a result, and arrives with a problem rather than
- * a browsing intent. So this page leads with the problems — a sample with no
- * source file, a design that fails at production speed — and names the
- * service second.
- *
- * Every service on this page is one the studio already advertises. Nothing was
- * invented to fill the structure out, no turnaround time is promised (none has
- * been confirmed), and the sample projects are generic work types rather than
- * named clients.
- *
- * THE CHAIN CARRIES THE PAGE
- * --------------------------
- * `<StudioRail>` shows REFERENCE → DIGITISING → SAMPLE → CORRECTION →
- * MACHINE-READY on the same `<ProductionRail>` the homepage uses for
- * DESIGN → MACHINE → RESULT — which is why that component takes its stages as
- * a prop rather than hard-coding three panels. A business arrives with a
- * situation, and the order the work goes in answers "can this studio handle my
- * mess" faster than any adjective.
+ * production unit is buying a RESULT and arrives with a problem rather than a
+ * browsing intent. So the page leads with the exchange — what you can bring,
+ * what comes back — then the chain, then the problems, and names the service
+ * after all three.
  *
  * THREE THINGS THIS PAGE STILL WILL NOT SAY
  * -----------------------------------------
@@ -57,303 +46,332 @@ export async function generateMetadata({
  * delivery window writes a cheque the floor has to cash. The copy asks for the
  * buyer's deadline and their machine's format instead of announcing ours.
  *
- * There is also no file upload, and the brief form says so plainly rather than
+ * **There is no file upload**, and the brief form says so plainly rather than
  * showing a dead control. Private file delivery waits on R2, which is
  * deliberately not activated.
+ *
+ * The sample projects are generic WORK TYPES, not named clients, and each
+ * carries its own preview marker.
  */
 export default async function ServicesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, tc, l] = await Promise.all([
+  const [t, tc, rawLocale] = await Promise.all([
     getTranslations("servicesPage"),
     getTranslations("common"),
     getLocale()
   ]);
-  const gu = l === "gu";
+  const l = asLocale(rawLocale);
   const howSteps = t.raw("howSteps") as Array<{ t: string; d: string }>;
   const guide = t.raw("guide") as string[];
 
   return (
     <>
-      <PageIntro
+      <PageHead
         eyebrow={t("eyebrow")}
         title={t("title")}
         lede={t("sub")}
         actions={
           <>
-            <a href="#brief" className="btn btn-primary">
-              {t("form.submit")} <Icon name="arrow" size={18} className="arrow" />
+            <a href="#brief" className="act act-primary">
+              {t("form.submit")} <Icon name="arrow" size={17} className="arrow" />
             </a>
             <a
               href={waLink(tc("waPrefillBusiness"))}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn btn-secondary"
+              className="act act-secondary"
             >
-              <Icon name="whatsapp" size={18} /> {tc("whatsapp")}
+              <Icon name="whatsapp" size={17} /> {tc("whatsapp")}
             </a>
           </>
         }
         aside={
           <>
-            <MonoNote as="p" tone="vermilion">{t("confidentialTitle")}</MonoNote>
-            <p className="mt-1.5">{t("confidential")}</p>
+            <p className="t-micro">{t("confidentialTitle")}</p>
+            <p className="t-body mt-2">{t("confidential")}</p>
           </>
         }
       />
 
-      {/* 2 + 3. What you can bring, and what comes back. The exchange stated
-             plainly, because a buyer's first question is whether their
-             particular mess is something this studio takes. */}
-      <section className="section">
-        <div className="container-site split split-even">
-          <div className="surface surface-feature">
-            <p className="microlabel !text-vermilion-deep">{t("bringTitle")}</p>
-            <h2 className="text-h3 mt-1.5 font-display">{t("bringH")}</h2>
-            <ul className="stack-lines mt-2">
-              {(t.raw("bring") as string[]).map((b) => (
-                <li key={b} className="flex gap-3 text-smallmeta">
-                  <Icon name="check" size={17} strokeWidth={2} className="mt-1 shrink-0 text-vermilion-deep" />
-                  <span>{b}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="surface surface-machine surface-feature">
-            <p className="microlabel">{t("returnTitle")}</p>
-            <h2 className="text-h3 mt-1.5 font-display">{t("returnH")}</h2>
-            <ul className="stack-lines mt-2">
-              {(t.raw("returns") as string[]).map((r) => (
-                <li key={r} className="flex gap-3 text-smallmeta">
-                  <Icon name="check" size={17} strokeWidth={2} className="mt-1 shrink-0 text-needle-light" />
-                  <span>{r}</span>
-                </li>
-              ))}
-            </ul>
+      {/* The exchange, stated plainly: a buyer's first question is whether
+          their particular mess is something this studio takes. */}
+      <section className="band on-canvas" aria-labelledby="exchange-heading">
+        <div className="wrap">
+          <h2 id="exchange-heading" className="sr-only">
+            {t("bringH")}
+          </h2>
+          <div className="split split-even">
+            <div className="fee-sheet">
+              <p className="t-micro">{t("bringTitle")}</p>
+              <p className="t-h3 mt-2">{t("bringH")}</p>
+              <ul className="make-skills mt-4" role="list">
+                {(t.raw("bring") as string[]).map((b) => (
+                  <li key={b}>
+                    <NeedlePoint state="done" />
+                    <span className="t-body">{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="fee-sheet">
+              <p className="t-micro">{t("returnTitle")}</p>
+              <p className="t-h3 mt-2">{t("returnH")}</p>
+              <ul className="make-skills mt-4" role="list">
+                {(t.raw("returns") as string[]).map((r) => (
+                  <li key={r}>
+                    <NeedlePoint state="done" />
+                    <span className="t-body">{r}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* The chain, in the order the work actually goes in. */}
-      <StudioRail />
+      <StudioChain />
 
-      {/* 6. Problem-led. A business arrives with a situation, not a noun. */}
-      <section className="section band-human">
-        <div className="container-site">
-          <SectionHeading eyebrow={t("problemsEyebrow")} title={t("problemsTitle")} sub={t("problemsSub")} rule />
-          <ol className="case-list u-section-body">
+      {/* Problem-led: a business arrives with a situation, not a noun. */}
+      <section className="band on-cloth" aria-labelledby="problems-heading">
+        <div className="wrap">
+          <header className="max-w-prose">
+            <p className="t-micro">{t("problemsEyebrow")}</p>
+            <h2 id="problems-heading" className="t-h2 mt-1.5">
+              {t("problemsTitle")}
+            </h2>
+            <p className="t-lede mt-3">{t("problemsSub")}</p>
+          </header>
+
+          <ol className="cases" role="list">
             {studioProblems.map((p, i) => (
-              <Reveal as="li" key={p.slug} delay={i * 50} className="case-note">
-                <div className="case-head">
-                  <span className="case-index tabular" aria-hidden="true">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span className="chip">{gu ? p.serviceGu : p.serviceEn}</span>
-                </div>
-                <p className="case-problem">{gu ? p.askGu : p.askEn}</p>
+              <li key={p.slug} className="case">
+                <p className="case-head">
+                  <span className="t-micro numeric">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="chip">{pick(p, "service", l)}</span>
+                </p>
+                <p className="t-h4 mt-3">{pick(p, "ask", l)}</p>
                 <dl className="case-fields">
                   <div>
-                    <dt className="case-label">{t("problemsReturns")}</dt>
-                    <dd className="case-value">{gu ? p.returnsGu : p.returnsEn}</dd>
+                    <dt className="t-micro">
+                      <NeedlePoint state="done" />
+                      {t("problemsReturns")}
+                    </dt>
+                    <dd className="t-body mt-1">{pick(p, "returns", l)}</dd>
                   </div>
                 </dl>
-              </Reveal>
+              </li>
             ))}
           </ol>
         </div>
       </section>
 
-      {/* 4. Machine capabilities, drawn straight from the catalogue so this
-             page can never claim a technique the studio does not teach. */}
-      <section className="section">
-        <div className="container-site">
-          <SectionHeading title={t("capabilityTitle")} sub={t("capabilitySub")} />
-          <ul className="u-section-body spec-grid">
+      {/* What the studio can actually make, drawn from the same eleven
+          techniques the school teaches — because they are the same floor. */}
+      <section className="band on-canvas" aria-labelledby="capability-heading">
+        <div className="wrap">
+          <header className="max-w-prose">
+            <h2 id="capability-heading" className="t-h2">
+              {t("capabilityTitle")}
+            </h2>
+            <p className="t-lede mt-3">{t("capabilitySub")}</p>
+          </header>
+
+          <ul className="capability-grid" role="list">
             {coursesByFamily.map((c) => (
               <li key={c.slug}>
-                <div className="capability-plate">
-                  <TechniqueSignature slug={c.slug} />
-                </div>
-                <span className="spec-label">
-                  {gu ? families[c.family].nameGu : families[c.family].nameEn}
-                </span>
-                <span className="spec-value mt-1 block">{gu ? c.nameGu : c.nameEn}</span>
-                <span className="spec-note mt-1 block">
-                  {gu ? c.production.machineGu : c.production.machineEn}
-                </span>
+                <StitchSwatch slug={c.slug} />
+                <p className="t-h4 mt-2">{pick(c, "name", l)}</p>
+                <p className="t-meta mt-1">{pick(families[c.family], "name", l)}</p>
               </li>
             ))}
           </ul>
-        </div>
-      </section>
 
-      {/* The service list, kept as the plain index it always was. */}
-      <section className="section-compact bg-ivory-2">
-        <div className="container-site">
-          <SectionHeading title={t("whatTitle")} sub={t("whatSub")} />
-          <dl className="u-section-body spec-grid">
-            {services.map((s) => (
-              <div key={s.titleEn}>
-                <dt className="spec-label">{gu ? s.titleGu : s.titleEn}</dt>
-                <dd className="spec-note mt-2">{gu ? s.descGu : s.descEn}</dd>
+          <div className="before-handbook">
+            <div className="min-w-0">
+              <h3 className="t-h3">{t("whatTitle")}</h3>
+              <p className="t-meta mt-2 max-w-[40ch]">{t("whatSub")}</p>
+            </div>
+            <dl className="before-grid !mt-0">
+              <div>
+                <dt className="t-h4">{t("turnaroundTitle")}</dt>
+                <dd className="t-body mt-2">{t("turnaroundBody")}</dd>
               </div>
-            ))}
-          </dl>
+              <div>
+                <dt className="t-h4">{t("formatsTitle")}</dt>
+                <dd className="t-body mt-2">{t("formatsBody")}</dd>
+              </div>
+            </dl>
+          </div>
         </div>
       </section>
 
-      {/* 7. Sample work: generic project types, tagged. A named client or a
-             logo would be an endorsement nobody gave. */}
-      <section className="section">
-        <div className="container-site">
-          <SectionHeading title={t("projectsTitle")} sub={t("projectsSub")} />
-          <ul className="project-grid u-section-body">
-            {studioProjects.map((pr, i) => (
-              <Reveal as="li" key={pr.titleEn} delay={i * 60} className="project-card">
-                <p className="chip">{gu ? pr.techniqueGu : pr.techniqueEn}</p>
-                <h3 className="project-title">{gu ? pr.titleGu : pr.titleEn}</h3>
+      {/* Sample projects: generic work types, never a named client, each
+          carrying its own preview marker. */}
+      <section className="band on-paper" aria-labelledby="projects-heading">
+        <div className="wrap">
+          <header className="max-w-prose">
+            <h2 id="projects-heading" className="t-h2">
+              {t("projectsTitle")}
+            </h2>
+            <p className="t-lede mt-3">{t("projectsSub")}</p>
+          </header>
+
+          <ul className="cases" role="list">
+            {studioProjects.map((pr) => (
+              <li key={pr.titleEn} className="case">
+                <p className="case-head">
+                  <span className="chip">{pick(pr, "technique", l)}</span>
+                  {pr.sample ? <SampleMark status="sample" /> : null}
+                </p>
+                <p className="t-h4 mt-3">{pick(pr, "title", l)}</p>
                 <dl className="case-fields">
                   <div>
-                    <dt className="case-label">{t("projectsBrief")}</dt>
-                    <dd className="case-value">{gu ? pr.briefGu : pr.briefEn}</dd>
+                    <dt className="t-micro">
+                      <NeedlePoint state="now" />
+                      {t("projectsBrief")}
+                    </dt>
+                    <dd className="t-body mt-1">{pick(pr, "brief", l)}</dd>
                   </div>
                   <div>
-                    <dt className="case-label">{t("projectsDelivered")}</dt>
-                    <dd className="case-value">{gu ? pr.deliveredGu : pr.deliveredEn}</dd>
+                    <dt className="t-micro">
+                      <NeedlePoint state="done" />
+                      {t("projectsDelivered")}
+                    </dt>
+                    <dd className="t-body mt-1">{pick(pr, "delivered", l)}</dd>
                   </div>
                 </dl>
-                {pr.sample ? (
-                  <p className="mt-4">
-                    <SampleTag />
-                  </p>
-                ) : null}
-              </Reveal>
+              </li>
             ))}
           </ul>
-          <p className="review-foot">{t("projectsFoot")}</p>
+
+          <p className="t-meta mt-6 max-w-prose">{t("projectsFoot")}</p>
         </div>
       </section>
 
-      <section className="section bg-ivory-2">
-        <div className="container-site grid gap-4 lg:grid-cols-2 lg:gap-16">
-          <div>
-            <SectionHeading title={t("howTitle")} sub={t("howSub")} />
-            <Ledger as="ol" className="mt-8">
-              {howSteps.map((s, i) => (
-                <LedgerRow
-                  key={s.t}
-                  index={String(i + 1).padStart(2, "0")}
-                  title={s.t}
-                  note={s.d}
-                />
-              ))}
-            </Ledger>
-          </div>
-          <div>
-            <SectionHeading title={t("guideTitle")} sub={t("guideSub")} />
-            {/* Turnaround and formats: said honestly rather than guessed.
-                No delivery time has been confirmed by the studio, and no
-                verified list of supported machine formats exists, so both
-                answers are "tell us and we will match it" — which is also
-                the truthful answer for job work of this kind. */}
-            <div className="surface mt-6">
-              <p className="case-label">{t("turnaroundTitle")}</p>
-              <p className="mt-2 text-smallmeta text-stone">{t("turnaroundBody")}</p>
-              <p className="case-label mt-5">{t("formatsTitle")}</p>
-              <p className="mt-2 text-smallmeta text-stone">{t("formatsBody")}</p>
+      {/* How a job runs, and what to send. */}
+      <section className="band on-mist" aria-labelledby="how-heading">
+        <div className="wrap">
+          <div className="split">
+            <div className="min-w-0">
+              <p className="t-micro">{t("howTitle")}</p>
+              <h2 id="how-heading" className="t-h2 mt-1.5">
+                {t("howSub")}
+              </h2>
+              <ol className="pathway mt-6" role="list">
+                {howSteps.map((step, i) => (
+                  <li key={step.t} className="pathway-step">
+                    <span className="pathway-mark" aria-hidden="true">
+                      <NeedlePoint state={i === howSteps.length - 1 ? "todo" : "done"} />
+                      {i < howSteps.length - 1 ? (
+                        <ThreadLine vertical className="pathway-thread" />
+                      ) : null}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="t-micro numeric">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="t-h4 mt-0.5 block">{step.t}</span>
+                      <span className="t-meta mt-1 block">{step.d}</span>
+                    </span>
+                  </li>
+                ))}
+              </ol>
             </div>
-            <ul className="mt-4 space-y-3.5">
-              {guide.map((g) => (
-                <li key={g} className="flex gap-3">
-                  <Icon
-                    name="check"
-                    size={17}
-                    strokeWidth={2}
-                    className="mt-1 shrink-0 text-vermilion-deep"
-                  />
-                  <span className="text-stone">{g}</span>
-                </li>
-              ))}
-            </ul>
+
+            <div className="fee-sheet">
+              <p className="t-micro">{t("guideTitle")}</p>
+              <p className="t-body mt-2">{t("guideSub")}</p>
+              <ul className="make-skills mt-4" role="list">
+                {guide.map((g) => (
+                  <li key={g}>
+                    <NeedlePoint state="done" />
+                    <span className="t-body">{g}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* The form used to sit alone in the middle of a very wide empty band.
-          Pairing it with what happens next removes the dead space and answers
-          the questions that otherwise arrive as a follow-up email. Every line
-          in the panel is drawn from copy already on this page. */}
-      <section className="section-compact bg-ivory-2" id="brief">
-        <div className="container-site grid gap-4 lg:grid-cols-[1.35fr_0.65fr] lg:items-start lg:gap-12">
-          <div className="card p-3.5 md:p-5">
-            <BriefForm />
+      {/* The brief. No uploader — files go over WhatsApp until private
+          storage is activated, and the form says so in its own words. */}
+      <section className="band on-cloth" id="brief" aria-labelledby="brief-heading">
+        <div className="wrap">
+          <h2 id="brief-heading" className="sr-only">
+            {t("formTitle")}
+          </h2>
+          <div className="split">
+            <div className="form-shell min-w-0">
+              <BriefForm />
+            </div>
+            <aside className="min-w-0">
+              <p className="t-micro">{t("afterTitle")}</p>
+              <ol className="pathway mt-4" role="list">
+                {(t.raw("afterSteps") as string[]).map((step, i, all) => (
+                  <li key={step} className="pathway-step">
+                    <span className="pathway-mark" aria-hidden="true">
+                      <NeedlePoint state={i === all.length - 1 ? "todo" : "done"} />
+                      {i < all.length - 1 ? (
+                        <ThreadLine vertical className="pathway-thread" />
+                      ) : null}
+                    </span>
+                    <span className="t-body min-w-0">{step}</span>
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-5">
+                <a
+                  href={waLink(tc("waPrefillBusiness"))}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="act act-secondary"
+                >
+                  <Icon name="whatsapp" size={17} /> {t("afterWhatsapp")}
+                </a>
+              </p>
+            </aside>
           </div>
-          <aside className="lg:sticky lg:top-24">
-            <p className="microlabel !text-vermilion-deep">{t("afterTitle")}</p>
-            <ol className="ledger mt-4">
-              {(t.raw("afterSteps") as string[]).map((step, i) => (
-                <li key={step} className="ledger-row">
-                  <span className="ledger-index">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="ledger-title !font-normal !text-smallmeta">{step}</span>
-                </li>
-              ))}
-            </ol>
-            {/* `form.filesHelp` used to render here — "Up to 3 files, 8 MB
-                each: PNG, JPG, WebP, PDF, AI or ZIP" — as guidance for an
-                in-form uploader that does not exist, beside a form that says
-                in its own words that files go over WhatsApp until private
-                storage is switched on. It told a business owner they could
-                attach files here and they could not. The key stays in the
-                catalogue: it is the copy to restore when R2 is activated, and
-                deleting it would lose the limits the API still enforces.
-
-                `confidential` went too — the form states the same sentence in
-                its file note, forty lines up the same screen. */}
-            <a
-              href={waLink(tc("waPrefillBusiness"))}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-secondary mt-5 w-full"
-            >
-              <Icon name="whatsapp" size={18} /> {t("afterWhatsapp")}
-            </a>
-          </aside>
         </div>
       </section>
 
-      {/* 11. The three ways a business actually gets in touch. */}
-      <section className="section-compact bg-sand">
-        <div className="container-site split">
-          <div>
-            <SectionHeading title={t("talkTitle")} sub={t("talkSub")} />
-          </div>
-          <div className="action-row">
-            <TrackedLink
-              href={`tel:+${site.callPhone}`}
-              event="call_demo_click"
-              props={{ surface: "services" }}
-              className="btn btn-primary"
-            >
-              <Icon name="phone" size={17} /> {t("talkCall")}
-            </TrackedLink>
-            <TrackedLink
-              href={waLink(tc("waPrefillBusiness"))}
-              event="whatsapp_click"
-              props={{ surface: "services" }}
-              external
-              className="btn btn-secondary"
-            >
-              <Icon name="whatsapp" size={18} /> {tc("whatsapp")}
-            </TrackedLink>
-            <TrackedLink
-              href={site.mapsUrl}
-              event="directions_click"
-              props={{ surface: "services" }}
-              external
-              className="cta-tertiary"
-            >
-              <Icon name="pin" size={16} /> {tc("directions")}
-            </TrackedLink>
+      {/* The three ways a business actually gets in touch. */}
+      <section className="band-tight on-canvas" aria-labelledby="talk-heading">
+        <div className="wrap">
+          <div className="split">
+            <div className="min-w-0">
+              <h2 id="talk-heading" className="t-h2">
+                {t("talkTitle")}
+              </h2>
+              <p className="t-lede mt-3">{t("talkSub")}</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <TrackedLink
+                href={`tel:+${site.callPhone}`}
+                event="call_demo_click"
+                props={{ surface: "services" }}
+                className="act act-primary"
+              >
+                <Icon name="phone" size={17} /> {t("talkCall")}
+              </TrackedLink>
+              <TrackedLink
+                href={waLink(tc("waPrefillBusiness"))}
+                event="whatsapp_click"
+                props={{ surface: "services" }}
+                external
+                className="act act-secondary"
+              >
+                <Icon name="whatsapp" size={17} /> {tc("whatsapp")}
+              </TrackedLink>
+              <TrackedLink
+                href={site.mapsUrl}
+                event="directions_click"
+                props={{ surface: "services" }}
+                external
+                className="act-quiet"
+              >
+                <Icon name="pin" size={16} /> {tc("directions")}
+              </TrackedLink>
+            </div>
           </div>
         </div>
       </section>

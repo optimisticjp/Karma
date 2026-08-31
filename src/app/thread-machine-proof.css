@@ -1736,6 +1736,26 @@
 .kds .note-row:hover .t-h4 { color: var(--brand-accent-strong); }
 .kds .note-row:hover .note-arrow { color: var(--brand-accent-strong); }
 
+/* ---- the studio's capability wall ---------------------------------------- */
+
+.kds .capability-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem 0.875rem;
+  margin-top: 1.75rem;
+}
+@media (min-width: 48rem) {
+  .kds .capability-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem 1.25rem; }
+}
+@media (min-width: 64rem) {
+  .kds .capability-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+/** An even two-track split, for two panels of equal weight. */
+.kds .split-even { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 64rem) {
+  .kds .split-even { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 /* ==========================================================================
  * 12. SMALL OBJECTS
  * ========================================================================== */
