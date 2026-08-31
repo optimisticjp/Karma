@@ -2446,7 +2446,7 @@ the page unlocks.
 
 # Phase 3 — Homepage rebuilt from zero
 
-**Status:** ✅ Complete — PR #64
+**Status:** ✅ Complete — PR #64, merged as 305743e
 
 Goal:
 
@@ -2583,7 +2583,7 @@ and the discrepancy is the owner's to resolve (`docs/content-checklist.md`).
 
 # Phase 4 — Courses + course-detail rebuild
 
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #65
 
 Required:
 
@@ -2600,6 +2600,112 @@ Required:
 Acceptance:
 
 A course should feel like a specialist textile-training product, not a generic landing page.
+
+## The catalogue
+
+Five blocks in `src/components/kds/courses/`: an intro carrying the 8 / 2 / 1
+family split **read from the catalogue rather than typed into copy**, the
+eleven as a filterable grid, the three families with every course named again
+as a link, the pathway as a seam, and the close.
+
+The page it replaces opened with a full-height intro and then repeated a family
+heading, an icon plate and a section rule three times before any course
+appeared. **The eleven courses ARE the page**; everything else is context, and
+context goes after the thing it contextualises.
+
+**Two columns on a phone.** Eleven full-width rows is about 4,000px to see a
+list that fits in six screens, and two columns keep the media large enough to
+tell zardosi from sequence work — which is the basis this choice is actually
+made on. Three columns from 48rem.
+
+**The media box is 4:3 whether a course is photographed or not.** Eight courses
+have a reserved photograph; the other three lead with their stitch swatch in
+the same box at the same size, so they never read as the leftovers and nothing
+moves when the eight files land.
+
+**The family filter is a group of toggle buttons, not a tablist.** Tab
+semantics promise a tabpanel the control owns and moves focus into; this
+narrows a list already on the page. The homepage sample book ran the same
+mistake and was corrected with it.
+
+## The course template
+
+Nine blocks, and **the money is second**. The compact-density pass had measured
+the old template: on EMCAD DAHAO — the one course with a confirmed duration and
+a published fee — those figures sat about 3,900px down, roughly 4.6 phone
+screens past the intro, the drawn signature and a two-column essay. The
+template changed; the finding did not.
+
+| # | Block | Ground |
+| --- | --- | --- |
+| 1 | `CourseHero` — what it produces, and the confirmed facts | canvas |
+| 2 | `CourseFacts` — the money, the timings, the certificate | cloth |
+| 3 | `CourseMake` — what you make, who it is for, what you can do | paper |
+| 4 | `CourseFaults` — the problems it teaches you to solve | mist |
+| 5 | `CourseFloor` — the machine, the software, the practice | canvas |
+| 6 | `CourseSyllabus` — the modules, closed by default | mist |
+| 7 | `CourseBatches` — when it runs, and the notes about it | paper |
+| 8 | `RelatedCourses` — three in the same family, in the catalogue's tile | cloth |
+| 9 | `CtaBand` — the one action | canvas |
+
+`CourseFaults` sits on the **cool register** because it is diagnostic work. It
+is also the most convincing block on the page: half the people reading a course
+page in Surat already run a machine, and naming their fault is something no
+institute that has not run production can do.
+
+`CourseNav` is a sticky anchor bar from `lg` up — plain anchors, no
+scroll-spy, and `scroll-margin-top` so a jumped-to heading never lands under
+the two sticky bars. Below `lg` it is not rendered: a second bar there would
+compete with the header and the action dock for the same thumb.
+
+## Two things were deduplicated rather than copied
+
+**`FeeSheet`** is now one component, used by the homepage decision panel and by
+the one course page that has a confirmed plan, so the two can never state the
+same fee differently. `CtaBand` is the same for the page close — the copy is a
+prop, the shape and the phone roles are not.
+
+**`pickList()`** joins `pick()` / `pickOptional()` / `tr()` in
+`src/lib/i18n/localized.ts`. The ternary it replaces is worse on an array than
+on a string: `gu ? p.outputsGu : p.outputsEn` renders an English list under a
+Gujarati heading, and five English lines are far less obviously wrong than one
+English sentence.
+
+## A factual defect the rebuild surfaced
+
+The shared draft syllabus titled its modules **"Weeks 1-2", "Weeks 3-4", "Weeks
+5-6" and "Final week"** — publishing a seven-week duration for ten courses
+whose duration the owner has NOT confirmed, and contradicting the one course
+that has (three months). The week prefixes are gone; the order is carried by
+the module index, which is what the order actually is. A test now fails on any
+week or month inside a module title.
+
+## Deleted, not orphaned
+
+`MachineIndex`, `CourseOperations` and `ModuleAccordion` were the old
+catalogue row, fee block and syllabus accordion. All three were unreferenced
+after the rebuild and are deleted; the tests that read them were repointed at
+the blocks that carry the same rules.
+
+## Measured
+
+| Width | `/courses` EN | `/courses` GU | EMCAD page | Sideways drag |
+| --- | --- | --- | --- | --- |
+| 390 | 7,491px | 7,425px | 7,690px | no |
+| 768 | 5,944px | 6,034px | 6,847px | no |
+| 820 | 5,889px | 5,988px | 6,847px | no |
+| 1024 | 5,547px | 5,655px | 5,346px | no |
+| 1440 | 6,047px | 6,032px | 5,608px | no |
+
+The EMCAD page was 9,393px at 390 and is 7,690px — 18% shorter with more on
+it. The ten courses with no confirmed fee gained a block that says so plainly,
+which is why a shorter page was not the target on those.
+
+## Verified
+
+**936 tests** across 58 files, including a new `tests/kds-courses.test.ts`
+(23). `tests/machine-lab-courses.test.tsx` kept every data rule and was
+repointed at the blocks that render them.
 
 ---
 

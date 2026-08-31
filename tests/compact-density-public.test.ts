@@ -56,41 +56,41 @@ describe("the shared interior-page intro", () => {
 describe("a course page leads with what the institute has confirmed", () => {
   const page = stripComments(read("src/app/[locale]/courses/[slug]/page.tsx"));
 
-  it("puts the verified operations ahead of the essay", () => {
+  it("puts the money block second, ahead of the essay", () => {
     /* On EMCAD DAHAO — the only course with a confirmed duration and a
        published fee — those figures sat behind the intro, the drawn signature
        and a two-column essay: about 3,900px, roughly 4.6 phone screens, to
-       reach the number a visitor came for. */
-    const facts = page.indexOf("<CourseOperations");
-    const essay = page.indexOf('t("whoTitle")');
+       reach the number a visitor came for. The template changed; the finding
+       did not, so the money block is the first thing after the hero. */
+    const facts = page.indexOf("<CourseFacts");
+    const essay = page.indexOf("<CourseMake");
     expect(facts).toBeGreaterThan(-1);
     expect(essay).toBeGreaterThan(-1);
-    expect(facts, "CourseOperations must come before the who-is-it-for essay").toBeLessThan(essay);
+    expect(facts, "CourseFacts must come before the who-is-it-for essay").toBeLessThan(essay);
   });
 
-  it("lists related courses as index rows, not as a card grid", () => {
+  it("lists related courses in the catalogue's own tile, not a bespoke card", () => {
     /* Three <CourseCard>s in a mobile single column were 1,476px at the very
-       bottom of the page. The Machine Index is the same component /courses
-       uses, so a related row and a catalogue row cannot drift in what they may
-       claim — which is why the card component was deleted rather than kept
-       around for one caller. */
-    expect(page).toContain("<MachineIndex");
+       bottom of the page. Related courses reuse `.cat-item` — the tile
+       `/courses` uses — so a related tile and a catalogue tile cannot drift in
+       what they may claim, which is why the card component was deleted rather
+       than kept around for one caller. */
+    expect(page).toContain("<RelatedCourses");
     expect(page).not.toContain("CourseCard");
+    expect(read("src/components/kds/courses/RelatedCourses.tsx")).toContain("cat-item");
     expect(existsSync(join(process.cwd(), "src/components/course/CourseCard.tsx"))).toBe(false);
   });
 
-  it("keeps the stitched rule a signature rather than a separator", () => {
-    /* Nine of them on one page — under every heading — is decoration, and
-       decoration is what the rule stops meaning when it repeats. */
-    const marks = (page.match(/<StitchRule/g) ?? []).length
-      + (stripComments(read("src/components/course/CourseOperations.tsx")).match(/<StitchRule/g) ?? []).length;
-    expect(marks).toBeLessThanOrEqual(2);
+  it("caps the related list rather than printing a second catalogue", () => {
+    expect(page).toContain(".slice(0, 3)");
   });
 
   it("does not open a syllabus panel for the reader", () => {
-    const accordion = stripComments(read("src/components/course/ModuleAccordion.tsx"));
-    expect(accordion).toContain("<details");
-    expect(accordion).not.toContain("open={i === 0}");
+    /* The first module used to be open, which on a phone put five syllabus
+       points between the reader and the rest of the syllabus. */
+    const syllabus = stripComments(read("src/components/kds/courses/CourseSyllabus.tsx"));
+    expect(syllabus).toContain("<details");
+    expect(syllabus).not.toContain("open");
   });
 });
 

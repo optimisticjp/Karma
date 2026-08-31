@@ -55,7 +55,9 @@ describe("the two mobile numbers keep their separate roles", () => {
       "src/components/kds/shell/SiteHeader.tsx",
       "src/components/kds/home/BatchesVisit.tsx",
       "src/components/kds/home/HomeClose.tsx",
-      "src/app/[locale]/courses/[slug]/page.tsx"
+      "src/components/kds/CtaBand.tsx",
+      "src/components/kds/courses/CourseHero.tsx",
+      "src/components/kds/courses/CourseFacts.tsx"
     ]) {
       expect(read(file)).toContain("tel:+${site.callPhone}");
     }

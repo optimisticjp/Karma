@@ -78,10 +78,7 @@ describe("a control that stands on its own is a control-sized target", () => {
     const body = ruleBody(premium, ".link-more");
     expect(body).toBeTruthy();
     expect(declaration(body!, "min-height")).toBe("2.75rem");
-    for (const file of [
-      "src/app/[locale]/courses/[slug]/page.tsx",
-      "src/app/[locale]/verify/[id]/page.tsx"
-    ]) {
+    for (const file of ["src/app/[locale]/verify/[id]/page.tsx"]) {
       const source = read(file);
       expect(source, file).toContain("link-more");
       expect(stripComments(source), file).not.toContain("min-h-8 shrink-0");

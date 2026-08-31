@@ -70,13 +70,16 @@ export function SampleBook() {
           <p className="t-lede mt-3">{t("sub")}</p>
         </header>
 
-        <div className="book-tabs" role="tablist" aria-label={t("filterLabel")}>
+        {/* A filter, not a tablist. Tab semantics promise a tabpanel the
+            control owns and moves focus into; this narrows a list that is
+            already on the page, so the honest role is a group of toggle
+            buttons and the honest state is `aria-pressed`. */}
+        <div className="book-tabs" role="group" aria-label={t("filterLabel")}>
           {tabs.map((tab) => (
             <button
               key={tab.key}
               type="button"
-              role="tab"
-              aria-selected={family === tab.key}
+              aria-pressed={family === tab.key}
               onClick={() => setFamily(tab.key)}
               className={cn("chip", family === tab.key && "is-on")}
             >

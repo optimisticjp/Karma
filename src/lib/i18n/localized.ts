@@ -70,6 +70,25 @@ export function pick(record: SuffixLocalized, base: string, locale: Locale): str
 }
 
 /**
+ * The same, for a LIST field — `outputsEn` / `outputsGu`, `problemsEn` /
+ * `problemsGu`, `outcomesEn` / `outcomesGu`.
+ *
+ * It exists because the ternary this replaces is worse on an array than on a
+ * string: `gu ? p.outputsGu : p.outputsEn` renders the English list under a
+ * Gujarati heading, and a list of five English lines is far less obviously
+ * wrong than one English sentence would be. An EMPTY Gujarati array falls back
+ * too — a heading followed by nothing is not a better outcome than a heading
+ * followed by the English.
+ */
+export function pickList(record: SuffixLocalized, base: string, locale: Locale): string[] {
+  const wanted = record[`${base}${SUFFIX[locale]}`];
+  if (Array.isArray(wanted) && wanted.length > 0) return wanted as string[];
+  if (locale !== "en") warnOnce(`${base}${SUFFIX[locale]}`);
+  const english = record[`${base}En`];
+  return Array.isArray(english) ? (english as string[]) : [];
+}
+
+/**
  * The same, for an optional field: returns `undefined` rather than an empty
  * string when neither the locale's value nor the English exists, so a caller
  * can decide not to render the element at all.

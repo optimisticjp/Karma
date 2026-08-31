@@ -125,10 +125,20 @@ export const families = {
   }
 } as const;
 
+/**
+ * The shared draft syllabus.
+ *
+ * **No module title may carry a week or a month.** These titles used to read
+ * "Weeks 1-2", "Weeks 3-4", "Weeks 5-6" and "Final week", which published a
+ * seven-week duration for ten courses whose duration the owner has NOT
+ * confirmed — and contradicted the one course that has (three months). The
+ * order is carried by the module index instead, which is what the order
+ * actually is. See `CLAUDE.md` §3; `tests/kds-courses.test.ts` enforces it.
+ */
 const draftModules = (topic: string, topicGu: string): CourseModule[] => [
   {
-    titleEn: "Weeks 1-2: Machine, frame and material basics",
-    titleGu: "અઠવાડિયું 1-2: મશીન, ફ્રેમ અને મટીરિયલ બેઝિક્સ",
+    titleEn: "Machine, frame and material basics",
+    titleGu: "મશીન, ફ્રેમ અને મટીરિયલ બેઝિક્સ",
     pointsEn: [
       "Machine parts, safety and daily care",
       "Frame setting and fabric tension, so your stitches stop breaking",
@@ -141,8 +151,8 @@ const draftModules = (topic: string, topicGu: string): CourseModule[] => [
     ]
   },
   {
-    titleEn: `Weeks 3-4: Core ${topic} technique`,
-    titleGu: `અઠવાડિયું 3-4: ${topicGu}ની મુખ્ય ટેકનિક`,
+    titleEn: `Core ${topic} technique`,
+    titleGu: `${topicGu}ની મુખ્ય ટેકનિક`,
     pointsEn: [
       "Base stitches and control drills on live machines",
       "Reading a design and planning the work",
@@ -155,8 +165,8 @@ const draftModules = (topic: string, topicGu: string): CourseModule[] => [
     ]
   },
   {
-    titleEn: "Weeks 5-6: Speed, finish and production quality",
-    titleGu: "અઠવાડિયું 5-6: સ્પીડ, ફિનિશ અને પ્રોડક્શન ક્વોલિટી",
+    titleEn: "Speed, finish and production quality",
+    titleGu: "સ્પીડ, ફિનિશ અને પ્રોડક્શન ક્વોલિટી",
     pointsEn: [
       "Production speed without losing finish",
       "Quality checks the market actually applies",
@@ -169,8 +179,8 @@ const draftModules = (topic: string, topicGu: string): CourseModule[] => [
     ]
   },
   {
-    titleEn: "Final week: Your finished project",
-    titleGu: "છેલ્લું અઠવાડિયું: તમારો ફાઇનલ પ્રોજેક્ટ",
+    titleEn: "Your finished project",
+    titleGu: "તમારો ફાઇનલ પ્રોજેક્ટ",
     pointsEn: [
       "A complete piece, start to finish, on your own",
       "Trainer review and certificate eligibility check",
