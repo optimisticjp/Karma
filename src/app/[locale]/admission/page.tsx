@@ -4,8 +4,8 @@ import { AdmissionForm, type AdmissionContext } from "@/components/forms/Admissi
 import { AdmissionNorms } from "@/components/site/AdmissionNorms";
 import { getPublicCourseConfigs } from "@/lib/course/config";
 import { CURRENT_TERMS_VERSION } from "@/content/admission-terms";
-import { PageIntro } from "@/components/ui/PageIntro";
-import { Icon } from "@/components/ui/Icon";
+import { asLocale } from "@/i18n/routing";
+import { NeedlePoint } from "@/components/kds/marks";
 import { pageMeta } from "@/lib/seo";
 import { ActionDock } from "@/components/kds/shell/ActionDock";
 
@@ -68,36 +68,38 @@ export default async function AdmissionFormPage({
 
   return (
     <>
-      <PageIntro
-        eyebrow={t("eyebrow")}
-        title={t("title")}
-        lede={t("sub")}
-        aside={
-          <>
-            <p className="microlabel !text-vermilion-deep">{t("reassuranceTitle")}</p>
-            {/* On a phone this aside stacks between the page title and the
-                first form field, so three reassurance lines were 208px of
-                "before you start" ahead of starting. Same three lines, one
-                wrapped row, at the aside's own 13px. */}
-            <ul className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 md:block md:space-y-1.5">
-              {reassurance.map((r) => (
-                <li key={r} className="flex gap-1.5">
-                  <Icon
-                    name="check"
-                    size={14}
-                    strokeWidth={2}
-                    className="mt-0.5 shrink-0 text-vermilion-deep"
-                  />
-                  <span>{r}</span>
-                </li>
-              ))}
-            </ul>
-          </>
-        }
-      />
-      <section className="section">
-        <div className="container-site">
-          <div className="reading-shell">
+      {/* The form's own opening. Short on purpose: everything here is a
+          reassurance somebody needs BEFORE they start typing, and anything
+          longer is a wall between a visitor and the first field. */}
+      <section className="band-tight on-canvas" aria-labelledby="form-heading">
+        <div className="wrap">
+          <div className="split">
+            <div className="min-w-0">
+              <p className="t-micro">{t("eyebrow")}</p>
+              <h1 id="form-heading" className="t-h1 mt-3">
+                {t("title")}
+              </h1>
+              <p className="t-lede mt-3 max-w-[46ch]">{t("sub")}</p>
+            </div>
+
+            <aside className="courses-aside">
+              <p className="t-micro">{t("reassuranceTitle")}</p>
+              <ul className="courses-facts" role="list">
+                {reassurance.map((r) => (
+                  <li key={r}>
+                    <NeedlePoint state="done" />
+                    <span className="t-body">{r}</span>
+                  </li>
+                ))}
+              </ul>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section className="band-tight on-paper">
+        <div className="wrap">
+          <div className="form-column">
             <AdmissionForm
               courses={options}
               context={context}
@@ -110,7 +112,7 @@ export default async function AdmissionFormPage({
 
       <AdmissionNorms
         version={CURRENT_TERMS_VERSION}
-        locale={locale === "gu" ? "gu" : "en"}
+        locale={asLocale(locale)}
         title={tn("title")}
         intro={tn("intro")}
         languageNote={tn("languageNote")}

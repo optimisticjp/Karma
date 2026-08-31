@@ -303,6 +303,22 @@ anchored section carries `scroll-margin-top: calc(var(--header-h) + 3.5rem)`.
 promise a tabpanel the control owns and moves focus into; a filter narrows a
 list already on the page. `role="group"` + `aria-pressed`.
 
+### Forms, and why they keep their old class names
+
+The public forms keep the classes they already had — `.label`, `.input`,
+`.choice-chip`, `.field-error` — and **this sheet restyles them inside
+`.kds`**. That is deliberate. The admission form is 900 lines of markup
+carrying a honeypot, a minimum-fill window, an idempotency key, consent
+handling and the norms version; re-typing all of it to change a colour is how a
+defence gets dropped by accident. Every rule is scoped, so the Console's
+identical class names are untouched.
+
+`.form-shell` is the card, `.form-column` holds the reading measure, and both
+`.input` and `.choice-chip` carry a 44px floor in either language.
+`<ThreadProgress>` is the step control: a named `<nav>` whose current step
+carries `aria-current="step"`, with the inactive LABELS hidden below 30rem
+because four step names do not fit on a phone.
+
 ### Where it lives
 
 - `src/app/thread-machine-proof.css` — the system
@@ -312,6 +328,8 @@ list already on the page. `role="group"` + `aria-pressed`.
 - `src/components/kds/home/` — the ten homepage blocks and the five-state motif
 - `src/components/kds/courses/` — the catalogue's five blocks and the course
   template's nine
+- `src/components/kds/batches/` · `src/components/kds/admissions/` — the
+  conversion routes
 - `src/components/kds/FeeSheet.tsx` · `CtaBand.tsx` — the two shared blocks
 - `src/lib/brand.ts` — the logo slot contract
 - `src/content/proof.ts` — the proof registry

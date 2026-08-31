@@ -547,7 +547,21 @@
     "step3": "Choose your course and the batch that fits your day.",
     "step4": "Complete admission and start.",
     "normsNote": "Fees, timings and the admission norms are set out in full on the admissions page.",
-    "normsLink": "Read the admission norms"
+    "normsLink": "Read the admission norms",
+    "listEyebrow": "The board",
+    "joiningEyebrow": "How it works",
+    "filterCourse": "Filter by course",
+    "filterTiming": "Filter by timing",
+    "filterAll": "All",
+    "morning": "Morning",
+    "evening": "Evening",
+    "filterEmpty": "No batch matches that combination.",
+    "filterClear": "Show every batch",
+    "showingCount": "{count, plural, one {# batch shown} other {# batches shown}}",
+    "countBatches": "{count, plural, one {batch open} other {batches open}}",
+    "countCourses": "{count, plural, one {course running} other {courses running}}",
+    "closeH2": "Not sure which batch suits you?",
+    "closeSub": "Book the free two-day demo and pick a batch afterwards. Nothing is held or paid online."
   },
   "courseDetail": {
     "whoTitle": "Who this course is for",
@@ -667,7 +681,9 @@
       "costValue": "Free",
       "bringLabel": "Bring",
       "bringValue": "Nothing. Thread, needles and practice cloth are ours.",
-      "cta": "Book the free 2-day demo"
+      "cta": "Book the free 2-day demo",
+      "eyebrow": "The free demo",
+      "daysValue": "{days} days · {hours} hours a session"
     },
     "steps": [
       {
@@ -718,7 +734,14 @@
     "faqCta": "Ask on WhatsApp",
     "closeTitle": "Ready to book the demo?",
     "formCta": "Fill the admission form",
-    "formNote": "Takes about two minutes, in Gujarati or English."
+    "formNote": "Takes about two minutes, in Gujarati or English.",
+    "stepsEyebrow": "The sequence",
+    "beforeEyebrow": "Before you come",
+    "faqEyebrow": "Questions",
+    "asideDemo": "The demo is {days} days, {hours} hours a session, and free.",
+    "asideNoPayment": "Nothing is paid on this website. There is no gateway, no payment link and no booking fee.",
+    "hoursLabel": "Studio hours",
+    "batchesCta": "See every open batch"
   },
   "admissionForm": {
     "title": "Admission form",

@@ -8,7 +8,7 @@ import { track } from "@/lib/analytics";
 import { cleanIndianMobile } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/Icon";
-import { StitchProgress } from "@/components/ui/StitchProgress";
+import { ThreadProgress } from "@/components/kds/marks";
 
 /**
  * A course as the form needs it: identity, plus the timetable and free-demo
@@ -343,29 +343,29 @@ export function AdmissionForm({
     return (
       <div className="card p-4 text-center md:p-8">
         <span className="seal-in mx-auto flex h-11 w-11 items-center justify-center rounded-full border-2 border-dashed border-success">
-          <Icon name="check" size={22} className="text-success" strokeWidth={2} />
+          <Icon name="check" size={22} className="text-[var(--ok)]" strokeWidth={2} />
         </span>
-        <h2 ref={successHeading} tabIndex={-1} className="text-h3 mt-2 font-display outline-none">
+        <h2 ref={successHeading} tabIndex={-1} className="t-h2 mt-2 outline-none">
           {t("success.title")}
         </h2>
-        <p className="mt-2 text-smallmeta text-stone">{t("success.refLabel")}</p>
-        <p className="font-mono text-h4 font-bold tracking-wide text-vermilion-deep">
+        <p className="mt-2 t-meta">{t("success.refLabel")}</p>
+        <p className="font-mono text-h4 font-bold tracking-wide text-[var(--brand-accent-strong)]">
           {done.reference}
         </p>
-        <p className="prose-measure mx-auto mt-2 text-smallmeta text-stone">{t("success.body")}</p>
+        <p className="prose-measure mx-auto mt-2 t-meta">{t("success.body")}</p>
         <div className="mt-3 flex flex-wrap justify-center gap-2">
-          <a href={done.waUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+          <a href={done.waUrl} target="_blank" rel="noopener noreferrer" className="act act-primary">
             {t("success.waButton")}
           </a>
-          <a href={site.mapsUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+          <a href={site.mapsUrl} target="_blank" rel="noopener noreferrer" className="act act-secondary">
             {t("success.mapButton")}
           </a>
         </div>
         {/* Both notes stay. One is what happens next and the other is what the
             free demo actually is — neither is decoration, and neither may be
             collapsed to save height. */}
-        <p className="mt-3 text-[0.8125rem] text-stone">{t("responseNote")}</p>
-        <p className="mt-1 text-[0.8125rem] text-stone">{t("success.demoNote")}</p>
+        <p className="mt-3 t-meta">{t("responseNote")}</p>
+        <p className="mt-1 t-meta">{t("success.demoNote")}</p>
       </div>
     );
   }
@@ -456,19 +456,19 @@ export function AdmissionForm({
   const contextCourse = courses.find((c) => c.slug === data.courseSlug);
 
   return (
-    <div className="card p-3 md:p-5">
+    <div className="form-shell">
       {/* progress stitch */}
       <h2
         ref={stepHeading}
         tabIndex={-1}
-        className="text-smallmeta font-bold text-vermilion-deep outline-none"
+        className="t-micro outline-none"
       >
         {t("stepLabel", { current: step + 1, total: 4 })} · {stepNames[step]}
       </h2>
       <p className="sr-only" aria-live="polite">
         {t("stepLabel", { current: step + 1, total: 4 })} {stepNames[step]}
       </p>
-      <StitchProgress
+      <ThreadProgress
         steps={stepNames}
         current={step}
         label={t("stepLabel", { current: step + 1, total: 4 })}
@@ -476,15 +476,15 @@ export function AdmissionForm({
       />
 
       {fromContext && contextCourse && step === 1 ? (
-        <p className="mt-2 flex flex-wrap items-center gap-2 rounded-lg bg-ivory-2 px-3 py-1.5 text-[0.8125rem] font-semibold">
+        <p className="mt-2 flex flex-wrap items-center gap-2 rounded-lg on-cloth px-3 py-1.5 text-[0.8125rem] font-semibold">
           {t("contextApplying")}{" "}
-          <span className="text-vermilion-deep">
+          <span className="text-[var(--brand-accent-strong)]">
             {uiLocale === "gu" ? contextCourse.nameGu : contextCourse.nameEn}
           </span>
           <button
             type="button"
             onClick={() => go(0)}
-            className="stitch-link ml-auto text-xs font-bold text-stone"
+            className="link-thread ml-auto t-micro"
           >
             {t("contextChange")}
           </button>
@@ -492,7 +492,7 @@ export function AdmissionForm({
       ) : null}
 
       {restored ? (
-        <p className="mt-2 rounded-lg bg-ivory-2 px-3 py-1.5 text-[0.8125rem] font-semibold text-stone">
+        <p className="form-note-box t-meta">
           ↩ {t("draftRestored")}
         </p>
       ) : null}
@@ -500,16 +500,16 @@ export function AdmissionForm({
       {errKeys.length > 0 ? (
         <div
           role="alert"
-          className="mt-2 rounded-lg border border-error/40 bg-error/5 p-3 text-smallmeta"
+          className="mt-2 rounded-lg border border-[var(--bad)] bg-[var(--brand-accent-soft)] p-3 t-meta"
         >
-          <p className="font-bold text-error">{t("errors.summaryTitle")}</p>
+          <p className="font-bold text-[var(--bad)]">{t("errors.summaryTitle")}</p>
           <ul className="mt-2 space-y-1">
             {errKeys.map((k) => (
               <li key={k}>
                 <button
                   type="button"
                   onClick={() => focusField(k)}
-                  className="stitch-link font-semibold text-carbon"
+                  className="link-thread font-semibold"
                 >
                   {errors[k]}
                 </button>
@@ -685,7 +685,7 @@ export function AdmissionForm({
             {/* Required for every applicant, not only under-18s (owner
                 decision, 2026-08-30). The studio wants a second person it can
                 reach about a student's course. */}
-            <div className="rounded-xl border border-dashed border-vermilion bg-ivory-2 p-4">
+            <div className="form-callout">
               {textField("guardianPhone", t("fields.guardianPhone"), {
                 type: "tel",
                 inputMode: "tel",
@@ -706,7 +706,7 @@ export function AdmissionForm({
               { v: "40plus", label: t("options.age4") }
             ])}
             {data.ageBand === "under18" ? (
-              <div className="rounded-xl border border-dashed border-vermilion bg-ivory-2 p-4">
+              <div className="form-callout">
                 {textField("guardianName", t("fields.guardianName"))}
               </div>
             ) : null}
@@ -759,8 +759,8 @@ export function AdmissionForm({
         {/* --------------------- STEP 4 · REVIEW ------------------------------ */}
         {step === 3 ? (
           <>
-            <h3 className="text-h4 font-display">{t("review.title")}</h3>
-            <dl className="space-y-3 text-smallmeta">
+            <h3 className="t-h4">{t("review.title")}</h3>
+            <dl className="space-y-3 t-meta">
               {(
                 [
                   [
@@ -784,16 +784,16 @@ export function AdmissionForm({
               ).map(([label, value, s]) => (
                 <div
                   key={label}
-                  className="flex items-baseline justify-between gap-4 border-b border-line/60 pb-2"
+                  className="review-row"
                 >
                   <div>
-                    <dt className="font-bold text-stone">{label}</dt>
+                    <dt className="t-micro">{label}</dt>
                     <dd>{value}</dd>
                   </div>
                   <button
                     type="button"
                     onClick={() => go(s)}
-                    className="stitch-link text-xs font-bold text-vermilion-deep"
+                    className="link-thread t-micro"
                   >
                     {t("review.edit")}
                   </button>
@@ -802,24 +802,24 @@ export function AdmissionForm({
             </dl>
 
             <div className="space-y-3" aria-describedby={errors.consent ? errId("consent") : undefined}>
-              <label className="flex items-start gap-3 text-smallmeta">
+              <label className="flex items-start gap-3 t-meta">
                 <input
                   id="adm-privacy"
                   type="checkbox"
                   checked={data.privacy}
                   onChange={(e) => set("privacy", e.target.checked)}
-                  className="mt-1 h-4 w-4 accent-vermilion"
+                  className="mt-1 h-4 w-4 accent-[var(--brand-accent-strong)]"
                   aria-invalid={errors.consent ? true : undefined}
                 />
                 <span>{t("consents.privacy")}</span>
               </label>
-              <label className="flex items-start gap-3 text-smallmeta">
+              <label className="flex items-start gap-3 t-meta">
                 <input
                   id="adm-comms"
                   type="checkbox"
                   checked={data.comms}
                   onChange={(e) => set("comms", e.target.checked)}
-                  className="mt-1 h-4 w-4 accent-vermilion"
+                  className="mt-1 h-4 w-4 accent-[var(--brand-accent-strong)]"
                   aria-invalid={errors.consent ? true : undefined}
                 />
                 <span>{t("consents.comms")}</span>
@@ -833,18 +833,18 @@ export function AdmissionForm({
                 application. The full text is on the page rather than in this
                 bundle — fifteen clauses in two languages is not a checkbox. */}
             <div aria-describedby={errors.terms ? errId("terms") : undefined}>
-              <label className="flex items-start gap-3 text-smallmeta">
+              <label className="flex items-start gap-3 t-meta">
                 <input
                   id="adm-terms"
                   type="checkbox"
                   checked={data.terms}
                   onChange={(e) => set("terms", e.target.checked)}
-                  className="mt-1 h-4 w-4 accent-vermilion"
+                  className="mt-1 h-4 w-4 accent-[var(--brand-accent-strong)]"
                   aria-invalid={errors.terms ? true : undefined}
                 />
                 <span>
                   {t("consents.terms")}{" "}
-                  <a className="stitch-link font-semibold" href={normsHref}>
+                  <a className="link-thread font-semibold" href={normsHref}>
                     {t("consents.termsLink")}
                   </a>
                 </span>
@@ -859,8 +859,8 @@ export function AdmissionForm({
             </div>
 
             <TurnstileWidget onToken={setToken} />
-            <p className="text-xs text-stone">{t("turnstileNote")}</p>
-            <p className="text-smallmeta text-stone">{t("responseNote")}</p>
+            <p className="t-meta">{t("turnstileNote")}</p>
+            <p className="t-meta">{t("responseNote")}</p>
             {serverError ? (
               <p role="alert" className="field-error">
                 {t("errors.generic")}
@@ -879,18 +879,18 @@ export function AdmissionForm({
           reserves for itself. */}
       <div className="form-nav mt-4 flex items-center justify-between gap-3">
         {step > 0 ? (
-          <button type="button" onClick={() => go(step - 1)} className="btn btn-ghost">
+          <button type="button" onClick={() => go(step - 1)} className="act-quiet">
             ← {t("buttons.back")}
           </button>
         ) : (
           <span />
         )}
         {step < 3 ? (
-          <button type="button" onClick={onNext} className="btn btn-primary">
+          <button type="button" onClick={onNext} className="act act-primary">
             {t("buttons.next")} <Icon name="arrow" size={16} className="arrow" />
           </button>
         ) : (
-          <button type="button" onClick={onSubmit} disabled={busy} className="btn btn-primary">
+          <button type="button" onClick={onSubmit} disabled={busy} className="act act-primary">
             {busy ? t("buttons.submitting") : t("buttons.submit")}
           </button>
         )}

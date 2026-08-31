@@ -361,7 +361,8 @@ Read `docs/design-system.md` before adding spacing.
 > further down this section). The component names in it — `<Hero>`,
 > `<EmcadDecision>`, `<StudentWorkWall>`, `<WhereYouLearn>`, `<Trainers>`,
 > `<TrustRail>` and the rest of `src/components/home/` — are **deleted**, as
-> are `<MachineIndex>`, `<CourseOperations>` and `<ModuleAccordion>`. The
+> are `<MachineIndex>`, `<CourseOperations>`, `<ModuleAccordion>`,
+> `<DemoFacts>`, `<BatchTable>` and `<StitchProgress>`. The
 > reasoning is kept because the decisions were expensive to reach and several
 > were carried into the rebuild; the file paths are not current.
 
@@ -774,8 +775,8 @@ and the new sheet, `robots: { index: false }`, exempted from the intl
 middleware. It is the rendered reference for the system at `/design`.
 
 **Phase record (2026-08-31):** Phase 0 recovery (PR #61), Phase 1 foundation
-(#62), Phase 2 shell (#63), Phase 3 homepage (#64), Phase 4 courses (#65). The
-homepage is ten blocks
+(#62), Phase 2 shell (#63), Phase 3 homepage (#64), Phase 4 courses (#65),
+Phase 5 conversion routes (#66). The homepage is ten blocks
 in `src/components/kds/home/`, no two of the same shape; the twenty-two
 components in `src/components/home/` are deleted. Measured at 390px it is
 **12,248px against a 18,665px baseline** across half as many sections. The
@@ -2147,7 +2148,7 @@ modules are importable in a test runner while the guard stays real in the app.
 `jsx: "preserve"` for Next.js — without the override a test importing a `.tsx`
 component sees raw JSX and fails to parse.
 
-**58 test files, 936 tests** (`vitest run`, ~6 s). Many encode a *policy* decision rather than a code detail,
+**60 test files, 955 tests** (`vitest run`, ~6 s). Many encode a *policy* decision rather than a code detail,
 which is the point — the policy survives a refactor:
 
 | Test | Guards |
@@ -2169,6 +2170,7 @@ which is the point — the policy survives a refactor:
 | `kds-foundation` | the public design system: four brand variables and no hardcoded hue, contrast recomputed for five logo colours, one type scale, every span-rendered primitive declaring a box, one stitch geometry, reduced motion |
 | `kds-shell` | the header, the mobile menu as a real modal, the EN\|ગુ switch, the footer, the skip link, nothing floating — and that every literal `t("…")` in `src/components/kds/**` resolves in both catalogues |
 | `kds-proof-firewall` | sample and owner-provided proof never reaching structured data: no `AggregateRating`, `Review` or `Person` from the registry, no review count published, `schema.ts` unable to import it |
+| `kds-admissions` | the batch board's filters built from the rows, its three distinct empty states and its bounded query; the admissions page carrying no second batch list; the form at a reading measure with 44px controls, the system's primitives and no console palette; none of the three routes offering a way to pay online |
 | `kds-courses` | the catalogue's five blocks and the course template's nine, in order and with no two adjacent grounds alike; no fee on a tile or in the hero; a duration only where the owner confirmed one; the same media box photographed or not; no payment provider, machine specification, unconfirmed trainer or week/month inside a syllabus module title |
 | `kds-homepage` | the ten blocks in order and no two adjacent grounds alike; every EMCAD figure rendered from the verified record and never typed into a catalogue; no online payment; no invented machine specification; no student name, outcome or earning on a frame; the signature interaction never autoplaying or needing a drag |
 | `public-locales` | the routed set is exactly `["en","gu"]`; no Hindi catalogue, route, face or string; no unapplied migration in the journal; the teaching languages survive |

@@ -10,10 +10,12 @@ const en = JSON.parse(read("messages/en.json")) as any;
 const gu = JSON.parse(read("messages/gu.json")) as any;
 
 const form = read("src/components/forms/AdmissionForm.tsx");
-const progress = read("src/components/ui/StitchProgress.tsx");
-const demoFacts = read("src/components/admission/DemoFacts.tsx");
+/* The form's progress moved to the design system's own primitive when the
+   route was rebuilt. */
+const progress = read("src/components/kds/marks.tsx");
+/* The demo block was rebuilt into the new system; the rules follow it. */
+const demoFacts = read("src/components/kds/admissions/DemoBlock.tsx");
 const contact = read("src/app/[locale]/contact/page.tsx");
-const css = read("src/app/machine-lab.css");
 
 const stripComments = (source: string) =>
   source.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/^\s*\/\/.*$/gm, " ");
@@ -84,43 +86,46 @@ describe("the admission form keeps every defence it had", () => {
  * ------------------------------------------------------------------ */
 
 describe("the progress seam", () => {
-  it("keeps the progressbar semantics the plain bar had", () => {
-    expect(progress).toContain('role="progressbar"');
-    expect(progress).toContain("aria-valuemin");
-    expect(progress).toContain("aria-valuemax");
-    expect(progress).toContain("aria-valuenow");
-    expect(progress).toContain("aria-label");
-    /* The visual step list repeats what the label says, so it is hidden from
-       assistive tech rather than read out twice. */
+  it("names the control and marks the step the visitor is on", () => {
+    /* This asserted `role="progressbar"` with aria-value* until the form moved
+       onto the design system's own `<ThreadProgress>`. The rule it protected —
+       that the step state is EXPOSED rather than only drawn — is unchanged and
+       is asserted against what the new control actually exposes: a named
+       navigation whose current step carries `aria-current="step"`, with the
+       decorative segments hidden. */
+    expect(progress).toContain("aria-label={label}");
+    expect(progress).toContain('aria-current={state === "now" ? "step" : undefined}');
     expect(progress).toContain('aria-hidden="true"');
   });
 
   it("leaves the form's own live region and focus move intact", () => {
     expect(form).toContain('aria-live="polite"');
     expect(form).toContain("stepHeading.current?.focus()");
+    /* And the step is still announced as "Step 2 of 4 · Details", which is
+       what the progressbar's value used to convey. */
+    expect(form).toContain('t("stepLabel", { current: step + 1, total: 4 })');
   });
 
   it("draws done, current and future as three different things", () => {
-    const block = css.slice(css.indexOf(".stitch-progress {"));
-    /* done: the running stitch at exact pixel scale */
-    expect(block).toContain("var(--color-vermilion) 0 9px, transparent 9px 15px");
-    /* current: the needle penetration point */
-    expect(block).toContain(".sp-step.is-current .sp-seg::after");
-    /* future: a faint construction line, not a stitch */
-    expect(block).toContain("background-size: 100% 1px");
+    const tmp = read("src/app/thread-machine-proof.css");
+    /* done: the running stitch at the system's one stitch geometry */
+    expect(tmp).toContain(".kds .progress-seg.is-done");
+    /* current: the needle penetration point, which is its own primitive */
+    expect(progress).toContain("<NeedlePoint state={state} />");
+    /* future: a construction line, not a stitch */
+    expect(tmp).toContain(".kds .progress-seg {");
   });
 
   it("renders four steps with the current one marked", async () => {
     const { renderToStaticMarkup } = await import("react-dom/server");
-    const { StitchProgress } = await import("../src/components/ui/StitchProgress");
+    const { ThreadProgress } = await import("../src/components/kds/marks");
     const html = renderToStaticMarkup(
-      <StitchProgress steps={["Course", "You", "Details", "Review"]} current={1} label="Step 2 of 4" />
+      <ThreadProgress steps={["Course", "You", "Details", "Review"]} current={1} label="Step 2 of 4" />
     );
-    /* `sp-steps` is the list; `sp-step` is a step. Match the boundary. */
-    expect((html.match(/class="sp-step[ "]/g) ?? [])).toHaveLength(4);
-    expect((html.match(/is-current/g) ?? [])).toHaveLength(1);
-    expect((html.match(/is-done/g) ?? [])).toHaveLength(1);
-    expect(html).toContain('aria-valuenow="2"');
+    expect((html.match(/<li/g) ?? [])).toHaveLength(4);
+    expect((html.match(/aria-current="step"/g) ?? [])).toHaveLength(1);
+    expect(html).toContain('aria-label="Step 2 of 4"');
+    expect(html).toContain("Course");
   });
 });
 

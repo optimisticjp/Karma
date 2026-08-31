@@ -1,4 +1,5 @@
-import { StitchRule } from "@/components/ui/StitchPath";
+import { ThreadLine } from "@/components/kds/marks";
+import { Icon } from "@/components/ui/Icon";
 import { admissionTerms } from "@/content/admission-terms";
 
 /**
@@ -35,33 +36,37 @@ export function AdmissionNorms({
   const gu = locale === "gu";
 
   return (
-    <section id="admission-norms" className="section">
-      <div className="container-site">
+    <section id="admission-norms" className="band on-cloth">
+      <div className="wrap">
         <div className="reading-shell">
-          <h2 className="text-h3 font-display">{title}</h2>
-          <StitchRule draw className="mt-2 max-w-[4.5rem]" />
-          <p className="u-section-body text-smallmeta text-stone">{intro}</p>
+          <h2 className="t-h3">{title}</h2>
+          <ThreadLine draw className="mt-3 w-16" />
+          <p className="t-body mt-4">{intro}</p>
 
-          <details className="mt-3 border border-line bg-card">
-            <summary className="flex min-h-11 cursor-pointer items-center px-3 py-2 text-smallmeta font-semibold">
-              {gu ? terms.titleGu : terms.titleEn} · {terms.clauses.length}
+          <details className="module mt-4">
+            <summary className="module-summary">
+              <span className="t-micro numeric module-index" aria-hidden="true">
+                {String(terms.clauses.length).padStart(2, "0")}
+              </span>
+              <span className="t-h4 min-w-0">{gu ? terms.titleGu : terms.titleEn}</span>
+              <Icon name="plus" size={17} className="module-plus" />
             </summary>
-            <div className="border-t border-line px-3 py-3">
-              <ol className="grid gap-2 text-smallmeta">
+            <div className="module-points">
+              <ol className="norms-list">
                 {terms.clauses.map((clause) => (
-                  <li key={clause.n} className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-2">
-                    <span className="font-bold text-vermilion-deep">{clause.n}.</span>
-                    <span>{gu ? clause.gu : clause.en}</span>
+                  <li key={clause.n}>
+                    <span className="t-micro numeric">{clause.n}.</span>
+                    <span className="t-body">{gu ? clause.gu : clause.en}</span>
                   </li>
                 ))}
               </ol>
 
-              <div className="mt-4 border-t border-line pt-3">
-                <p className="microlabel">{declarationLabel}</p>
-                <p className="mt-1 text-smallmeta text-stone">{gu ? terms.declarationGu : terms.declarationEn}</p>
+              <div className="norms-declaration">
+                <p className="t-micro">{declarationLabel}</p>
+                <p className="t-meta mt-1.5">{gu ? terms.declarationGu : terms.declarationEn}</p>
               </div>
 
-              {!gu ? <p className="form-note mt-3">{languageNote}</p> : null}
+              {!gu ? <p className="t-meta mt-3">{languageNote}</p> : null}
             </div>
           </details>
         </div>

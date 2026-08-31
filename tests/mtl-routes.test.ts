@@ -110,6 +110,9 @@ describe("the public route map", () => {
 
 describe("the public batches route", () => {
   const page = read("src/app/[locale]/batches/page.tsx");
+/* The rows and their filters moved into the board when the route was
+   rebuilt. The rules did not move; they are asserted where they now live. */
+const board = read("src/components/kds/batches/BatchBoard.tsx");
 
   it("reads the database rather than the sample generator", () => {
     /* `sampleBatches()` in src/content/courses.ts fabricates start dates,
@@ -135,16 +138,16 @@ describe("the public batches route", () => {
     /* A batch row that carries no days renders no days; one that carries no
        language says nothing about language. The plan forbids inventing any of
        them, and the way to not invent a field is to not render it. */
-    expect(page).toContain("row.days ?");
-    expect(page).toContain("row.language ?");
-    expect(page).toContain("row.startTime && row.endTime ?");
+    expect(board).toContain("row.days ?");
+    expect(board).toContain("row.language ?");
+    expect(board).toContain("row.startTime && row.endTime");
   });
 
   it("does not turn an untracked capacity into scarcity", () => {
     /* `seats` of 0 means the studio does not track a capacity for this batch.
        Rendering "0 seats left" would manufacture urgency out of a null. */
-    expect(page).toContain("row.seats > 0 ? row.seats - row.seatsTaken : null");
-    expect(page).toContain("seatsLeft !== null ?");
+    expect(board).toContain("row.seats > 0 ? row.seats - row.seatsTaken : null");
+    expect(board).toContain("seatsLeft === null ?");
   });
 
   it("has an honest empty state that still gives somewhere to go", () => {
