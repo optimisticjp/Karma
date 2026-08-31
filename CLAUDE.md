@@ -30,7 +30,7 @@ Bilingual (EN + Gujarati) website and student-management platform for Karma Desi
 
 ## Stack
 - Next.js 15 (App Router) + React 19 + TypeScript + Tailwind v4; design system v3 "Screen to Stitch / The Machine Floor" (`src/app/globals.css`, `src/app/premium.css`, `docs/design-system.md`).
-- next-intl v4: `en` + `gu` + `hi` on the public site (Console is `en` + `gu`), always-prefixed public URLs, no browser-language auto-redirect.
+- next-intl v4: `en` + `gu` on the public site and in the Console, always-prefixed public URLs, no browser-language auto-redirect.
 - **Supabase Postgres** via Drizzle + `drizzle-orm/node-postgres` (`pg`). The Worker reaches it through Cloudflare **HYPERDRIVE**; migrations/seeds/backups/bootstrap use direct `DATABASE_URL`. NOT Neon.
 - **Supabase Auth** (`@supabase/supabase-js` + `@supabase/ssr`) for invite-only staff email/password sign-in. **Karma Console is password-only; MFA/TOTP is not an access requirement.** NOT Better Auth.
 - Cloudflare Workers via `@opennextjs/cloudflare`. Private R2 bindings are added only when the file/PDF phase is activated; do not assume R2 exists today.
@@ -50,7 +50,7 @@ Bilingual (EN + Gujarati) website and student-management platform for Karma Desi
 Cloudflare production deployment currently uses the dashboard command `OPEN_NEXT_DEPLOY=true npx wrangler deploy --keep-vars`; do not replace it with OpenNext's delegated deploy path while Hyperdrive is bound. Preview/version uploads use `npx wrangler versions upload --keep-vars`.
 
 ## Non-negotiables
-1. **Trilingual parity (public) · bilingual (Console).** The PUBLIC site is EN + GU + HI: every user-facing catalog string exists in `messages/en.json`, `messages/gu.json` and `messages/hi.json` with mirrored keys. Gujarati and Hindi are both first-class — natural Surti Gujarati/Gujlish and natural Devanagari Hindi — while trade terms such as emCAD, machine, batch and WhatsApp stay familiar in both. Never uppercase or letterspace either script, and never apply Latin tracking to Devanagari. **Karma Console stays EN + GU on purpose**: `AdminLocale` is its own two-value type, so `messages/hi.json` deliberately has no `admin` namespace. Never resolve a locale with `locale === "gu" ? … : …` — use `pick()` / `tr()` from `src/lib/i18n/localized.ts`, because the else-branch of that ternary is a silent English fallback.
+1. **Bilingual parity, everywhere.** The public site and Karma Console are both **EN + GU**: every user-facing catalog string exists in `messages/en.json` and `messages/gu.json` with mirrored keys. Gujarati is first-class — natural Surti Gujarati/Gujlish — while trade terms such as EMCAD, machine, batch and WhatsApp stay familiar. Never uppercase or letterspace Gujarati, and never squeeze it into Latin line-height. Never resolve a locale with `locale === "gu" ? … : …` — use `pick()` / `tr()` from `src/lib/i18n/localized.ts`, because the else-branch of that ternary renders a MISSING Gujarati field as English and looks exactly like a translated one. **There is no Hindi website.** A Hindi public locale was implemented and reversed by the owner on 2026-08-31; `tests/public-locales.test.ts` is what stops it returning by accident. That is a decision about the WEBSITE only — Karma teaches and supports students in Gujarati **and Hindi**, which stays published as `availableLanguage` / `inLanguage`.
 
 2. **EMCAD DAHAO is the only software Karma teaches.** Not Wilcom, not any other digitising package — the institute's own admission norm #1, confirmed 2026-08-30. Nothing on the site may state, imply or SEO-target Wilcom training. The one legitimate mention of the word is the institute's own rule, quoted verbatim in `src/content/admission-terms.ts`; `tests/machine-notes.test.ts` fails if it reappears in the notes.
 
@@ -80,7 +80,7 @@ Cloudflare production deployment currently uses the dashboard command `OPEN_NEXT
 
 14. **⚠ CONFIRM-WITH-OWNER markers stay unresolved until the owner supplies the fact.** Never infer an address, phone, trainer, duration, testimonial or public statistic from convenience.
 
-15. **Locale routing stays.** Public URLs are `/en/...`, `/gu/...` and `/hi/...`, always prefixed, with English the default and **no browser-language auto-redirect**; `/admin` deliberately stays outside the locale segment. Every new public page gets hreflang metadata through `pageMeta()`, which derives its alternates from `routing.locales` — never list locales by hand there or in the sitemap.
+15. **Locale routing stays.** Public URLs are `/en/...` and `/gu/...`, always prefixed, with English the default and **no browser-language auto-redirect**; `/admin` deliberately stays outside the locale segment. Every new public page gets hreflang metadata through `pageMeta()`, which derives its alternates from `routing.locales` — never list locales by hand there or in the sitemap, because a hreflang set that disagrees with the sitemap is worse than none.
 
 16. **Tests guard contracts.** `npm test` must pass. New validation/security/permission/content-publishing behavior gets pure tests where possible. i18n parity remains mechanical for message catalogs.
 
@@ -137,18 +137,28 @@ Then: **feature branch → PR → CI + Cloudflare preview green → merge.** Do 
 - Durable project memory: `docs/project-context.md`
 
 ## Current roadmap state
-The public site and Karma Console have both been through the **Machine Lab
-full-product redesign** (`docs/karma-machine-lab-redesign-master-plan.md`,
-fourteen phases, PRs #28–#41, all merged). Design system **v4 "Machine Lab"**
-extends v3 additively: `src/app/machine-lab.css` is a third, unlayered
-stylesheet imported after `premium.css` in both root layouts — read
-`docs/design-system.md` before adding a primitive.
+**A full public visual rebuild is in progress.** The authoritative direction is
+[`docs/karma-modern-textile-lab-redesign-plan.md`](docs/karma-modern-textile-lab-redesign-plan.md)
+(THREAD / MACHINE / PROOF), with
+[`docs/karma-creative-freedom-trust-proof-addendum.md`](docs/karma-creative-freedom-trust-proof-addendum.md)
+taking precedence over it on visual creativity, trust/proof modules, sample
+placeholders and photography presentation. Read both before touching a public
+route, and start from the phase record at the end of the plan.
 
-What remains is real content from the owner (including the 32 studio
-photographs, which have typed, reserved frames waiting in
-`src/content/photo-manifest.ts`), the open confirmations in
-`docs/content-checklist.md` — including the **10:30 pm vs 23:00 last-class
-conflict** found during the redesign — and the owner's review of the finished
-system. Turnstile, R2/private file delivery, public-media upload tooling and
-custom-domain migration are separate infrastructure steps and must not be
+The owner **stopped and rejected** the "Modern Textile Lab" implementation from
+PRs #55–#58: it reskinned the existing composition instead of rebuilding it,
+and it added a Hindi public locale the owner does not want. PR #55's rendered
+audit and PR #56's `/batches` data contract survive as evidence and function;
+the visual direction does not. `src/app/textile-lab.css` is superseded and is
+to be replaced, not extended.
+
+Karma Console is explicitly **out of scope**: the compact post-PR-#53 Console
+is the baseline, and public CSS must not reach `/admin`.
+
+What still depends on the owner: real content (including the 32 studio
+photographs, which have typed, reserved frames in
+`src/content/photo-manifest.ts`) and the open confirmations in
+`docs/content-checklist.md`, including the **10:30 pm vs 23:00 last-class
+conflict**. Turnstile, R2/private file delivery, public-media upload tooling
+and custom-domain migration are separate infrastructure steps and must not be
 silently activated by feature work.

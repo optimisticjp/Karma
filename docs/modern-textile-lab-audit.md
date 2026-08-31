@@ -10,6 +10,15 @@ in both current locales, plus per-section geometry for every route.
 
 Nothing in this document is estimated. Every number is a rendered box.
 
+> **Status after the 2026-08-31 restart: EVIDENCE, NOT DIRECTION.** The owner
+> rejected the Modern Textile Lab visual direction; these measurements of the
+> site as it stood are unaffected by that and remain the baseline the rebuild
+> is measured against. Any recommendation phrased as direction in this file is
+> superseded by `docs/karma-modern-textile-lab-redesign-plan.md` and its
+> creative-freedom addendum. Note also that the locale columns describe the
+> two locales that existed when it was captured — English and Gujarati — which
+> is again the whole set.
+
 ---
 
 ## 1. What the public site is today

@@ -43,49 +43,6 @@
  * EVERY RATIO BELOW IS MEASURED, NOT ESTIMATED.
  * ========================================================================== */
 
-/* ==========================================================================
- * 0. Devanagari
- *
- * Declared here rather than in globals.css so the Console never downloads it:
- * this file is imported by the public root layout only.
- *
- * WHY A :lang()-SCOPED STACK AND NOT A RE-CUT unicode-range
- * ---------------------------------------------------------
- * The Gujarati face in globals.css claims `U+0951-0952` and `U+0964-0965` —
- * the stress marks and the danda, which Gujarati and Devanagari share. Adding
- * Devanagari to the same global font stack would mean a danda in a Hindi
- * sentence gets drawn by the Gujarati font: the right glyph from the wrong
- * face, with the wrong weight axis, mid-sentence.
- *
- * The obvious fix is to re-cut the Gujarati range. It is the wrong one —
- * Gujarati uses the danda too, so whichever face loses the codepoint has a
- * hole in it. Instead each script gets its own stack, selected by the
- * language of the element. A Hindi page never has the Gujarati family in its
- * stack, so it cannot borrow from it; a `<span lang="gu">` inside a Hindi page
- * matches `:lang(gu)` and not `:lang(hi)`, because `:lang()` resolves against
- * the element's own language, so an embedded Gujarati phrase still renders in
- * Gujarati.
- *
- * It also means the Devanagari face is fetched on Hindi pages ONLY. Nothing
- * in the English or Gujarati stack references it, so the payload is zero
- * there — the same discipline the Gujarati subset note in globals.css
- * describes.
- * ========================================================================== */
-
-@font-face {
-  font-family: "Noto Sans Devanagari Variable";
-  font-style: normal;
-  font-display: swap;
-  font-weight: 100 900;
-  src: url("~@fontsource-variable/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-wght-normal.woff2")
-    format("woff2-variations");
-  /* The Devanagari block, the joiners a conjunct script needs, the rupee sign,
-     the dotted circle a lone mark renders on, and the Devanagari-shared
-     numerics. Nothing else: arrows and stars fall through to the system font,
-     which is what stopped the Gujarati face being downloaded to draw a "→". */
-  unicode-range: U+0900-097F, U+200C-200D, U+20B9, U+25CC, U+A830-A839;
-}
-
 .site-body {
   /* ---- the seven ------------------------------------------------------ */
 
@@ -518,48 +475,30 @@
 /* ==========================================================================
  * 8. Script-specific typography
  *
- * Gujarati is never uppercased and never letterspaced. Devanagari gets the
- * same protection, because Latin tracking applied to a conjunct script is the
- * same mistake in a different alphabet.
+ * Gujarati is never uppercased and never letterspaced, and it gets its own
+ * font stack rather than sharing one with Latin.
  * ========================================================================== */
 
-/* Each script gets its own stack. Latin stays Manrope in all three, because
-   the trade writes emCAD, WhatsApp and batch in Latin inside every sentence
-   and switching face mid-phrase for them would be worse than the mismatch
-   this avoids. */
-.site-body :lang(hi) {
-  --font-display: "Manrope Variable", "Noto Sans Devanagari Variable", system-ui, sans-serif;
-  --font-body: "Manrope Variable", "Noto Sans Devanagari Variable", system-ui, sans-serif;
-  /* Playfair has no Devanagari coverage and Devanagari has no italic
-     convention, so the editorial accent resolves to the body face. */
-  --font-accent: "Manrope Variable", "Noto Sans Devanagari Variable", system-ui, sans-serif;
-  font-style: normal;
-}
-/* Declared after `:lang(hi)` so an embedded `<span lang="gu">` on a Hindi page
-   wins on source order at equal specificity. */
+/* Latin stays Manrope inside a Gujarati sentence, because the trade writes
+   EMCAD, WhatsApp and batch in Latin inside every sentence and switching face
+   mid-phrase for them would be worse than the mismatch this avoids. */
 .site-body :lang(gu) {
   --font-display: "Manrope Variable", "Noto Sans Gujarati Variable", system-ui, sans-serif;
   --font-body: "Manrope Variable", "Noto Sans Gujarati Variable", system-ui, sans-serif;
   --font-accent: "Manrope Variable", "Noto Sans Gujarati Variable", system-ui, sans-serif;
   font-style: normal;
-}
-
-.site-body :lang(gu),
-.site-body :lang(hi) {
   letter-spacing: 0;
 }
+
 .site-body :lang(gu) .eyebrow,
-.site-body :lang(hi) .eyebrow,
-.site-body :lang(gu) .microlabel,
-.site-body :lang(hi) .microlabel {
+.site-body :lang(gu) .microlabel {
   text-transform: none;
   letter-spacing: 0;
 }
-/* Both scripts carry marks above and below the line, so they need the room. */
+
+/* Gujarati carries marks above and below the line, so it needs the room. */
 .site-body :lang(gu) { line-height: 1.8; }
-.site-body :lang(hi) { line-height: 1.75; }
-.site-body :lang(gu) h1, .site-body :lang(gu) h2, .site-body :lang(gu) h3,
-.site-body :lang(hi) h1, .site-body :lang(hi) h2, .site-body :lang(hi) h3 {
+.site-body :lang(gu) h1, .site-body :lang(gu) h2, .site-body :lang(gu) h3 {
   line-height: 1.4;
 }
 

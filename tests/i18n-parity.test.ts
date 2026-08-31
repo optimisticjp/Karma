@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import en from "../messages/en.json";
 import gu from "../messages/gu.json";
-import hi from "../messages/hi.json";
 import { routing } from "@/i18n/routing";
 import {
   PERMISSIONS,
@@ -12,12 +11,10 @@ import {
 /**
  * Locale parity is a hard rule: structures must mirror.
  *
- * TRILINGUAL SINCE 2026-08-31, with one deliberate asymmetry. The public
- * namespaces must match across all three catalogues. The `admin` namespace
- * must match across `en` and `gu` ONLY, because Karma Console is not
- * trilingual — `AdminLocale` is its own two-value type and a staff member
- * picks English or Gujarati. `messages/hi.json` therefore has no `admin` key
- * at all, which is a true statement about the product rather than a gap.
+ * The public website and Karma Console are both EN + GU, so every namespace
+ * must match key-for-key across both catalogues. A key present in one and
+ * absent in the other is a string that renders as a raw dotted path to
+ * whichever visitor happens to be reading in that language.
  */
 function compareShape(a: unknown, b: unknown, path: string, problems: string[], bName = "b") {
   if (Array.isArray(a) || Array.isArray(b)) {
@@ -53,33 +50,24 @@ describe("message catalogs", () => {
     expect(problems).toEqual([]);
   });
 
-  it("hi mirrors every PUBLIC namespace key-for-key", () => {
-    const problems: string[] = [];
-    const publicOnly = (cat: Record<string, unknown>) =>
-      Object.fromEntries(Object.entries(cat).filter(([k]) => k !== "admin"));
-    compareShape(publicOnly(en), publicOnly(hi as unknown as Record<string, unknown>), "messages", problems, "hi");
-    expect(problems).toEqual([]);
-  });
-
   it("has one catalogue per routed locale", () => {
     /* The failure this catches is a locale added to routing.ts with no
        catalogue behind it, which next-intl resolves at request time and not
        at build time — so it is a 500 on a URL a crawler has already indexed,
        not a compile error. */
-    const catalogues: Record<string, unknown> = { en, gu, hi };
+    const catalogues: Record<string, unknown> = { en, gu };
     for (const locale of routing.locales) {
       expect(catalogues[locale], `messages/${locale}.json`).toBeTruthy();
     }
     expect(Object.keys(catalogues).sort()).toEqual([...routing.locales].sort());
   });
 
-  it("keeps the Console bilingual on purpose", () => {
-    /* Not an oversight. Staff choose a console language from a two-value
-       `AdminLocale`; Hindi is a public decision. If the Console ever becomes
-       trilingual this test is the place that says so. */
+  it("keeps the Console and the website on the same two languages", () => {
+    /* They agree today and are still two decisions. `AdminLocale` is its own
+       type: a staff member picks a console language, a visitor is served a
+       website locale, and one changing must not silently change the other. */
     expect(Object.keys(en)).toContain("admin");
     expect(Object.keys(gu)).toContain("admin");
-    expect(Object.keys(hi)).not.toContain("admin");
   });
 });
 

@@ -379,7 +379,7 @@ export default async function StudentsPage({ searchParams }: Props) {
                     <Fact
                       label={copy.language}
                       value={
-                        { gu: copy.languageGu, hi: copy.languageHi, en: copy.languageEn }[
+                        { gu: copy.languageGu, en: copy.languageEn }[
                           selected.languagePref
                         ]
                       }

@@ -43,11 +43,11 @@ export async function LatestVideos() {
                         `overflow-hidden`. Any string we did not write gets to
                         break wherever it must. */}
                     {/* The studio posts in Gujarati, so a title from the feed
-                        is usually Gujarati — on an English or Hindi page that
-                        is a run of text in a script the document's font stack
-                        does not contain, announced by a screen reader in the
-                        wrong voice. We cannot know a feed string's language,
-                        but we can read its script. */}
+                        is usually Gujarati — on the English page that is a run
+                        of text in a script the document's font stack does not
+                        contain, announced by a screen reader in the wrong
+                        voice. We cannot know a feed string's language, but we
+                        can read its script. */}
                     <p
                       lang={scriptLang(v.title)}
                       className="u-break p-3 text-smallmeta font-semibold md:p-4"

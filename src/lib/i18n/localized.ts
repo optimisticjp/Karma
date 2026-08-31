@@ -1,27 +1,29 @@
 import { routing, type Locale } from "@/i18n/routing";
 
 /**
- * Reading localized content, once, instead of 135 times.
+ * Reading localized content in one place instead of 135.
  *
  * THE PROBLEM THIS SOLVES
  * -----------------------
  * The content layer stores localized strings as a field-suffix convention —
- * `nameEn` / `nameGu`, `introEn` / `introGu` — and every call site resolved it
- * by hand:
+ * `nameEn` / `nameGu`, `introEn` / `introGu` — and call sites resolve it by
+ * hand:
  *
  *     locale === "gu" ? course.nameGu : course.nameEn
  *
- * The Phase 1 audit counted **135 of those across 46 files**. The shape has
- * two properties that matter here. First, the else-branch is English, so a
- * third locale does not fail a typecheck — it silently renders English, which
- * is exactly the "Hindi button that falls back to English" the owner ruled
- * out. Second, adding Hindi by hand means editing 135 ternaries into 135
- * three-way ternaries, and the 136th written next month will be a two-way one
- * again.
+ * A repository audit counted **135 of those across 46 files**. Two things are
+ * wrong with the shape even while there are exactly two locales. The
+ * else-branch is English, so a MISSING Gujarati field renders English
+ * silently and looks identical to a translated one; and the ternary has to be
+ * rewritten everywhere the day the locale set changes, which is how a site
+ * ends up half-translated.
  *
- * So the resolution moves into one function. A call site says *which field
- * family* it wants and the locale; this decides how to find it and what to do
- * when a translation is missing.
+ * So resolution moves into one function. A call site says which field family
+ * it wants and the locale; this decides how to find it and what to do when a
+ * translation is missing.
+ *
+ * CLAUDE.md non-negotiable #1 points here: prefer `pick()` / `tr()` to a
+ * `locale === "gu" ? … : …` ternary in new code.
  *
  * THE FALLBACK RULE, AND WHY IT IS LOUD
  * -------------------------------------
@@ -30,20 +32,17 @@ import { routing, type Locale } from "@/i18n/routing";
  * silent fallback is indistinguishable from a translation that exists. In
  * development a missing field logs the exact key once. In production it
  * returns the English rather than throwing, because a visitor reading one
- * English sentence on a Hindi page is a smaller failure than a 500.
- *
- * `tests/mtl-trilingual.test.ts` asserts the content sources actually carry
- * the Hindi fields, so the fallback is a safety net rather than the design.
+ * English sentence on a Gujarati page is a smaller failure than a 500.
  */
 
-/** `"Name"` → the suffix convention, e.g. `nameEn` / `nameGu` / `nameHi`. */
-const SUFFIX: Record<Locale, string> = { en: "En", gu: "Gu", hi: "Hi" };
+/** `"Name"` → the suffix convention, e.g. `nameEn` / `nameGu`. */
+const SUFFIX: Record<Locale, string> = { en: "En", gu: "Gu" };
 
-/** A record carrying `<base>En` / `<base>Gu` / `<base>Hi` string fields. */
+/** A record carrying `<base>En` / `<base>Gu` string fields. */
 export type SuffixLocalized = Record<string, unknown>;
 
-/** A record carrying `{ en, gu, hi }` directly. */
-export type Localized = { en: string; gu: string; hi?: string };
+/** A record carrying `{ en, gu }` directly. */
+export type Localized = { en: string; gu: string };
 
 const warned = new Set<string>();
 
@@ -57,7 +56,7 @@ function warnOnce(key: string) {
 /**
  * Resolve a suffix-convention field.
  *
- *     pick(course, "name", locale)   →  course.nameHi ?? course.nameEn
+ *     pick(course, "name", locale)   →  course.nameGu ?? course.nameEn
  *
  * `base` is the field family without its locale suffix. Returns the English
  * when the locale's field is absent or empty, and says so in development.
@@ -75,7 +74,7 @@ export function pick(record: SuffixLocalized, base: string, locale: Locale): str
  * string when neither the locale's value nor the English exists, so a caller
  * can decide not to render the element at all.
  *
- * That distinction matters more than it looks. A course with no Hindi
+ * That distinction matters more than it looks. A course with no Gujarati
  * `outcome` should render no outcome line, not an empty one — the plan's rule
  * is that a field with no data is not displayed, and `""` is truthy enough in
  * JSX to leave a gap where a sentence should be.
@@ -96,7 +95,7 @@ export function pickOptional(
 }
 
 /**
- * Resolve a `{ en, gu, hi }` object. This is the shape new content should use;
+ * Resolve a `{ en, gu }` object. This is the shape new content should use;
  * `pick` exists for the ~460 existing suffix fields the audit counted, which
  * are not worth a migration on their own.
  */
@@ -118,11 +117,10 @@ export function otherLocales(current: Locale): Locale[] {
 /**
  * The `Intl` tag for a locale. Kept here rather than inline at each
  * `Intl.DateTimeFormat` call site, because the previous inline form was
- * `locale === "gu" ? "gu-IN" : "en-IN"` — which is exactly the shape that
- * silently gave Hindi English dates.
+ * `locale === "gu" ? "gu-IN" : "en-IN"`, restated at every formatter.
  */
 export function intlLocale(locale: Locale): string {
-  return { en: "en-IN", gu: "gu-IN", hi: "hi-IN" }[locale];
+  return { en: "en-IN", gu: "gu-IN" }[locale];
 }
 
 /**
@@ -131,26 +129,22 @@ export function intlLocale(locale: Locale): string {
  * WHY THIS EXISTS
  * ---------------
  * The homepage renders live YouTube titles from the studio's own channel. The
- * studio posts in Gujarati, so those titles are Gujarati — and on the Hindi
- * page they were rendering inside a `lang="hi"` document with no marker of
- * their own. Two things follow from that, and both are real:
+ * studio posts in Gujarati, so those titles are Gujarati — and on the English
+ * page they render inside a `lang="en"` document with no marker of their own.
+ * Two things follow, and both are real:
  *
- *  - a screen reader announces Gujarati words with a Hindi voice;
- *  - the browser has no signal to reach for the Gujarati face, because the
- *    Hindi font stack does not contain it, so the glyphs fall through to
- *    whatever the system happens to have.
+ *  - a screen reader announces Gujarati words with an English voice;
+ *  - the browser has no signal to reach for the Gujarati face, so the glyphs
+ *    fall through to whatever the system happens to have.
  *
  * We cannot know the language of an arbitrary feed string, but we can know its
- * SCRIPT, and for these three languages script and language coincide closely
- * enough to be useful: Gujarati text is Gujarati, Devanagari text is Hindi
- * here, and everything else is left unmarked so it inherits the document.
+ * SCRIPT, and here script and language coincide closely enough to be useful.
  *
  * Deliberately returns `undefined` rather than guessing "en" for Latin text —
- * a wrong `lang` is worse than none, and Latin appears inside Gujarati and
- * Hindi sentences constantly in this trade.
+ * a wrong `lang` is worse than none, and Latin appears inside Gujarati
+ * sentences constantly in this trade.
  */
 export function scriptLang(value: string): Locale | undefined {
   if (/[\u0A80-\u0AFF]/.test(value)) return "gu";
-  if (/[\u0900-\u097F]/.test(value)) return "hi";
   return undefined;
 }

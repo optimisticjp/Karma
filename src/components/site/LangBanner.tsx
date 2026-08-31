@@ -25,10 +25,11 @@ export function LangBanner() {
 
   if (!show) return null;
 
-  /* With three locales there is no "the other language", so the banner offers
-     both of them by name. Each name is in its own script and therefore needs
-     no translation — a Hindi speaker recognises "हिन्दी" whatever page they
-     landed on, which is the whole point of offering rather than redirecting. */
+  /* Derived rather than hardcoded to "the other one", so this keeps working
+     whatever `routing.locales` holds. Each language is offered under its own
+     name in its own script and therefore needs no translation — a Gujarati
+     speaker recognises "ગુજરાતી" whatever page they landed on, which is the
+     whole point of offering rather than redirecting. */
   const others = otherLocales(locale as Locale);
   const choose = (target: Locale) => {
     try {

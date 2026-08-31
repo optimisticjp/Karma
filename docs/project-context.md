@@ -285,6 +285,17 @@ only two things worth a permanent thumb-reachable slot are the two that convert.
 
 ## 7. Design system and the Screen-to-Stitch redesign
 
+> **A full PUBLIC visual rebuild is in progress and supersedes this section for
+> public routes.** Authoritative direction:
+> `docs/karma-modern-textile-lab-redesign-plan.md` (THREAD / MACHINE / PROOF),
+> with `docs/karma-creative-freedom-trust-proof-addendum.md` taking precedence
+> over it on visual creativity, trust/proof modules, sample placeholders and
+> photography presentation. The owner rejected the "Modern Textile Lab"
+> implementation of PRs #55–#58 as a reskin, so `src/app/textile-lab.css` is
+> **superseded and to be replaced, not extended**. What follows describes the
+> system the rebuild replaces on public routes — and the system **Karma Console
+> still runs on**, which is explicitly out of scope.
+
 Current system: **v3, "Screen to Stitch / The Machine Floor"**, superseding v2
 ("The Digital Thread"). Implemented in `src/app/globals.css` (tokens, base
 layers, rhythm utilities) and `src/app/premium.css` (the "Machine Floor Ledger"
@@ -677,76 +688,88 @@ to parse. This changes nothing about how the application is built.
 
 ---
 
-## 8. Trilingual EN/GU/HI (public) · bilingual EN/GU (Console)
+## 8. Bilingual EN/GU — website and Console
 
-**The public site became trilingual on 2026-08-31** (owner decision, Modern
-Textile Lab plan §4.1). All three are first-class. Gujarati is not a
-translation afterthought: it is the language most of the audience actually
-speaks. Hindi was added because Karma **already teaches in Hindi** — a verified
-fact, and `src/lib/schema.ts` had been publishing `availableLanguage:
-["gu","hi","en"]` for months — so the site now exists in the language a Hindi
-speaker was already going to be taught in. Adding the locale asserted nothing
-new about teaching.
+**The public website is English + Gujarati. There is no Hindi website.**
 
-The copy is natural Surti Gujarati/Gujlish and natural Devanagari Hindi rather
-than formal translated Indic. Trade terms that the trade says in English —
-emCAD, machine, batch, WhatsApp — stay in English inside both, because that is
-how the floor talks. The calibration rule the Hindi was written against: **if
-the Gujarati kept a word in English, the Hindi keeps it too.**
+Gujarati is not a translation afterthought: it is the language most of the
+audience actually speaks. The copy is natural Surti Gujarati/Gujlish rather
+than formal translated Indic, and the trade terms the trade says in English —
+EMCAD, machine, batch, WhatsApp — stay in English inside it, because that is
+how the floor talks.
 
-**Karma Console stays EN + GU deliberately.** `AdminLocale` is its own
-two-value type; staff choose a console language and Hindi is a public decision.
-`messages/hi.json` therefore has **no `admin` namespace at all**, which is a
-true statement about the product rather than a gap, and
-`tests/i18n-parity.test.ts` asserts exactly that asymmetry.
+### The Hindi locale that existed for one day
+
+On 2026-08-31 a Hindi public locale shipped in PR #58: `messages/hi.json` with
+860 leaves, `/hi` routing, hreflang, a Devanagari face and a widened Postgres
+enum. The owner reversed the decision the same day, and the recovery phase of
+the public visual rebuild removed all of it.
+
+Three things are worth remembering rather than re-deriving:
+
+1. **`drizzle/0005_trilingual_locale.sql` was never applied.** The connected
+   Supabase project was checked after the correction and `public.locale` was
+   still `{en,gu}`. The migration, its snapshot and its journal entry were
+   deleted rather than reversed — an `ALTER TYPE … ADD VALUE` has no
+   `DROP VALUE`, so had it run, this would have been permanent.
+2. **The TypeScript enum was widened ahead of the migration.** For one day
+   `localeEnum` promised the type system a value Postgres would have rejected
+   on insert, which surfaced as a Console student form offering a "Hindi"
+   language preference that would have failed on save. Widen a `pgEnum` only
+   in the same change as an applied `ALTER TYPE`, never ahead of one.
+3. **Removing the Hindi WEBSITE did not make the teaching monolingual.** Karma
+   teaches and supports students in Gujarati *and Hindi* — a confirmed fact —
+   and `src/lib/schema.ts` still publishes `availableLanguage` / `inLanguage`
+   as `["gu","hi","en"]` from one `TEACHING_LANGUAGES` constant. A website
+   locale and a teaching language are two different claims. The constant is
+   deliberately NOT derived from `routing.locales`, because deriving it would
+   silently tell a crawler the studio cannot teach a Hindi speaker.
+
+`tests/public-locales.test.ts` is what keeps all three true: it asserts the
+routed set is exactly `["en","gu"]`, that no `messages/hi.json`, `/hi` route,
+Devanagari face or Devanagari string exists, that the journal has no unapplied
+entry and every entry has a SQL file and snapshot, and that the teaching
+languages survived.
 
 **Never resolve a locale with a ternary.** The pattern
-`locale === "gu" ? x.nameGu : x.nameEn` appeared 135 times across 46 files, and
-its else-branch is a silent English fallback — which is how a third locale
-renders as English without failing a typecheck. `src/lib/i18n/localized.ts`
-resolves it once: `pick()` for the `*En`/`*Gu`/`*Hi` suffix convention, `tr()`
-for `{en,gu,hi}` objects, both warning loudly in development when a translation
-is missing. `scriptLang()` marks content this site did not write — live YouTube
-titles from the studio's Gujarati channel — with the script it is actually in.
-
-**Fonts are `:lang()`-scoped, not one shared stack.** The Gujarati face claims
-the Devanagari-shared danda and stress marks, so a single stack would draw a
-Hindi danda from the Gujarati font. Each script has its own stack; the
-Devanagari face is declared in `textile-lab.css` and is fetched on Hindi pages
-only. Measured: `/en` and `/gu` download no Devanagari, `/hi` does.
+`locale === "gu" ? x.nameGu : x.nameEn` appears 135 times across 46 files, and
+its else-branch is a silent English fallback — so a MISSING Gujarati field
+renders English and looks identical to a translated one.
+`src/lib/i18n/localized.ts` resolves it once: `pick()` for the `*En`/`*Gu`
+suffix convention, `tr()` for `{en,gu}` objects, `pickOptional()` returning
+`undefined` rather than `""` so a caller can render nothing at all, and
+`intlLocale()` so a date formatter is not written as a ternary either. All warn
+loudly in development when a translation is missing. `scriptLang()` marks
+content this site did not write — live YouTube titles from the studio's
+Gujarati channel — with the script it is actually in, so a screen reader on the
+English page does not announce Gujarati in an English voice.
 
 Mechanics:
 
-- `messages/en.json`, `messages/gu.json` and `messages/hi.json` carry mirrored
-  keys across every PUBLIC namespace; `admin` mirrors across `en`/`gu` only.
-  `tests/i18n-parity.test.ts` fails the build if a key exists in one and not the
-  other, and asserts there is one catalogue per routed locale — the failure that
-  catches is a locale added to `routing.ts` with no catalogue behind it, which
-  next-intl resolves at request time and not at build time, i.e. a 500 on a URL
-  a crawler has already indexed.
-- `tests/mtl-trilingual.test.ts` goes further than shape: it asserts the Hindi
-  is *actually Hindi* — over 80% of its prose carries Devanagari, no multi-word
-  English sentence stands as a translation, no Gujarati script leaked in from
-  the source catalogue, and every ICU placeholder and plural branch survived.
+- `messages/en.json` and `messages/gu.json` carry mirrored keys across every
+  namespace, `admin` included. `tests/i18n-parity.test.ts` fails the build if a
+  key exists in one and not the other, and asserts there is one catalogue per
+  routed locale — the failure that catches is a locale added to `routing.ts`
+  with no catalogue behind it, which next-intl resolves at request time and not
+  at build time, i.e. a 500 on a URL a crawler has already indexed.
 - Content in `src/content/*.ts` carries paired `…En` / `…Gu` fields.
 - `src/lib/site.ts` holds `addressEn` / `addressGu`, `hoursEn` / `hoursGu`.
-- The console has its own bilingual copy modules (`src/lib/admin/*-copy.ts`) and
-  a staff locale toggle.
-- Every public page emits `en`, `gu`, `hi` and `x-default` hreflang alternates
-  through `pageMeta()` in `src/lib/seo.ts`. Both the alternates and the sitemap's
-  per-URL alternates are **derived from `routing.locales`** — they were two
-  hardcoded entries while the sitemap's URLs already iterated the list, so a
-  third locale would have tripled the sitemap while every entry still advertised
-  two alternates. A hreflang set that disagrees with the sitemap is worse than
-  none. A page that skips `pageMeta()` is the usual cause of a Search Console
-  hreflang error.
-- **The Postgres `locale` enum gained `hi`** in `drizzle/0005_trilingual_locale.sql`
-  because `applications.locale` and `design_jobs.locale` record the language a
-  visitor filled a form in. Additive and irreversible — Postgres has no
-  `DROP VALUE`. Widening the enum permits a value; it does not require anything
-  to use it, and the Console still writes only `en` or `gu`. A student's
-  `languagePref` **can** now be Hindi, because that is a teaching language and
-  Karma teaches in Hindi; being unable to record it was a gap in the record.
+- The console has its own bilingual copy modules (`src/lib/admin/*-copy.ts`)
+  and a staff locale toggle. `AdminLocale` stays its own two-value type: the
+  Console's language and the website's happen to agree and are still two
+  decisions.
+- Gujarati has its own `:lang(gu)` font stack — Latin inside a Gujarati
+  sentence stays Manrope, because the trade writes EMCAD and WhatsApp in Latin
+  inside every sentence — and its own line height, because its marks sit above
+  and below the line and Latin leading clips them.
+- Every public page emits `en`, `gu` and `x-default` hreflang alternates
+  through `pageMeta()` in `src/lib/seo.ts`. Both those alternates and the
+  sitemap's per-URL alternates are **derived from `routing.locales`** rather
+  than listed, so the two cannot disagree — and a hreflang set that disagrees
+  with the sitemap is worse than none, because it promises a crawler an
+  alternate that 404s. A page that skips `pageMeta()` is the usual cause of a
+  Search Console hreflang error.
+- The Postgres `locale` enum is `{en, gu}` and matches the database.
 
 ---
 
@@ -2245,6 +2268,20 @@ frames, so sample content is **allowed for prototyping** — under three
 conditions: replaceable in one place, unmistakable in three (in source, on
 screen, and in structured data), and never quotable as fact.
 
+**Widened on 2026-08-31** by `docs/karma-creative-freedom-trust-proof-addendum.md`
+§§6–9. The owner would rather review a trust-rich preview with managed sample
+content than a cautious site that looks unfinished, and explicitly authorised
+sample/fictional preview content on the Workers.dev URL for testimonials,
+student stories, trainer profiles, Google review presentation, follower
+counters, partner/trusted-by marks, outcome stories and sample statistics —
+carried by a centralized typed source with a `sample | owner_provided |
+verified` status, not scattered through JSX. **Every condition below still
+holds**, and one is added: the launch checklist must be able to list every
+remaining `sample` proof item before the custom domain is connected.
+
+The table below is the register as it stood before that widening; the rebuild
+extends it.
+
 | What | Count | Where |
 | --- | ---: | --- |
 | Reviews | 7 | `sampleReviews` in `src/content/collections.ts` |
@@ -2792,7 +2829,13 @@ credentials, the Resend API key, `CRON_SECRET`, any cookie, JWT or TOTP secret.
 | `docs/owner-decisions.md` | Ten product decisions the owner gates. | **Current** |
 | `docs/claude-skills.md` | The vendored skill library: what, why, caveats, how to sync. | **Current** |
 | `docs/claude-skills-inventory.md` | Upstream per-skill inventory, copied verbatim. | Reference (upstream) |
-| `docs/screen-to-stitch-progress.md` | The 10-phase redesign plan **and** its implementation record. | **Current plan + history** |
+| `docs/karma-modern-textile-lab-redesign-plan.md` | The public visual rebuild: THREAD / MACHINE / PROOF direction and its phase record. | **Current — authoritative for public visuals** |
+| `docs/karma-creative-freedom-trust-proof-addendum.md` | Owner override on creative patterns, trust/proof modules and sample placeholders. **Beats the plan** where they disagree. | **Current — authoritative** |
+| `docs/modern-textile-lab-audit.md` | Rendered measurements of the public site before the rebuild. | Reference (evidence only, not direction) |
+| `docs/modern-textile-lab-ia.md` | IA from the rejected Modern Textile Lab direction. | **Superseded** — see its own header |
+| `docs/karma-machine-lab-redesign-master-plan.md` | The v4 "Machine Lab" redesign, fourteen phases. | **Historical** — brand reasoning, not current visual authority |
+| `docs/karma-compact-density-redesign-plan.md` | The compact-density pass. | **Historical** — lessons, not current visual authority |
+| `docs/screen-to-stitch-progress.md` | The 10-phase redesign plan **and** its implementation record. | **Historical** |
 | `docs/karma-master-plan-final.md` | The original full product strategy. | **Historical** — later decisions override its auth/hosting assumptions |
 | `docs/karma-redesign-plan.md` | An earlier redesign plan. | **Historical** |
 | `docs/phase-prompts.md` | Paste-ready prompts from an earlier phase model. | **Historical** |

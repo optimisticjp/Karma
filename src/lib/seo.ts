@@ -5,12 +5,12 @@ import { asLocale, OG_LOCALE, routing } from "@/i18n/routing";
 /**
  * Per-page metadata with correct hreflang alternates.
  *
- * The alternates and the OpenGraph locale are DERIVED from `routing.locales`,
- * not listed. Before 2026-08-31 both were hardcoded to two languages while the
- * sitemap iterated the locale list — so adding a third locale would have
- * tripled the sitemap's URLs while every one of them advertised only two
- * alternates. A hreflang set that disagrees with the sitemap is worse than no
- * hreflang: it tells a crawler the Hindi page has no Hindi alternate.
+ * The alternates and the OpenGraph locale are DERIVED from `routing.locales`
+ * rather than listed. They were once hardcoded while the sitemap iterated the
+ * locale list, which means the two could disagree — and a hreflang set that
+ * disagrees with the sitemap is worse than no hreflang, because it tells a
+ * crawler that a page it can see has no alternate. Deriving both from one
+ * source is what makes them agree by construction.
  */
 export function pageMeta(opts: {
   locale: string;

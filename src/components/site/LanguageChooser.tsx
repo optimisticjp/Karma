@@ -9,29 +9,28 @@ import { cn } from "@/lib/utils";
 /**
  * The language chooser: a popover on a laptop, a bottom sheet on a phone.
  *
- * WHY IT REPLACED THE PILL
- * ------------------------
- * The previous control was an `EN | ગુ` segmented pill. Two values fit a pill;
- * three do not, and a pill has nowhere to put the native-script preview line
- * the plan asks for. It was also hardcoded to two locales in its own type.
+ * ⚠ SLATED FOR REPLACEMENT in the shell rebuild. With exactly two public
+ * locales a bottom sheet is more control than the decision needs — see
+ * `docs/karma-modern-textile-lab-redesign-plan.md` §14, "do not over-engineer
+ * a giant language bottom sheet". It renders both locales correctly today,
+ * which is why it stayed through the recovery phase rather than being
+ * half-rewritten twice.
  *
- * WHAT IT MUST GET RIGHT
- * ----------------------
- *  - **A language is offered in its own script.** A Hindi speaker scans for
- *    "हिन्दी", not for "Hindi". Every row carries `lang` so a screen reader
- *    announces it in the right voice and the browser gives Devanagari and
- *    Gujarati vowel marks the line box they need instead of cramping them into
- *    a Latin one.
- *  - **No flags.** A flag is a country. None of these three is one, and
- *    Gujarati and Hindi are both spoken in the same country as each other.
+ * WHAT ANY REPLACEMENT MUST KEEP
+ * ------------------------------
+ *  - **A language is offered in its own script.** A Gujarati speaker scans
+ *    for "ગુજરાતી", not for "Gujarati". Every row carries `lang` so a screen
+ *    reader announces it in the right voice and the browser gives Gujarati
+ *    vowel marks the line box they need instead of cramping them into a Latin
+ *    one.
+ *  - **No flags.** A flag is a country; a language is not.
  *  - **The route is preserved.** Switching language on a course page lands on
  *    the same course, not the homepage.
  *  - **The choice is remembered** — but nothing auto-redirects on it. The URL
  *    still decides; `localeDetection` stays off. The stored value is only read
  *    by the one-time banner that offers the other language.
- *
- * The sheet is a real dialog: Escape closes it, focus is trapped inside it,
- * focus returns to the trigger, and the page behind it does not scroll.
+ *  - **It is a real dialog:** Escape closes it, focus is trapped inside it,
+ *    focus returns to the trigger, and the page behind it does not scroll.
  */
 export function LanguageChooser({
   className,
