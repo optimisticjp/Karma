@@ -2908,7 +2908,7 @@ GROUNDS, which is the same rule in the new vocabulary.
 
 # Phase 7 — Services + Studio + Contact + secondary public pages
 
-**Status:** ✅ Complete
+**Status:** ✅ Complete — PR #68, merged as 5e45660
 
 Required:
 
@@ -3078,7 +3078,7 @@ read.
 
 # Phase 8 — Complete EN/GU copy rebuild + SEO consistency
 
-**Status:** ⏳ Pending
+**Status:** ✅ Complete
 
 Required:
 
@@ -3095,6 +3095,100 @@ Required:
 - no Wilcom training claim;
 - no sample proof leakage;
 - no invented numbers.
+
+## 249 dead leaves, or 22% of the catalogue
+
+The audit's first finding was not a wording problem. **249 of 1,152 message
+leaves were reachable from no page at all** — 182 of them under `home.*`, the
+copy of a homepage that was rebuilt from zero in Phase 3, plus the leftovers of
+every component deleted since.
+
+That is a defect and not untidiness. Dead copy still has to be translated,
+still has to be reviewed against the factual rules, and still passes the EN/GU
+parity check — so the parity check looks like coverage while covering nothing.
+And it drifts: `proof.stories.before` and `home.voices.before` said different
+things, and only one of them was on screen.
+
+They are gone, and `tests/kds-copy-seo.test.ts` runs the scan in reverse from
+now on: every public message must be reachable from a page. One key survives
+by name — `servicesPage.form.filesHelp`, held for the day R2 is activated,
+with a test that already explains why deleting it would lose limits the API
+still enforces.
+
+**719 public leaves, 198 Console.** Both catalogues, same shape, no empty
+Gujarati string anywhere.
+
+## What the copy audit did NOT find
+
+Worth recording, because a phase that reports only what it changed reads as if
+nothing else was checked:
+
+- **Gujarati coverage is complete.** Three strings are identical in both
+  catalogues and all three are deliberately bilingual WhatsApp prefills.
+- **No marketing cliché survives anywhere in the public copy.** A scan for
+  twenty-five of them — world-class, unleash, empower, seamless, transform
+  your, unlock, guarantee, placement, salary, 100% — returned exactly one hit,
+  and it is the stories page's own disclaimer saying none of those things are
+  claimed.
+
+The earlier phases did that work. The remaining copy defects were all in
+metadata, which no page renders and nobody had read end to end.
+
+## Metadata
+
+Four titles and three descriptions were past the length a search result
+actually shows, the worst by 70 characters — and what gets truncated is the
+END, which on this site is the studio's name.
+
+The two highest-intent local titles now drop the brand suffix rather than the
+locality: **"Embroidery Classes in Mota Varachha, Surat"** keeps every word
+somebody types, and the brand is already in the `LocalBusiness` schema on every
+page. The rest keep `| Karma Design Studio`.
+
+One description was a **factual leak**. `/success-stories` was advertised as
+"businesses started, jobs landed, skills that pay" — for a page whose every
+story is a sample and whose own copy says none of them claims an income, a job
+or a placement. A description is a claim; it may not say what the page will
+not. It now describes the arc and the consent gate.
+
+The Gujarati `meta.notes` title was also the only one transliterating the
+studio's name into Gujarati script while eleven others kept it in Latin.
+
+## Breadcrumbs, in the language of the page
+
+Twelve second-level routes gained a `BreadcrumbList` through one server
+component, `<PageCrumbs>`. The labels live in their own `crumbs` namespace
+rather than in `nav`: a breadcrumb names a PLACE and a nav link invites a
+CLICK, and `crumbs` also has to name the four pages the header does not link at
+all — the admission form, the stories, the certificate check, the privacy
+policy.
+
+The two deep trails that already existed were **describing their pages in the
+wrong language**. The home crumb was the literal English word "Home" on every
+Gujarati page, and a note's trail carried the English section name and the
+English question. Both are localized now, and `breadcrumbSchema()` takes the
+home label rather than hardcoding it.
+
+## A sitemap that contradicted itself
+
+`/terms` was submitted in the sitemap while its own metadata sets `noIndex` —
+a contradiction a crawler reports back as an error. It is out until the owner
+approves the draft, and the rule is no longer a list: a route is in the sitemap
+exactly when its own page does not opt out of the index, which is what
+`tests/mtl-routes.test.ts` now derives.
+
+hreflang and the sitemap both iterate `routing.locales`; neither lists a locale
+by hand, and neither can name a third. `availableLanguage` / `inLanguage` still
+publish Hindi, because Karma genuinely teaches in Hindi — that is a fact about
+the classroom, not a website locale.
+
+## Verified
+
+**1,019 tests** across 62 files, including a new `tests/kds-copy-seo.test.ts`
+(18). Its orphan scan was confirmed to fail on a planted key before it was
+trusted. The rendered pages were re-read on a production server: every
+second-level and deep route emits its `BreadcrumbList`, the Gujarati ones in
+Gujarati, and the server logged zero `MISSING_MESSAGE`.
 
 ---
 

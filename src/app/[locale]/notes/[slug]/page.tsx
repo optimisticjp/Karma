@@ -63,9 +63,10 @@ export default async function NotePage({
   const note = noteBySlug(slug);
   if (!note) notFound();
 
-  const [t, tc, rawLocale] = await Promise.all([
+  const [t, tc, tcr, rawLocale] = await Promise.all([
     getTranslations("notesPage"),
     getTranslations("common"),
+    getTranslations("crumbs"),
     getLocale()
   ]);
   const l = asLocale(rawLocale);
@@ -85,10 +86,17 @@ export default async function NotePage({
     courseName: course?.nameEn
   });
 
-  const crumbs = breadcrumbSchema(l, [
-    ["Machine Notes", "/notes"],
-    [note.questionEn, `/notes/${note.slug}`]
-  ]);
+  /* Both crumbs in the page's own language. They used to be the English
+     section name and the English question on the Gujarati page — a structured
+     description of a page in a language the page is not written in. */
+  const crumbs = breadcrumbSchema(
+    l,
+    [
+      [tcr("notes"), "/notes"],
+      [pick(note, "question", l), `/notes/${note.slug}`]
+    ],
+    tcr("home")
+  );
 
   return (
     <>

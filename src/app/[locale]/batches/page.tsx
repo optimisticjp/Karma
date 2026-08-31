@@ -10,6 +10,7 @@ import { ActionDock } from "@/components/kds/shell/ActionDock";
 import { Link } from "@/i18n/navigation";
 import { site, waLink } from "@/lib/site";
 import { Icon } from "@/components/ui/Icon";
+import { PageCrumbs } from "@/components/kds/PageCrumbs";
 
 /**
  * `/[locale]/batches` — when you can actually come.
@@ -81,6 +82,7 @@ export default async function BatchesPage({
 
   return (
     <>
+      <PageCrumbs page="batches" path="/batches" />
       <BatchesIntro batchCount={rows.length} courseCount={courseCount} />
 
       <section className="band on-canvas" aria-labelledby="board-heading">

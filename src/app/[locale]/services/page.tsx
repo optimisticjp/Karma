@@ -14,6 +14,7 @@ import { StudioChain } from "@/components/kds/studio/StudioChain";
 import { StitchSwatch } from "@/components/kds/StitchSwatch";
 import { SampleMark } from "@/components/kds/proof";
 import { NeedlePoint, ThreadLine } from "@/components/kds/marks";
+import { PageCrumbs } from "@/components/kds/PageCrumbs";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -67,6 +68,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
 
   return (
     <>
+      <PageCrumbs page="services" path="/services" />
       <PageHead
         eyebrow={t("eyebrow")}
         title={t("title")}

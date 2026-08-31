@@ -124,14 +124,18 @@ describe("the local identity is complete and consistent", () => {
 describe("every page is discoverable and the console is not", () => {
   const sitemap = read("src/app/sitemap.ts");
 
-  it("includes every public surface", () => {
+  it("includes every public surface it has not told the crawler to skip", () => {
     for (const path of [
       '""', '"/courses"', '"/admissions"', '"/admission"', '"/student-work"',
       '"/notes"', '"/services"', '"/about"', '"/success-stories"', '"/contact"',
-      '"/verify"', '"/privacy"', '"/terms"'
+      '"/verify"', '"/privacy"'
     ]) {
       expect(sitemap, path).toContain(path);
     }
+    /* `/terms` is deliberately absent: it is `noIndex` until the owner
+       approves the draft, and submitting a noindex URL is an error a crawler
+       reports back. It returns when the noIndex does. */
+    expect(sitemap).not.toContain('"/terms"');
     expect(sitemap).toContain("courses.map((c) => `/courses/${c.slug}`)");
     expect(sitemap).toContain("machineNotes.map((n) => `/notes/${n.slug}`)");
   });

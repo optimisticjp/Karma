@@ -11,6 +11,7 @@ import { MachineCaseNotes } from "@/components/kds/work/MachineCaseNotes";
 import { CtaBand } from "@/components/kds/CtaBand";
 import { ThreadLine } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
+import { PageCrumbs } from "@/components/kds/PageCrumbs";
 
 /* The published gallery is database-backed with a source fallback. */
 export const dynamic = "force-dynamic";
@@ -67,6 +68,7 @@ export default async function StudentWorkPage({ params }: { params: Promise<{ lo
 
   return (
     <>
+      <PageCrumbs page="work" path="/student-work" />
       <section className="band-hero on-paper" aria-labelledby="work-heading">
         <div className="wrap">
           <div className="split">

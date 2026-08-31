@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { routing } from "@/i18n/routing";
+import { asLocale, routing } from "@/i18n/routing";
 import { SiteHeader } from "@/components/kds/shell/SiteHeader";
 import { SiteFooter } from "@/components/kds/shell/SiteFooter";
 import { UnveilWatcher } from "@/components/ui/Reveal";
@@ -57,7 +57,7 @@ export default async function LocaleLayout({
 
   /* Structured data is built in one module so the fact discipline lives in
      one place — see the note at the top of src/lib/schema.ts. */
-  const businessLd = studioSchema(locale === "gu" ? "gu" : "en");
+  const businessLd = studioSchema(asLocale(locale));
 
   return (
     <html lang={locale} suppressHydrationWarning>

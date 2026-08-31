@@ -67,12 +67,21 @@ describe("the public route map", () => {
     expect(exists("src/app/[locale]/batches/page.tsx")).toBe(true);
   });
 
-  it("lists every public route in the sitemap", () => {
+  it("lists every INDEXABLE public route in the sitemap, and only those", () => {
+    /* The rule tightened in Phase 8. It used to be "every public route",
+       which quietly required submitting `/terms` — a page that sets
+       `noIndex` while the owner's review is open. A sitemap entry for a page
+       told not to be indexed is a contradiction the crawler reports back as
+       an error, so the two now decide together: a route is in the sitemap
+       exactly when its own page does not opt out of the index. */
     const sitemap = read("src/app/sitemap.ts");
     for (const route of PUBLIC_ROUTES) {
       if (route.includes("[")) continue; // dynamic routes are mapped from content
       const needle = route === "" ? '""' : `"${route}"`;
-      expect(sitemap, route).toContain(needle);
+      const page = `src/app/[locale]${route}/page.tsx`;
+      const noIndexed = exists(page) && /noIndex:\s*true|index:\s*false/.test(read(page));
+      if (noIndexed) expect(sitemap, `${route} is noindex`).not.toContain(needle);
+      else expect(sitemap, route).toContain(needle);
     }
     /* And it enumerates locales rather than hardcoding two, so a third locale
        is a routing change and not a sitemap change. */

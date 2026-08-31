@@ -15,6 +15,7 @@ import { SampleMark } from "@/components/kds/proof";
 import { CtaBand } from "@/components/kds/CtaBand";
 import { NeedlePoint, ThreadLine } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
+import { PageCrumbs } from "@/components/kds/PageCrumbs";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -72,6 +73,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
 
   return (
     <>
+      <PageCrumbs page="about" path="/about" />
       <PageHead
         eyebrow={t("eyebrow")}
         title={t("title")}

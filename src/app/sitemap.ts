@@ -20,8 +20,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/success-stories",
     "/contact",
     "/verify",
-    "/privacy",
-    "/terms"
+    "/privacy"
+    /* NOT `/terms`. It sets `noIndex` while the owner's review is open, and a
+       sitemap entry for a page told not to be indexed is a contradiction the
+       crawler reports back as an error. The two come back together: when the
+       owner approves the text, the `noIndex` goes and this line returns.
+
+       NOT `/verify/[id]` either — a per-certificate result carries a named
+       person's completion record and is deliberately noindex. */
   ];
 
   return staticPaths.flatMap((path) =>

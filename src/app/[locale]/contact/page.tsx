@@ -9,6 +9,7 @@ import { PageHead } from "@/components/kds/PageHead";
 import { PhotoFrame } from "@/components/kds/Frame";
 import { ThreadLine } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
+import { PageCrumbs } from "@/components/kds/PageCrumbs";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -111,6 +112,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
 
   return (
     <>
+      <PageCrumbs page="contact" path="/contact" />
       <PageHead
         eyebrow={t("eyebrow")}
         title={t("title")}

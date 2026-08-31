@@ -5,6 +5,7 @@ import { pageMeta } from "@/lib/seo";
 import { VerifyForm } from "@/components/site/VerifyForm";
 import { PageHead } from "@/components/kds/PageHead";
 import { Icon } from "@/components/ui/Icon";
+import { PageCrumbs } from "@/components/kds/PageCrumbs";
 
 export async function generateMetadata({
   params
@@ -39,6 +40,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ locale:
 
   return (
     <>
+      <PageCrumbs page="verify" path="/verify" />
       <PageHead
         eyebrow={t("eyebrow")}
         title={t("title")}

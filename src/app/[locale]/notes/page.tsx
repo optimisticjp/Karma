@@ -9,6 +9,7 @@ import { NotesIndex, type NoteRow } from "@/components/kds/notes/NotesIndex";
 import { CtaBand } from "@/components/kds/CtaBand";
 import { ThreadLine } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
+import { PageCrumbs } from "@/components/kds/PageCrumbs";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -68,6 +69,7 @@ export default async function NotesIndexPage({ params }: { params: Promise<{ loc
 
   return (
     <>
+      <PageCrumbs page="notes" path="/notes" />
       <section className="band-hero on-paper" aria-labelledby="notes-heading">
         <div className="wrap">
           <div className="split">

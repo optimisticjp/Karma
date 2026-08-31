@@ -8,6 +8,7 @@ import { site } from "@/lib/site";
 import { pageMeta } from "@/lib/seo";
 import { PageHead } from "@/components/kds/PageHead";
 import { Icon } from "@/components/ui/Icon";
+import { PageCrumbs } from "@/components/kds/PageCrumbs";
 
 export async function generateMetadata({
   params
@@ -48,6 +49,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
 
   return (
     <>
+      <PageCrumbs page="privacy" path="/privacy" />
       <PageHead
         eyebrow={t("eyebrow")}
         title={t("title")}
