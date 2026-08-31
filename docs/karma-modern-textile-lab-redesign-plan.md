@@ -3078,7 +3078,7 @@ read.
 
 # Phase 8 — Complete EN/GU copy rebuild + SEO consistency
 
-**Status:** ✅ Complete
+**Status:** ✅ Complete — PR #69, merged as `da3a901`
 
 Required:
 
@@ -3194,7 +3194,7 @@ Gujarati, and the server logged zero `MISSING_MESSAGE`.
 
 # Phase 9 — 32-photo-ready art direction
 
-**Status:** ✅ Complete
+**Status:** ✅ Complete — PR #70, merged as `4f0f373`
 
 Goal:
 
@@ -3309,7 +3309,7 @@ line in both scripts and **zero `role="img"`** on any placeholder.
 
 # Phase 10 — Responsive, accessibility, performance hardening
 
-**Status:** ✅ Complete
+**Status:** ✅ Complete — PR #71, merged as `4348087`
 
 Use real Chromium.
 
@@ -3484,7 +3484,7 @@ actually asks. Phase 11 gets the final word.
 
 # Phase 11 — Final creative-director audit + old visual cleanup
 
-**Status:** ✅ Complete
+**Status:** ✅ Complete — PR #72, merged as `ff4a7e8`
 
 This is not a bug-fix-only pass.
 
