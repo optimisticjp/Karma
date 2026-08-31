@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { getLatestVideos } from "@/lib/youtube";
 import { site } from "@/lib/site";
+import { scriptLang } from "@/lib/i18n/localized";
 
 /**
  * Latest uploads from the studio's real channel via RSS; graceful fallback
@@ -41,7 +42,18 @@ export async function LatestVideos() {
                         past the card at 200% zoom and were silently clipped by
                         `overflow-hidden`. Any string we did not write gets to
                         break wherever it must. */}
-                    <p className="u-break p-3 text-smallmeta font-semibold md:p-4">{v.title}</p>
+                    {/* The studio posts in Gujarati, so a title from the feed
+                        is usually Gujarati — on an English or Hindi page that
+                        is a run of text in a script the document's font stack
+                        does not contain, announced by a screen reader in the
+                        wrong voice. We cannot know a feed string's language,
+                        but we can read its script. */}
+                    <p
+                      lang={scriptLang(v.title)}
+                      className="u-break p-3 text-smallmeta font-semibold md:p-4"
+                    >
+                      {v.title}
+                    </p>
                   </a>
                 </li>
               ))}

@@ -1813,7 +1813,7 @@ route that does not exist**, the batches data contract, and the locale
 routing contract. **809 tests pass.**
 
 ## Phase 3 — Modern Textile Lab design system
-**Status:** ✅ Complete — PR #57, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #57, merged as `4677f7e`
 
 `src/app/textile-lab.css`, imported by `src/app/[locale]/layout.tsx` **only**.
 
@@ -1879,16 +1879,94 @@ the browser on Hindi pages only and never enters the Worker bundle.
 which side of the product each governs.
 
 ## Phase 4 — trilingual shell + navigation
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #58, merged as `PLACEHOLDER_MERGE`
 
-- `hi` locale
-- translated shell/navigation/footer
-- language popover/sheet
-- route-preserving locale switch
-- persistence of explicit user choice
-- hreflang/sitemap/meta parity
-- dedicated mobile menu
-- remove old shell patterns superseded by this plan
+**`messages/hi.json` — 860 leaf strings of real Devanagari Hindi**, written
+against the existing Gujarati as the register reference so the calibration rule
+is explicit: *if the Gujarati kept a word in English, the Hindi keeps it too.*
+Trade terms (machine, batch, WhatsApp, design, demo, EMCAD DAHAO) stay Latin
+inside Devanagari sentences, which is how the Surat floor talks.
+
+Verified mechanically, not asserted: **>80% of Hindi prose carries Devanagari**;
+**zero** multi-word English sentences standing as a translation; **zero**
+Gujarati script leaked from the source; **every ICU placeholder and plural
+branch preserved** across all 860 leaves.
+
+Six values were corrected after comparing against Gujarati — the translation
+had kept `EMCAD DAHAO course`, `EMCAD DAHAO file`, the page title and the
+course-count plural in Latin where the Gujarati transliterates. One flagged by
+a translator and acted on: `reassurance[1]` said the form is available "in
+Gujarati or English", which stopped being true the moment this phase shipped —
+so it changed in **all three** catalogues, a fact catching up with the product.
+
+**The Console stays bilingual on purpose.** `AdminLocale` is its own two-value
+type, so `messages/hi.json` has no `admin` namespace at all — a true statement
+about the product, and `tests/i18n-parity.test.ts` asserts the asymmetry rather
+than tolerating it.
+
+**`src/lib/i18n/localized.ts` is the answer to the audit's 135 ternaries.**
+`pick()` for the `*En`/`*Gu`/`*Hi` suffix convention, `tr()` for `{en,gu,hi}`,
+`pickOptional()` which returns `undefined` rather than `""` so a caller can
+render nothing at all, and `intlLocale()` so no date formatter is written as
+`locale === "gu" ? "gu-IN" : "en-IN"` again. Every fallback warns loudly in
+development, because a silent fallback is indistinguishable from a translation
+that exists — which is exactly how a "Hindi" site stays English.
+
+**`scriptLang()` marks content this site did not write.** The homepage renders
+live YouTube titles from the studio's own Gujarati channel; on the Hindi page
+they were Gujarati text inside a `lang="hi"` document with no marker, announced
+by a screen reader in the wrong voice and with no signal to reach for the
+Gujarati face. We cannot know a feed string's language; we can read its script.
+
+**Navigation rebuilt to the IA.** Six desktop links — Home dropped (the
+wordmark is the home link), Admissions and Contact moved to the footer and
+mobile menu, `/about` labelled "Studio" without renaming the route. A 56px
+mobile header of wordmark | language | menu, and a seven-row mobile menu with
+Book free demo anchored at the bottom.
+
+**The language chooser replaced the pill entirely.** Three values do not fit a
+segmented control and a pill has nowhere for the native-script preview. It is a
+popover on a laptop and a bottom sheet on a phone, a real dialog either way
+(Escape, focus trap, focus restoration, scroll lock), every option marked with
+its own `lang`, no flags — a flag is a country, and Gujarati and Hindi are
+spoken in the same one. The one-time banner now offers **both** other languages
+rather than "the other" one.
+
+**hreflang and sitemap alternates now derive from `routing.locales`.** They were
+two hardcoded entries while the sitemap's URLs already iterated the list — so a
+third locale would have tripled the sitemap to 99 URLs while every one still
+advertised two alternates. Measured after: **99 URLs, each with all three.**
+
+**One additive migration, `drizzle/0005_trilingual_locale.sql`** —
+`ALTER TYPE "public"."locale" ADD VALUE 'hi'`. Genuinely necessary:
+`applications.locale` and `design_jobs.locale` record the language a visitor
+filled a form in, so a Hindi submission would fail on insert. **NOT YET
+APPLIED** — it ships in this PR and needs `npm run db:migrate` against the
+Supabase database. The type system then caught the boundary the migration
+creates, in three places, and each was resolved by asking what the column
+actually means: `staff.admin_locale` narrows back to `AdminLocale` on read (the
+Console has no Hindi catalogue), while **`students.languagePref` and
+`serviceEnquiries.locale` genuinely widen** — the first because Karma teaches
+in Hindi and being unable to record a Hindi-preferring student was a gap in the
+record, the second because it stores the language a B2B client wrote to us in.
+
+**One real contradiction fixed.** `src/lib/schema.ts` emitted
+`availableLanguage: ["gu","hi","en"]` on the organisation and
+`inLanguage: ["gu","en"]` on every course — two JSON-LD blocks on the same page
+disagreeing about whether Karma teaches in Hindi. It does. Both now read one
+`TEACHING_LANGUAGES` constant.
+
+`tests/machine-lab-secondary.test.tsx`'s `expect(routing.locales).toEqual(["en","gu"])`
+was the suite's single hard locale tripwire and was updated deliberately: what
+it guards — one route tree, so no route exists in one language and not another
+— is unchanged and now derived rather than restated.
+
+New suite: `tests/mtl-trilingual.test.ts` (34 assertions). **878 tests pass.
+Worker 2062.68 KiB gzip** (+34 KiB for a third catalogue in the bundle; the
+Devanagari face is still browser-fetched on Hindi pages only).
+
+`CLAUDE.md` non-negotiables #1 and #15 and `docs/project-context.md` §8 are
+rewritten for the trilingual rule.
 
 ## Phase 5 — homepage rebuild
 **Status:** ⏳ Pending

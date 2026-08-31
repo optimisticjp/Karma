@@ -24,7 +24,16 @@ export type StudentEditValue = {
   whatsapp: string | null;
   email: string | null;
   area: string | null;
-  languagePref: "en" | "gu";
+  /**
+   * Which language this student is taught in. Gained `hi` on 2026-08-31 —
+   * Karma teaches in Gujarati AND Hindi (a verified fact in
+   * `docs/content-checklist.md`), so being unable to record a Hindi-preferring
+   * student was a gap in the record, not a constraint anyone chose.
+   *
+   * This is a TEACHING language and not a console locale. `AdminLocale` stays
+   * `"en" | "gu"`: they share a Postgres enum and mean different things.
+   */
+  languagePref: "en" | "gu" | "hi";
   isMinor: boolean;
   photoConsent: boolean;
   notes: string | null;
@@ -89,7 +98,7 @@ function PersonFields({
         </Field>
         <Field label={copy.language} htmlFor={`student-language-${value?.id ?? "new"}`}>
           <select id={`student-language-${value?.id ?? "new"}`} name="languagePref" className="input" defaultValue={value?.languagePref ?? "gu"}>
-            <option value="gu">{copy.languageGu}</option><option value="en">{copy.languageEn}</option>
+            <option value="gu">{copy.languageGu}</option><option value="hi">{copy.languageHi}</option><option value="en">{copy.languageEn}</option>
           </select>
         </Field>
       </div>

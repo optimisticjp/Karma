@@ -376,7 +376,14 @@ export default async function StudentsPage({ searchParams }: Props) {
                 <div className="panel-body grid gap-6">
                   <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <Fact label={copy.area} value={selected.area ?? "—"} />
-                    <Fact label={copy.language} value={selected.languagePref === "gu" ? copy.languageGu : copy.languageEn} />
+                    <Fact
+                      label={copy.language}
+                      value={
+                        { gu: copy.languageGu, hi: copy.languageHi, en: copy.languageEn }[
+                          selected.languagePref
+                        ]
+                      }
+                    />
                     <Fact label={copy.guardian} value={guardian ? `${guardian.name} · ${guardian.phone}${guardian.relation ? ` · ${guardian.relation}` : ""}` : "—"} />
                     <Fact label={copy.photoConsent} value={selected.photoConsent ? "✓" : "—"} />
                   </dl>

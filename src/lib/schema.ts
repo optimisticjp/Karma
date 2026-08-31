@@ -56,6 +56,16 @@ type Locale = "en" | "gu";
  * `EducationalOrganization`; declaring only the first loses course
  * eligibility, and declaring only the second loses the local pack.
  */
+/**
+ * The languages Karma teaches in. Verified in `docs/content-checklist.md`
+ * ("Teaching in Gujarati and Hindi") and separate from the website's locale
+ * set — the site gained Hindi in 2026-08-31 because the teaching already had
+ * it, not the other way round.
+ *
+ * One constant because two blocks on the same page used to disagree.
+ */
+const TEACHING_LANGUAGES = ["gu", "hi", "en"] as const;
+
 export function studioSchema(locale: Locale) {
   return {
     "@context": "https://schema.org",
@@ -80,7 +90,7 @@ export function studioSchema(locale: Locale) {
     geo: { "@type": "GeoCoordinates", latitude: site.geo.lat, longitude: site.geo.lng },
     hasMap: site.mapsUrl,
     areaServed: { "@type": "City", name: "Surat" },
-    availableLanguage: ["gu", "hi", "en"],
+    availableLanguage: TEACHING_LANGUAGES,
     knowsLanguage: ["gu", "hi", "en"],
     /* Exact day-by-day business hours are deliberately absent until the owner
        confirms them. The public copy may still truthfully say that evening
@@ -121,7 +131,13 @@ export function courseSchema(course: Course, locale: Locale) {
     name: course.nameEn,
     description: course.production.producesEn,
     url: `${site.url}/${locale}/courses/${course.slug}`,
-    inLanguage: ["gu", "en"],
+    /* The teaching languages, and they must not disagree with the studio's own
+       `availableLanguage` above. They did: this said `["gu","en"]` while the
+       organisation said `["gu","hi","en"]`, so one JSON-LD block on the same
+       page contradicted another about whether Karma teaches in Hindi. It does
+       — that is a confirmed fact in `docs/content-checklist.md` — and both now
+       read from one constant. */
+    inLanguage: TEACHING_LANGUAGES,
     teaches: course.outcomesEn,
     /* Real, and useful: this is genuinely on-site, in-person instruction. */
     courseMode: "onsite",

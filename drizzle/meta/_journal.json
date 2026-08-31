@@ -36,6 +36,13 @@
       "when": 1788106756189,
       "tag": "0004_course_operations",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788183298836,
+      "tag": "0005_trilingual_locale",
+      "breakpoints": true
     }
   ]
 }

@@ -75,8 +75,7 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "langBanner": {
-      "question": "ગુજરાતીમાં વાંચવું છે?",
-      "action": "ગુજરાતીમાં જુઓ",
+      "question": "Read this page in another language?",
       "dismiss": "Stay in English"
     },
     "waPrefillDemo": "Hi Karma Design Studio! 👑 મને ફ્રી ડેમો ક્લાસ બુક કરવો છે. નામ: ____ | કોર્સ: ____ | ટાઇમ: સવાર/સાંજ",
@@ -712,7 +711,7 @@
     "reassuranceTitle": "Before you start",
     "reassurance": [
       "No payment on this website, and no fee to book a demo",
-      "About two minutes, in Gujarati or English",
+      "About two minutes, in Gujarati, Hindi or English",
       "A person from the studio replies on WhatsApp"
     ],
     "norms": {

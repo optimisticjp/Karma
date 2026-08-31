@@ -677,28 +677,76 @@ to parse. This changes nothing about how the application is built.
 
 ---
 
-## 8. Bilingual EN/GU
+## 8. Trilingual EN/GU/HI (public) · bilingual EN/GU (Console)
 
-Both languages are first-class. Gujarati is not a translation afterthought: it
-is the language most of the audience actually speaks, and the copy is natural
-Surti Gujarati/Gujlish rather than formal translated Gujarati. Trade terms that
-the trade says in English — emCAD, machine, batch, WhatsApp — stay in English
-inside Gujarati sentences, because that is how the floor talks.
+**The public site became trilingual on 2026-08-31** (owner decision, Modern
+Textile Lab plan §4.1). All three are first-class. Gujarati is not a
+translation afterthought: it is the language most of the audience actually
+speaks. Hindi was added because Karma **already teaches in Hindi** — a verified
+fact, and `src/lib/schema.ts` had been publishing `availableLanguage:
+["gu","hi","en"]` for months — so the site now exists in the language a Hindi
+speaker was already going to be taught in. Adding the locale asserted nothing
+new about teaching.
+
+The copy is natural Surti Gujarati/Gujlish and natural Devanagari Hindi rather
+than formal translated Indic. Trade terms that the trade says in English —
+emCAD, machine, batch, WhatsApp — stay in English inside both, because that is
+how the floor talks. The calibration rule the Hindi was written against: **if
+the Gujarati kept a word in English, the Hindi keeps it too.**
+
+**Karma Console stays EN + GU deliberately.** `AdminLocale` is its own
+two-value type; staff choose a console language and Hindi is a public decision.
+`messages/hi.json` therefore has **no `admin` namespace at all**, which is a
+true statement about the product rather than a gap, and
+`tests/i18n-parity.test.ts` asserts exactly that asymmetry.
+
+**Never resolve a locale with a ternary.** The pattern
+`locale === "gu" ? x.nameGu : x.nameEn` appeared 135 times across 46 files, and
+its else-branch is a silent English fallback — which is how a third locale
+renders as English without failing a typecheck. `src/lib/i18n/localized.ts`
+resolves it once: `pick()` for the `*En`/`*Gu`/`*Hi` suffix convention, `tr()`
+for `{en,gu,hi}` objects, both warning loudly in development when a translation
+is missing. `scriptLang()` marks content this site did not write — live YouTube
+titles from the studio's Gujarati channel — with the script it is actually in.
+
+**Fonts are `:lang()`-scoped, not one shared stack.** The Gujarati face claims
+the Devanagari-shared danda and stress marks, so a single stack would draw a
+Hindi danda from the Gujarati font. Each script has its own stack; the
+Devanagari face is declared in `textile-lab.css` and is fetched on Hindi pages
+only. Measured: `/en` and `/gu` download no Devanagari, `/hi` does.
 
 Mechanics:
 
-- `messages/en.json` and `messages/gu.json` carry mirrored keys.
+- `messages/en.json`, `messages/gu.json` and `messages/hi.json` carry mirrored
+  keys across every PUBLIC namespace; `admin` mirrors across `en`/`gu` only.
   `tests/i18n-parity.test.ts` fails the build if a key exists in one and not the
-  other. This is deliberately mechanical — it catches the common failure (a new
-  English string shipped without its Gujarati twin) without pretending to judge
-  translation quality.
+  other, and asserts there is one catalogue per routed locale — the failure that
+  catches is a locale added to `routing.ts` with no catalogue behind it, which
+  next-intl resolves at request time and not at build time, i.e. a 500 on a URL
+  a crawler has already indexed.
+- `tests/mtl-trilingual.test.ts` goes further than shape: it asserts the Hindi
+  is *actually Hindi* — over 80% of its prose carries Devanagari, no multi-word
+  English sentence stands as a translation, no Gujarati script leaked in from
+  the source catalogue, and every ICU placeholder and plural branch survived.
 - Content in `src/content/*.ts` carries paired `…En` / `…Gu` fields.
 - `src/lib/site.ts` holds `addressEn` / `addressGu`, `hoursEn` / `hoursGu`.
 - The console has its own bilingual copy modules (`src/lib/admin/*-copy.ts`) and
   a staff locale toggle.
-- Every public page emits `en`, `gu` and `x-default` hreflang alternates through
-  `pageMeta()` in `src/lib/seo.ts`. A page that skips that helper is the usual
-  cause of a Search Console hreflang error.
+- Every public page emits `en`, `gu`, `hi` and `x-default` hreflang alternates
+  through `pageMeta()` in `src/lib/seo.ts`. Both the alternates and the sitemap's
+  per-URL alternates are **derived from `routing.locales`** — they were two
+  hardcoded entries while the sitemap's URLs already iterated the list, so a
+  third locale would have tripled the sitemap while every entry still advertised
+  two alternates. A hreflang set that disagrees with the sitemap is worse than
+  none. A page that skips `pageMeta()` is the usual cause of a Search Console
+  hreflang error.
+- **The Postgres `locale` enum gained `hi`** in `drizzle/0005_trilingual_locale.sql`
+  because `applications.locale` and `design_jobs.locale` record the language a
+  visitor filled a form in. Additive and irreversible — Postgres has no
+  `DROP VALUE`. Widening the enum permits a value; it does not require anything
+  to use it, and the Console still writes only `en` or `gu`. A student's
+  `languagePref` **can** now be Hindi, because that is a teaching language and
+  Karma teaches in Hindi; being unable to record it was a gap in the record.
 
 ---
 

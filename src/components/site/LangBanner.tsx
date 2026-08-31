@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { LOCALE_NAMES, type Locale } from "@/i18n/routing";
+import { otherLocales } from "@/lib/i18n/localized";
 
 /**
  * One-time, dismissible language suggestion (plan decision log #6):
@@ -23,13 +25,19 @@ export function LangBanner() {
 
   if (!show) return null;
 
-  const other = locale === "en" ? "gu" : "en";
-  const choose = (target: string) => {
+  /* With three locales there is no "the other language", so the banner offers
+     both of them by name. Each name is in its own script and therefore needs
+     no translation — a Hindi speaker recognises "हिन्दी" whatever page they
+     landed on, which is the whole point of offering rather than redirecting. */
+  const others = otherLocales(locale as Locale);
+  const choose = (target: Locale) => {
     try {
       localStorage.setItem("kds-lang-choice", target);
-    } catch {}
+    } catch {
+      /* A locked-down browser should still be able to switch language. */
+    }
     setShow(false);
-    if (target !== locale) router.replace(pathname, { locale: target as "en" | "gu" });
+    if (target !== locale) router.replace(pathname, { locale: target });
   };
 
   /* Collision management. This used to sit at `bottom-0` unless a per-page
@@ -42,11 +50,24 @@ export function LangBanner() {
   return (
     <div className="lang-banner fixed inset-x-0 z-40 border-t border-line bg-card p-2.5 shadow-lg md:inset-x-auto md:left-6 md:right-auto md:max-w-sm md:rounded-xl md:border">
       <p className="text-smallmeta font-semibold">{t("question")}</p>
-      <div className="mt-2 flex gap-2">
-        <button type="button" onClick={() => choose(other)} className="btn btn-primary !px-3.5 !py-1.5 text-sm">
-          {t("action")}
-        </button>
-        <button type="button" onClick={() => choose(locale)} className="btn btn-ghost !px-3 !py-1.5 text-sm">
+      <div className="mt-2 flex flex-wrap gap-2">
+        {others.map((code) => (
+          <button
+            key={code}
+            type="button"
+            onClick={() => choose(code)}
+            className="btn btn-primary !min-h-11 !px-3.5 text-sm"
+          >
+            {/* `lang` so the name is announced in the right voice and the
+                script gets the line box its marks need. */}
+            <span lang={code}>{LOCALE_NAMES[code].name}</span>
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => choose(locale as Locale)}
+          className="btn btn-ghost !min-h-11 !px-3 text-sm"
+        >
           {t("dismiss")}
         </button>
       </div>
