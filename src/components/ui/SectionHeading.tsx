@@ -19,12 +19,20 @@ import { Reveal } from "./Reveal";
  */
 export function SectionHeading({
   eyebrow,
+  id,
   title,
   sub,
   className,
   rule = false
 }: {
   eyebrow?: string;
+  /**
+   * Lands on the `<h2>`, so a `<section aria-labelledby>` can name its landmark
+   * with the heading a sighted visitor is already reading. Without it the only
+   * way to name the region is `aria-label`, which duplicates the string and
+   * then drifts from it.
+   */
+  id?: string;
   title: ReactNode;
   sub?: ReactNode;
   className?: string;
@@ -39,7 +47,7 @@ export function SectionHeading({
   return (
     <Reveal className={cn("max-w-3xl", className)}>
       {eyebrow ? <p className="eyebrow u-eyebrow-gap">{eyebrow}</p> : null}
-      <h2 className="text-h2">{title}</h2>
+      <h2 id={id} className="text-h2">{title}</h2>
       {rule ? <span aria-hidden="true" className="rule-stitch" /> : null}
       {sub ? <p className="u-lede">{sub}</p> : null}
     </Reveal>

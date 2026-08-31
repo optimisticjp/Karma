@@ -66,9 +66,13 @@ export function Footer() {
           <nav className="footer-nav lg:col-span-2" aria-label={t("students")}>
             <MonoNote as="p">{t("students")}</MonoNote>
             <ul className="mt-1.5 text-smallmeta">
+              {/* `/batches` is a route as of Phase 2. It replaces the
+                  `/admissions#batches` anchor that used to point two thirds of
+                  the way down another page — the same destination, except it
+                  can now be linked to, filtered and navigated to. */}
+              <li><Link className="stitch-link" href="/batches">{tn("batches")}</Link></li>
               <li><Link className="stitch-link" href="/admissions">{tn("admissions")}</Link></li>
               <li><Link className="stitch-link" href="/admission">{t("admissionForm")}</Link></li>
-              <li><Link className="stitch-link" href="/admissions#batches">{t("batches")}</Link></li>
               <li><Link className="stitch-link" href="/verify">{t("verify")}</Link></li>
             </ul>
           </nav>

@@ -12,6 +12,10 @@
       "title": "Admissions & Upcoming Batches | Karma Design Studio, Surat",
       "description": "Joining is simple: start with a free demo class. See upcoming batches, timings till 10:30 pm, the student handbook and the admission form."
     },
+    "batches": {
+      "title": "Batches at Karma Design Studio · Surat",
+      "description": "Current batches at Karma Design Studio in Mota Varachha, Surat. Real timings from the studio's own records — book a free demo before you choose."
+    },
     "admissionForm": {
       "title": "Admission Form | Karma Design Studio",
       "description": "Apply in 4 short steps. No online payment needed; confirm on WhatsApp with your reference number."
@@ -48,10 +52,12 @@
   "nav": {
     "home": "Home",
     "courses": "Courses",
+    "batches": "Batches",
     "admissions": "Admissions",
     "work": "Student Work",
     "services": "Services",
     "about": "About",
+    "studio": "Studio",
     "contact": "Contact",
     "cta": "Book Free Demo",
     "notes": "Machine Notes"
@@ -432,6 +438,27 @@
         }
       ]
     }
+  },
+  "batchesPage": {
+    "eyebrow": "When you can come",
+    "title": "Choose a batch that fits your day",
+    "lede": "Every batch below is a real one running at the studio. Come for the free demo first, use the machine, and decide after that.",
+    "listTitle": "Current batches",
+    "listSub": "Straight from the studio's records. If a batch is not listed here, it is not open yet.",
+    "seatsLeft": "{count, plural, one {# seat left} other {# seats left}}",
+    "full": "Full",
+    "emptyTitle": "No batch is open for booking right now.",
+    "emptyBody": "New batches open through the month. Message or call the studio and we will tell you what is starting next — or book the free demo now and pick a batch afterwards.",
+    "errorTitle": "We could not load the batch list.",
+    "errorBody": "Rather than show you something that might be out of date, here is the direct way to ask. Message or call the studio and we will tell you what is running.",
+    "joiningTitle": "How joining works",
+    "joiningSub": "Four steps, in the order they actually happen.",
+    "step1": "Book the free demo.",
+    "step2": "Come to the studio and use the machine yourself.",
+    "step3": "Choose your course and the batch that fits your day.",
+    "step4": "Complete admission and start.",
+    "normsNote": "Fees, timings and the admission norms are set out in full on the admissions page.",
+    "normsLink": "Read the admission norms"
   },
   "courseDetail": {
     "whoTitle": "Who this course is for",
