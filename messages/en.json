@@ -1472,6 +1472,17 @@
     "moreTitle": "More notes",
     "courseNotesTitle": "Machine notes for this technique",
     "courseNotesSub": "Short answers from the floor about the faults this course teaches you to fix.",
-    "issueLabel": "Issue"
+    "issueLabel": "Issue",
+    "listEyebrow": "The archive",
+    "searchLabel": "Search the notes",
+    "searchPlaceholder": "thread breaking, puckering, register…",
+    "filterCourse": "Filter by course",
+    "filterAll": "All",
+    "searchEmpty": "No note matches that yet.",
+    "searchClear": "Show every note",
+    "countLabel": "Notes published",
+    "closeH2": "Bring the fault to the machine.",
+    "closeSub": "Reading about a fault gets you halfway. Sit at the machine with the sample in your hand and it takes ten minutes.",
+    "noteIndexLabel": "Note {n} of {total}"
   }
 }

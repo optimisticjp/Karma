@@ -1698,6 +1698,44 @@
 }
 .kds .case-fields dt { display: flex; align-items: center; gap: 0.5rem; }
 
+/* ---- the machine notes archive ------------------------------------------ */
+
+.kds .notes-controls { display: grid; gap: 1rem; margin-top: 1.75rem; }
+@media (min-width: 48rem) {
+  .kds .notes-controls { grid-template-columns: minmax(0, 20rem) minmax(0, 1fr); align-items: end; }
+}
+.kds .notes-controls > .book-tabs { margin: 0; }
+.kds .notes { display: grid; gap: 0; margin-top: 1.5rem; }
+.kds .note-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.875rem;
+  padding-block: 1rem;
+  border-top: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+}
+.kds .notes li:last-child .note-row { border-bottom: 1px solid var(--line); }
+.kds .note-mark { display: grid; justify-items: center; gap: 0.35rem; padding-top: 0.2rem; }
+.kds .note-issue { color: var(--brand-accent-strong); }
+/* Two lines of the answer: enough to know whether this is the note, not
+   enough to be the note. */
+.kds .note-answer {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.kds .note-arrow { align-self: center; color: var(--ink-muted); }
+/* The related-course swatch on a note page: big enough to recognise the
+   material, small enough not to become the page. */
+.kds .note-course-swatch { width: 5rem; margin-top: 0.75rem; }
+/* Two columns when a row has no index mark (the "more notes" list). */
+.kds .note-row:not(:has(.note-mark)) { grid-template-columns: minmax(0, 1fr) auto; }
+.kds .note-row:hover .t-h4 { color: var(--brand-accent-strong); }
+.kds .note-row:hover .note-arrow { color: var(--brand-accent-strong); }
+
 /* ==========================================================================
  * 12. SMALL OBJECTS
  * ========================================================================== */

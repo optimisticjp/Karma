@@ -2823,7 +2823,7 @@ way to pay online.
 
 # Phase 6 — Student Work + Machine Notes
 
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #67
 
 Required:
 
@@ -2834,6 +2834,75 @@ Required:
 - search/filter where useful;
 - remove over-technical archive theatre;
 - preserve real note content.
+
+## Student work
+
+Four blocks: the intro (which states how anything gets published before it
+shows anything), the six reserved shoot frames as masonry, whatever staff have
+published through Content Desk, and the machine case notes.
+
+The page this replaces filtered every sample out — which, with nothing
+published, left an intro above a "come and look instead" card and made the
+absence of photography the loudest thing on the site.
+
+**The archive and the published feed stay two different things.** The archive
+is the six photographs the owner's shoot is for: fixed slots, fixed ratios, no
+attribution. The feed is editable, with technique, course, note and consent
+metadata intact. Merging them would either make the shoot slots deletable from
+an admin screen or strip published items of what makes them publishable.
+
+The **machine case notes** are the proof the studio genuinely has today, and
+they carry no sample marker — deliberately. Each is an ordinary production
+fault with its ordinary cause, trade knowledge that would be equally true in
+any unit in Surat, so there is nothing in them for the owner to verify. To a
+working operator they are more persuasive than a photograph.
+
+## Machine Notes
+
+The archive is **searchable and filterable**, because nobody browses machine
+notes: they arrive with a fault. The filter is by course — the taxonomy the
+notes actually carry — and the search matches the question, the fault label and
+the note's own tags rather than the whole answer, so a common word does not
+return everything. Both are an enhancement rather than a gate: every note is
+rendered on the server, and the controls narrow what is already there.
+
+A note page answers in the first screen and explains after it: question, then
+the answer in two sentences, then why it happens, then the machine detail and
+an example, with **what to check drawn as a seam** because the order is the
+method. It still emits `TechArticle` and no `Person` — no trainer has been
+confirmed, and a fabricated byline is exactly what structured data must never
+carry.
+
+Still not a blog: no dates, no bylines, no "read more". The fault notation runs
+at full strength on these two surfaces and nowhere else on the site.
+
+## Deleted, not orphaned
+
+`MaterialWall`, `WorkLedger`, `MachineCases` and `NoteSpec`. The registration
+mark `<NoteSpec>` carried is settled in the system instead: `.mframe` draws its
+two hairline ticks once, in CSS, so no caller can sprinkle them.
+
+Every locale ternary on the note page — fifteen of them — became `pick()` /
+`pickList()`.
+
+## Measured
+
+| Width | `/student-work` | `/notes` | a note |
+| --- | --- | --- | --- |
+| 390 | 8,524px | 4,044px | 1,860px |
+| 768 | 6,910px | 3,436px | 1,687px |
+| 1024 | 6,281px | 3,189px | 1,434px |
+| 1440 | 6,825px | 3,369px | 1,510px |
+
+No sideways drag at any width; Gujarati within 5% of English.
+
+## Verified
+
+**977 tests** across 61 files, including a new `tests/kds-work-notes.test.ts`
+(20). `machine-lab-proof` and `machine-lab-notes` kept every rule and were
+repointed; the four-band assertion in `machine-lab-final` became the four
+GROUNDS, which is the same rule in the new vocabulary.
+
 
 ---
 
