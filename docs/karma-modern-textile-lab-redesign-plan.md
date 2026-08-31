@@ -2908,7 +2908,7 @@ GROUNDS, which is the same rule in the new vocabulary.
 
 # Phase 7 — Services + Studio + Contact + secondary public pages
 
-**Status:** ✅ Complete
+**Status:** ✅ Complete — PR #68, merged as 5e45660
 
 Required:
 
