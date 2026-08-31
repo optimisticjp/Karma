@@ -3194,7 +3194,7 @@ Gujarati, and the server logged zero `MISSING_MESSAGE`.
 
 # Phase 9 — 32-photo-ready art direction
 
-**Status:** ⏳ Pending
+**Status:** ✅ Complete
 
 Goal:
 
@@ -3210,6 +3210,100 @@ Required:
 - technique swatches for photo-less three courses;
 - alt-text strategy documented for when files arrive;
 - image size/format pipeline recommendation without activating R2.
+
+## All 32, verified and placed
+
+hero 3 · course 8 · work 6 · trainer 3 · studio 6 · story 2 · process 3 ·
+floor 1. Every one renders in a real composition — fourteen by id, eight
+through `coursePhotoFor(slug)`, and the work, studio and story groups through
+`photosInGroup()`. `tests/kds-photo.test.ts` fails if a slot is added, dropped,
+or left unplaced, because a slot nobody renders is a shot the owner is being
+asked to take for a page that will not show it.
+
+The counts are asserted against the owner's brief rather than against
+whatever the file happens to contain: changing them is a change to what the
+photographer was asked for, and that is the owner's call.
+
+## The three courses with no station
+
+**flat-embroidery, applique-3d-embroidery, cross-stitch.** They are not in the
+shoot, so they are not given another course's photograph and they are not left
+with an empty box either: the technique's own **stitch swatch** stands in — a
+drawing of that stitch, not a picture of somebody else's. Every course carries
+its swatch on its own page whether photographed or not, so the eleven read as
+one catalogue rather than as eight real ones and three placeholders.
+
+## The placeholder was lying to screen readers
+
+`<PhotoFrame>` announced itself as `role="img"` labelled with the shoot brief.
+To somebody who cannot see the page that says there IS a photograph of an
+EMCAD DAHAO screen with a stitch design visible. There is not.
+
+It now carries a visually-hidden **`Photograph pending · ફોટો બાકી: <brief>`**
+at every scale — including `thumb`, which previously announced a label while
+showing nothing, the same inconsistency in the other direction.
+
+`PHOTO_PENDING` is one bilingual string rather than a catalogue key because
+`<PhotoFrame>` also renders on `/design`, which is its own root layout with no
+intl provider. It is the exception the WhatsApp prefills already take.
+
+## One empty frame, not three
+
+Three placeholder vocabularies were in the tree at once: `<PhotoFrame>` (the
+rebuilt one), `<PhotoSlot>` (a dashed camera box in the superseded palette),
+and `<ManifestPhoto>` (the same job as `<PhotoFrame>`, done twice). `<SampleTag>`
+was a fourth, orphaned since the proof registry moved to `<SampleMark>`.
+
+`PhotoSlot.tsx` and `SampleTag.tsx` are deleted. Content Desk's `<ManagedPhoto>`
+— which publishes images the shoot list knows nothing about, so it cannot ask
+the manifest for a ratio — now falls back to a new **`<EmptyFrame>`** in the
+same file as `<PhotoFrame>`: same cloth ground, same weave, same pending line,
+caller-stated ratio. A wall mixing published work with waiting slots reads as
+one system instead of two half-finished ones.
+
+Deleting `<SampleTag>` orphaned `common.sampleTag`, and Phase 8's orphan scan
+caught it on the next run — which is the first time that test earned its keep.
+
+## Alt text, as three different strings
+
+| Field | Who it is for | Where it appears |
+| --- | --- | --- |
+| `label` | the photographer | on the placeholder, as the shot brief |
+| `altGuidance` | whoever writes the alt when the file lands | in the manifest, never on the page |
+| `alt` | the reader who cannot see the photograph | **does not exist yet** |
+
+`altGuidance` is an INSTRUCTION, not a description: "Name the technique being
+stitched and the material" is what the alt has to accomplish once somebody has
+looked at the actual photograph. Pasting it into an `alt` would describe a
+picture nobody has seen, and the test bans exactly that.
+
+## The pipeline, with R2 still switched off
+
+Public photography is **same-origin deployed assets, not R2** — R2 is for
+confidential B2B brief files and stays deferred (CLAUDE.md #20); a public
+photograph has no reason to sit behind an authenticated route. Files go in
+`public/photos/<SLOT_ID>.<ext>` and are served from the Workers Assets binding
+(`.open-next/assets` in `wrangler.jsonc`), which is a **different budget from
+the 3 MB Worker script** — 32 photographs cannot push the script over its
+limit.
+
+The full recommendation — AVIF/WebP/JPEG in one `<picture>`, two widths per
+slot from the manifest's own dimensions, ~150 KB per AVIF at 1600px, lazy
+everywhere but the hero, EXIF stripped on export because a phone photograph of
+the floor carries GPS, and no `next/image` optimization on Workers — is in
+`docs/design-system.md`.
+
+## Measured
+
+No sideways drag and no status other than 200 across `/`, `/courses`, a
+photographed course, a photograph-less course, `/student-work` and `/about` at
+390 / 768 / 1024 / 1440 in both languages. The rendered pages carry the pending
+line in both scripts and **zero `role="img"`** on any placeholder.
+
+## Verified
+
+**1,032 tests** across 63 files, including a new `tests/kds-photo.test.ts`
+(13).
 
 ---
 

@@ -227,6 +227,22 @@ export const PHOTO_COUNT = 32;
 
 const BY_ID = new Map(PHOTO_MANIFEST.map((slot) => [slot.id, slot]));
 
+/**
+ * What a reserved frame announces while it is still empty.
+ *
+ * BILINGUAL AS ONE STRING, DELIBERATELY. `<PhotoFrame>` renders on `/design`
+ * too, which is its own root layout with no intl provider, so the component
+ * cannot call `useTranslations()` without breaking the reference page. The
+ * pattern is the same one the WhatsApp prefills use: one string carrying both
+ * languages, for the handful of places a translator cannot reach.
+ *
+ * It exists because the placeholder used to announce itself to a screen
+ * reader as `role="img"` with the shoot brief as its label — telling somebody
+ * who cannot see the page that there IS a photograph of an EMCAD DAHAO screen,
+ * when there is not. The frame is a reserved space, and it now says so.
+ */
+export const PHOTO_PENDING = "Photograph pending · ફોટો બાકી";
+
 export function photoSlot(id: string): PhotoSlotSpec {
   const slot = BY_ID.get(id);
   /* Loud rather than silent: a typo would otherwise render a frame with no

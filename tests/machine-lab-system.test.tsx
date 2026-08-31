@@ -100,7 +100,7 @@ describe("photography honesty", () => {
   it("ships no remote image source anywhere in the manifest or the frames", () => {
     const sources = [
       read("src/content/photo-manifest.ts"),
-      read("src/components/ui/PhotoSlot.tsx")
+      read("src/components/kds/Frame.tsx")
     ].join("\n");
     for (const host of [
       "unsplash",
@@ -405,9 +405,14 @@ describe("primitives render", () => {
       expect(renderToStaticMarkup(<Mark />)).toContain("<svg");
     }
 
-    const { ManifestPhoto } = await import("../src/components/ui/PhotoSlot");
+    /* `<ManifestPhoto>` and `<PhotoSlot>` were deleted in Phase 9 — two
+       placeholder vocabularies for one job, the older drawn in the superseded
+       palette. `<PhotoFrame>` is the only one now, and the rule it carries is
+       the one that always mattered: the frame reserves the photograph's exact
+       ratio. */
+    const { PhotoFrame } = await import("../src/components/kds/Frame");
     for (const slot of PHOTO_MANIFEST) {
-      const html = renderToStaticMarkup(<ManifestPhoto id={slot.id} />);
+      const html = renderToStaticMarkup(<PhotoFrame id={slot.id} scale="lead" />);
       /* The frame reserves the photograph's exact ratio — this is what keeps
          layout shift at zero when the real file lands. */
       expect(html, slot.id).toContain(`aspect-ratio:${slot.width} / ${slot.height}`);

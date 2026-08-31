@@ -1,4 +1,4 @@
-import { PhotoSlot } from "@/components/ui/PhotoSlot";
+import { EmptyFrame } from "@/components/kds/Frame";
 import { cn } from "@/lib/utils";
 
 /**
@@ -7,8 +7,10 @@ import { cn } from "@/lib/utils";
  * Until the public-media upload service is switched on, staff may publish only
  * a same-origin site path (for example /photos/work/zardosi-01.webp). That
  * keeps the existing CSP tight and avoids turning Content Desk into an
- * arbitrary remote-image proxy. Empty media falls back to the explicit
- * PhotoSlot used by source/sample content.
+ * arbitrary remote-image proxy. Empty media falls back to `<EmptyFrame>` —
+ * the SAME empty frame the 32 reserved slots use, so a wall mixing published
+ * work with waiting slots reads as one system. It used to fall back to
+ * `<PhotoSlot>`, a dashed camera box in the superseded palette.
  *
  * ## Why a bare <img> and not next/image
  *
@@ -50,7 +52,7 @@ export function ManagedPhoto({
   sizes?: string;
   className?: string;
 }) {
-  if (!src) return <PhotoSlot label={label} ratio={ratio} className={className} />;
+  if (!src) return <EmptyFrame label={label} ratio={ratio.replace("/", " / ")} className={className} />;
 
   return (
     <div
