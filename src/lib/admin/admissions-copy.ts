@@ -16,6 +16,8 @@ export type AdmissionsCopy = {
   courseInterest: string;
   noCourseYet: string;
   timing: string;
+  demoSlot: string;
+  followUp: string;
   timingChoose: string;
   morning: string;
   evening: string;
@@ -84,6 +86,8 @@ const COPY = {
     courseInterest: "Course interest",
     noCourseYet: "Not decided yet",
     timing: "Preferred timing",
+    demoSlot: "Free demo",
+    followUp: "Follow-up",
     timingChoose: "Not decided",
     morning: "Morning",
     evening: "Evening",
@@ -179,6 +183,8 @@ const COPY = {
     courseInterest: "કયા Courseમાં રસ છે?",
     noCourseYet: "હજુ નક્કી નથી",
     timing: "પસંદનો સમય",
+    demoSlot: "ફ્રી ડેમો",
+    followUp: "ફોલો-અપ",
     timingChoose: "હજુ નક્કી નથી",
     morning: "સવાર",
     evening: "સાંજ",

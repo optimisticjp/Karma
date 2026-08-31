@@ -8,6 +8,7 @@ import { hasPermission } from "@/lib/auth/access";
 import { admissionsCopy } from "@/lib/admin/admissions-copy";
 import { recordsCopy } from "@/lib/admin/records-copy";
 import { canPerform } from "@/lib/admin/record-actions";
+import { readCourseOperations } from "@/lib/admin/course-operations";
 import { RecordMenu } from "@/components/admin/RecordMenu";
 import {
   APPLICATION_STATUSES,
@@ -104,7 +105,12 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
       )
       .orderBy(asc(schema.staff.name)),
     db
-      .select({ slug: schema.courses.slug, nameEn: schema.courses.nameEn, nameGu: schema.courses.nameGu })
+      .select({
+        slug: schema.courses.slug,
+        nameEn: schema.courses.nameEn,
+        nameGu: schema.courses.nameGu,
+        operations: schema.courses.operations
+      })
       .from(schema.courses)
       .where(and(eq(schema.courses.active, true), isNull(schema.courses.archivedAt)))
       .orderBy(asc(schema.courses.sortOrder), asc(schema.courses.nameEn))
@@ -143,6 +149,35 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
   const courseNames = new Map(
     courses.map((course) => [course.slug, session.staff.adminLocale === "gu" ? course.nameGu : course.nameEn])
   );
+
+  /*
+   * Slot KEYS to readable times.
+   *
+   * `preferred_schedule` and `demo_slot` store a key — `morning-0800`,
+   * `demo-1400` — validated on submission against the course's own timetable.
+   * This page printed the raw key as the "Preferred timing" fact, and
+   * `demoSlot` was selected and rendered nowhere at all: the one field that
+   * says when the applicant wants to come in for their free demo, fetched on
+   * every load and thrown away.
+   *
+   * The labels come from `courses.operations`, which is one more column on a
+   * SELECT that already runs — the payload is validated on read, the same rule
+   * every other reader of it follows, so a malformed row renders an empty
+   * timetable rather than 500-ing a staff page.
+   */
+  const slotLabels = new Map<string, string>();
+  for (const course of courses) {
+    const ops = readCourseOperations(course.operations);
+    for (const slot of ops.scheduleOptions) {
+      slotLabels.set(`${course.slug}:${slot.key}`, `${slot.startTime}–${slot.endTime}`);
+    }
+    for (const slot of ops.demo?.slots ?? []) {
+      slotLabels.set(`${course.slug}:${slot.key}`, `${slot.startTime}–${slot.endTime}`);
+    }
+  }
+  /** The stored key is the fallback: never invent a time we cannot resolve. */
+  const slotLabel = (slug: string | null, key: string | null) =>
+    key ? slotLabels.get(`${slug ?? ""}:${key}`) ?? key : null;
   const courseOptions = courses.map((course) => ({
     slug: course.slug,
     name: session.staff.adminLocale === "gu" ? course.nameGu : course.nameEn
@@ -160,22 +195,34 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
     <div className="max-w-[76rem]">
       <PageHead title={copy.title} context={copy.lede} />
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        <Metric label={copy.visible} value={applications.length} />
-        <Metric label={copy.newApplications} value={newCount} />
-        <Metric label={copy.followUpsDue} value={followUpsDue} />
+      {/* Three `panel panel-body` tiles went single-column at 390px and cost
+          306px before any enquiry. Rows on a phone, cells from 640px. */}
+      <div className="console-metrics mt-3">
+        <div>
+          <span className="kv-label">{copy.visible}</span>
+          <span className="kv-value">{applications.length}</span>
+        </div>
+        <div>
+          <span className="kv-label">{copy.newApplications}</span>
+          <span className="kv-value">{newCount}</span>
+        </div>
+        <div>
+          <span className="kv-label">{copy.followUpsDue}</span>
+          <span className="kv-value">{followUpsDue}</span>
+        </div>
       </div>
 
       {canManage ? (
-        <details className="panel mt-8">
+        <details className="panel mt-3">
+          {/* The hint used to render inside the summary, so a 101-character
+              sentence took three lines on a phone whether or not the form was
+              open. It belongs with the form it explains. */}
           <summary className="panel-head cursor-pointer list-none">
-            <div>
-              <h2 className="text-h4">{copy.addEnquiry}</h2>
-              <p className="form-note mt-1">{copy.addEnquiryHint}</p>
-            </div>
+            <h2 className="text-h4">{copy.addEnquiry}</h2>
             <span aria-hidden className="text-h4">＋</span>
           </summary>
           <div className="panel-body border-t border-rule">
+            <p className="form-note mb-3">{copy.addEnquiryHint}</p>
             <ManualEnquiryForm
               staff={staff}
               courses={courseOptions}
@@ -185,10 +232,13 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
           </div>
         </details>
       ) : (
-        <p className="form-note mt-6">{copy.viewOnly}</p>
+        <p className="form-note mt-3">{copy.viewOnly}</p>
       )}
 
-      <form method="get" className="toolbar mt-6 md:grid-cols-[1fr_14rem_auto_auto] md:items-end">
+      {/* Four stacked full-width rows cost 292px of sticky chrome before the
+          list. Search and status share a row on a phone; the archived toggle
+          and the two buttons share the next one. */}
+      <form method="get" className="toolbar mt-3 grid-cols-2 md:grid-cols-[1fr_14rem_auto_auto] md:items-end">
         <Field label={copy.search} htmlFor="admissions-search">
           <input
             id="admissions-search"
@@ -207,7 +257,7 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
             ))}
           </select>
         </Field>
-        <label className="choice-chip text-smallmeta w-fit self-end">
+        <label className="choice-chip w-fit self-end text-smallmeta">
           <input type="checkbox" name="archived" value="1" className="size-4 accent-vermilion" defaultChecked={showArchived} />
           {records.showArchived}
         </label>
@@ -217,7 +267,7 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
         </div>
       </form>
 
-      <section className="data-list mt-6" aria-label={copy.title}>
+      <section className="data-list mt-3" aria-label={copy.title}>
         {applications.length === 0 ? (
           <p className="empty-state">{copy.empty}</p>
         ) : (
@@ -243,11 +293,33 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
                       {application.archivedAt ? records.archived : copy.statuses[status]}
                     </span>
                   </span>
+                  {/* Two meta lines: who and what on the first, when and with
+                      whom on the second. The follow-up date carries the tone
+                      the page already computes for its own count — an overdue
+                      follow-up is the reason to open this row. */}
                   <span className="data-row__meta">
                     <span>{application.reference}</span>
-                    <span>{application.whatsapp}</span>
                     <span>{courseName}</span>
-                    {application.nextFollowUp ? <span>{application.nextFollowUp}</span> : null}
+                    <span>{slotLabel(application.courseSlug, application.preferredSchedule) ?? "—"}</span>
+                  </span>
+                  <span className="data-row__meta">
+                    {application.nextFollowUp ? (
+                      <span
+                        className={
+                          application.nextFollowUp <= today &&
+                          !["enrolled", "not_proceeding", "closed"].includes(application.status)
+                            ? "text-error"
+                            : undefined
+                        }
+                      >
+                        {copy.followUp}: {application.nextFollowUp}
+                      </span>
+                    ) : null}
+                    {application.demoSlot ? (
+                      <span>
+                        {copy.demoSlot}: {slotLabel(application.courseSlug, application.demoSlot)}
+                      </span>
+                    ) : null}
                     <span>{application.assignedName ?? copy.unassigned}</span>
                   </span>
                 </summary>
@@ -271,7 +343,18 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
 
                   <dl className="kv-grid">
                     <Fact label={copy.course} value={courseName} />
-                    <Fact label={copy.timing} value={application.preferredSchedule ?? application.preferredTiming ?? "—"} />
+                    <Fact
+                      label={copy.timing}
+                      value={
+                        slotLabel(application.courseSlug, application.preferredSchedule) ??
+                        application.preferredTiming ??
+                        "—"
+                      }
+                    />
+                    <Fact
+                      label={copy.demoSlot}
+                      value={slotLabel(application.courseSlug, application.demoSlot) ?? "—"}
+                    />
                     <Fact label={copy.area} value={application.area ?? "—"} />
                     <Fact label={copy.created} value={formatDateTime(application.createdAt, session.staff.adminLocale)} />
                     <Fact label={copy.experience} value={application.experience ?? "—"} />
@@ -331,9 +414,6 @@ export default async function AdmissionsPage({ searchParams }: PageProps) {
 }
 
 
-function Metric({ label, value }: { label: string; value: number }) {
-  return <div className="panel panel-body"><p className="microlabel">{label}</p><p className="text-h3 mt-2">{value}</p></div>;
-}
 
 function Fact({ label, value }: { label: string; value: string }) {
   return <div><dt className="kv-label">{label}</dt><dd className="kv-value mt-0.5">{value}</dd></div>;

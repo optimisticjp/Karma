@@ -11,6 +11,7 @@ import { canPerform } from "@/lib/admin/record-actions";
 import { RecordMenu } from "@/components/admin/RecordMenu";
 import { PrintLink } from "@/components/admin/PrintLink";
 import { printCopy } from "@/lib/admin/print-copy";
+import { kolkataDate } from "@/lib/admin/dates";
 import { AgreementForm, FeeEntryForm } from "./FeeForm";
 
 type Props = { searchParams: Promise<{ q?: string; pending?: string }> };
@@ -136,20 +137,33 @@ export default async function FeesPage({ searchParams }: Props) {
   return (
     <div className="max-w-[80rem]">
       <PageHead title={copy.title} context={copy.lede} />
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        <Metric label={copy.totalAgreed} value={money(totalNet)} />
-        <Metric label={copy.totalReceived} value={money(totalReceived)} />
-        <Metric label={copy.totalPending} value={money(totalDue)} />
+      {/* The three derived totals as a hairline strip. As `panel panel-body`
+          tiles carrying money at 24px they stacked to 308px at 390px, on the
+          page whose own comment says a row answers the only question the front
+          desk asks all day. */}
+      <div className="console-metrics mt-3">
+        <div>
+          <span className="kv-label">{copy.totalAgreed}</span>
+          <span className="kv-value data-num">{money(totalNet)}</span>
+        </div>
+        <div>
+          <span className="kv-label">{copy.totalReceived}</span>
+          <span className="kv-value data-num">{money(totalReceived)}</span>
+        </div>
+        <div>
+          <span className="kv-label">{copy.totalPending}</span>
+          <span className="kv-value data-num">{money(totalDue)}</span>
+        </div>
       </div>
 
-      <form method="get" className="toolbar mt-6 md:grid-cols-[1fr_auto_auto] md:items-end">
+      <form method="get" className="toolbar mt-3 grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_auto] md:items-end">
         <Field label={copy.search} htmlFor="fee-search"><input id="fee-search" name="q" className="input" defaultValue={params.q ?? ""} placeholder={copy.searchPlaceholder} /></Field>
         <label className="choice-chip text-smallmeta"><input type="checkbox" name="pending" value="1" className="size-4 accent-vermilion" defaultChecked={pendingOnly} />{copy.pendingOnly}</label>
         <button className="btn btn-primary" type="submit">{copy.show}</button>
       </form>
-      {!canManage ? <p className="form-note mt-5">{copy.viewOnly}</p> : null}
+      {!canManage ? <p className="form-note mt-3">{copy.viewOnly}</p> : null}
 
-      <section className="data-list mt-6">
+      <section className="data-list mt-3">
         {cards.length === 0 ? <p className="empty-state">{copy.empty}</p> : cards.map((card) => (
           /* Closed, a row answers the only question the front desk asks all
              day: who owes what, and by when. Opening it shows the ledger and
@@ -162,16 +176,30 @@ export default async function FeesPage({ searchParams }: Props) {
                   {card.summary.unset ? copy.noLedger : copy.statuses[card.summary.status]}
                 </span>
               </span>
+              {/* Identity on one line, money on its own. Mixing an admission
+                  number, a batch label and two amounts on a single wrapped
+                  line meant a column of balances did not line up, which is the
+                  one thing a ledger has to do. All figures tabular. */}
               <span className="data-row__meta">
                 <span>{card.admissionNo}</span>
                 <span>{card.batchLabel}</span>
+                <span>
+                  {session.staff.adminLocale === "gu" ? card.courseNameGu : card.courseNameEn}
+                </span>
+              </span>
+              <span className="data-row__meta">
+                <span className="data-num">
+                  {card.summary.agreed != null ? money(card.summary.agreed) : "—"}
+                </span>
                 <span className="data-num">{money(card.summary.received)}</span>
                 {card.summary.balance > 0 ? (
                   <span className={card.overdue ? "data-num text-error" : "data-num"}>
                     {copy.due} {money(card.summary.balance)}
                   </span>
                 ) : null}
-                {card.summary.nextDueOn ? <span>{formatDate(card.summary.nextDueOn, session.staff.adminLocale)}</span> : null}
+                {card.summary.nextDueOn ? (
+                  <span>{formatDate(card.summary.nextDueOn, session.staff.adminLocale)}</span>
+                ) : null}
               </span>
             </summary>
             <div className="grid gap-6 border-t border-line bg-ivory-2/40 px-3 py-4 md:px-4">
@@ -180,11 +208,23 @@ export default async function FeesPage({ searchParams }: Props) {
                   {session.staff.adminLocale === "gu" ? card.courseNameGu : card.courseNameEn} ·{" "}
                   <a href={`https://wa.me/91${card.whatsapp ?? card.phone}`}>WhatsApp</a>
                 </p>
-                <PrintLink
-                  href={`/admin/print/statement/${card.enrollmentId}`}
-                  label={sheets.feeStatement}
-                  compact
-                />
+                <span className="flex flex-wrap items-center gap-3">
+                  {/* `latest` was computed on line 125 and read nowhere. It is
+                      the last receipt — the thing a parent at the counter is
+                      holding — and it costs nothing. */}
+                  {card.latest ? (
+                    <PrintLink
+                      href={`/admin/print/receipt/${card.latest.id}`}
+                      label={sheets.feeReceipt}
+                      compact
+                    />
+                  ) : null}
+                  <PrintLink
+                    href={`/admin/print/statement/${card.enrollmentId}`}
+                    label={sheets.feeStatement}
+                    compact
+                  />
+                </span>
               </div>
               <dl className="kv-grid">
                 <Fact label={copy.courseFee} value={card.summary.agreed != null ? money(card.summary.agreed) : "—"} />
@@ -274,13 +314,6 @@ export default async function FeesPage({ searchParams }: Props) {
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) { return <div className="panel panel-body"><p className="microlabel">{label}</p><p className="text-h3 mt-2">{value}</p></div>; }
-function Fact({ label, value }: { label: string; value: string }) { return <div><dt className="kv-label">{label}</dt><dd className="kv-value mt-0.5">{value}</dd></div>; }
-function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) { return <div><label className="label" htmlFor={htmlFor}>{label}</label>{children}</div>; }
-/** "Today" for a member of staff standing in Surat, not the Worker's UTC clock. */
-function kolkataToday() {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
-}
 function statusClass(status: FeeStatus, overdue: boolean) {
   if (overdue) return "status-error";
   return status === "paid" ? "status-active" : status === "partial" ? "status-pending" : "status-off";
@@ -288,3 +321,8 @@ function statusClass(status: FeeStatus, overdue: boolean) {
 function money(value: number) { return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value); }
 function formatDate(value: string, locale: "en" | "gu") { return new Intl.DateTimeFormat(locale === "gu" ? "gu-IN" : "en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kolkata" }).format(new Date(`${value}T00:00:00+05:30`)); }
 function formatDateTime(value: Date, locale: "en" | "gu") { return new Intl.DateTimeFormat(locale === "gu" ? "gu-IN" : "en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" }).format(value); }
+
+function Fact({ label, value }: { label: string; value: string }) { return <div><dt className="kv-label">{label}</dt><dd className="kv-value mt-0.5">{value}</dd></div>; }
+function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) { return <div><label className="label" htmlFor={htmlFor}>{label}</label>{children}</div>; }
+/** "Today" for a member of staff standing in Surat, not the Worker's UTC clock. */
+const kolkataToday = kolkataDate;

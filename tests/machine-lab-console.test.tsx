@@ -94,11 +94,15 @@ describe("Today at Karma", () => {
 
   it("queries only the queues the operator can actually open", () => {
     /* Free-tier discipline: an admin with attendance rights alone costs one
-       round trip, not five. */
-    expect(today).toContain("getTodayQueues({ admissions: canAdmissions");
-    expect(dashboard).toContain("if (want.admissions)");
-    expect(dashboard).toContain("if (want.batches)");
-    expect(dashboard).toContain("if (want.design)");
+       round trip, not five. A fees queue joined the set on 2026-08-31 — the
+       audit found a fees-only admin looking at an EMPTY Today, because every
+       queue was gated on a permission they do not hold and they still paid for
+       the counts. It is gated exactly like the others. */
+    expect(today).toContain("admissions: canAdmissions");
+    expect(today).toContain("fees: canFees");
+    for (const want of ["admissions", "batches", "design", "fees"]) {
+      expect(dashboard, want).toContain(`if (want.${want})`);
+    }
   });
 
   it("caps every queue", () => {

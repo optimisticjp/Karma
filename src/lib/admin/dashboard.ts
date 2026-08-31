@@ -26,6 +26,12 @@ export type DashboardCounts = {
   upcomingBatches: number;
   newBriefs: number;
   openBriefs: number;
+  /* Enrolments whose agreed balance is past its due date and not yet covered
+     by the ledger. Derived here exactly as `summariseFees` derives it on the
+     fees page — from the agreement snapshot minus what was received — because
+     a stored "paid" flag would be a second source of truth for a number the
+     ledger already holds. */
+  feesOverdue: number;
 };
 
 export type DashboardResult =
@@ -49,6 +55,7 @@ export async function getDashboardCounts(): Promise<DashboardResult> {
       upcoming_batches: string;
       new_briefs: string;
       open_briefs: string;
+      fees_overdue: string;
     }>(sql`
       select
         (select count(*) from applications where status = 'new')                       as new_applications,
@@ -66,7 +73,19 @@ export async function getDashboardCounts(): Promise<DashboardResult> {
           where start_date > ${today} and status = 'open')                             as upcoming_batches,
         (select count(*) from service_enquiries where status = 'new')                  as new_briefs,
         (select count(*) from service_enquiries
-          where status not in ('delivered', 'closed'))                                 as open_briefs
+          where status not in ('delivered', 'closed'))                                 as open_briefs,
+        (select count(*) from enrollments e
+          where e.agreed_fee_total is not null
+            and e.agreed_balance_due_on is not null
+            and e.agreed_balance_due_on < ${today}
+            and coalesce(
+                  (select sum(f.received) from fee_records f where f.enrollment_id = e.id),
+                  0
+                ) < e.agreed_fee_total
+                  - coalesce(
+                      (select sum(f.discount) from fee_records f where f.enrollment_id = e.id),
+                      0
+                    ))                                                                 as fees_overdue
     `);
 
     const r = rows.rows[0];
@@ -82,7 +101,8 @@ export async function getDashboardCounts(): Promise<DashboardResult> {
         runningBatches: n(r.running_batches),
         upcomingBatches: n(r.upcoming_batches),
         newBriefs: n(r.new_briefs),
-        openBriefs: n(r.open_briefs)
+        openBriefs: n(r.open_briefs),
+        feesOverdue: n(r.fees_overdue)
       }
     };
   } catch (e) {
@@ -178,18 +198,29 @@ export type BriefRow = {
   deadline: string | null;
 };
 
+export type FeeRow = {
+  enrollmentId: number;
+  studentId: number;
+  admissionNo: string;
+  fullName: string;
+  balance: number;
+  dueOn: string;
+};
+
 export type TodayQueues = {
   newApplications: EnquiryRow[];
   followUps: FollowUpRow[];
   batches: BatchRow[];
   briefs: BriefRow[];
+  fees: FeeRow[];
 };
 
 const EMPTY_QUEUES: TodayQueues = {
   newApplications: [],
   followUps: [],
   batches: [],
-  briefs: []
+  briefs: [],
+  fees: []
 };
 
 /** How many rows a queue shows before it defers to its own module. */
@@ -199,6 +230,7 @@ export async function getTodayQueues(want: {
   admissions: boolean;
   batches: boolean;
   design: boolean;
+  fees: boolean;
 }): Promise<TodayQueues> {
   const db = getDb();
   if (!db) return EMPTY_QUEUES;
@@ -303,6 +335,54 @@ export async function getTodayQueues(want: {
         name: r.name,
         status: r.status,
         deadline: r.deadline
+      }));
+    }
+
+    if (want.fees) {
+      /* Money owed, past its date. The audit found a fees-only admin looking
+         at an empty Today: every queue was gated on a permission they do not
+         hold, and they still paid for the counts. This is their queue.
+
+         Derived, never stored — the same rule `summariseFees` follows. One
+         query, capped, with the sums as correlated subqueries so it stays one
+         round trip: the request-scoped pool holds a single connection, so a
+         second query would serialise anyway. */
+      const fees = await db.execute<{
+        enrollment_id: number;
+        student_id: number;
+        admission_no: string;
+        full_name: string;
+        balance: string;
+        due_on: string;
+      }>(sql`
+        select
+          e.id as enrollment_id,
+          s.id as student_id,
+          s.admission_no,
+          s.full_name,
+          e.agreed_fee_total
+            - coalesce((select sum(f.discount) from fee_records f where f.enrollment_id = e.id), 0)
+            - coalesce((select sum(f.received) from fee_records f where f.enrollment_id = e.id), 0)
+            as balance,
+          e.agreed_balance_due_on as due_on
+        from enrollments e
+        join students s on s.id = e.student_id
+        where e.agreed_fee_total is not null
+          and e.agreed_balance_due_on is not null
+          and e.agreed_balance_due_on < ${today}
+          and coalesce((select sum(f.received) from fee_records f where f.enrollment_id = e.id), 0)
+              < e.agreed_fee_total
+                - coalesce((select sum(f.discount) from fee_records f where f.enrollment_id = e.id), 0)
+        order by e.agreed_balance_due_on asc
+        limit ${QUEUE_LIMIT}
+      `);
+      queues.fees = fees.rows.map((r) => ({
+        enrollmentId: Number(r.enrollment_id),
+        studentId: Number(r.student_id),
+        admissionNo: r.admission_no,
+        fullName: r.full_name,
+        balance: Number(r.balance ?? 0),
+        dueOn: r.due_on
       }));
     }
 

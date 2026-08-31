@@ -1428,7 +1428,7 @@ focus-to-field, the still consent step, and the demo times staying a preference
 with nothing on the surface that could reserve a seat.
 
 ## Phase 6 — Admin shell + mobile navigation
-**Status:** ✅ Complete — PR #48, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #48, merged as `218363c`
 
 Delivered:
 
@@ -1492,18 +1492,51 @@ authorization note). New suite: `tests/compact-density-console.test.ts`.
 **Worker: 2011.09 KiB gzip** against the 3 MB free plan — unchanged.
 
 ## Phase 7 — Core admin workflows
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #49, merged as `PLACEHOLDER_MERGE`
 
-Redesign:
+Eleven of sixteen console screens showed **zero complete records** at 390×844,
+and it was one pattern: a `sm:grid-cols-3` metric trio that stacks to a single
+column on a phone, then a filter toolbar of full-width rows, then the list.
 
-- Today at Karma
-- Admissions
-- Students
-- Courses
-- Batches
-- Fees
+Delivered:
 
-Target several useful records/elements per mobile viewport.
+- **The metric trio is a hairline strip** on Today, Admissions, Fees, Courses
+  and Batches — a label/value row on a phone, cells from 640px. That single
+  change is worth ~300px on five screens.
+- **Today** gains a compact figure strip under the head: the counts were only
+  ever visible one at a time at the head of their own queue, so three of the
+  seven fetched were never shown and seeing four numbers meant scrolling three
+  viewports. Quick actions became chips (439px → ~76). Recent activity became
+  two-line rows.
+- **A fees queue on Today.** The audit found a fees-only admin looking at an
+  *empty* Today — every queue was gated on a permission they do not hold, and
+  they still paid for the counts. It is one capped query with the sums as
+  correlated subqueries, so it stays one round trip, and the balance is
+  **derived** exactly as `summariseFees` derives it.
+- **Admissions**: the add-enquiry hint moves out of the summary (a 101-character
+  sentence took three lines whether or not the form was open); the toolbar goes
+  two-up (292px → ~150); and the row gains a second meta line with the
+  follow-up date toned for overdue.
+- **`demoSlot` and `preferredSchedule` finally render.** `demoSlot` was
+  selected on every load and shown nowhere — the one field that says when an
+  applicant wants their free demo — and `preferredSchedule` printed its raw
+  storage key. Both resolve through the course's own timetable, from one more
+  column on a SELECT that already runs.
+- **Students**: the directory row carried a name, an admission number and a
+  phone, and an *active* student's row carried no status at all. It now shows
+  the enrolment status (a dot **and** a word), the course, the batch and the
+  balance — from **two set-based reads over the ids already on screen**, which
+  shrink with the list rather than multiplying by it. The two front-desk
+  accordions and the four-row search form come down from 590px to ~180.
+- **Fees**: identity on one meta line, money on its own with every figure
+  tabular — a column of balances did not line up, which is the one thing a
+  ledger has to do. `latest`, computed and never read, becomes the last-receipt
+  print link.
+
+New assertions in `tests/compact-density-console.test.ts` covering the metric
+strip, the fees-only operator, derived-never-stored fee figures, set-based
+reads, the fields that were fetched and discarded, dot-and-word status, and
+tabular money.
 
 ## Phase 8 — Remaining admin workflows
 **Status:** ⏳ Pending
