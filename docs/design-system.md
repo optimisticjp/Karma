@@ -487,6 +487,7 @@ added to the Worker budget.
 | Class | What it is |
 | --- | --- |
 | `.data-list` / `.data-row` | A list of records, one hairline between rows. A row is a title, a `__meta` line of dot-separated facts, and a `__actions` slot. `.is-archived` mutes one without hiding it. |
+| `summary.data-row` | The same row used as a `<summary>`. `.data-row` is `display: grid`, which silently drops the marker a `<summary>` draws for itself, so this restores the affordance: a caret in its own third column, rotating on open, plus the pointer cursor. Use it wherever a record's body is behind a disclosure — never a bare `.data-row` on a `<summary>`. |
 | `.chip` | A compact status pill. Colour still comes from `.status-*`, so it stays status-only. |
 | `.kv-grid` · `.kv-label` · `.kv-value` | Key/value pairs at a density that fits a phone: label above value, tabular figures. |
 | `.toolbar` | Sticky search and filters, clearing the mobile console header at `top: 4rem` and sitting at `top: 0` on desktop where there is none. |

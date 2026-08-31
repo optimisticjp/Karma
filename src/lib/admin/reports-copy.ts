@@ -22,6 +22,14 @@ export type ReportsCopy = {
   exportDesign: string;
   audit: string;
   auditHelp: string;
+  /* The audit column headings. They were hardcoded English until 2026-08-31 —
+     five words the Gujarati operator read in a language they did not choose,
+     inside a table that is the owner's record of what changed. */
+  auditWhen: string;
+  auditStaff: string;
+  auditAction: string;
+  auditRecord: string;
+  auditReason: string;
   noAudit: string;
   databaseUnavailable: string;
   viewOnly: string;
@@ -50,6 +58,11 @@ const COPY = {
     exportDesign: "Design jobs",
     audit: "Recent activity log",
     auditHelp: "Sensitive changes are recorded here so the owner can see what changed, when and by whom.",
+    auditWhen: "When",
+    auditStaff: "Staff",
+    auditAction: "Action",
+    auditRecord: "Record",
+    auditReason: "Reason",
     noAudit: "No recorded activity yet.",
     databaseUnavailable: "The database is unavailable on this deployment, so reports cannot be shown.",
     viewOnly: "You can see reports, but this account cannot download exports or view the audit trail unless those permissions are granted."
@@ -76,6 +89,11 @@ const COPY = {
     exportDesign: "Design jobs",
     audit: "તાજેતરની activity",
     auditHelp: "મહત્વના ફેરફારો અહીં record થાય છે જેથી owner જોઈ શકે કે શું, ક્યારે અને કોના દ્વારા બદલાયું.",
+    auditWhen: "ક્યારે",
+    auditStaff: "Staff",
+    auditAction: "શું થયું",
+    auditRecord: "કયો record",
+    auditReason: "કારણ",
     noAudit: "હજુ કોઈ recorded activity નથી.",
     databaseUnavailable: "આ deployment પર database ઉપલબ્ધ નથી, એટલે reports બતાવી શકાતા નથી.",
     viewOnly: "આ account reports જોઈ શકે છે. CSV download અથવા audit trail માટે અલગ permission જરૂરી છે."

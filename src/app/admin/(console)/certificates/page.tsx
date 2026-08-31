@@ -82,26 +82,74 @@ export default async function CertificatesPage() {
   return (
     <div className="max-w-[80rem]">
       <PageHead title={copy.title} context={copy.lede} />
-      <div className="mt-8 grid gap-4 sm:grid-cols-3"><Metric label={copy.eligible} value={eligibleCount} /><Metric label={copy.issued} value={issuedCount} /><Metric label={copy.revoked} value={revokedCount} /></div>
-      <p className="form-note mt-5">{copy.r2Note}</p>
-      {!canManage ? <p className="form-note mt-3">{copy.viewOnly}</p> : null}
+      <div className="console-metrics mt-3">
+        <div><span className="kv-label">{copy.eligible}</span><span className="kv-value">{eligibleCount}</span></div>
+        <div><span className="kv-label">{copy.issued}</span><span className="kv-value">{issuedCount}</span></div>
+        <div><span className="kv-label">{copy.revoked}</span><span className="kv-value">{revokedCount}</span></div>
+      </div>
+      {/* Certificates have no file pipeline — no R2, no PDF library, no signed
+          URL. The note says so, and it stays: it is what stops the next
+          session assuming one exists. */}
+      <p className="form-note mt-2">{copy.r2Note}</p>
+      {!canManage ? <p className="form-note mt-1">{copy.viewOnly}</p> : null}
 
-      <section className="mt-8 grid gap-5">
+      {/* Rows, not a 362px `<article class="panel">` per candidate. The issue
+          form moves behind its own disclosure: it was rendered open for every
+          eligible student, 254px each, on a screen that is scanned far more
+          often than it is acted on. */}
+      <section className="data-list mt-3">
         {candidates.length === 0 ? <p className="empty-state">{copy.noCandidates}</p> : candidates.map((item) => {
           const activeCert = item.certs.find((cert) => cert.status === "issued");
           const eligibilityLabel = item.enrollmentStatus !== "completed" ? copy.notCompleted : item.rate == null ? copy.noAttendance : item.rate < 75 ? copy.belowAttendance : copy.ready;
           return (
-            <article key={item.enrollmentId} className="panel">
-              <div className="panel-head flex-wrap gap-4">
-                <div><p className="microlabel">{item.admissionNo}</p><h2 className="text-h4 mt-1">{item.studentName}</h2><p className="form-note mt-1">{session.staff.adminLocale === "gu" ? item.courseNameGu : item.courseNameEn} · {item.batchLabel}</p></div>
-                <span className={`status ${item.eligible ? "status-active" : "status-pending"}`}>{eligibilityLabel}{item.rate != null ? ` · ${item.rate}%` : ""}</span>
+            <details key={item.enrollmentId}>
+              <summary className="data-row">
+                <span className="data-row__title">{item.studentName}</span>
+                <span className="data-row__actions">
+                  <span className={`chip ${item.eligible ? "status-active" : "status-pending"}`}>{eligibilityLabel}</span>
+                </span>
+                <span className="data-row__meta">
+                  <span>{item.admissionNo}</span>
+                  <span>{session.staff.adminLocale === "gu" ? item.courseNameGu : item.courseNameEn}</span>
+                  <span>{item.batchLabel}</span>
+                </span>
+                <span className="data-row__meta">
+                  <span>{item.enrollmentStatus}</span>
+                  <span className="data-num">{item.rate == null ? "—" : `${item.rate}%`}</span>
+                  <span>{item.completedOn ? formatDate(item.completedOn, session.staff.adminLocale) : "—"}</span>
+                  {activeCert ? <span>{activeCert.certNo}</span> : null}
+                </span>
+              </summary>
+              <div className="border-t border-line px-3 py-3 md:px-4">
+                {item.certs.length ? (
+                  <div className="data-list">
+                    {item.certs.map((cert) => (
+                      <div key={cert.id} className="data-row">
+                        <span className="data-row__title data-num">{cert.certNo}</span>
+                        <span className="data-row__actions">
+                          <span className={`chip ${cert.status === "issued" ? "status-active" : "status-off"}`}>{cert.status === "issued" ? copy.issued : copy.revoked}</span>
+                        </span>
+                        <span className="data-row__meta">
+                          <span>{formatDate(cert.issuedOn, session.staff.adminLocale)}</span>
+                          {cert.grade ? <span>{cert.grade}</span> : null}
+                          <Link className="tap font-semibold text-vermilion-deep" href={`/en/verify/${encodeURIComponent(cert.certNo)}`}>{copy.verify}</Link>
+                          <Link className="tap font-semibold text-vermilion-deep" href={`/admin/print/certificate/${encodeURIComponent(cert.certNo)}`}>{copy.print}</Link>
+                        </span>
+                        {canManage && cert.status === "issued" ? (
+                          <span className="data-row__meta"><RevokeCertificateForm certificateId={cert.id} copy={copy} /></span>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+                {canManage && item.eligible && !activeCert ? (
+                  <details className="mt-2 border border-rule bg-card">
+                    <summary className="flex min-h-11 cursor-pointer items-center px-3 text-smallmeta font-semibold">{copy.issue}</summary>
+                    <div className="border-t border-rule p-3"><IssueCertificateForm enrollmentId={item.enrollmentId} copy={copy} /></div>
+                  </details>
+                ) : null}
               </div>
-              <div className="panel-body grid gap-5">
-                <dl className="grid gap-4 sm:grid-cols-3"><Fact label={copy.enrollment} value={item.enrollmentStatus} /><Fact label={copy.completed} value={item.completedOn ? formatDate(item.completedOn, session.staff.adminLocale) : "—"} /><Fact label={copy.attendance} value={item.rate == null ? "—" : `${item.rate}%`} /></dl>
-                {item.certs.length ? <div className="grid gap-3 border-t border-rule pt-5">{item.certs.map((cert) => <div key={cert.id} className="rounded-[var(--radius-card)] border border-rule p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="font-semibold">{cert.certNo}</p><p className="form-note mt-1">{formatDate(cert.issuedOn, session.staff.adminLocale)}{cert.grade ? ` · ${cert.grade}` : ""}</p></div><span className={`status ${cert.status === "issued" ? "status-active" : "status-off"}`}>{cert.status === "issued" ? copy.issued : copy.revoked}</span></div><div className="mt-3 flex flex-wrap gap-2"><Link className="btn btn-secondary" href={`/en/verify/${encodeURIComponent(cert.certNo)}`}>{copy.verify}</Link><Link className="btn btn-secondary" href={`/admin/print/certificate/${encodeURIComponent(cert.certNo)}`}>{copy.print}</Link></div>{canManage && cert.status === "issued" ? <div className="mt-4"><RevokeCertificateForm certificateId={cert.id} copy={copy} /></div> : null}</div>)}</div> : null}
-                {canManage && item.eligible && !activeCert ? <div className="border-t border-rule pt-5"><IssueCertificateForm enrollmentId={item.enrollmentId} copy={copy} /></div> : null}
-              </div>
-            </article>
+            </details>
           );
         })}
       </section>
@@ -109,6 +157,4 @@ export default async function CertificatesPage() {
   );
 }
 
-function Metric({ label, value }: { label: string; value: number }) { return <div className="panel panel-body"><p className="microlabel">{label}</p><p className="text-h3 mt-2">{value}</p></div>; }
-function Fact({ label, value }: { label: string; value: string }) { return <div><dt className="microlabel">{label}</dt><dd className="text-smallmeta mt-1">{value}</dd></div>; }
 function formatDate(value: string, locale: "en" | "gu") { return new Intl.DateTimeFormat(locale === "gu" ? "gu-IN" : "en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kolkata" }).format(new Date(`${value}T00:00:00+05:30`)); }

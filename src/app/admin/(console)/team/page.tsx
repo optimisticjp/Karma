@@ -38,7 +38,7 @@ export default async function TeamPage() {
     return (
       <div className="max-w-[48rem]">
         <PageHead title={t("team.title")} context={t("team.lede")} />
-        <p className="alert mt-8">{t("team.notConfigured")}</p>
+        <p className="alert mt-6">{t("team.notConfigured")}</p>
       </div>
     );
   }
@@ -106,11 +106,11 @@ export default async function TeamPage() {
     <div className="max-w-[64rem]">
       <PageHead title={t("team.title")} context={t("team.lede")} />
 
-      <p className="form-note mt-6">
+      <p className="form-note mt-4">
         {t("team.seatsUsed", { used: seatsUsed, total: MAX_ADMIN_SEATS })}
       </p>
 
-      <div className="mt-6">
+      <div className="mt-4">
         <InviteAdminForm
           groups={groups}
           templates={templates}
@@ -120,85 +120,97 @@ export default async function TeamPage() {
         />
       </div>
 
-      {/* -------------------------------- owner ---------------------------- */}
-      {owner ? (
-        <section className="panel mt-10">
-          <div className="panel-head">
-            <h2 className="text-h4">{t("team.roles.owner")}</h2>
-            <span className="status status-active">{t("team.status.active")}</span>
-          </div>
-          <div className="panel-body">
-            <p className="text-smallmeta font-semibold">{owner.name}</p>
-            <p className="form-note">{owner.email}</p>
-            <p className="form-note mt-3">{t("team.ownerNote")}</p>
-          </div>
-        </section>
-      ) : null}
+      {/* ------------------------------ the team --------------------------- */}
+      {/* One list, Owner first. The Owner used to be a 280px panel of its own
+          above a heading and a second list, restating a role the page's own
+          title already establishes; each admin was a 443px `panel` whose three
+          facts, permission editor and activate button were all rendered open,
+          so five admins were 2,215px before the operator reached anything.
 
-      {/* -------------------------------- admins --------------------------- */}
-      <section className="mt-10" aria-labelledby="admins-heading">
-        <h2 id="admins-heading" className="text-h4">
-          {t("team.roles.admin")}
-        </h2>
+          The Owner is a plain row because nothing on this page can act on it.
+          Every admin is a disclosure: the row carries name, email, status and
+          permission count — enough to answer "who has access to what" without
+          opening anything — and the editor and the deactivate control live
+          inside. There is still no delete affordance anywhere. */}
+      <section className="mt-6" aria-labelledby="team-heading">
+        <h2 id="team-heading" className="text-h4">{t("team.accounts")}</h2>
 
-        {admins.length === 0 ? (
-          <p className="empty-state mt-4">{t("team.empty")}</p>
-        ) : (
-          <div className="mt-4 grid gap-6">
-            {admins.map((admin) => (
-              <article key={admin.id} className="panel">
-                <div className="panel-head flex-wrap">
-                  <div>
-                    <h3 className="text-h4">{admin.name}</h3>
-                    <p className="form-note">{admin.email}</p>
-                  </div>
-                  <StatusPill
-                    status={admin.active ? admin.status : "deactivated"}
-                    labels={{
-                      invited: t("team.status.invited"),
-                      active: t("team.status.active"),
-                      deactivated: t("team.status.deactivated")
-                    }}
-                  />
-                </div>
+        <div className="data-list mt-3">
+          {owner ? (
+            <div className="data-row">
+              <span className="data-row__title">{owner.name}</span>
+              <span className="data-row__actions">
+                <span className="chip status-active">{t("team.status.active")}</span>
+              </span>
+              <span className="data-row__meta">
+                <span>{t("team.roles.owner")}</span>
+                <span className="break-all">{owner.email}</span>
+              </span>
+            </div>
+          ) : null}
 
-                <div className="panel-body grid gap-5">
-                  <dl className="grid gap-3 sm:grid-cols-3">
-                    <Fact label={t("team.columns.invited")} value={formatDate(admin.invitedAt)} />
+          {admins.map((admin) => {
+            const status = admin.active ? admin.status : "deactivated";
+            return (
+              <details key={admin.id}>
+                <summary className="data-row">
+                  <span className="data-row__title">{admin.name}</span>
+                  <span className="data-row__actions">
+                    <StatusPill
+                      status={status}
+                      labels={{
+                        invited: t("team.status.invited"),
+                        active: t("team.status.active"),
+                        deactivated: t("team.status.deactivated")
+                      }}
+                    />
+                  </span>
+                  <span className="data-row__meta">
+                    <span className="break-all">{admin.email}</span>
+                    <span>
+                      {admin.permissions.length === 0
+                        ? t("team.noPermissions")
+                        : t("team.permissionCount", { count: admin.permissions.length })}
+                    </span>
+                  </span>
+                </summary>
+
+                <div className="border-t border-line px-3 py-3 md:px-4">
+                  <dl className="kv-grid">
                     <Fact
-                      label={t("team.columns.lastSeen")}
-                      value={admin.lastSeenAt ? formatDate(admin.lastSeenAt) : t("team.never")}
+                      label={t("team.columns.invited")}
+                      value={formatDate(admin.invitedAt, session.staff.adminLocale)}
                     />
                     <Fact
-                      label={t("team.columns.permissions")}
+                      label={t("team.columns.lastSeen")}
                       value={
-                        admin.permissions.length === 0
-                          ? t("team.noPermissions")
-                          : t("team.permissionCount", { count: admin.permissions.length })
+                        admin.lastSeenAt
+                          ? formatDate(admin.lastSeenAt, session.staff.adminLocale)
+                          : t("team.never")
                       }
                     />
                   </dl>
 
-                  <details>
-                    <summary className="cursor-pointer text-smallmeta font-semibold">
-                      {t("team.permissions")}
-                    </summary>
-                    <div className="mt-4">
-                      <EditPermissionsForm
-                        staffId={admin.id}
-                        initial={admin.permissions}
-                        groups={groups}
-                        labels={labels}
-                      />
-                    </div>
-                  </details>
+                  <div className="mt-4">
+                    <EditPermissionsForm
+                      staffId={admin.id}
+                      initial={admin.permissions}
+                      groups={groups}
+                      labels={labels}
+                    />
+                  </div>
 
-                  <SetActiveForm staffId={admin.id} activate={!admin.active} labels={labels} />
+                  <div className="mt-4 border-t border-line pt-3">
+                    <SetActiveForm staffId={admin.id} activate={!admin.active} labels={labels} />
+                  </div>
                 </div>
-              </article>
-            ))}
-          </div>
-        )}
+              </details>
+            );
+          })}
+        </div>
+
+        {admins.length === 0 ? <p className="empty-state mt-3">{t("team.empty")}</p> : null}
+        <p className="form-note mt-3">{t("team.ownerNote")}</p>
       </section>
     </div>
   );
@@ -208,8 +220,8 @@ export default async function TeamPage() {
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="microlabel">{label}</dt>
-      <dd className="mt-1 text-smallmeta">{value}</dd>
+      <dt className="kv-label">{label}</dt>
+      <dd className="mt-0.5 text-smallmeta">{value}</dd>
     </div>
   );
 }
@@ -223,12 +235,14 @@ function StatusPill({
 }) {
   const tone =
     status === "active" ? "status-active" : status === "invited" ? "status-pending" : "status-off";
-  return <span className={`status ${tone}`}>{labels[status]}</span>;
+  return <span className={`chip ${tone}`}>{labels[status]}</span>;
 }
 
-function formatDate(value: Date | null) {
+/* The dates were formatted `en-IN` for both locales until 2026-08-31 — an
+   English month abbreviation inside an otherwise Gujarati screen. */
+function formatDate(value: Date | null, locale: "en" | "gu") {
   if (!value) return "—";
-  return new Intl.DateTimeFormat("en-IN", {
+  return new Intl.DateTimeFormat(locale === "gu" ? "gu-IN" : "en-IN", {
     timeZone: "Asia/Kolkata",
     day: "2-digit",
     month: "short",

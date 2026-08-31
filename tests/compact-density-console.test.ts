@@ -319,3 +319,166 @@ describe("the core admin workflows show records, not chrome", () => {
     }
   });
 });
+
+/* ------------------------------------------------------------------ *
+ * The remaining workflows — Attendance, Certificates, Design Desk,
+ * Content Desk, Reports, Team, account & security
+ *
+ * The same pattern in five more places, plus two shapes the core
+ * workflows did not have: a 5-column table with `min-w-[52rem]` inside
+ * a 366px panel, and a page whose entire body was one open form per
+ * record.
+ * ------------------------------------------------------------------ */
+
+describe("the remaining admin workflows", () => {
+  const attendance = read("src/app/admin/(console)/attendance/page.tsx");
+  const attendanceForm = read("src/app/admin/(console)/attendance/AttendanceForm.tsx");
+  const certificates = read("src/app/admin/(console)/certificates/page.tsx");
+  const design = read("src/app/admin/(console)/design/page.tsx");
+  const content = read("src/app/admin/(console)/content/page.tsx");
+  const reports = read("src/app/admin/(console)/reports/page.tsx");
+  const team = read("src/app/admin/(console)/team/page.tsx");
+  const account = read("src/app/admin/(console)/account/security/page.tsx");
+
+  it("replaces every remaining stacked metric trio with the hairline strip", () => {
+    for (const [name, source] of [
+      ["certificates", certificates],
+      ["design", design],
+      ["content", content],
+      ["reports", reports]
+    ] as const) {
+      expect(source, name).toContain("console-metrics");
+      expect(stripComments(source), name).not.toContain("sm:grid-cols-3");
+    }
+    /* Attendance is the exception, and deliberately so. Its three counts belong
+       ON the register they describe, not in a strip above it: the operator
+       reads "34 students, 12 marked" while marking, so they are one meta line
+       inside the form itself. */
+    expect(stripComments(attendance)).not.toContain("sm:grid-cols-3");
+    expect(attendanceForm).toContain("data-row__meta");
+    expect(stripComments(attendanceForm)).not.toContain("panel panel-body");
+  });
+
+  it("puts no record behind a full-width card on any of them", () => {
+    /* `<article className="panel">` per record was the shape that made
+       Certificates 362px, Design ~900px and Team 443px PER ROW. */
+    for (const [name, source] of [
+      ["certificates", certificates],
+      ["design", design],
+      ["content", content],
+      ["team", team]
+    ] as const) {
+      expect(stripComments(source), name).not.toContain('<article className="panel"');
+      expect(source, name).toContain("data-list");
+      expect(source, name).toContain("data-row");
+    }
+  });
+
+  it("gives a disclosure row a visible disclosure", () => {
+    /* `.data-row` is `display: grid`, which silently drops the marker a
+       `<summary>` draws for itself. Four modules put their record body behind
+       such a row; without the caret the row reads as static text and the
+       actions underneath are never found. */
+    const body = ruleBody(premium, "summary.data-row");
+    expect(body).toBeTruthy();
+    expect(declaration(body!, "cursor")).toBe("pointer");
+    const caret = ruleBody(premium, "summary.data-row::after");
+    expect(caret).toBeTruthy();
+    expect(declaration(caret!, "transform")).toContain("rotate");
+    expect(premium).toContain("details[open] > summary.data-row::after");
+  });
+
+  it("keeps the attendance control both the display and the input", () => {
+    /* A roster row is read and written in the same gesture. Splitting the two
+       is what made each student a 212px bordered card. */
+    expect(attendanceForm).toContain("data-row");
+    expect(stripComments(attendanceForm)).not.toContain("MiniMetric");
+  });
+
+  it("does not rename an attendance field while compacting the row", () => {
+    /* `saveAttendanceAction` reads `status:<id>` and `note:<id>` for the whole
+       roster. A rename here would silently stop saving, and the failure would
+       look like a UI bug weeks later. */
+    expect(attendanceForm).toContain("`status:${row.studentId}`");
+    expect(attendanceForm).toContain("`note:${row.studentId}`");
+    const action = read("src/app/admin/(console)/attendance/actions.ts");
+    expect(action).toContain("status:");
+    expect(action).toContain("note:");
+  });
+
+  it("stops making a phone drag a 52rem table sideways", () => {
+    /* Sixty audit rows in a 5-column table with `min-w-[52rem]` was 832px of
+       content inside a 366px panel. Below `md` it is a list; the table is
+       still the better scan on a laptop. */
+    expect(stripComments(reports)).not.toContain("min-w-[52rem]");
+    expect(reports).toContain("data-list mt-4 md:hidden");
+    expect(reports).toContain("hidden overflow-x-auto md:block");
+  });
+
+  it("states the audit column headings in the operator's language", () => {
+    const copy = read("src/lib/admin/reports-copy.ts");
+    for (const key of ["auditWhen", "auditStaff", "auditAction", "auditRecord", "auditReason"]) {
+      expect(reports, key).toContain(`copy.${key}`);
+      /* Present in BOTH catalogs — the Gujarati console is not a translation
+         of an English screen, it is the screen. */
+      expect((copy.match(new RegExp(`${key}:`, "g")) ?? []).length, key).toBe(3);
+    }
+    expect(stripComments(reports)).not.toContain('<th className="px-4 py-3">When</th>');
+  });
+
+  it("does not repeat a qualifier the heading already states", () => {
+    /* Three of seven figures carried a "Last 30 days" caption under the
+       number, on a screen whose section heading says it once on the same
+       line. */
+    expect(reports).toContain("{copy.last30Days}");
+    expect((reports.match(/copy\.last30Days/g) ?? []).length).toBe(1);
+  });
+
+  it("keeps Team owner-only, deletion-free and inside its invariants", () => {
+    expect(team).toContain('requireOwner("/admin/team")');
+    expect(team).toContain("MAX_ADMIN_SEATS");
+    /* Accounts are deactivated, never removed: audit rows must keep pointing
+       at a real staff record. Compacting the page must not introduce the one
+       affordance the module has never had. */
+    const clean = stripComments(team);
+    expect(clean).not.toContain("deleteStaff");
+    expect(clean).not.toMatch(/team\.delete/);
+    expect(clean).not.toContain("PermanentDelete");
+  });
+
+  it("shows who has access to what without opening anything", () => {
+    expect(team).toContain("team.permissionCount");
+    expect(team).toContain("team.status.");
+    expect(team).toContain("<summary className=\"data-row\">");
+  });
+
+  it("formats a console date in the console's own locale", () => {
+    /* Team printed `en-IN` month abbreviations inside an otherwise Gujarati
+       screen. */
+    expect(team).toContain('locale === "gu" ? "gu-IN" : "en-IN"');
+    expect(team).toContain("formatDate(admin.invitedAt, session.staff.adminLocale)");
+  });
+
+  it("does not spend a 500-row read on a form the caller cannot see", () => {
+    /* The Content Desk student picker feeds create and edit, and both need
+       `content.manage`. A view-only admin paid for it on every load. */
+    expect(content).toContain("const students = canManage");
+    expect(content).toContain(": [];");
+  });
+
+  it("keeps the Design Desk reads scoped to the jobs on screen", () => {
+    expect(design).toContain("inArray");
+    expect(stripComments(design)).not.toMatch(/\.from\(schema\.serviceFiles\)\s*;/);
+  });
+
+  it("does not restate four facts across a full phone screen", () => {
+    expect(account).toContain("kv-grid");
+    expect(stripComments(account)).not.toContain("sm:grid-cols-2");
+  });
+
+  it("leaves the certificate R2 note in place", () => {
+    /* It is what stops the next session assuming a private file pipeline
+       exists. R2 is deferred on purpose. */
+    expect(certificates.toLowerCase()).toContain("r2");
+  });
+});

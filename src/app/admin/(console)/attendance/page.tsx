@@ -88,7 +88,11 @@ export default async function AttendancePage({ searchParams }: Props) {
   return (
     <div className="max-w-[76rem]">
       <PageHead title={copy.title} context={copy.lede} />
-      <form method="get" className="panel panel-body mt-8 grid gap-4 md:grid-cols-[1fr_14rem_auto] md:items-end">
+      {/* The picker cost 269px to ask two questions. Batch and date share a
+          row on a phone; the button takes the next one. Sticky, so it stays
+          with the register as a long roster scrolls under it — this is the one
+          piece of context an operator marking attendance must not lose. */}
+      <form method="get" className="toolbar mt-3 grid-cols-2 md:grid-cols-[1fr_14rem_auto] md:items-end">
         <Field label={copy.batch} htmlFor="attendance-batch">
           <select id="attendance-batch" name="batch" className="input" defaultValue={selectedBatchId ? String(selectedBatchId) : ""} required>
             <option value="" disabled>{copy.chooseBatch}</option>
@@ -96,13 +100,13 @@ export default async function AttendancePage({ searchParams }: Props) {
           </select>
         </Field>
         <Field label={copy.date} htmlFor="attendance-date"><input id="attendance-date" name="date" className="input" type="date" defaultValue={date} required /></Field>
-        <button className="btn btn-primary" type="submit">{copy.openRegister}</button>
+        <button className="btn btn-primary col-span-2 md:col-span-1" type="submit">{copy.openRegister}</button>
       </form>
 
-      {!selectedBatch ? <p className="empty-state mt-8">{copy.noBatch}</p> : (
-        <section className="panel mt-8">
+      {!selectedBatch ? <p className="empty-state mt-3">{copy.noBatch}</p> : (
+        <section className="panel mt-3">
           <div className="panel-head flex-wrap gap-3">
-            <div><p className="microlabel">{formatDate(date, session.staff.adminLocale)}</p><h2 className="text-h3 mt-1">{session.staff.adminLocale === "gu" ? selectedBatch.courseNameGu : selectedBatch.courseNameEn}</h2><p className="form-note mt-1">{selectedBatch.label}</p><p className="mt-2"><PrintLink href={`/admin/print/register/${selectedBatch.id}`} label={sheets.register} compact /></p></div>
+            <div><p className="microlabel">{formatDate(date, session.staff.adminLocale)}</p><h2 className="text-h4 mt-0.5">{session.staff.adminLocale === "gu" ? selectedBatch.courseNameGu : selectedBatch.courseNameEn}</h2><p className="form-note">{selectedBatch.label}</p><p className="mt-1"><PrintLink href={`/admin/print/register/${selectedBatch.id}`} label={sheets.register} compact /></p></div>
             {locked ? <span className="status status-pending">{copy.locked}</span> : <span className="status status-active">{copy.roster}</span>}
           </div>
           <div className="panel-body border-t border-rule">

@@ -27,9 +27,14 @@ export default async function AccountSecurityPage() {
     <div className="max-w-[48rem]">
       <PageHead title={t("account.title")} context={t("account.lede")} />
 
-      <section className="panel mt-10">
+      {/* Four label/value pairs. As a `panel` of `sm:grid-cols-2` Facts they
+          went single-column at 390px and took 416px — a full screen to say a
+          name, an email, a role and a word the operator already knew, on the
+          one console page nobody visits twice. `.kv-grid` states the same four
+          in two columns. */}
+      <section className="panel mt-6">
         <div className="panel-body">
-          <dl className="grid gap-4 sm:grid-cols-2">
+          <dl className="kv-grid">
             <Fact label={t("account.name")} value={session.staff.name} />
             <Fact label={t("account.email")} value={session.email ?? session.staff.email ?? "—"} />
             <Fact
@@ -44,11 +49,9 @@ export default async function AccountSecurityPage() {
         </div>
       </section>
 
-      <section className="panel mt-6">
-        <div className="panel-head">
-          <h2 className="text-h4">{t("account.language")}</h2>
-        </div>
-        <div className="panel-body">
+      <section className="mt-5" aria-labelledby="account-language-heading">
+        <h2 id="account-language-heading" className="text-h4">{t("account.language")}</h2>
+        <div className="mt-2">
           <AdminLocaleForm
             current={session.staff.adminLocale}
             saveLabel={t("account.save")}
@@ -58,17 +61,15 @@ export default async function AccountSecurityPage() {
         </div>
       </section>
 
-      <section className="panel mt-6">
-        <div className="panel-head">
-          <h2 className="text-h4">{t("account.permissions")}</h2>
-        </div>
-        <div className="panel-body">
+      <section className="mt-5" aria-labelledby="account-permissions-heading">
+        <h2 id="account-permissions-heading" className="text-h4">{t("account.permissions")}</h2>
+        <div className="mt-2">
           {session.role === "owner" ? (
             <p className="text-smallmeta">{t("account.ownerAll")}</p>
           ) : granted.length === 0 ? (
             <p className="empty-state">{t("team.noPermissions")}</p>
           ) : (
-            <ul className="flex flex-wrap gap-2">
+            <ul className="flex flex-wrap gap-1.5">
               {granted.map((permission) => (
                 <li key={permission.key} className="chip">
                   {permission.label}
@@ -79,7 +80,7 @@ export default async function AccountSecurityPage() {
         </div>
       </section>
 
-      <div className="u-actions">
+      <div className="mt-6">
         <SignOutLink label={t("account.signOut")} className="btn btn-secondary" />
       </div>
     </div>
@@ -88,9 +89,9 @@ export default async function AccountSecurityPage() {
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <dt className="microlabel">{label}</dt>
-      <dd className="mt-1 text-smallmeta font-semibold">{value}</dd>
+    <div className="min-w-0">
+      <dt className="kv-label">{label}</dt>
+      <dd className="mt-0.5 break-all text-smallmeta font-semibold">{value}</dd>
     </div>
   );
 }
