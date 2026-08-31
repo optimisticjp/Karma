@@ -34,11 +34,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
         path === "" || path === "/admissions" || path === "/batches"
           ? ("weekly" as const)
           : ("monthly" as const),
+      /* Derived from the locale list, like the URLs above. These were two
+         hardcoded entries while the URLs iterated `routing.locales` — so a
+         third locale would have tripled the sitemap while every entry still
+         claimed two alternates. */
       alternates: {
-        languages: {
-          en: `${site.url}/en${path}`,
-          gu: `${site.url}/gu${path}`
-        }
+        languages: Object.fromEntries(
+          routing.locales.map((l) => [l, `${site.url}/${l}${path}`])
+        )
       }
     }))
   );

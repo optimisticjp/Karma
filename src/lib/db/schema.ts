@@ -34,7 +34,22 @@ import {
 
 /* ---------------------------------- enums --------------------------------- */
 
-export const localeEnum = pgEnum("locale", ["en", "gu"]);
+/**
+ * The locales a row can be tagged with.
+ *
+ * Widened to include `hi` on 2026-08-31, when the public site became
+ * trilingual: `applications.locale` and `design_jobs.locale` record the
+ * language a visitor filled the form in, and a Hindi submission would
+ * otherwise fail the enum on insert.
+ *
+ * This does NOT make Karma Console trilingual. `staff.admin_locale` uses the
+ * same enum but is constrained in TypeScript by `AdminLocale` (`"en" | "gu"`),
+ * so the Console simply never writes `hi`. Widening a database enum permits a
+ * value; it does not require anything to use it.
+ *
+ * Requires migration `drizzle/0005_trilingual_locale.sql`.
+ */
+export const localeEnum = pgEnum("locale", ["en", "gu", "hi"]);
 
 export const applicationStatusEnum = pgEnum("application_status", [
   "new",

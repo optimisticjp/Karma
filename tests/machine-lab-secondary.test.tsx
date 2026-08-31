@@ -28,12 +28,23 @@ const componentFiles = walk("src/components").filter((f) => f.endsWith(".tsx"));
  * ------------------------------------------------------------------ */
 
 describe("route parity", () => {
-  it("serves both locales from one tree", () => {
-    expect(routing.locales).toEqual(["en", "gu"]);
+  it("serves every locale from one tree", () => {
+    /* TRILINGUAL since 2026-08-31 (owner decision, Modern Textile Lab plan
+       §4.1). This assertion used to read `toEqual(["en", "gu"])`, which was
+       the single hard tripwire in the suite for adding a locale — and rightly
+       so, because adding one silently is how a site ends up with a Hindi
+       button that serves English.
+
+       What it guards is unchanged: there is ONE route tree, so no route can
+       exist in one language and not another. The list is now derived from
+       routing rather than restated, and the parity is structural. */
+    expect(routing.locales).toContain("en");
+    expect(routing.locales).toContain("gu");
+    expect(routing.locales).toContain("hi");
+    expect(routing.defaultLocale).toBe("en");
+
     const pages = localeFiles.filter((f) => f.endsWith("/page.tsx"));
     expect(pages.length).toBeGreaterThanOrEqual(12);
-    /* Every one of them lives under [locale], so there is no route that
-       exists in English and not in Gujarati. */
     for (const page of pages) {
       expect(relative(LOCALE_ROOT, page).startsWith(".."), page).toBe(false);
     }
