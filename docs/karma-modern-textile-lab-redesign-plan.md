@@ -1,612 +1,1003 @@
-# KARMA — Modern Textile Lab Redesign
-## Public experience, content architecture, navigation and multilingual rebuild
+# KARMA — Full Public Visual Rebuild
+## THREAD / MACHINE / PROOF — a niche embroidery-training experience, rebuilt from composition upward
 
-**Status:** AUTHORITATIVE OWNER-DIRECTED REDESIGN PLAN — pending implementation  
-**Created:** 2026-08-31  
+**Status:** AUTHORITATIVE OWNER-DIRECTED RESTART — implementation must restart from Phase 0  
+**Rewritten:** 2026-08-31  
 **Repository:** `optimisticjp/Karma`  
-**Baseline:** `main` at `9cd82741d4c295db36dd6b8fae7d6798dd13d13e` after the compact-density redesign (PRs #43–#53)  
-**Previous public systems:**  
-- `docs/karma-machine-lab-redesign-master-plan.md` — Machine Lab, complete  
-- `docs/karma-compact-density-redesign-plan.md` — light-first compact-density pass, complete  
+**Current baseline when this was written:** `main` at `d910c871293737ee508b159e10ff834d0148d14d`  
+**Owner correction:** the partially implemented “Modern Textile Lab” direction from PRs #55–#58 is **not approved as the visual solution**.  
 
-This is the authoritative visual, information-architecture, public-navigation, multilingual and public-content direction for the next major redesign.
+This file replaces the previous contents of `docs/karma-modern-textile-lab-redesign-plan.md` completely.
 
-It **supersedes prior plans where they conflict about the public website’s aesthetic, homepage architecture, public navigation, public mobile conversion chrome, public locale set, visual hierarchy, public content grouping, public photography treatment and public page templates.**
-
-It **does not supersede** architecture, authentication, authorization, database integrity, RLS, Hyperdrive, Supabase, audit, operational course facts, fee-agreement snapshots, archive/delete policy, print workflows, deployment, security, private-file rules or infrastructure decisions in `CLAUDE.md` and `docs/project-context.md`.
-
-The Karma Console is **not** being redesigned again in this plan. Preserve the post-PR-#53 compact native-operations system. Public CSS changes must not regress it.
+It is the authoritative owner direction for the next public-site implementation.
 
 ---
 
-# 0. Read before touching code
+# 0. STOP — understand what changed before touching code
 
-Every implementation session must read, in order:
+The owner stopped the previous Claude session after Phase 4 because the implementation was moving in the wrong direction.
 
-1. `CLAUDE.md`
-2. `docs/project-context.md`
-3. this file completely
-4. `docs/design-system.md`
-5. `docs/karma-compact-density-redesign-plan.md`
-6. `docs/karma-machine-lab-redesign-master-plan.md`
-7. `docs/content-checklist.md`
-8. `docs/admin-architecture.md`
-9. `docs/security.md`
-10. `docs/operations.md`
-11. `src/content/course-operations.ts`
-12. `src/content/admission-terms.ts`
-13. `src/content/photo-manifest.ts`
-14. the actual current route/component/content code for the phase
+The problem was not that the code was technically careless. The problem was product/design interpretation:
 
-Current code wins over stale documentation. If a doc is stale, fix it in the same PR.
+- it was **reskinning and repairing the existing visual system**;
+- it reused the existing structure too heavily;
+- it treated a token bridge and stylesheet override as if that constituted a new visual identity;
+- it spent substantial effort expanding the public locale system to Hindi, which the owner does **not** want;
+- it was preserving too much of the existing component composition instead of rebuilding the public experience from first principles.
 
-Use the vendored `.claude/skills/` library selectively. Particularly relevant skill areas:
+The owner now wants:
 
-- frontend design
-- UI/UX
-- mobile product design
-- responsive design
-- design systems
-- accessibility
-- copy / humanization
-- multilingual UX
-- forms
-- SEO
-- structured data
-- testing / TDD
-- code review
-- performance
-- context engineering
-- Spec Kit only when the subsystem genuinely benefits
+> **A COMPLETE NEW PUBLIC LOOK.**
+>
+> Not another polish pass.  
+> Not another token retune.  
+> Not another wrapper around the current sections.  
+> Not an AI/template website.  
+> Not a generic design-school website.
 
-Do not initialize shadcn/ui. Do not add a generic component system, chart library or animation framework simply because a skill mentions one.
+The finished public site must be recognisably built for **Karma Design Studio & Classes — machine embroidery, EMCAD DAHAO, live production machines, fabric, stitch, thread, samples and Surat textile work.**
 
----
-
-# 1. Why this redesign exists
-
-The current product is technically strong and carefully built, but the public site still behaves too much like a long technical/editorial case study.
-
-The next public experience must shift from:
-
-> **lots of explanation + lots of sections + technical background treatment**
-
-to:
-
-> **real work + clear decisions + compact hierarchy + creative niche-specific details**
-
-The strongest existing idea remains:
+The permanent business idea remains:
 
 # FROM SCREEN TO STITCH.
 
 **Design on screen. Prove it on the machine.**
 
-Keep the philosophy. Rebuild the visual execution.
-
-The finished public site should feel like a modern creative production studio where:
-
-**craft + machine precision**
-
-meet naturally.
-
-It must not feel like:
-
-- a traditional handicraft site
-- a generic coaching institute
-- a futuristic SaaS product
-- a fashion-school template
-- a machine manufacturer
-- a generic beige “premium” website
-- an AI-generated agency concept
-
-The immediate message must be:
-
-> **Real embroidery. Real machines. Real commercial skills.**
+The new visual system must make that idea feel physical, useful and memorable.
 
 ---
 
-# 2. Product/audience model
+# 1. Owner corrections — these override PRs #55–#58 and older public-design plans
 
-The site serves four visitor modes:
+## 1.1 Website languages are English + Gujarati ONLY
 
-## 2.1 Beginner / student
+Public website locales are exactly:
 
-Questions:
+- `en`
+- `gu`
 
-- Can I learn from zero?
-- How long?
-- Which batch?
-- How much?
-- Can I try before joining?
+No Hindi website locale.
 
-## 2.2 Existing operator / digitizer / embroidery designer
+This is a direct owner correction and supersedes PR #58.
 
-Questions:
+Important distinction:
 
-- Can Karma help with the actual production problem I have?
-- Does it teach the machine/software workflow I need?
-- Can I improve troubleshooting and output?
+- **Website UI:** English + Gujarati only.
+- **Teaching/support reality:** Karma may still teach/support students in Hindi where that is a verified business fact.
 
-## 2.3 Tailor / boutique owner / entrepreneur
+Do not delete a truthful “Gujarati + Hindi teaching/support” business fact merely because there is no Hindi website translation.
 
-Questions:
+Do remove Hindi as a routed/public UI language.
 
-- Can this skill help me add embroidery capability?
-- Can I improve production quality?
-- Can I understand digital-to-machine workflow?
+## 1.2 Light mode only
 
-Do **not** turn this into an earnings promise.
+The public website is a **light-mode product**.
 
-## 2.4 Garment/business customer
+No large dark hero.
+No large charcoal Services hero.
+No dark footer.
+No black interstitial bands.
+No “dark mode” visual identity.
 
-Questions:
+Dark ink remains text/icon colour.
+Small dark technical marks may exist when functionally justified.
+The public experience must read as light, tactile, fresh and contemporary.
 
-- Can Karma digitize/design/correct commercial embroidery work for me?
-- What is the workflow?
-- How do I send a brief?
+## 1.3 This is a visual rebuild, not a reskin
 
-The homepage must stop making all four audiences consume all content in sequence.
+The new implementation must replace public page composition and visual primitives.
 
----
+A route is not considered redesigned because:
 
-# 3. New audience routing
+- its background token changed;
+- its existing cards got smaller;
+- its old sections got new borders;
+- the old `className`s still define the visual hierarchy under a new token scope;
+- old components are wrapped in a new shell;
+- a new stylesheet overrides old CSS while the underlying visual composition remains unchanged.
 
-Near the top of the homepage add a compact routing module:
+The route must be rebuilt when its current markup/composition belongs to the old visual system.
 
-### I want to learn
-Courses · demo · batches
+## 1.4 Future logo colour must not break the site
 
-### I already work in embroidery
-Advanced techniques · Machine Notes · troubleshooting
+The visual system must be **logo-neutral and accent-adaptable**.
 
-### I need design / production work
-Services · digitising · commercial enquiry
+A future Karma logo may be:
 
-Desktop:
-- compact three-column or asymmetric route chooser
-- no giant cards
+- black;
+- red;
+- blue;
+- green;
+- metallic/gold;
+- multicolour;
+- another owner-selected palette.
 
-Mobile:
-- compact horizontal cards or a three-item segmented route chooser
-- one clear destination per item
-- no long explanatory copy
+The site must still look intentional.
 
-This module exists to shorten the visitor’s path, not to add another section for decoration.
+Therefore:
 
----
+- logo sits on a neutral light surface;
+- do not place the logo permanently on a strong brand-colour block;
+- do not make the whole website visually dependent on matching one red logo;
+- chromatic UI is controlled through a replaceable brand accent layer;
+- photographs, textile work and material provide most colour;
+- the system must still work beautifully in near-monochrome.
 
-# 4. Owner decisions introduced by this plan
+## 1.5 Karma Console is NOT part of this visual restart
 
-The following are new owner-directed product decisions and supersede older public-UX rules where necessary.
+Preserve the compact post-PR-#53 Karma Console.
 
-## 4.1 Public site becomes trilingual
+Public CSS and public components must not leak into `/admin`.
 
-Public locales become:
-
-- English — `en`
-- Gujarati — `gu`
-- Hindi — `hi`
-
-This supersedes the previous bilingual-only public routing rule.
-
-Requirements:
-
-- always-prefixed locale URLs remain
-- default locale stays English unless separately changed by the owner
-- browser-language auto-detection remains off
-- explicit user choice may be remembered
-- language switching preserves the current route when an equivalent route exists
-- correct `<html lang="">`
-- correct hreflang for all indexable public pages
-- sitemap parity across all three locales
-- no country flags
-- navigation itself is translated
-- Gujarati remains native-script first-class
-- Hindi uses natural Devanagari Hindi with familiar trade terms left in English where appropriate
-
-Karma teaches in Gujarati and Hindi; adding a Hindi website locale does not imply a new teaching claim.
-
-## 4.2 New public Batches route
-
-Create a top-level public `/[locale]/batches` decision page.
-
-It must use real batch data only.
-
-Do not fabricate:
-
-- start dates
-- seats
-- trainer assignment
-- weekend batches
-- language-per-batch
-- availability
-
-If the database has no current batch rows, show an honest empty state and lead to demo/contact.
-
-Keep `/admissions` for admissions information/norms unless current route architecture strongly supports a clearer redirect/relationship. Do not silently remove working URLs.
-
-## 4.3 Contextual sticky conversion bar
-
-The current site-wide fixed `Call + Directions` mobile conversion rule is superseded.
-
-High-intent pages should use:
-
-**Book free demo | WhatsApp**
-
-on:
-- course detail pages
-- `/admission`
-- `/batches`
-- `/admissions` where appropriate
-
-General information pages should not automatically carry a large fixed bottom bar if the actions are already obvious.
-
-Call and Directions remain prominent on Contact/Visit and in the site shell/menu/footer.
-
-## 4.4 One controlled business-mode dark surface
-
-The site remains predominantly warm/light.
-
-One deliberate exception is allowed:
-
-- the top hero of `/services`
-
-It may use Deep Charcoal (`#202321`) as a clear “commercial studio mode” switch.
-
-Do not reintroduce dark bands across the rest of the site.
+No admin redesign in this plan.
 
 ---
 
-# 5. Factual guardrails — do not let design invent the business
+# 2. What the stopped Claude run actually changed — and the disposition
 
-This plan contains design recommendations. They are **not permission to invent facts**.
+The owner stopped after PR #58.
 
-## 5.1 EMCAD DAHAO
+Merged work from the rejected direction:
 
-Verified:
+- PR #55 — rendered audit
+- PR #56 — IA + public `/batches` route
+- PR #57 — `src/app/textile-lab.css` token-bridge design system
+- PR #58 — Hindi public locale + navigation/language rebuild
 
-- EMCAD DAHAO is the only embroidery-design software Karma teaches
-- 3 months
-- ₹35,000 total
-- ₹25,000 at admission
-- ₹10,000 within one month of joining
-- four timetable options
-- 2-day free demo
-- 2-hour demo session
-- 100% live practical machine training
-- verified curriculum/practical list already in source
+## 2.1 Keep what is factual/useful
 
-Do not apply these figures to any other course.
+The following may survive if still correct:
 
-## 5.2 Other ten courses
+### Rendered audit data
 
-Still unknown unless current repo facts say otherwise:
+`docs/modern-textile-lab-audit.md` contains useful measurements.
 
-- duration
-- fees
-- exact module list
-- current live batch availability
+Treat it as historical/current-state evidence, not as visual direction.
 
-Never invent them for a card layout.
+### Public `/batches` route
 
-## 5.3 “Small batches”
+The route is conceptually useful.
 
-The supplied design recommendation mentioned “Small batches.”
+It reads real database rows rather than fabricated demo rows.
 
-This is **not currently a verified public fact**.
+Keep the route/data contract unless a better implementation preserves the same function.
 
-Do not publish it unless the owner confirms a real batch-size policy.
+**Rebuild its visuals from scratch.**
 
-Use verified alternatives in “Why Karma”:
+### “Real rows or nothing” batch policy
 
-- Live machine practical
-- EMCAD DAHAO specialist training
-- Gujarati + Hindi teaching support
-- Production troubleshooting / practical output knowledge
+Keep it.
 
-## 5.4 Reviews / rating
+Never invent seats, dates, trainer assignments or weekend availability.
 
-Do not fabricate reviews.
+## 2.2 Undo Hindi public-locale work
 
-Do not invent a review count.
+PR #58 introduced Hindi public routing and content.
 
-Do not emit `AggregateRating`.
+The connected Supabase project was checked on 2026-08-31 after the owner correction.
 
-Use:
-- real owner-approved reviews when supplied
-- existing sample policy until then
-- an honest pending/proof state rather than fake social proof
+The database enum `public.locale` is still:
 
-The owner-provided Google figure remains governed by `docs/content-checklist.md`.
+`{en,gu}`
 
-## 5.5 Current batches and seats
+Therefore `drizzle/0005_trilingual_locale.sql` was **never applied**.
 
-Every “current batch”, “date”, “seat”, “trainer” or availability statement must come from real operational data.
+Phase 0 must remove the unapplied Hindi migration cleanly before any future `db:migrate` can pick it up:
 
-Filters should be generated from data that actually exists.
+- remove `drizzle/0005_trilingual_locale.sql`;
+- remove its unapplied Drizzle snapshot;
+- remove its journal entry;
+- restore the repo migration state to the already-applied `0004` baseline;
+- remove `messages/hi.json`;
+- remove Hindi from routing/sitemap/hreflang/public locale types;
+- remove the Devanagari web-font dependency introduced only for the Hindi site;
+- remove Hindi-only tests;
+- revert public-locale DB/schema TypeScript changes whose only purpose was a `hi` website submission;
+- restore `CLAUDE.md`, `docs/project-context.md` and other durable docs to **bilingual EN/GU website** language.
 
-For example, do not show a Weekend chip if no current weekend data exists.
+Do **not** create a database “rollback migration” for `hi` because `0005` never reached the database.
 
-## 5.6 B2B files
+Do **not** remove truthful support for Hindi as a teaching/student preference if a field semantically represents teaching language rather than website locale.
 
-R2 is still deferred.
+## 2.3 Replace, do not extend, the rejected public design-system implementation
 
-Do not add a public file uploader.
+`src/app/textile-lab.css` from PR #57 is not the approved final visual system.
 
-Do not present a dead upload control.
+Do not continue layering more overrides onto it.
 
-The Services/brief flow should clearly use the existing brief + WhatsApp/manual handoff until private storage is separately activated.
+The next implementation should either:
 
-## 5.7 Timing conflict
+1. replace it with the new public visual layer; or
+2. delete it after the new system has migrated every caller.
 
-The unresolved `10:30 pm` versus EMCAD `23:00` last-slot conflict remains unresolved.
+The public site must not finish with four generations of CSS fighting through source order.
 
-Do not “average” the two.
-
-Do not silently rewrite one.
-
-Contact/batch copy must stay factually cautious until the owner resolves it.
+Old design-system code may remain only where another product such as Karma Console still genuinely needs it.
 
 ---
 
-# 6. Modern Textile Lab visual direction
+# 3. Required reading before implementation
 
-The visual concept is:
+Every implementation session must read in this order:
 
-# MODERN TEXTILE LAB
+1. `CLAUDE.md`
+2. `docs/project-context.md`
+3. **this file — completely**
+4. `docs/design-system.md`
+5. `docs/content-checklist.md`
+6. `docs/admin-architecture.md`
+7. `docs/security.md`
+8. `docs/operations.md`
+9. `docs/karma-compact-density-redesign-plan.md` — history/lessons, not current visual authority
+10. `docs/karma-machine-lab-redesign-master-plan.md` — history/brand reasoning, not current visual authority
+11. `src/content/course-operations.ts`
+12. `src/content/admission-terms.ts`
+13. `src/content/photo-manifest.ts`
+14. actual current code for every route/component being replaced
 
-It sits between:
+Where an older document conflicts with this file on public visual design, public locales, public navigation or public composition, **this file wins**.
 
-**craft + machine precision**
-
-The design should feel creative and tactile without becoming decorative craft styling.
-
-The public site should instantly communicate:
-
-- real textile material
-- industrial machinery
-- digital vector work
-- practical learning
-- commercial output
-- Surat production reality
-
-The visual system should be simpler than the current technical-manual treatment.
-
----
-
-# 7. Public palette
-
-Build a public-scoped palette.
-
-Do not retune shared global tokens in a way that restyles Karma Console.
-
-Prefer a public-only stylesheet/scope imported only by the locale layout.
-
-## Canvas
-`#F7F4EE`
-
-Warm off-white.
-
-Primary public canvas.
-
-## Paper
-`#FFFFFF`
-
-Forms, cards, important content, image mats.
-
-## Ink
-`#171918`
-
-Primary text and strong linework.
-
-## Muted Ink
-approximately `#666864`
-
-Secondary copy.
-
-## Thread Red
-approximately `#D44B35`
-
-Primary CTA / active stitch / key path.
-
-It is the action accent.
-
-## Warm Sand
-approximately `#E9E1D5`
-
-Secondary material surface.
-
-## Deep Charcoal
-approximately `#202321`
-
-Only for controlled business-mode moments, principally the Services hero.
-
-## 60 / 30 / 10 principle
-
-Use neutrals for most of the experience.
-
-Use secondary material surfaces for depth.
-
-Keep the accent controlled enough that it retains meaning.
-
-Do not make “embroidery” an excuse for a rainbow UI.
-
-Photography supplies colour.
+Where this file conflicts with security/data/auth/factual rules in `CLAUDE.md`, those non-visual safety rules still win unless this file explicitly records a new owner decision.
 
 ---
 
-# 8. Texture
+# 4. Use Claude’s skill library properly
 
-Texture remains, but only in controlled moments.
+The repository contains the vendored `.claude/skills/` library.
 
-Good:
+Use skills selectively for:
 
-- faint fabric weave behind a finished embroidery proof
-- subtle CAD dot-grid behind an EMCAD visual
-- stitch perforations along a divider
-- tiny paper/fabric grain on a hero object
-- subtle technical annotation layer
+- frontend design
+- UI/UX
+- visual design systems
+- responsive/mobile design
+- accessibility
+- copy/humanization
+- i18n
+- forms
+- SEO
+- performance
+- testing/TDD
+- code review
+- context engineering
 
-Bad:
+Do not invoke dozens of skills for ceremony.
 
-- graph-paper texture across whole pages
-- repeating weave behind long body copy
-- every section carrying its own visual texture
-- decorative noise that competes with photography
+Do not let a generic skill introduce:
 
-Texture should be noticed after the content, not before it.
+- shadcn/ui;
+- a generic dashboard kit;
+- a generic landing-page template;
+- a giant animation framework;
+- a chart library;
+- a new state-management framework;
+- a page-builder dependency.
 
----
-
-# 9. Visual identity from the business
-
-Build/retain a small visual language directly from embroidery and digitising:
-
-- stitch paths
-- vector anchor points
-- thread spool
-- bobbin
-- needle
-- machine head
-- hoop/frame
-- fabric swatches
-- stitch-density diagram motifs
-- thread-tension graphics
-- machine-frame outlines
-- CAD node patterns
-- screen-to-fabric transitions
-- registration marks
-- technique signatures
-
-Existing Karma Stitch icons and technique signatures should be reused where they fit.
-
-Do not redraw working niche primitives merely to rename the design system.
-
-Universal actions stay universal:
-
-- phone
-- location
-- search
-- menu
-- back
-- print
-- edit
-- delete
-- arrow
-
-The site should remain recognizable as Karma without the logo.
+Karma’s own rules win.
 
 ---
 
-# 10. Photography
+# 5. Reference-site research — borrow principles, never appearance
 
-Photography becomes the dominant emotional layer when the real files arrive.
+The owner supplied a reference pool across the US, UK and India.
 
-Target final visual mix:
+The research goal is **not** “make Karma look like one of these schools.”
 
-- ~70% real photography
-- ~20% technical diagrams / annotations
-- ~10% icons / decorative motion
+The goal is to understand why good education/design sites make decisions easy and creative work believable.
 
-## 10.1 Preserve the final 32-shot architecture
+## 5.1 Reference pool supplied by owner
 
-The existing manifest remains authoritative.
+United States:
 
-Expected:
-- 32
-- filled today: 0 until files arrive
+- Noble Desktop — https://www.nobledesktop.com/
+- Miami Ad School — https://miamiadschool.com/
+- BrainStation — https://brainstation.io/
+- General Assembly — https://generalassemb.ly/
+- School of Visual Arts — https://sva.edu/
 
-Do not add stock or generated Karma photography.
+United Kingdom:
 
-Do not invent new mandatory photo slots during this redesign.
+- University of the Arts London — https://www.arts.ac.uk/study-at-ual/short-courses
+- Media Training Ltd — https://mediatraining.ltd.uk/
+- Escape Studios — https://www.escapestudios.ac.uk/
+- Academy Class — https://academyclass.com/
+- City Lit — https://www.citylit.ac.uk/
 
-Do not activate R2 for these public images merely because they exist.
+India:
 
-## 10.2 Art-direction priorities within the 32 real shots
+- Frameboxx — https://frameboxx.in/
+- Pearl Academy — https://www.pearlacademy.com/
+- DesignBoat School — owner-provided reference
+- Srishti Manipal Institute — https://srishtimanipalinstitute.in/
+- MAAC — https://www.maacindia.com/
 
-When mapping and cropping the actual files, favour the brief’s real subjects that support:
+## 5.2 Research findings to borrow
 
-- EMCAD screen / design path
-- needle/machine stitching
-- finished embroidery
-- trainer at actual station
-- student at workstation
-- studio floor
-- machine stations
-- student work
-- screen + result relationships
-- technique macros
-- exterior/wayfinding
+### Noble Desktop — decision density
 
-The more ambitious suggested shot ideas (bobbin macro, failed-vs-corrected, extra hand close-ups, etc.) are **future optional art direction**, not a reason to create unbriefed placeholders now.
+Useful pattern:
 
-## 10.3 Placeholder rule
+- schedule-first browsing;
+- course/date/time/duration visible together;
+- strong filtering;
+- clear “what is available next” mental model;
+- practical copy over poetic marketing.
 
-Until real files arrive:
+Karma application:
 
-- keep named, honest placeholders
-- preserve aspect ratio
-- no “Image Not Found”
-- no stock
-- no image from another studio
-- no fake student/trainer face
-- no duplicate course image standing in for another
+- real batch information becomes easy to scan;
+- course decision facts appear early;
+- no visitor hunts through five sections for a timetable.
+
+Do not copy Noble’s visual branding.
+
+### UAL — strong hierarchy without card clutter
+
+Useful pattern:
+
+- disciplined typographic hierarchy;
+- clear course sub-navigation;
+- course description + booking action visible early;
+- creative institution feels confident without explaining itself in twenty decorative modules.
+
+Karma application:
+
+- stronger page hierarchy;
+- fewer generic cards;
+- decisive course information close to title/CTA.
+
+Do not copy UAL’s black visual identity; Karma is light-mode.
+
+### City Lit — starting-date and course-detail clarity
+
+Useful pattern:
+
+- “choose a starting date” is a real product task;
+- date/time/location/duration sit together;
+- jump navigation reduces blind scrolling;
+- rich detail lives lower on the page rather than blocking the decision.
+
+Karma application:
+
+- `/batches` and course pages make real schedule rows/timings obvious;
+- sticky/scrollable local navigation on long course pages.
+
+### Media Training — operational confidence
+
+Useful pattern:
+
+- course level/duration/mode facts are concrete;
+- calls to choose dates/course level are straightforward;
+- real reviews and operational facts build trust better than decorative “why us” cards.
+
+Karma application:
+
+- show verified practical facts;
+- build trust from real machine/course information;
+- never invent proof just to fill the layout.
+
+### Miami Ad School — editorial personality
+
+Useful pattern:
+
+- bolder art-direction voice;
+- program identity feels creative and aspirational;
+- student/portfolio culture is visible;
+- typography creates attitude rather than endless decoration.
+
+Karma application:
+
+- student work and textile output carry emotional energy;
+- course family pages can have distinct rhythm;
+- copy can be confident and short.
+
+Do not copy their career claims or exact visual language.
+
+### Escape Studios — production proof
+
+Useful pattern:
+
+- real work/showreel/industry production is central;
+- course details and outcomes are supported by media;
+- “studio environment” is shown through evidence.
+
+Karma application:
+
+- real machine floor and finished stitch are proof, not decoration;
+- Screen → Machine → Proof becomes the signature demonstration.
+
+### Academy Class — taxonomy and level discovery
+
+Useful pattern:
+
+- strong grouping by tool/topic/level;
+- user can find an appropriate course path quickly;
+- navigation supports a large catalogue without forcing giant cards.
+
+Karma application:
+
+- use the existing real families: `machine`, `modern`, `software`;
+- make all 11 courses easy to browse.
+
+### BrainStation / General Assembly — polished conversion system
+
+Useful pattern:
+
+- clear primary next step;
+- modular program discovery;
+- consistent polished interactions;
+- schedule/instructor/event information appears in predictable structures.
+
+Karma application:
+
+- one primary action per context;
+- consistent interaction grammar;
+- no CTA soup.
+
+### Pearl Academy / Srishti — editorial education credibility
+
+Useful pattern:
+
+- program families and creative disciplines have editorial presence;
+- work/curriculum/program identity can coexist without looking like ecommerce cards;
+- design education can feel serious without becoming corporate software UI.
+
+Karma application:
+
+- course catalogue can feel like a textile sample book / studio index rather than product cards.
+
+### MAAC / Frameboxx — local decision convenience
+
+Useful pattern:
+
+- easy course-family discovery;
+- direct enquiry;
+- clear local centre/location actions.
+
+Karma application:
+
+- Surat/Mota Varachha/location/visit are practical conversion assets;
+- local visitor should never wonder where the studio is or how to contact it.
+
+## 5.3 Explicit anti-copy rule
+
+Do not reproduce:
+
+- reference-site colour systems;
+- exact headers;
+- exact card shapes;
+- exact animations;
+- copyrighted artwork;
+- proprietary layouts;
+- slogans;
+- review/proof numbers;
+- program claims.
+
+The references teach **product clarity and creative confidence**.
+
+Karma’s visuals come from embroidery.
 
 ---
 
-# 11. Typography
+# 6. New creative thesis: THREAD / MACHINE / PROOF
 
-Typography becomes simpler and more human.
+Internal design-system name:
 
-Do not return to tiny technical-manual labels everywhere.
+# THREAD / MACHINE / PROOF
 
-Do not swing to huge AI-landing-page type.
+It is not necessarily a public headline.
+
+It is the rule for composing the site.
+
+Every important public page should express some combination of:
+
+### THREAD
+
+Material, stitch, beads, sequence, cord, loops, fabric, texture, human craft.
+
+### MACHINE
+
+EMCAD path, machine head, needle, frame, production station, setup, troubleshooting.
+
+### PROOF
+
+Finished sample, student work, real batch information, fee facts, studio, machine output.
+
+This is more specific than “Modern Textile Lab” and less generic than “creative institute.”
+
+The site should feel like a **working embroidery studio made digital**.
+
+---
+
+# 7. Anti-template / anti-AI visual rules
+
+The following patterns are banned unless a specific page genuinely needs them:
+
+- centered hero + paragraph + two buttons + three identical cards;
+- giant 70px+ mobile headline;
+- gradient blobs;
+- purple/blue SaaS aurora;
+- glassmorphism cards;
+- generic icon-in-circle benefit grids;
+- repeated 3-column feature cards;
+- pill chips everywhere;
+- fake dashboard metrics;
+- fake “trusted by” logos;
+- fake counters;
+- abstract stock 3D objects;
+- generic student-with-laptop stock photos;
+- random floating shapes;
+- every section fading upward;
+- bento layout merely because it is fashionable;
+- enormous rounded 24–32px cards as the universal primitive;
+- alternating left/right marketing sections repeated six times;
+- “unlock your creativity” copy;
+- “transform your passion” copy;
+- “world-class” claims;
+- “industry-leading” claims without evidence;
+- fake career outcomes;
+- invented batch scarcity;
+- invented trainer credentials;
+- invented technical machine metrics.
+
+A screenshot should not be identifiable as “AI landing page 2026.”
+
+---
+
+# 8. Logo-neutral brand architecture
+
+This is a core owner requirement.
+
+## 8.1 Neutral shell
+
+Header, footer and primary page surfaces use neutral materials:
+
+- warm white;
+- paper white;
+- ink;
+- soft warm grey/sand;
+- fine neutral borders.
+
+The logo should never require a matching background colour to look correct.
+
+## 8.2 Replaceable accent system
+
+Create a public-scoped accent layer such as:
+
+- `--brand-accent`
+- `--brand-accent-strong`
+- `--brand-accent-soft`
+- `--brand-on-accent`
+
+Default can remain a restrained thread vermilion/red family because it suits embroidery and current Karma history.
+
+But the layout must remain attractive if those variables become:
+
+- blue;
+- green;
+- purple;
+- copper;
+- gold;
+- black;
+- another accessible owner colour.
+
+Do not use accent as a large background blanket.
+
+Use accent for:
+
+- primary CTA;
+- active stitch path;
+- current state;
+- small key markers;
+- selected tab/filter;
+- micro-interaction.
+
+## 8.3 Status colours remain separate
+
+Success/warning/error must not derive from brand colour.
+
+Operational meaning stays stable.
+
+## 8.4 Logo component contract
+
+Build the public header so a future logo asset can drop in without redesign:
+
+- reserved mark/wordmark slot;
+- supports horizontal or compact mark;
+- sensible max height;
+- no forced recolour unless asset explicitly supports it;
+- current text/mark fallback remains usable until logo arrives;
+- logo container stays neutral.
+
+---
+
+# 9. Surface and colour system — light mode
+
+The new site is not “beige everywhere.”
+
+It uses a restrained material palette with contrast and structure.
+
+Suggested starting families — final values must be contrast-tested:
+
+### Worktable Canvas
+
+Warm near-white.
+
+Purpose:
+
+- main page canvas;
+- quiet background.
+
+### Paper
+
+Pure or nearly pure white.
+
+Purpose:
+
+- forms;
+- course decision surfaces;
+- media mats;
+- schedule rows.
+
+### Fabric Wash
+
+Very pale warm textile tone.
+
+Purpose:
+
+- alternate sections;
+- sample/work context.
+
+### Machine Mist
+
+Very pale cool neutral.
+
+Purpose:
+
+- EMCAD/software/process areas;
+- gives digital contrast without a dark panel.
+
+### Ink
+
+Near-black neutral.
+
+Purpose:
+
+- headings;
+- body emphasis;
+- icons;
+- technical linework.
+
+### Muted Ink
+
+Accessible medium-dark grey.
+
+Purpose:
+
+- secondary copy;
+- metadata.
+
+### Brand Accent
+
+Replaceable.
+
+Default thread vermilion family.
+
+Purpose:
+
+- action;
+- stitch/progress;
+- selected state.
+
+### Metallic/technique colours
+
+Do not make them permanent UI accents.
+
+Copper/silver/pearl may appear inside technique illustrations only.
+
+## 9.1 No full-width dark surfaces
+
+This rule is absolute for this redesign.
+
+Services must also remain light.
+
+Commercial mode is expressed through:
+
+- denser grid;
+- sharper rules;
+- different composition;
+- technical copy;
+- machine/process visuals;
+
+—not a black hero.
+
+---
+
+# 10. Typography
+
+Typography should feel contemporary, confident and easy to scan.
+
+Keep the strong multilingual foundation rather than chasing novelty fonts.
 
 ## English
-Clean modern sans — continue Manrope unless a measured reason to change exists.
+
+Manrope remains the default unless a real side-by-side design exploration proves another font materially improves the work.
 
 ## Gujarati
-Continue Noto Sans Gujarati.
 
-Never uppercase or letterspace Gujarati.
+Noto Sans Gujarati remains first-class.
 
-## Hindi
-Add a strong Devanagari font, preferably Noto Sans Devanagari or an equally appropriate native-script sans.
+Never uppercase Gujarati.
+Never letterspace Gujarati.
+Never squeeze Gujarati into Latin line-height assumptions.
 
-Do not force Hindi through a Latin-first display face.
+## Editorial accent
 
-## Starting mobile scale
+Use Playfair italic only if it adds a human/material interruption.
 
-- H1: 32–38px
-- H2: 24–28px
+Maximum sparing use.
+
+Do not build the identity around serif headlines.
+
+## Scale targets
+
+Mobile starting range:
+
+- Hero H1: 34–40px
+- Page H1: 28–34px
+- H2: 23–28px
 - H3: 18–21px
-- Body: 15–16px
-- Metadata: 12–13px
+- Body: 15.5–17px
+- Metadata: 12–14px
 - Buttons: 14–15px
 
-## Starting desktop scale
+Tablet:
 
-- H1: roughly 52–64px
-- H2: 34–42px
-- H3: 22–26px
+- deliberately compose, do not just interpolate mobile.
 
-Use fluid `clamp()` carefully.
+Desktop starting range:
 
-Preserve browser zoom/accessibility.
+- Hero H1: 54–68px depending on line length
+- Page H1: 44–56px
+- H2: 32–42px
+- H3: 22–27px
 
-Do not choose independent random sizes page-by-page.
+Use `clamp()` where appropriate.
 
-A coherent type scale is required.
+Avoid tiny machine-manual typography as the dominant voice.
+
+Small mono notation may remain for genuinely technical labels only.
 
 ---
 
-# 12. Navigation redesign
+# 11. Layout system
 
-Redesign the public navigation from scratch.
+## 11.1 390px-first
 
-## Desktop primary navigation
+Design every public component from ~390px outward.
 
-Target:
+Then deliberately compose:
+
+- 320
+- 360
+- 390
+- 430
+- 768
+- 820
+- 1024
+- 1280
+- 1440
+
+## 11.2 Tablet is its own design state
+
+768–1024 must not be:
+
+- mobile stretched wider;
+- desktop squeezed smaller.
+
+Use:
+
+- 2-column editorial splits;
+- horizontal sample strips;
+- 60/40 decision layouts;
+- 2–3-column visual proof where appropriate;
+- navigation that expands only when it truly fits.
+
+## 11.3 Desktop width
+
+Target readable content around 1180–1240px.
+
+Use wider media selectively.
+
+Do not increase padding and heading sizes merely because space exists.
+
+## 11.4 Rhythm
+
+Aim for a confident but compact editorial rhythm.
+
+Typical mobile section separation:
+
+32–56px depending on importance.
+
+Not every section gets the same gap.
+
+Hero/signature proof may breathe more.
+
+Course lists, schedules and notes should be denser.
+
+---
+
+# 12. New niche visual grammar
+
+The visual identity must come from embroidery mechanics, but remain usable.
+
+Create a small, coherent set of primitives.
+
+## 12.1 Thread Line
+
+A thread/stitch rule connecting related states.
+
+Use for:
+
+- section transitions;
+- process;
+- selected tab underline;
+- form progress.
+
+Not on every heading.
+
+## 12.2 Needle Point
+
+A small penetration/knot point indicating:
+
+- current step;
+- exact selected point;
+- completion junction.
+
+## 12.3 Hoop Window
+
+A controlled circular/elliptical crop inspired by the embroidery frame.
+
+Use occasionally for:
+
+- stitch macro;
+- trainer/machine detail;
+- transition between screen and fabric.
+
+Do not make every photo circular.
+
+## 12.4 Stitch Swatch
+
+Technique-specific compact visual texture.
+
+One per course.
+
+Examples:
+
+- Zardosi: tight metallic/satin lines;
+- Beads: sequential nodes;
+- Sequence: overlapping perforated discs;
+- Cording: thick guided curve;
+- Chain: linked loops;
+- Laser: cut-trace edge;
+- Tufting: raised loop field;
+- EMCAD: path nodes and control handles;
+- Flat: dense clean field;
+- Appliqué/3D: layered edge/raised panel;
+- Cross Stitch: structured X grid.
+
+These are identity assets, not substitute photographs pretending to be work.
+
+## 12.5 Sample Strip
+
+A horizontal textile-sample rail useful for:
+
+- homepage course explorer;
+- course families;
+- technique browsing.
+
+This should feel like a physical sample book rather than ecommerce cards.
+
+## 12.6 Machine Frame
+
+A clean square/rectangular media frame with very restrained registration marks.
+
+Do not cover every image in CAD crosshairs.
+
+## 12.7 Batch Board
+
+Schedule information should feel like a studio wall/production board:
+
+- course;
+- real date if known;
+- real time;
+- real status;
+- direct action.
+
+No fake scarcity.
+
+## 12.8 Work Tile
+
+Student work is image-first.
+
+Caption is secondary.
+
+No generic testimonial-card treatment.
+
+## 12.9 Thread Progress
+
+Admission form progress can use stitch logic:
+
+`COURSE ━ DETAILS ┅ TERMS ┅ DONE`
+
+Completed = stitched.
+Current = needle point.
+Future = construction line.
+
+## 12.10 Universal UI stays universal
+
+Search = search.
+Menu = menu.
+Phone = phone.
+Location = location.
+Edit = pencil.
+Delete = trash.
+Print = printer.
+
+Do not force users to decode embroidery metaphors for common actions.
+
+---
+
+# 13. Motion system
+
+The site should not animate like a generic Framer template.
+
+## Level 0 — static
+
+Long copy, forms, legal, schedules, tables.
+
+## Level 1 — functional
+
+- menu open;
+- accordion;
+- tabs;
+- validation;
+- hover/press feedback.
+
+## Level 2 — niche microinteraction
+
+- stitch line advances;
+- bead node appears;
+- sequence disc shifts subtly;
+- arrow moves 2–3px;
+- path node activates.
+
+## Level 3 — storytelling
+
+Screen → Machine → Proof transition.
+
+Maximum one signature storytelling interaction per page.
+
+## Rules
+
+- no cursor followers;
+- no scroll hijack;
+- no infinite decorative loops;
+- no constant parallax;
+- no glowing cards;
+- no marquee wallpaper;
+- no animation merely because a section enters viewport;
+- `prefers-reduced-motion` must render a complete usable final state.
+
+---
+
+# 14. Navigation — rebuild for the new site
+
+Public navigation should be simple enough to understand in one glance.
+
+## Desktop
+
+Recommended primary destinations:
 
 - Courses
 - Batches
@@ -616,34 +1007,29 @@ Target:
 - Studio
 
 Then:
-- language control
+
+- EN / ગુજરાતી language control
 - Book Free Demo
 
-“Studio” may route to `/about` if that remains the canonical studio/about route.
+Home is the logo/brand link.
 
-Contact does not need prime desktop navigation if it is prominent in:
-- mobile menu
-- footer
-- Studio/Visit pathways
-- persistent contact surfaces
-
-If width cannot support this cleanly, use a controlled More menu rather than squeezing text.
+Contact can remain in menu/footer/Studio pathways rather than competing in the primary row if width demands it.
 
 ## Mobile header
 
-Target height around 56px.
+Around 56px.
 
 Structure:
 
-**Logo | language | menu**
+`Brand/Logo | EN/ગુ | Menu`
 
-The visible menu/language icons may be small, but interactive hit areas remain ~44–48px.
-
-Do not shrink the desktop nav into a crowded mobile row.
+No Hindi option.
 
 ## Mobile menu
 
-Dedicated mobile navigation:
+Dedicated mobile navigation, not the desktop row wrapped into multiple lines.
+
+Rows:
 
 - Courses
 - Batches
@@ -653,1467 +1039,966 @@ Dedicated mobile navigation:
 - Studio
 - Contact
 
-Each row approximately 48–52px.
+Primary demo action remains obvious.
 
-Bottom of menu:
+## Language control
+
+With only two locales, do not over-engineer a giant language bottom sheet.
+
+Use a polished two-language switch/action that:
+
+- clearly shows `EN` and `ગુ`/ગુજરાતી;
+- preserves current route;
+- remains keyboard accessible;
+- has 44px touch target;
+- uses no flag;
+- does not dominate the header.
+
+---
+
+# 15. Mobile conversion strategy
+
+Do not turn the entire marketing site into an app tab bar.
+
+Use contextual conversion.
+
+High-intent routes such as:
+
+- EMCAD/course detail;
+- `/admission`;
+- `/admissions`;
+- `/batches`;
+
+may use a compact sticky action dock:
+
+**Book Free Demo | WhatsApp**
+
+General pages can rely on inline CTA + menu/footer.
+
+Contact first viewport must expose:
+
+- Call
+- WhatsApp
+- Directions
+
+Keep existing distinct phone-role facts.
+
+Never collapse mobile numbers into one role without owner confirmation.
+
+---
+
+# 16. Homepage — rebuild from a blank composition
+
+The current homepage must not be visually edited section by section.
+
+Recompose it.
+
+The target is approximately **7–8 purposeful blocks**, not 19–20.
+
+## 16.1 Hero — 30-second decision
+
+### Desktop
+
+Asymmetric composition.
+
+Left/content side:
+
+**FROM SCREEN TO STITCH.**
+
+Short explanation, for example in meaning:
+
+Karma teaches embroidery design where the file meets the production machine.
+
+Do not use that exact sentence if stronger EN/GU copy emerges, but preserve the meaning.
+
+Verified quick facts:
+
+- EMCAD DAHAO
+- Live machine practical
+- Mota Varachha, Surat
+- 2-day free demo — clearly tied to EMCAD if necessary to avoid scope confusion
+
+Primary CTA:
 
 **Book Free Demo**
 
-No text collision.
-No nested micro-dropdowns.
-No duplicate navigation systems fighting for the same space.
-
----
-
-# 13. Language selector
-
-The language selector becomes a designed feature.
-
-Never use flags.
-
-## Desktop
-
-Compact globe/current-language control:
-
-`◎ EN ▾`
-
-Popover choices:
-
-- English
-- ગુજરાતી
-- हिन्दी
-
-## Mobile
-
-Language control remains directly in the header.
-
-Tap opens a bottom sheet with large choices.
-
-Each choice should include a short native-script preview.
-
-Example intent:
-
-**English**
-Screen to stitch
-
-**ગુજરાતી**
-localized preview
-
-**हिन्दी**
-localized preview
-
-## Technical requirements
-
-- preserve current route where possible
-- explicit choice can be persisted
-- no browser auto-detect redirect
-- correct `lang`
-- correct hreflang
-- translated navigation
-- locale-aware metadata
-- route parity
-- no page silently falling back to English text inside Gujarati/Hindi UI
-- locale tests must mechanically enforce parity
-
----
-
-# 14. Homepage — reduce to roughly eight purposeful sections
-
-The current public homepage is too long for its job.
-
-It should answer:
-
-1. What is Karma?
-2. What can I learn?
-3. Why should I trust you?
-4. What will I actually make?
-5. How do I start?
-
-The homepage should no longer carry every possible content module.
-
-Move deep explanation into dedicated routes.
-
-Target approximately **8 purposeful sections**, not 19.
-
----
-
-# 15. Homepage A — compact hero
-
-Desktop:
-
-- asymmetric 55/45 or 60/40 composition
-- no giant centered text block
-
-Left:
-
-# From screen to stitch.
-
-One concise two-line explanation.
-
-Compact verified facts:
-
-- EMCAD DAHAO
-- Live machines
-- Mota Varachha
-- 2-day free demo — clearly scoped to EMCAD if proximity could imply otherwise
-
-Primary:
-**Book free demo**
-
 Secondary:
-**Explore courses**
 
-Right:
+**Explore Courses**
 
-One strong Screen → Machine → Result visual composition.
+Visual side:
 
-Do not render three giant stacked boxes.
+one composed Screen → Machine → Proof scene using the existing photo slots / stitch swatches.
 
-Use the existing three relevant photo slots/placeholders as one designed system.
+Not three enormous empty rectangles.
 
-## Mobile first viewport
+The real photos later replace the reserved slots without structural changes.
 
-At about 390×844, aim to show:
+### Mobile
 
-- compact header
-- headline
-- 2–3 lines support
-- 2×2 quick facts
-- CTA
-- meaningful portion of the signature visual
+First viewport should contain:
 
-A user should understand the offer before scrolling a second screen.
+- compact header;
+- headline;
+- 2–3 lines support;
+- small 2×2 fact cluster or concise fact strip;
+- primary CTA;
+- meaningful beginning of the signature visual.
 
----
+The user should understand Karma before the first full scroll.
 
-# 16. Homepage B — “What are you here for?”
+## 16.2 Entry paths — integrated, not generic cards
 
-Use the audience routing from §3.
+Use a compact stitched index such as:
 
-This section should replace several generic explanatory sections.
+### Learn embroidery
+Courses · demo · batches
 
-Keep it concise.
+### Improve production
+Techniques · Machine Notes · troubleshooting
 
----
+### Need commercial design work
+Karma Studio · brief · WhatsApp
 
-# 17. Homepage C — course explorer
+This may be part of the hero tail rather than a giant separate section.
 
-Do **not** list all eleven courses vertically on the homepage.
+## 16.3 Course Sample Book
 
-The full catalogue remains on `/courses`.
+Do not show all 11 giant cards on the homepage.
 
-Homepage course explorer uses categories such as:
+Use the real taxonomy:
 
-- Machine
-- Special Techniques
-- Software
+- machine
+- modern
+- software
 
-Use actual current course-family data; do not invent a classification that conflicts with source.
+Show a compact curated subset based on canonical display order — never “popular” unless proven.
 
-Show 3–4 useful items per current category state, based on canonical display order — not an invented popularity claim.
+Interaction should feel like browsing textile technique samples.
 
 CTA:
 
-**Explore all 11 techniques**
+**Explore all 11 courses**
 
-Mobile:
-- horizontal tabs/chips
-- compact list-card hybrid or horizontal course cards
-- no full-screen cards
+## 16.4 Signature Screen → Machine → Proof
 
-All eleven courses remain in the product.
+One project, three states:
 
----
+01 SCREEN
+EMCAD path
 
-# 18. Homepage D — signature Screen → Machine → Stitch
+02 MACHINE
+needle / production
 
-This remains one of the memorable experiences.
-
-One real project eventually drives three states:
-
-### 01 Screen
-EMCAD path / design
-
-### 02 Machine
-production
-
-### 03 Stitch
+03 PROOF
 finished textile
 
 Desktop:
-- controlled tab/scrubber/rail
-- no autoplay required
-- no scroll hijacking
+
+- interactive rail/tabs/scrub that does not require precision dragging.
 
 Mobile:
-- swipeable/scroll-snap frames or compact vertical sequence
-- must work without precision dragging
-- every state remains accessible with reduced motion and without JavaScript where practical
 
-Until photos arrive, use the corresponding manifest placeholders.
+- swipe/scroll-snap or compact stacked stages.
 
-This is proof, not explanation.
+No autoplay required.
 
----
+This is the page’s strongest interaction.
 
-# 19. Homepage E — student work
+## 16.5 EMCAD decision panel
 
-Show a compact selection of up to six real/placeholder work examples.
+Make the verified course easy to decide on.
 
-Photography leads.
+Only EMCAD DAHAO gets these verified facts:
 
-Minimal text.
+- 3 months
+- ₹35,000 total
+- ₹25,000 admission amount
+- ₹10,000 balance within one month
+- 2-day free demo
+- four normal timetable options
+- EMCAD DAHAO only
 
-Technique filter only if it remains useful at this small set.
+No payment gateway.
 
-CTA:
+The panel should feel practical, not like SaaS pricing.
 
-**See all student work**
+## 16.6 Proof Wall
 
-Do not use fake student names or outcomes.
-
----
-
-# 20. Homepage F — Why Karma
-
-Use four short, concrete, verified points.
-
-Preferred verified set:
-
-- Train on real production machines
-- EMCAD DAHAO specialist training
-- Gujarati + Hindi teaching support
-- Production troubleshooting and practical output
-
-Do not publish “small batches” until confirmed.
-
-No generic benefit cards.
-
----
-
-# 21. Homepage G — current batches + free demo
-
-This section is live-data driven.
-
-Show upcoming/current batch rows only when real data exists.
-
-Useful fields when present:
-
-- course
-- date/start
-- time
-- seats/availability
-- language/trainer only if actually stored and verified
-
-Do not fabricate missing fields.
-
-If there are no live batches:
-
-- honest empty state
-- Book Free Demo
-- Call / WhatsApp to ask
-
-Do not show fake fallback batch inventory.
-
----
-
-# 22. Homepage H — studio proof, FAQ, conversion close
-
-Combine trust/visit/reviews efficiently instead of adding several long sections.
-
-## Studio proof
-
-Use real studio placeholders/photos.
-
-## Reviews
-
-Only real owner-approved reviews.
-
-If real reviews are unavailable, omit the review carousel or show an honest pending state.
-
-Do not create fake review cards.
-
-## FAQ
-
-Compact accordion.
-
-## Final conversion
-
-Short CTA:
-
-- Book Free Demo
-- Call / WhatsApp / Directions as appropriate
-
-No long marketing essay.
-
----
-
-# 23. Courses index
-
-Treat `/courses` like a product catalogue.
-
-Top:
-
-**Find the skill you want to learn**
-
-Filter chips based on real taxonomy:
-
-- All
-- Machine Embroidery
-- Special Techniques
-- Software
-
-Use the actual current families/tags; naming may be adjusted to source truth.
-
-Each item should show only useful decision information:
-
-- image/signature
-- course name
-- family
-- duration only if verified
-- learning mode only if verified/general
-- one concise outcome
-- CTA
-
-Do not repeat paragraphs.
-
-Do not invent a fee/duration to make the card look complete.
-
-Mobile:
-- dense list-card hybrid
-- compact image or technique signature
-- no enormous 16:9 card stack
-
----
-
-# 24. Course detail pages
-
-Decision information belongs above the fold.
-
-Within the first mobile viewport aim to expose:
-
-- course title
-- technique/software identity
-- duration if verified
-- software/machine fact if verified
-- practice mode
-- teaching-language context
-- current batch if real
-- demo availability if verified
-- fee if verified, otherwise truthful existing deferral
-- location
-- primary CTA
-
-Primary:
-**Book free demo**
-
-Secondary:
-**WhatsApp about this course**
-
-## Sticky/scrollable section navigation
+Combine proof rather than create separate “why us / studio / gallery / machine” marketing sections.
 
 Use:
 
-- Overview
-- What you'll learn
-- Syllabus
-- Machine practice
-- Student work
-- Batches
-- Fees
-- FAQ
+- student-work photo slots;
+- machine-floor photo slots;
+- technique swatches;
+- real machine-practical facts.
 
-Only render tabs for content that exists.
+No fake review section if no approved real reviews are available.
 
-Mobile:
-- horizontally scrollable sticky tab rail
-- no blind long scroll
-- sticky bar must not obscure anchor targets
+## 16.7 Current batches / visit
 
-Keep course pages production-led, not syllabus-first.
+Use real rows from the database.
 
----
+If none exist:
 
-# 25. Public Batches page
+honest empty state + demo/contact.
 
-Create `/[locale]/batches`.
+Pair with:
 
-Headline:
+- location;
+- directions;
+- visit cue.
 
-**Choose a batch that fits your day**
+## 16.8 FAQ + conversion close
 
-Filters may include, only when represented by real data:
+Compact FAQ.
 
-- Morning
-- Afternoon
-- Evening
-- Weekend
-- Course
+Final CTA.
 
-Each live row/card may display:
+Light footer.
 
-- course
-- start date
-- days
-- timing
-- available seats
-- trainer
-- language
-
-Only fields with actual data are shown.
-
-Then the simple admission sequence:
-
-1. Book free demo
-2. Visit and use the machine
-3. Choose course and batch
-4. Join
-
-Admission/fee norms remain below in compact disclosure.
-
-No giant marketing section.
+That is enough.
 
 ---
 
-# 26. Admission / admissions experience
+# 17. Courses index — textile sample catalogue
 
-Keep the working secure multi-step form.
+The full 11-course catalogue belongs here.
 
-Visually simplify it.
+Do not use a generic responsive card grid as the primary layout.
 
-- short step header
-- compact stitch progress
-- grouped fields
-- no giant card around every step
-- sticky/reachable Next/Submit
-- full terms accessible without turning the whole form into one page of legal copy
+Preferred visual model:
 
-Do not weaken:
-- guardian phone requirement
-- honeypot
-- minimum-time defense
-- idempotency
-- rate limits
-- validation
-- terms versioning
-- audit/security rules
-- Turnstile-ready path
+**sample-book index + technique preview**.
 
-Turnstile remains deferred unless separately activated.
+Each course entry can contain:
 
----
+- index number;
+- course name;
+- family;
+- technique swatch/photo slot;
+- one short factual/outcome line;
+- duration only when verified;
+- clear action.
 
-# 27. Student Work
-
-This should become one of the strongest visual routes.
-
-Use an editorial masonry-like gallery that respects real image aspect ratios.
-
-Filters may include actual techniques:
+Filters:
 
 - All
-- Zardosi
-- Beads
-- Sequence
-- Appliqué
-- Laser
-- Tufting
-- EMCAD
+- Machine
+- Modern / Special Techniques
+- Software
 
-Only categories backed by real items should appear.
+Use real taxonomy labels from source.
 
 Mobile:
-- two-column visual grid when image widths/legibility permit
-- otherwise one-plus-small asymmetric layouts
 
-Tap/open detail sheet or route:
+- dense list/sample hybrid;
+- no giant 16:9 card per course.
 
-**screen design → machine setup → finished result**
+Desktop:
 
-Metadata is conditional:
+- selected-preview split is allowed if accessible and useful;
+- still make every course directly reachable without hover dependency.
 
-- student — only with consent/verified identity
-- technique
-- machine — only when known
-- level — only when real
-- what they learned — only when sourced
-
-Do not invent missing metadata.
+All 11 remain.
 
 ---
 
-# 28. Machine Notes — knowledge hub
+# 18. Course detail — decision first, detail second
 
-Keep Machine Notes as technical authority, not a generic blog.
+Rebuild the template.
 
-Evolve the index into a compact searchable/filterable knowledge hub.
+## Above the fold
 
-Useful card/index metadata:
+Show:
 
-- type/problem
-- technique
-- issue
-- short cause/fix framing where supported by the actual note
-- computed reading time
-- machine/software category when real
+- course name;
+- family/technique;
+- real software/machine context;
+- verified duration only when known;
+- fee only when known;
+- free demo only where applicable;
+- location;
+- primary action;
+- visual technique/photo proof.
 
-Possible conceptual types include:
-- Problem
-- Cause
-- Fix
+For the ten courses without confirmed duration/fee:
 
-Do **not** invent new technical notes just to populate categories.
+render nothing or truthful “ask us” copy where appropriate.
 
-Work with the existing verified note set unless new owner-approved/trade-knowledge content is deliberately added.
+Do not fill blank cells with guesses.
 
-Useful filters:
+## Page navigation
 
-- search
-- technique/category chips
+Use sticky/scrollable section navigation for long pages:
 
-No dates/bylines unless they serve a real purpose.
+- Overview
+- What you learn
+- Machine practice
+- Syllabus/topics when verified
+- Student work when real
+- Batches when real
+- Fees when verified
+- FAQ
 
-No fake RPM/GSM/stitch-density values.
+Only render sections that have real content.
 
-No SEO-targeted claim that Karma teaches Wilcom.
+## Desktop
+
+A sticky decision rail is allowed:
+
+- CTA;
+- verified facts;
+- current batch if real.
+
+## Mobile
+
+Contextual action dock:
+
+Book Free Demo / WhatsApp where relevant.
 
 ---
 
-# 29. Services — business mode
+# 19. Public Batches — schedule board, not marketing page
 
-`/services` gets a distinct commercial mode.
+Keep `/[locale]/batches`.
 
-This is the one public page allowed a major Deep Charcoal hero.
+Rebuild visually.
+
+Use a compact studio schedule board.
+
+Real fields only.
+
+A row may expose:
+
+- course;
+- start date if real;
+- timing;
+- days if real;
+- language if stored/real;
+- status;
+- seat information only when meaningful real capacity exists.
+
+Filters are data-driven.
+
+Do not render empty filters.
+
+Example:
+
+If there is no weekend batch in current data, there is no Weekend filter.
+
+Empty state:
+
+**No current batch has been published yet. Book a demo or WhatsApp the studio for the next opening.**
+
+Translate naturally into Gujarati.
+
+---
+
+# 20. Admissions information + admission form
+
+## `/admissions`
+
+Decision page, not a wall of marketing copy.
+
+Explain:
+
+1. Book demo
+2. Visit/use machine
+3. Choose course/batch
+4. Admission
+
+Surface real EMCAD fees/timings in the correct course context.
+
+Terms/admission norms can live in expandable/detail treatment.
+
+## `/admission`
+
+Keep backend/security behaviour.
+
+Rebuild the UI like a good registration desk:
+
+- clean paper surface;
+- strong field labels;
+- compact step progress;
+- groups that fit phone screen;
+- no giant card around every field;
+- Next/Submit reachable;
+- terms readable without a giant scroll block;
+- guardian number remains required by current business rule.
+
+Preserve:
+
+- honeypot;
+- minimum time;
+- rate limiting;
+- idempotency;
+- consent;
+- terms version;
+- validation;
+- Turnstile-ready flow without activating Turnstile.
+
+---
+
+# 21. Student Work — strongest visual proof page
+
+When real photos arrive this should become one of Karma’s most convincing pages.
+
+Until then, preserve exact 32-shot placeholders and technique visuals.
+
+Use an editorial wall / masonry-like layout that respects real aspect ratios.
+
+Do not force every work into one card size.
+
+Filters only for categories with real published work.
+
+On detail/open state, show available real context such as:
+
+- technique;
+- course;
+- screen/path;
+- machine stage;
+- finished result;
+- student only when consented/verified;
+- learning note only when real.
+
+No invented project metadata.
+
+---
+
+# 22. Machine Notes — useful workshop knowledge, not “technical archive theatre”
+
+The previous site leaned too hard into technical-manual aesthetics.
+
+Keep Machine Notes as a credibility asset but make it approachable.
+
+Visual direction:
+
+**workshop notebook + diagnostic sketch**, light mode.
+
+Index:
+
+- search;
+- category chips only where useful;
+- issue-first headlines;
+- concise excerpt;
+- technique/software label;
+- computed reading time if correctly derived.
+
+Article:
+
+Use problem-solving structure where the real note supports it:
+
+- What you see
+- What to check
+- Why it happens
+- How to correct
+
+Small technical diagrams are welcome.
+
+No fake machine numbers.
+No fake case IDs.
+No “engineering terminal” aesthetic.
+No giant monospace blocks.
+
+---
+
+# 23. Services — commercial studio, still light
+
+Services must look different through composition, not dark mode.
+
+Use:
+
+- crisp worktable white;
+- slightly cooler technical wash;
+- tighter grid/rules;
+- Screen → Brief → Design → Proof workflow;
+- commercial examples when real.
 
 Headline direction:
 
-> **Need designs, digitising or production work?**
+**Need embroidery design, digitising or production correction?**
 
-Show the commercial workflow clearly.
+Explain:
 
-For each service:
+- what client sends;
+- what Karma does;
+- what client receives;
+- workflow.
 
-- what the client sends
-- what Karma does
-- what the client receives
-- workflow
-- example output when real
+Do not invent:
 
-Primary CTA:
+- file formats;
+- turnaround;
+- price;
+- machine capacity.
+
+CTA:
 
 **Send a design brief**
 
 Secondary:
 
-**Send on WhatsApp**
+**WhatsApp**
 
-No public file uploader while R2/private storage is deferred.
-
-Do not invent:
-- turnaround
-- file formats
-- price
-- capacity
-
-The rest of the page returns to the normal light system.
+No public upload while R2 remains deferred.
 
 ---
 
-# 30. Studio / About
+# 24. Studio / About
 
-Do not use generic “faculty” cards.
+The page should make a visitor feel they understand the place.
 
-The page should eventually show:
+Use:
 
-- real founder/studio story
-- actual trainers
-- actual machine floor
-- how classes run
-- teaching languages
-- practical approach
-- software used
-- why production machines matter
+- studio floor photo placeholder;
+- machine stations;
+- real teaching approach;
+- EMCAD DAHAO;
+- real languages/support;
+- location;
+- trainer portraits only when real/approved;
+- founder story only when supplied.
 
-Until identities/photos/story are supplied:
+No generic “faculty” cards.
+No fake biographies.
+No fake years of experience.
 
-- keep honest placeholders/pending blocks
-- do not invent biographies
-- do not invent years of experience
+Desktop may use one controlled sticky image/story moment.
 
-Desktop may use one sticky/pinned storytelling visual.
-
-Mobile must stack normally; no scroll hijack/pinned trap.
+Mobile must be normal flow.
 
 ---
 
-# 31. Contact / Visit
+# 25. Contact / Visit
 
-First phone viewport should prioritize:
+First phone viewport must expose practical actions.
 
-# Visit Karma Design Studio
+Heading:
+
+**Visit Karma Design Studio**
+
+Show:
+
+- address;
+- landmark;
+- Call;
+- WhatsApp;
+- Directions.
+
+Do not publish a clean “today’s hours” claim until the 10:30/11:00 conflict is resolved.
 
 Then:
 
-- address
-- current truthful hours statement
-- Call
+- map/wayfinding;
+- what happens on a first visit;
+- short enquiry/demo action.
+
+No giant contact form if a call/demo action is more useful.
+
+---
+
+# 26. Footer
+
+Light.
+
+Compact.
+
+Useful.
+
+Contains:
+
+- Karma identity;
+- From Screen to Stitch;
+- Courses;
+- Batches;
+- Student Work;
+- Machine Notes;
+- Services;
+- Studio;
+- Contact;
+- address;
+- phones with correct roles;
+- Directions;
+- WhatsApp;
+- Instagram/Facebook;
+- EN / Gujarati;
+- Privacy / Terms.
+
+No asset-shoot instructions.
+No internal operations language.
+No giant footer slab.
+
+---
+
+# 27. Copy rebuild — entire public site
+
+This is not just a visual task.
+
+Rewrite the public copy where the current text is:
+
+- verbose;
+- repetitive;
+- generic;
+- written to explain the design concept rather than help the visitor;
+- “technical” for appearance rather than usefulness;
+- obviously AI-like;
+- formal in Gujarati when a natural studio voice is better.
+
+## 27.1 English voice
+
+Direct.
+Practical.
+Confident.
+Specific.
+Warm.
+Commercial.
+
+Examples of the *type* of sentence wanted:
+
+- Learn the design on screen. Test it on the machine.
+- See the stitch before you decide.
+- Choose the batch that fits your day.
+- Bring a production problem. Learn what to check.
+
+These are tone examples, not mandatory copy.
+
+Avoid:
+
+- unlock your creativity;
+- transform your passion;
+- embark on your journey;
+- world-class;
+- premier;
+- best-in-class;
+- become a master;
+- guaranteed career;
+- limitless possibilities.
+
+## 27.2 Gujarati voice
+
+Natural Surti Gujarati/Gujlish.
+
+Trade words remain familiar when that is how the institute speaks:
+
+- EMCAD
+- machine
+- batch
+- demo
+- design
+- sample
 - WhatsApp
-- Directions
 
-Then map/wayfinding.
+Do not produce literal bureaucratic Gujarati when natural spoken wording is clearer.
 
-Do not show a computed “today’s hours” until the opening-hours conflict is resolved accurately.
+## 27.3 Copy hierarchy
 
-Add a compact “What happens on your first visit” sequence:
+A normal section should need:
 
-1. Arrive / message first
-2. See the machines
-3. Try the demo
-4. Choose later
+- one strong heading;
+- one short explanation;
+- facts/actions.
 
-Keep enquiry/contact form extremely short.
+Not:
 
----
-
-# 32. Contextual mobile sticky action bar
-
-On course/admission/batch decision pages:
-
-**Book free demo | WhatsApp**
-
-Target height about 56–60px including safe area treatment.
-
-Rules:
-
-- clear hierarchy
-- not on every page merely because component exists
-- does not cover content
-- anchors/focus states account for sticky chrome
-- respects permission-free public routes
-- uses the correct WhatsApp number from central site config
-- analytics events contain no PII
+heading + eyebrow + mono label + long paragraph + subheading + another paragraph.
 
 ---
 
-# 33. Motion
+# 28. English + Gujarati i18n contract
 
-Animation must come from embroidery, not generic landing-page motion.
+Return the public app to bilingual parity.
 
-## Hero
-Thread traces one design path once.
+Requirements:
 
-## Screen-to-Stitch
-CAD path transitions into stitched texture/state.
+- `routing.locales` = `['en','gu']`;
+- `messages/en.json` and `messages/gu.json` mirror all public keys;
+- no `messages/hi.json`;
+- sitemap/hreflang only EN/GU;
+- no `/hi` route generation;
+- route-preserving EN/GU switch;
+- correct `<html lang>`;
+- Gujarati script safeguards remain tested.
 
-## Course items
-Tiny stitch line along edge/title on hover/focus.
+A helper that improves bilingual content access may remain if it is actually useful after Hindi is removed.
 
-## Buttons
-Arrow movement approximately 2–3px.
-
-## Gallery
-Very small image scale (~1.02) on hover-capable devices.
-
-## Menu
-Controlled 220–280ms slide/fade.
-
-## Machine Notes
-Annotations may reveal after primary content.
-
-Never:
-
-- cursor followers
-- floating blobs
-- constant parallax
-- infinite marquees
-- glowing cards
-- scroll hijacking
-- animation merely because a library exists
-- loops that compete with the work
-
-Respect `prefers-reduced-motion`.
-
-No animation should hide content if it fails.
+Do not preserve complexity solely because it was recently written.
 
 ---
 
-# 34. Responsive compactness
+# 29. Photography architecture — 32 exact slots remain
 
-Develop from **390px outward**, then verify smaller and larger widths.
+The studio’s final photo list remains authoritative.
 
-## Mobile
+Expected:
 
-- approximately 16px gutters
-- section spacing generally 32–48px
-- card padding generally 12–16px
-- avoid cards consuming an entire viewport
-- use 2-column facts
-- horizontal chips
-- compact list cards
-- accordions
-- tabs
-- bottom sheets
-- 2-column visual galleries when appropriate
-- minimum useful tap target ~44–48px for primary controls
+**32 photographs**
 
-## Tablet
+Current:
 
-Tablet gets a deliberate composition.
+**0 real files added**
 
-Use:
-- 2-column cards
-- 60/40 splits
-- 3-column gallery where content supports it
-- expanded nav only when it genuinely fits
+Do not add stock.
+Do not generate fake Karma images.
+Do not borrow other institutes’ work.
+Do not activate R2 for public photos.
 
-Do not treat tablet as “mobile but wider.”
+The 32 slots include:
 
-## Desktop
+- 3 Hero
+- 8 Course
+- 6 Student Work
+- 3 Trainers
+- 6 Studio/Machines
+- 2 Student Stories
+- 3 Screen-to-Stitch
+- 1 Studio Floor
 
-- content width around 1180–1240px unless a specific media composition earns wider
-- more asymmetry
-- more image/text pairings
-- richer visible metadata
-- no arbitrary enlargement merely because space exists
+Known eight course-photo subjects:
 
-Required final widths:
+- Zardosi
+- 4-Beads
+- Sequence
+- Coding/Cording
+- Chain & Multi
+- Laser
+- Tufting
+- EMCAD station
 
-- 320
-- 360
-- 390
-- 430
-- 768
-- 820
-- 1024
-- 1280
-- 1440
+No dedicated shot in this shoot for:
 
-All public locales must be measured.
+- Flat Embroidery
+- Appliqué & 3D
+- Cross Stitch
 
----
+Those three must look intentional using Stitch Swatches until real media is acquired.
 
-# 35. Content and trust cleanup
+## Placeholder presentation
 
-Do a real crawl of the current Workers.dev build.
+Placeholders should feel like **reserved art-direction frames**, not broken images.
 
-Do **not** use the old `karmadesignstudio.in` template site as a factual source.
+They may show:
 
-Before calling the redesign complete:
+- photo slot name;
+- aspect ratio;
+- restrained technique swatch;
+- a subtle “studio photo reserved” cue.
 
-- no accidental broken images
-- no accidental `Image Not Found`
-- no template leftovers
-- no broken internal links
-- no missing legal routes
-- no duplicate contradictory course facts
-- no old template email
-- contact details from central config only
-- no unsupported claims
-- unique metadata
-- course schema only with verified facts
-- breadcrumbs on deep pages where appropriate
-- LocalBusiness/EducationalOrganization schema through the one approved schema module
-- hreflang EN/GU/HI
-- correct canonical URLs for the review host environment
-- Terms/Privacy retain existing legal-review/noIndex rules until approved
+Do not show giant dashed empty boxes everywhere.
 
-**Important:** deliberate named PhotoSlots are not “broken placeholders.” Preserve them until real images arrive.
+When real photos arrive, replacing the file must not require a page redesign.
 
 ---
 
-# 36. Backend/content architecture
+# 30. Factual policy — unchanged and strict
 
-Do not rebuild working infrastructure for aesthetic reasons.
+## Verified EMCAD facts
 
-## Courses
+Only EMCAD DAHAO Embroidery Designing currently has owner-confirmed:
 
-Karma already has central course and operational sources.
+- 3 months;
+- ₹35,000 total;
+- ₹25,000 at admission;
+- ₹10,000 balance within one month;
+- four standard batch timings;
+- 2-day free demo;
+- 2-hour demo session;
+- EMCAD DAHAO only;
+- practical curriculum already recorded.
 
-Use those rather than creating a second truth.
+Do not copy these to the other ten courses.
 
-Audit duplication across:
-- homepage
-- courses index
-- course detail
-- admission
-- batches
-- SEO/schema
+## Reviews
 
-Consolidate only where necessary.
+No fake review.
+No fake count.
+No AggregateRating until properly verified.
 
-## Batches
+## Trainers
 
-Use the actual database/queries for public live batch data.
+No fake name.
+No fake profile.
+No fake years.
 
-No demo inventory system unless the institute actually manages inventory.
+## Student work/stories
 
-## Student work / notes / stories / trainers / services
+No fake student identity or outcome.
 
-Keep shared IDs and central sources.
+## Opening time conflict
 
-Do not build three disconnected locale sites.
+Still unresolved:
 
-## Trilingual source model
+- general “evening batches till 10:30 pm”
+- EMCAD fourth slot `8:00–11:00 PM`
 
-Adding Hindi must be typed and coherent.
+Do not reconcile by guessing.
 
-Avoid a wave of ad-hoc untranslated literals.
+## Payment
 
-Prefer a reusable localized-content shape/helper where practical, while preserving stable IDs/slugs.
+No online payments.
 
-Do not rename public slugs merely because display copy changed.
-
-Content Desk JSONB may be extended for Hindi where needed without forcing a relational migration solely for translation fields if typed validation can handle it safely.
-
-If a schema migration becomes genuinely necessary, generate a new additive Drizzle migration; never edit 0000–0004.
-
-## Free-tier discipline
-
-Audit:
-- N+1 queries
-- unbounded lists
-- duplicate requests
-- client fetching that could be server-rendered
-- unnecessary hydration
-- image payload
-- locale bundle growth
-
-Do not optimize by guessing. Measure.
+No UPI checkout.
+No payment link.
+No Razorpay/Stripe.
 
 ---
 
-# 37. Visual component system
+# 31. Backend and architecture — preserve the working system
 
-Before page-by-page work, establish/revise the public component set.
-
-Target reusable components/roles:
-
-- `Header`
-- `MobileMenu`
-- `LanguageSheet`
-- `QuickFact`
-- `PrimaryButton`
-- `SecondaryButton`
-- `CourseCard`
-- `CourseListRow`
-- `CategoryTabs`
-- `BatchCard` / batch row
-- `StudentWorkCard`
-- `ScreenToStitch`
-- `MachineNoteCard`
-- `ReviewCard` only for real reviews
-- `StudioPhoto`
-- `FAQAccordion`
-- `StickyActionBar`
-- `Breadcrumbs`
-- `SectionIntro`
-- `ThreadDivider`
-- `Footer`
-
-Reuse existing primitives where they already satisfy the role.
-
-Do not duplicate a working component merely to match a name in this plan.
-
-New public styling should be scoped so Karma Console does not inherit it accidentally.
-
----
-
-# 38. Screenshot/browser audit requirement
-
-Before changing visual code:
-
-Capture the current deployed/production-build version of every public route template at:
-
-- 390
-- 768
-- 1024
-- 1440
-
-At minimum:
-- EN
-- GU
-- HI once Hindi exists
-
-After each major route phase, repeat the relevant screenshots.
-
-For final hardening, run a full rendered-browser matrix at all required widths.
-
-Prefer actual Chromium measurements over source-code assumptions.
-
-Browser tooling must not be committed as a dependency merely for this audit if it can be run externally/outside the package, as the prior compact-density pass successfully did.
-
-Measure:
-
-- overflow
-- clipping
-- sticky overlap
-- focus visibility
-- tap target size
-- heading heights
-- first-viewport usefulness
-- route height
-- locale height differences
-- image/placeholder aspect ratios
-
----
-
-# 39. Homepage editorial budget
-
-The previous compact-density pass correctly concluded that homepage length can no longer be meaningfully reduced by shaving padding.
-
-This plan makes the editorial decision:
-
-**Reduce the homepage from the current ~19 sections to roughly 8 purposeful sections.**
-
-Do not preserve an old section merely because it exists.
-
-Deep content should move to:
-- Courses
-- Batches
-- Student Work
-- Machine Notes
-- Services
-- Studio/About
-- Contact
-
-The homepage is a router/decision/proof surface, not the entire website concatenated.
-
----
-
-# 40. SEO and discoverability
-
-Keep the SEO architecture factual.
-
-Required:
-
-- EN/GU/HI hreflang
-- locale-aware titles/descriptions
-- breadcrumbs on deep pages
-- Course schema only where verified
-- `timeRequired` only for verified durations
-- no prices/offers in schema unless policy permits and facts are verified
-- no aggregate rating without verified count/data
-- no review schema for sample content
-- no trainer Person schema without real verified people
-- LocalBusiness/EducationalOrganization through `src/lib/schema.ts`
-- Machine Notes remain technical authority, not keyword-stuffed blog posts
-- no Wilcom-training targeting
-- page copy should use real search language naturally, not repetitive SEO blocks
-
----
-
-# 41. Accessibility
-
-Do not trade accessibility for visual cleanliness.
-
-Required:
-
-- WCAG-appropriate contrast
-- visible focus
-- logical heading order
-- keyboard-operable menu, language sheet, tabs, accordions, galleries
-- no information by colour alone
-- tap targets appropriate to context
-- `prefers-reduced-motion`
-- locale/script-specific line heights
-- Gujarati no uppercase/letterspacing
-- Hindi Devanagari no Latin tracking assumptions
-- sticky bars never cover focused/anchored content
-- no hover-only essential action
-- images have useful alt text once real
-- placeholders describe the shot they await, not fake visual content
-
----
-
-# 42. Performance
-
-Do not solve the redesign by adding a stack of libraries.
-
-Current Worker baseline is about 2026 KiB gzip against 3 MB.
-
-Protect free-plan headroom.
-
-Prefer:
-- CSS
-- existing primitives
-- small targeted client components
-- server rendering
-- native `<details>`
-- CSS scroll snap
-- browser APIs where appropriate
-
-Audit:
-- bundle size
-- font payload after Hindi font addition
-- image strategy when real files arrive
-- unnecessary hydration
-- duplicated locale payload
-- large serialized props
-
-If a dependency is added, document why it is materially better than the native/current option and run Wrangler dry-run size measurement.
-
----
-
-# 43. Infrastructure exclusions
-
-Do not touch as a side effect:
-
-- `karmadesignstudio.in`
-- DNS
-- Cloudflare custom-domain routing
-- R2 activation
-- Turnstile activation
-- payment gateway
-- UPI checkout
-- Stripe
-- Razorpay
-- Supabase project
-- Supabase Auth
-- Hyperdrive architecture
-- RLS policy model
-- password-only console rule
-- MFA/TOTP/AAL2
-- deployment command
-- private-file architecture
-
-No manual production deploy.
-
-Cloudflare remains Git-driven.
-
----
-
-# 44. Karma Console preservation
-
-The public redesign must not undo the compact Console.
+A full visual rebuild does not mean rebuilding the backend.
 
 Preserve:
 
-- 52px compact app bar
-- permission-aware bottom nav
-- rows over giant panels
-- current admin typography/density
-- Today queues
-- `/admin/batches`
-- archive/restore/delete model
-- Owner-only destructive deletion
-- one Owner / five Admins
-- print routes
-- mobile bottom sheets/action menus
-- current query optimizations
+- Next.js 15;
+- React 19;
+- TypeScript strict;
+- Tailwind 4;
+- next-intl;
+- Supabase Auth;
+- Supabase Postgres;
+- Drizzle;
+- Hyperdrive;
+- OpenNext;
+- Cloudflare Workers;
+- RLS strategy;
+- existing forms/security;
+- Content Desk;
+- course operations;
+- admission terms;
+- audit;
+- archive/delete system;
+- A4 print system;
+- Karma Console.
 
-Public styling should not leak into `/admin`.
+Use existing central operational facts rather than duplicating them.
 
-If shared global tokens need to change, either:
-- prove the Console remains correct at all widths
-- or scope the public visual system instead
+The redesign may refactor public content helpers/components when that produces a cleaner source of truth.
 
-Scoping is preferred.
+Avoid schema migrations unless genuinely necessary.
+
+The Hindi cleanup in Phase 0 should not require a new DB migration because the connected database never received `0005`.
 
 ---
 
-# 45. Implementation phases
-
-Execute one clean PR per phase unless two tiny adjacent phases are clearly safer together.
-
-## Phase 1 — repository + rendered screenshot audit
-**Status:** ✅ Complete — PR #55, merged as `b5edbf9`
-
-Audit recorded in **`docs/modern-textile-lab-audit.md`**. Measured in Chromium
-against a production build — 100 screenshots at 390/768/1024/1440 across 25
-routes in both current locales, plus per-section geometry for every route.
-Browser tooling stayed outside the package, as §38 requires.
-
-Six findings change how later phases are implemented:
-
-1. **The course taxonomy §17 asks for already exists.** `src/content/courses.ts`
-   types `family: "machine" | "modern" | "software"` with `FAMILY_ORDER` and an
-   owner-decided `COURSE_DISPLAY_ORDER` — 8 / 2 / 1 = 11. The homepage explorer
-   reads that, so no classification is invented and "popular" never appears.
-2. **`sampleBatches()` is the only fabricated batch data in the repository** —
-   and the only `"Sat-Sun"` string, i.e. the fake weekend §5.5 forbids. It is
-   already production-gated behind `demoModeAllowed`, so the new public route
-   simply must not call it. `getUpcomingBatches()` already filters status, date
-   and both archive flags in SQL before LIMIT.
-3. **The bilingual assumption is 135 occurrences across 46 files**, in the shape
-   `locale === "gu" ? x.nameGu : x.nameEn` — six of them Console files that must
-   be excluded. Phase 4's real work is the typed localized-content accessor §36
-   asks for, not a config change.
-4. **The Gujarati `@font-face` `unicode-range` already claims `U+0951-0952` and
-   `U+0964-0965`** — Devanagari-shared marks. Adding a Devanagari face without
-   reconciling that range would give Hindi its danda from the Gujarati font.
-5. **Homepage section padding is 4% of its 18,381px.** Twenty sections, and the
-   measurement names the duplication precisely: four sections (3,816px) argue
-   the machine claim, two show student work, two show the studio, and three
-   render only `sample: true` content. §39's editorial cut is the only lever
-   left, and this is where it falls.
-6. **`.on-carbon` survives unused from the last redesign**, which makes the
-   §4.4 Services charcoal hero a re-use rather than a re-implementation.
-
-Also confirmed: **32 photo slots, 0 filled**; no horizontal overflow at any
-width on any route; `globals.css` and `premium.css` are shared with Karma
-Console, which is why Phase 3 scopes a fourth public-only stylesheet rather than
-retuning shared tokens.
-
-## Phase 2 — information architecture + public route/navigation model
-**Status:** ✅ Complete — PR #56, merged as `e1cd496`
-
-The IA is recorded in **`docs/modern-textile-lab-ia.md`** — authoritative for
-public routes, navigation and conversion chrome, and it supersedes the
-public-navigation sections of the two previous plans.
-
-**`/[locale]/batches` exists and is server-rendered.** It reads
-`getUpcomingBatches()` directly — one query, no client fetch, no hydration, no
-loading skeleton, because this page *is* about the batches where the homepage
-teaser is a widget on an otherwise static page. `force-dynamic` verified: no
-HTML is emitted for it at build, so every request queries live.
-
-The rule the route is built on is *real rows or nothing*:
-
-- it does not call `sampleBatches()` — the audit found that generator is the
-  only `"Sat-Sun"` string in the repository, i.e. the fake weekend §5.5 forbids
-  by name, along with fabricated seats, dates and per-batch language;
-- every uncertain field renders conditionally — no `days`, no days line; no
-  `language`, nothing said about language;
-- **`seats` of 0 means "not tracked", not "full"**, so it renders no seat line
-  rather than manufacturing "0 seats left" out of a null;
-- the empty state offers demo, WhatsApp and a call instead of a fabricated
-  batch, and the error state says the list could not be loaded rather than
-  showing something possibly stale.
-
-**The homepage map from 20 sections to 8** is in the IA doc §2, with each
-removal named and its content's new home. Twelve sections leave: four that
-argue the machine claim (3,816px between them), three that render only
-`sample: true` content, and five that duplicate another section. Nothing
-verified is lost — every fact moves to the page that owns it.
-
-**Navigation** is defined in §4: six desktop links (Home drops — the wordmark
-is the home link; Admissions and Contact move to the footer and mobile menu,
-which §12 permits explicitly), a 56px mobile header of Logo | language | menu,
-and a seven-row mobile menu with Book free demo anchored at the bottom.
-Implementation lands in Phase 4; Phase 2 adds `/batches` to the existing header
-and footer so the new route is reachable in every merged state.
-
-**The contextual sticky CTA policy** is §6: Book free demo | WhatsApp on
-`/courses/[slug]`, `/batches`, `/admissions`; the admission form keeps its own
-`.form-nav` rather than stacking a second bar; `/contact` gets none, because a
-fixed bar duplicating the three buttons already in its first viewport is chrome
-covering content. The doc separates what the owner changed (which actions,
-which routes) from the five contracts that survive verbatim — separate phone
-roles, no PII, one token for height and reservation, 44px targets, and
-actions-not-navigation.
-
-**No URL is renamed or removed.** `/about` keeps its slug while displaying as
-"Studio". `/admissions` and `/batches` both exist and neither redirects to the
-other. The footer's `/admissions#batches` anchor — which pointed two thirds of
-the way down another page — becomes a link to the route.
-
-New suite: `tests/mtl-routes.test.ts` (15 assertions) covering the route map,
-that nothing is renamed, sitemap parity, that **no public `href` points at a
-route that does not exist**, the batches data contract, and the locale
-routing contract. **809 tests pass.**
-
-## Phase 3 — Modern Textile Lab design system
-**Status:** ✅ Complete — PR #57, merged as `4677f7e`
-
-`src/app/textile-lab.css`, imported by `src/app/[locale]/layout.tsx` **only**.
-
-**The scoping is structural, not a convention.** The Phase 1 audit found there
-is no shared root layout — `[locale]/layout.tsx` and `admin/layout.tsx` are two
-independent roots, and both import the other three stylesheets. A fourth sheet
-imported by one root cannot reach the other. Every selector inside is
-*additionally* scoped to `.site-body`, and a test walks the file asserting that.
-
-**The token bridge.** Re-pointing the shared `--color-*` tokens inside
-`.site-body` re-skins ~90 public files without editing a className, because
-Tailwind v4 compiles `bg-ivory` to `var(--color-ivory)`. Verified in a browser
-from one build: `/en` reports `--color-ivory: #f7f4ee` and `/admin/login`
-reports `#f5f0e6`, with the Console also keeping `#111716`, `#605e56`, needle
-`#29617a`, zari `#aa6239` and its own type scale. The alternative was a
-ninety-file rename with no visual difference at the end of it.
-
-**Every ratio measured, and two of them changed the design.** Thread Red is
-3.94:1 on Canvas and Muted Ink is 4.34:1 on Warm Sand — both below the 4.5
-body-text floor. Neither is fixed by brightening the accent: each gets a deep
-step (`--mtl-thread-deep` #B03522 → 5.66/6.22/4.79; `--mtl-ink-muted-deep`
-#5E605C → 5.79/6.36/4.90), and `.surface-sand` swaps its own in so no caller
-has to remember.
-
-**Eleven public colours became seven.** Needle Blue and Zari Copper are mapped
-into the seven rather than deleted — ninety files reference them and an
-undefined Tailwind v4 token silently falls back to `currentColor`, which is how
-`border-rule` already went wrong in the Console.
-
-**Type scale, rendered at both ends:** h1 **32.5 → 56**, h2 **24.3 → 38**,
-h3 **20 → 24**, body **16**, button 14 → 14.8. Every value inside the plan's
-ranges and the ladder strictly ascending at 390 *and* 1440. `lead` and
-`bodylg` were separate clamps landing 0.04px apart at 390px — one size role
-wearing two names — and are now deliberately identical.
-
-**Hindi typography is a stack decision, not a range decision.** The Gujarati
-face claims the Devanagari-shared danda and stress marks, so one shared stack
-would draw a Hindi danda from the Gujarati font. Re-cutting the Gujarati range
-is the wrong fix — Gujarati uses the danda too. Each script gets its own
-`:lang()`-scoped stack, Gujarati declared second so an embedded
-`<span lang="gu">` on a Hindi page wins on source order. The face is declared
-in this file, so the Console never downloads it, and its `unicode-range` claims
-the Devanagari block and nothing decorative.
-
-Also delivered: four texture treatments each with one job (every alpha ≤ 0.09,
-no page ground textured), `.surface-business` as a **single named class** for
-the one charcoal surface so it cannot be reached for by habit, `.lab-row`,
-`.lab-tabs`/`.lab-tab`, `.lab-sheet`, `.action-bar` with its reservation read
-from the same token as its height, and a motion budget of one 2.5px arrow, one
-1.02 image scale and one 240ms sheet.
-
-Three failures came from the phase's own tests and all three were fixed in the
-CSS rather than the assertion: `--text-h4` rendering 0.008px *below*
-`--text-lead`, the `lead`/`bodylg` duplication, and a texture-alpha sweep that
-was catching the bottom sheet's 45% scrim (that one was the test, and it was
-scoped to the texture rules).
-
-New suite: `tests/mtl-design-system.test.ts` (32 assertions). **841 tests pass.
-Worker 2028.56 KiB gzip** — +2.3 KiB, because the Devanagari face is fetched by
-the browser on Hindi pages only and never enters the Worker bundle.
-
-`docs/design-system.md` now opens by stating that there are two systems and
-which side of the product each governs.
-
-## Phase 4 — trilingual shell + navigation
-**Status:** ✅ Complete — PR #58, merged as `PLACEHOLDER_MERGE`
-
-**`messages/hi.json` — 860 leaf strings of real Devanagari Hindi**, written
-against the existing Gujarati as the register reference so the calibration rule
-is explicit: *if the Gujarati kept a word in English, the Hindi keeps it too.*
-Trade terms (machine, batch, WhatsApp, design, demo, EMCAD DAHAO) stay Latin
-inside Devanagari sentences, which is how the Surat floor talks.
-
-Verified mechanically, not asserted: **>80% of Hindi prose carries Devanagari**;
-**zero** multi-word English sentences standing as a translation; **zero**
-Gujarati script leaked from the source; **every ICU placeholder and plural
-branch preserved** across all 860 leaves.
-
-Six values were corrected after comparing against Gujarati — the translation
-had kept `EMCAD DAHAO course`, `EMCAD DAHAO file`, the page title and the
-course-count plural in Latin where the Gujarati transliterates. One flagged by
-a translator and acted on: `reassurance[1]` said the form is available "in
-Gujarati or English", which stopped being true the moment this phase shipped —
-so it changed in **all three** catalogues, a fact catching up with the product.
-
-**The Console stays bilingual on purpose.** `AdminLocale` is its own two-value
-type, so `messages/hi.json` has no `admin` namespace at all — a true statement
-about the product, and `tests/i18n-parity.test.ts` asserts the asymmetry rather
-than tolerating it.
-
-**`src/lib/i18n/localized.ts` is the answer to the audit's 135 ternaries.**
-`pick()` for the `*En`/`*Gu`/`*Hi` suffix convention, `tr()` for `{en,gu,hi}`,
-`pickOptional()` which returns `undefined` rather than `""` so a caller can
-render nothing at all, and `intlLocale()` so no date formatter is written as
-`locale === "gu" ? "gu-IN" : "en-IN"` again. Every fallback warns loudly in
-development, because a silent fallback is indistinguishable from a translation
-that exists — which is exactly how a "Hindi" site stays English.
-
-**`scriptLang()` marks content this site did not write.** The homepage renders
-live YouTube titles from the studio's own Gujarati channel; on the Hindi page
-they were Gujarati text inside a `lang="hi"` document with no marker, announced
-by a screen reader in the wrong voice and with no signal to reach for the
-Gujarati face. We cannot know a feed string's language; we can read its script.
-
-**Navigation rebuilt to the IA.** Six desktop links — Home dropped (the
-wordmark is the home link), Admissions and Contact moved to the footer and
-mobile menu, `/about` labelled "Studio" without renaming the route. A 56px
-mobile header of wordmark | language | menu, and a seven-row mobile menu with
-Book free demo anchored at the bottom.
-
-**The language chooser replaced the pill entirely.** Three values do not fit a
-segmented control and a pill has nowhere for the native-script preview. It is a
-popover on a laptop and a bottom sheet on a phone, a real dialog either way
-(Escape, focus trap, focus restoration, scroll lock), every option marked with
-its own `lang`, no flags — a flag is a country, and Gujarati and Hindi are
-spoken in the same one. The one-time banner now offers **both** other languages
-rather than "the other" one.
-
-**hreflang and sitemap alternates now derive from `routing.locales`.** They were
-two hardcoded entries while the sitemap's URLs already iterated the list — so a
-third locale would have tripled the sitemap to 99 URLs while every one still
-advertised two alternates. Measured after: **99 URLs, each with all three.**
-
-**One additive migration, `drizzle/0005_trilingual_locale.sql`** —
-`ALTER TYPE "public"."locale" ADD VALUE 'hi'`. Genuinely necessary:
-`applications.locale` and `design_jobs.locale` record the language a visitor
-filled a form in, so a Hindi submission would fail on insert. **NOT YET
-APPLIED** — it ships in this PR and needs `npm run db:migrate` against the
-Supabase database. The type system then caught the boundary the migration
-creates, in three places, and each was resolved by asking what the column
-actually means: `staff.admin_locale` narrows back to `AdminLocale` on read (the
-Console has no Hindi catalogue), while **`students.languagePref` and
-`serviceEnquiries.locale` genuinely widen** — the first because Karma teaches
-in Hindi and being unable to record a Hindi-preferring student was a gap in the
-record, the second because it stores the language a B2B client wrote to us in.
-
-**One real contradiction fixed.** `src/lib/schema.ts` emitted
-`availableLanguage: ["gu","hi","en"]` on the organisation and
-`inLanguage: ["gu","en"]` on every course — two JSON-LD blocks on the same page
-disagreeing about whether Karma teaches in Hindi. It does. Both now read one
-`TEACHING_LANGUAGES` constant.
-
-`tests/machine-lab-secondary.test.tsx`'s `expect(routing.locales).toEqual(["en","gu"])`
-was the suite's single hard locale tripwire and was updated deliberately: what
-it guards — one route tree, so no route exists in one language and not another
-— is unchanged and now derived rather than restated.
-
-New suite: `tests/mtl-trilingual.test.ts` (34 assertions). **878 tests pass.
-Worker 2062.68 KiB gzip** (+34 KiB for a third catalogue in the bundle; the
-Devanagari face is still browser-fetched on Hindi pages only).
-
-`CLAUDE.md` non-negotiables #1 and #15 and `docs/project-context.md` §8 are
-rewritten for the trilingual rule.
-
-## Phase 5 — homepage rebuild
-**Status:** ⏳ Pending
-
-Implement the ~8-section homepage:
-
-1. compact hero
-2. audience routing
-3. course explorer
-4. Screen → Machine → Stitch
-5. student work
-6. Why Karma
-7. live batches + demo
-8. studio proof + FAQ + close
-
-Do not preserve redundant sections merely to avoid deletion.
-
-## Phase 6 — Courses + Course detail + Batches + Admission
-**Status:** ⏳ Pending
-
-- courses catalogue filters/list-card system
-- all eleven courses
-- decision-first course detail
-- sticky content rail
-- contextual sticky Demo + WhatsApp
-- public Batches route
-- data-driven filters
-- compact admissions decision page/form
-- no invented facts
-
-## Phase 7 — Student Work + Machine Notes
-**Status:** ⏳ Pending
-
-- visual student-work gallery
-- real/pending detail behavior
-- filters from actual content
-- Machine Notes search/filter knowledge hub
-- computed reading time if useful
-- preserve technical authority
-- no invented articles/specs
-
-## Phase 8 — Services + Studio/About + Contact + secondary pages
-**Status:** ⏳ Pending
-
-- controlled charcoal Services hero
-- B2B workflow
-- no upload
-- Studio/About storytelling
-- trainer/story placeholders remain honest
-- Contact first-viewport redesign
-- legal/verify/error/loading/404 harmonized with new public system
-- footer final form
-
-## Phase 9 — content architecture + copy + trust + SEO
-**Status:** ⏳ Pending
-
-- central-source audit
-- remove user-facing duplication
-- trilingual content parity
-- rewrite generic copy
-- preserve verified facts
-- review/sample gates
-- structured data
-- breadcrumbs
-- metadata
-- live-batch query integrity
-- no old-template facts
-
-## Phase 10 — photography-ready art direction
-**Status:** ⏳ Pending
-
-Until files arrive:
-- all 32 slots remain honest
-- no stock/generated media
-- no extra mandatory slots
-
-Prepare:
-- exact crop behavior
-- aspect-ratio contracts
-- responsive `sizes`
-- alt-text workflow
-- file naming
-- future static-vs-R2 decision checklist
-- OpenGraph plan for when real photography exists
-
-Do not activate R2.
-
-## Phase 11 — full responsive/accessibility/performance/creative hardening
-**Status:** ⏳ Pending
-
-Rendered-browser matrix:
-
-- 320
-- 360
-- 390
-- 430
-- 768
-- 820
-- 1024
-- 1280
-- 1440
-
-All public locales.
-
-Verify:
-- no overflow/clipping
-- useful first viewport
-- keyboard/focus
-- sticky chrome
-- language parity
-- reduced motion
-- route height
-- no accidental English fallback
-- no Console regression
-- Worker gzip
-- no unexpected dependencies
-
-Final creative-director question:
-
-> Does this feel like someone spent time inside this specific studio, understood the machines, understood the students, understood EMCAD DAHAO, understood Gujarati/Hindi visitors, understood Surat garment businesses, and built the site around that reality?
-
-Remove anything that still looks:
-- template-like
-- generic
-- overdesigned
-- repetitive
-- unnecessarily large
-- technically fake
+# 32. New public component architecture
+
+Do not keep a giant pile of old components and override their CSS indefinitely.
+
+Build a coherent new public component family.
+
+Exact filenames may differ, but conceptually the system needs:
+
+- `PublicHeader`
+- `PublicMobileMenu`
+- `LocaleSwitch`
+- `HeroProof`
+- `FactCluster`
+- `EntryPathIndex`
+- `SampleStrip`
+- `StitchSwatch`
+- `ThreadLine`
+- `NeedlePoint`
+- `HoopWindow`
+- `ScreenMachineProof`
+- `CourseIndexRow`
+- `CourseDecisionRail`
+- `BatchBoard`
+- `BatchRow`
+- `WorkTile`
+- `WorkWall`
+- `NoteCard`
+- `StickyActionDock`
+- `ThreadProgress`
+- `FAQDisclosure`
+- `VisitPanel`
+- `PublicFooter`
+
+Use composition, not a universal Card component, as the visual system.
+
+## Migration strategy
+
+A route may temporarily use old and new components during its own PR.
+
+At the end of the full redesign:
+
+- delete unused old public components;
+- delete dead public CSS;
+- no stale visual generation should remain loaded “just in case.”
 
 ---
 
-# 46. Per-phase PR protocol
+# 33. Accessibility
 
-For every phase:
+The new look must remain genuinely accessible.
 
-1. start from latest `main`
-2. re-read the relevant current code
-3. select only useful Claude skills
-4. create feature branch
-5. implement the complete phase
-6. update this plan:
-   - `⏳ Pending` → `✅ Complete`
-   - PR number
-   - merge commit
-   - concise implementation record
-7. update `docs/project-context.md` and specialist docs whenever product/architecture/design/locale facts change
-8. run:
+Required:
+
+- semantic headings;
+- keyboard navigation;
+- visible focus;
+- 44px-ish important touch targets;
+- proper labels;
+- status not colour-only;
+- reduced motion;
+- no horizontal overflow;
+- no focus trapped behind sticky dock;
+- scroll padding for sticky chrome;
+- adequate contrast;
+- Gujarati glyphs never clipped;
+- menus/dialogs restore focus correctly;
+- tabs/accordions use correct semantics.
+
+Do not sacrifice legibility for compactness.
+
+---
+
+# 34. Performance / free-tier discipline
+
+No new dependency unless it clearly earns its cost.
+
+Prefer:
+
+- CSS;
+- SVG;
+- native `<details>` where appropriate;
+- small React interactions;
+- server components;
+- existing helpers.
+
+Avoid:
+
+- GSAP unless absolutely necessary — currently it is not;
+- animation libraries;
+- carousel libraries for simple scroll snap;
+- icon packages when current icon system covers needs;
+- component kits.
+
+Run Worker size after bundle-affecting phases.
+
+Remain comfortably under the 3 MB gzip free-plan limit.
+
+---
+
+# 35. Implementation workflow — RESTART from Phase 0
+
+The prior phase statuses in the rejected plan are obsolete.
+
+Do not resume at old “Phase 5.”
+
+Start at **Phase 0** below.
+
+Each phase should be one focused PR unless two tiny adjacent phases are clearly safer together.
+
+Every phase:
+
+1. start from latest `main`;
+2. read current code;
+3. select only useful skills;
+4. implement the whole phase;
+5. update this file’s phase record;
+6. update durable docs when rules change;
+7. run:
 
 ```bash
 npm ci
@@ -2123,185 +2008,448 @@ npm test
 npm run build
 ```
 
-9. run real browser checks relevant to the phase
-10. if bundle-affecting, run Wrangler dry-run and record gzip
-11. open PR
-12. wait for GitHub CI + Cloudflare preview
-13. merge only when both are green
-14. continue immediately
-
-Do not push directly to `main`.
-
-Do not deploy by hand.
-
-If the session stops, stop at a clean merged/PR boundary and leave this plan accurate.
+8. use rendered-browser checks for visual phases;
+9. run Wrangler dry-run after bundle-affecting work;
+10. open PR;
+11. wait for GitHub CI and Cloudflare preview;
+12. merge only when both are green;
+13. continue without waiting for owner review unless a real owner fact blocks implementation.
 
 ---
 
-# 47. Automated test expectations
+# Phase 0 — Recovery from the stopped implementation
 
-Add/maintain tests for:
+**Status:** ⏳ Pending
 
-- all public locales EN/GU/HI
-- route parity
-- current route preserved by locale switch
-- no flag language selector
-- translated nav/footer
-- no untranslated EN-only literal on GU/HI route where mechanical detection is possible
-- all eleven courses retained
-- only EMCAD duration/fee published as verified
-- real-data-only batches
-- no fake weekend/seat/trainer state
-- no online payments
-- no public file uploader
-- no R2 use
-- no Wilcom-training claim
-- contextual sticky CTA route policy
-- correct WhatsApp number
-- no PII analytics
-- review/sample policy
-- 32 photo slots exactly
-- no stock image host
-- no generated-image substitution
-- no dark public band except the Services business-mode hero/small allowed overlays
-- public styles do not leak into Console
-- Gujarati no uppercase/letterspacing
-- Hindi Devanagari no inappropriate Latin tracking
-- hreflang EN/GU/HI
-- structured-data factual policy
-- no broken public href
-- reduced motion
-- accessibility/focus contracts
+Goal:
 
-Do not write brittle tests that ban honest words inside disclaimers. Test the claim/behavior.
+Return product rules to the corrected owner direction before designing anything else.
+
+Required:
+
+- restore EN/GU-only public locales;
+- remove Hindi catalogue/routing/hreflang/sitemap;
+- remove Hindi-only package/font;
+- remove unapplied `0005_trilingual_locale.sql`, snapshot and journal record;
+- confirm no Supabase migration is needed because DB remains `{en,gu}`;
+- keep truthful Hindi teaching/support facts where semantically appropriate;
+- update `CLAUDE.md` and `docs/project-context.md` back to bilingual public site;
+- mark old `docs/modern-textile-lab-ia.md` as superseded where its navigation/locale direction conflicts;
+- retain useful audit measurements;
+- preserve `/batches` data contract;
+- decide which PR #57 code should be removed immediately versus replaced in Phase 1;
+- add regression tests preventing `/hi` and Hindi catalogue reintroduction.
+
+No visual polishing in this phase.
 
 ---
 
-# 48. What this plan deliberately does not decide
+# Phase 1 — New THREAD / MACHINE / PROOF foundation
 
-Still owner/content dependent:
+**Status:** ⏳ Pending
 
-- exact opening hours / 10:30 vs 23:00 conflict
-- durations/fees for the other ten courses
-- verified live batch inventory
-- exact trainer identities
-- student stories
-- real reviews
-- review count
-- final legal Terms/Privacy approval
-- B2B turnaround
-- supported commercial file formats
-- phone-role confirmation
-- Google rating verification policy
+Goal:
 
-Do not block visual implementation on these.
+Create a real new public design system rather than a token bridge over the old one.
 
-Design honest empty/pending states.
+Required:
 
----
+- new public-scoped colour tokens;
+- logo-neutral accent adapter;
+- new type/rhythm system;
+- new light surfaces;
+- new border/radius rules;
+- new responsive containers;
+- Thread Line;
+- Needle Point;
+- Stitch Swatches;
+- Sample Strip;
+- Machine Frame;
+- Hoop Window;
+- new CTA/button language;
+- new placeholder framing;
+- motion primitives;
+- reduced-motion rules;
+- public-only scope that cannot alter Console;
+- remove/replace obsolete `textile-lab.css` rather than stack another stylesheet indefinitely.
 
-# 49. Success metrics
+Acceptance:
 
-A mobile visitor from Instagram should understand within seconds:
+Render a component showcase or representative internal test surface across mobile/tablet/desktop.
 
-- Karma teaches commercial embroidery
-- EMCAD DAHAO is the software
-- students work on real machines
-- Karma is in Mota Varachha, Surat
-- a free demo exists for EMCAD
-- there are courses beyond software
-- there is a real studio/business side
-
-Within a short browse they should be able to:
-
-- choose their audience path
-- inspect courses
-- see current real batches if any
-- understand Screen → Machine → Stitch
-- view real/pending student work
-- reach demo/WhatsApp
-- find the studio
-
-The homepage should feel fast rather than encyclopedic.
-
-The site should feel:
-
-**specific**
-**tactile**
-**modern**
-**credible**
-**practical**
-**commercial**
-**mobile-first**
-
-Premium must come from:
-
-- photography
-- precision
-- typography
-- interaction quality
-- specificity
-
-—not giant spacing or giant text.
+The system must look clearly unrelated to the current site before proceeding.
 
 ---
 
-# 50. Final report requirements
+# Phase 2 — Header, menu, locale switch, footer
 
-When all phases are merged, report:
+**Status:** ⏳ Pending
 
-1. every PR + merge commit
-2. final `main` SHA
-3. screenshot/browser audit findings before vs after
-4. homepage section count and measured height
-5. public navigation changes
-6. Hindi locale implementation
-7. language selector behavior
-8. Courses/Batches architecture
-9. course-detail changes
-10. admission changes
-11. Student Work changes
-12. Machine Notes changes
-13. Services business-mode changes
-14. Studio/About/Contact changes
-15. public component-system changes
-16. backend/content consolidation
-17. SEO/hreflang/schema changes
-18. accessibility results
-19. responsive matrix results
-20. Worker gzip result
-21. test count
-22. Cloudflare/GitHub status
-23. 32-photo placeholder status
-24. exact remaining owner/content blockers
-25. any measured reason a recommendation from this plan was adapted rather than implemented literally
+Goal:
+
+Create the new shell.
+
+Required:
+
+- logo-neutral header;
+- EN/Gujarati switch;
+- desktop navigation;
+- purpose-built mobile menu;
+- Book Free Demo action;
+- light compact footer;
+- no Hindi option;
+- route-preserving locale switch;
+- accessible menu/dialog behaviour;
+- remove old shell components no longer used.
+
+Acceptance:
+
+Header/footer must already make the site feel like a different product.
+
+---
+
+# Phase 3 — Homepage rebuilt from zero
+
+**Status:** ⏳ Pending
+
+Goal:
+
+Replace old 19–20-section composition with the new 7–8 block decision experience.
+
+Required blocks:
+
+1. Hero
+2. Entry-path index
+3. Course Sample Book
+4. Screen → Machine → Proof
+5. EMCAD decision panel
+6. Proof Wall
+7. Batches / Visit
+8. FAQ / close
+
+Do not “hide” old sections and leave them in the render tree.
+
+Delete/move obsolete homepage components once no longer needed.
+
+Acceptance:
+
+At 390px the page must feel substantially shorter, more visual and easier to decide from than the current baseline.
+
+---
+
+# Phase 4 — Courses + course-detail rebuild
+
+**Status:** ⏳ Pending
+
+Required:
+
+- new 11-course sample catalogue;
+- real family filtering;
+- Stitch Swatch per course;
+- photo-slot integration where the shoot covers the course;
+- new course-detail template;
+- decision facts above fold;
+- sticky local page navigation where useful;
+- mobile action dock;
+- no unverified duration/fee.
+
+Acceptance:
+
+A course should feel like a specialist textile-training product, not a generic landing page.
+
+---
+
+# Phase 5 — Batches + admissions + admission form
+
+**Status:** ⏳ Pending
+
+Required:
+
+- visually rebuild `/batches` while preserving real DB data;
+- data-driven filters;
+- honest empty state;
+- rebuild `/admissions` as decision page;
+- rebuild `/admission` UI while keeping backend/security;
+- Thread Progress;
+- contextual Demo + WhatsApp dock.
+
+Acceptance:
+
+A visitor should understand “when, how, and what next” quickly on a phone.
+
+---
+
+# Phase 6 — Student Work + Machine Notes
+
+**Status:** ⏳ Pending
+
+Required:
+
+- editorial work wall;
+- filter only real published categories;
+- photo placeholders remain art-directed;
+- Machine Notes becomes approachable workshop knowledge;
+- search/filter where useful;
+- remove over-technical archive theatre;
+- preserve real note content.
+
+---
+
+# Phase 7 — Services + Studio + Contact + secondary public pages
+
+**Status:** ⏳ Pending
+
+Required:
+
+- light commercial Services visual system;
+- brief/WhatsApp flow;
+- no file uploader;
+- Studio/About storytelling;
+- real/pending people treatment;
+- Visit/Contact first-viewport actions;
+- `/verify` styling;
+- Privacy/Terms styling without changing approval/noIndex policy;
+- 404/loading/error niche treatment;
+- no dark hero.
+
+---
+
+# Phase 8 — Complete EN/GU copy rebuild + SEO consistency
+
+**Status:** ⏳ Pending
+
+Required:
+
+- audit every public message;
+- shorten/rewrite generic copy;
+- natural Gujarati;
+- mirrored keys;
+- factual-source discipline;
+- metadata/title/description uniqueness;
+- breadcrumbs;
+- schema consistency;
+- EN/GU hreflang only;
+- no Hindi URL/schema locale;
+- no Wilcom training claim;
+- no sample proof leakage;
+- no invented numbers.
+
+---
+
+# Phase 9 — 32-photo-ready art direction
+
+**Status:** ⏳ Pending
+
+Goal:
+
+Make every reserved real-photo slot look intentional now and be drop-in ready later.
+
+Required:
+
+- verify all 32 manifest slots;
+- map each to the correct composition;
+- no fake fill;
+- responsive crops/aspect boxes;
+- no layout shift;
+- technique swatches for photo-less three courses;
+- alt-text strategy documented for when files arrive;
+- image size/format pipeline recommendation without activating R2.
+
+---
+
+# Phase 10 — Responsive, accessibility, performance hardening
+
+**Status:** ⏳ Pending
+
+Use real Chromium.
+
+Matrix:
+
+- 320
+- 360
+- 390
+- 430
+- 768
+- 820
+- 1024
+- 1280
+- 1440
+
+Both EN + GU.
+
+Measure:
+
+- overflow;
+- clipping;
+- fixed/sticky overlap;
+- focus;
+- touch targets;
+- menu behaviour;
+- Gujarati height/glyph clipping;
+- first-viewport usefulness;
+- page heights;
+- photo-slot geometry;
+- reduced motion;
+- performance.
+
+Worker gzip must remain safely under 3 MB.
+
+---
+
+# Phase 11 — Final creative-director audit + old visual cleanup
+
+**Status:** ⏳ Pending
+
+This is not a bug-fix-only pass.
+
+Review every public route as a designer.
+
+Ask:
+
+- Does this look like an AI/template website?
+- Does it look like a generic design institute?
+- Does it feel specifically related to embroidery?
+- Is the site light but still distinctive?
+- Is the visual language coming from thread/machine/material rather than decoration?
+- Does the logo area work with an arbitrary future logo colour?
+- Is the first phone viewport useful?
+- Is tablet intentionally composed?
+- Does desktop feel editorial without wasting space?
+- Are there old cards/components/styles still visually leaking through?
+- Is any copy longer than it needs to be?
+- Is there fake technicality?
+- Is there fake proof?
+
+Delete unused legacy public components/styles created by old redesign generations when no longer needed.
+
+Do not delete shared code Karma Console still uses.
+
+---
+
+# 36. Tests the redesign must protect
+
+At minimum add/update tests for:
+
+- routing locales exactly EN/GU;
+- no `/hi` sitemap/hreflang;
+- no Hindi catalogue dependency;
+- no unapplied `0005` migration left in journal;
+- public stylesheet isolation from admin;
+- all 11 courses present;
+- photo manifest 32/32;
+- EMCAD facts scoped correctly;
+- no online payment CTA;
+- no Wilcom training claim;
+- mobile conversion route policy;
+- route integrity;
+- EN/GU i18n parity;
+- Gujarati no uppercase/letterspacing;
+- no fake sample content rendered as real proof;
+- reduced-motion fallback;
+- no major dark public surface;
+- public header logo slot remains neutral;
+- no horizontal overflow in browser matrix where testable;
+- Worker bundle budget.
+
+Do not weaken unrelated security/auth/data tests.
+
+---
+
+# 37. Things this redesign must NOT touch
+
+Do not:
+
+- connect `karmadesignstudio.in`;
+- change DNS;
+- activate R2;
+- activate Turnstile;
+- add payment gateway;
+- add UPI checkout;
+- add Stripe;
+- add Razorpay;
+- replace Supabase;
+- replace Drizzle;
+- replace Hyperdrive;
+- replace Supabase Auth;
+- introduce Neon;
+- introduce Better Auth;
+- reintroduce MFA/TOTP/AAL2;
+- loosen RLS;
+- redesign Karma Console;
+- manually deploy production;
+- invent studio photos;
+- invent student/trainer/review proof.
+
+---
+
+# 38. Final acceptance standard
+
+The finished site should pass this emotional test:
+
+A visitor lands from Instagram on a phone.
+
+Within 3 seconds:
+
+> **Embroidery design. Real machines. Surat.**
+
+Within 10 seconds:
+
+> **They teach the file and then make you prove it on the machine.**
+
+Within 20 seconds:
+
+> **I can see the kinds of techniques they teach and the physical output.**
+
+Within 30 seconds:
+
+> **I understand the EMCAD course, demo, practical setup and how to contact/visit.**
+
+After browsing:
+
+> **This looks like a real embroidery studio with a serious training floor — not a generic institute website.**
+
+Visually, the memory should be:
+
+> **a thread leaving the screen, passing through the machine, and becoming proof on fabric.**
+
+Not:
+
+> beige cards + labels + generic CTA buttons.
+
+---
+
+# 39. Final report required from Claude
+
+After all phases are complete and merged, report:
+
+1. recovery/rollback PR and exactly what PR #58 work was removed;
+2. confirmation that Supabase stayed EN/GU and `0005` was never applied;
+3. every implementation PR;
+4. every merge commit;
+5. final main SHA;
+6. design-system architecture;
+7. logo-neutral accent system;
+8. header/navigation/language system;
+9. homepage before/after section count and mobile height;
+10. homepage screenshots at 390 / 768 / 1440;
+11. all 11 course catalogue changes;
+12. course-detail template changes;
+13. Batches changes;
+14. Admissions/form changes;
+15. Student Work changes;
+16. Machine Notes changes;
+17. Services changes;
+18. Studio/About/Contact changes;
+19. EN/GU copy rewrite summary;
+20. SEO/hreflang/schema changes;
+21. accessibility matrix;
+22. responsive matrix;
+23. test count;
+24. Worker gzip;
+25. GitHub CI status;
+26. Cloudflare status;
+27. 32 photo-slot status;
+28. remaining owner facts;
+29. list of old public CSS/components deleted after the rebuild.
 
 Then stop.
-
----
-
-# 51. Quality bar
-
-The finished website must not feel like:
-
-> “an AI redesigned an embroidery institute.”
-
-It should feel like somebody spent time inside this specific studio, understood:
-
-- the machines
-- the students
-- EMCAD DAHAO
-- actual machine-output problems
-- Gujarati/Hindi visitors
-- Surat garment businesses
-- the difference between learning software and proving output on a machine
-
-and built the digital experience around that reality.
-
-The final shift is:
-
-**Current:** compact but still structurally descended from a long technical/editorial site.
-
-**New:** real work + clear decisions + shorter architecture + Modern Textile Lab visual confidence + niche-specific interaction.
-
-That is the redesign.
