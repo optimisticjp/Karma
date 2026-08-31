@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
-import { courseBySlug, coursesByFamily, coursesInFamily } from "@/content/courses";
+import { courseBySlug, coursesInFamily } from "@/content/courses";
 import { pick } from "@/lib/i18n/localized";
-import { asLocale, routing } from "@/i18n/routing";
+import { asLocale } from "@/i18n/routing";
 import { pageMeta } from "@/lib/seo";
 import { breadcrumbSchema, courseSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/site/JsonLd";
@@ -20,15 +20,12 @@ import { RelatedCourses } from "@/components/kds/courses/RelatedCourses";
 import { CtaBand } from "@/components/kds/CtaBand";
 import { ActionDock } from "@/components/kds/shell/ActionDock";
 
-/* Batches are database-backed. Keep the page request-time until the planned
-   incremental-cache work is activated. */
+/* Batches are database-backed, so this page is rendered per request until the
+   planned incremental-cache work is activated. It deliberately has NO
+   `generateStaticParams`: adding one prerenders all twenty-two course pages at
+   build time and bakes whatever the batch query returned during the build,
+   which on a build machine with no database is nothing at all. */
 export const dynamic = "force-dynamic";
-
-export function generateStaticParams() {
-  return routing.locales.flatMap((locale) =>
-    coursesByFamily.map((course) => ({ locale, slug: course.slug }))
-  );
-}
 
 export async function generateMetadata({
   params
