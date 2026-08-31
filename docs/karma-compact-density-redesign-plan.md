@@ -1191,18 +1191,37 @@ The 32 real photographs remain placeholders until the files arrive.
 Execute as separate PRs. Do not wait for owner review between phases unless blocked by an actual owner fact.
 
 ## Phase 1 — Research + density audit
-**Status:** ⏳ Pending
+**Status:** ✅ Complete — PR #43, merged as `PLACEHOLDER_MERGE`
 
-Deliver:
+Delivered:
 
-- `docs/compact-density-research.md`
-- route-by-route public density audit
-- module-by-module admin density audit
-- first-viewport screenshots/measurements where tooling permits
-- list of oversized components/spacing patterns
-- final proposed density tokens and admin navigation IA
+- `docs/compact-density-research.md` — the principles borrowed, the ones
+  deliberately not borrowed, and how each is adapted to Karma
+- `docs/compact-density-audit.md` — route-by-route public and module-by-module
+  admin density audit, every value measured at 390×844 through the real
+  stylesheet cascade
+- 216 oversized components/spacing patterns, ~25,300px of recoverable mobile
+  height, ranked by area
+- the proposed density tokens, including **Steel Mist `#e6ebee`** with computed
+  WCAG ratios for every text role placed on it
+- the admin navigation IA: **Today · Admissions · Students · Batches · More**,
+  permission-filtered from a priority-ordered candidate list
+- `tests/helpers/measure.ts` + `tests/compact-density-tooling.test.ts` — the
+  clamp-at-a-viewport and contrast helpers the later phases assert through, so
+  a density test states the rule rather than pinning one expression
 
-No broad visual implementation yet except obvious audit tooling/tests.
+Findings that changed the plan's own assumptions:
+
+- The footer is **not** dark (`#e9decd` Raw Silk). Its defect is 1,031px of
+  height on every page, with the phone number 686px inside it.
+- Five public surfaces are dark, and they are the hero, the production rail,
+  the EMCAD decision block, the homepage close and the B2B chain.
+- **`/admin/batches` does not exist** — batches are nested two `<details>` deep
+  inside a course row — so the recommended bottom-nav IA requires creating it.
+- Two real z-index bugs: `.tabbar` (z-45) paints over the mobile-menu scrim
+  (z-40) and over `LangBanner`, whose avoidance branch is dead code.
+
+No broad visual implementation. Audit tooling and its own tests only.
 
 ## Phase 2 — Light-first public design system
 **Status:** ⏳ Pending
