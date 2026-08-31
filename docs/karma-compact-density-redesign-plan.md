@@ -1675,7 +1675,7 @@ breakpoint the block lives at moved.
 **Worker: 2021.78 KiB gzip** against the 3 MB free plan.
 
 ## Phase 10 — Final compactness pass
-**Status:** ✅ Complete — PR #52, merged as `PLACEHOLDER_MERGE`
+**Status:** ✅ Complete — PR #52, merged as `242a98b`
 
 The twelve questions were asked of **measured section heights at 390px**
 rather than of an impression — every route broken into its sections, each
@@ -1885,3 +1885,209 @@ The interface should feel:
 Premium does not mean large.
 
 **Premium means intentional.**
+
+---
+
+# 37. Final report — 2026-08-31
+
+All ten phases are merged. Final `main`: **`242a98b`**.
+
+## The pull requests
+
+| PR | Phase | Merge |
+| --- | --- | --- |
+| [#43](https://github.com/optimisticjp/Karma/pull/43) | 1 — Research + density audit | `628a1e8` |
+| [#44](https://github.com/optimisticjp/Karma/pull/44) | 2 — Light-first design system | `9ae1438` |
+| [#45](https://github.com/optimisticjp/Karma/pull/45) | 3 — Public shell + homepage | `a8c1204` |
+| [#46](https://github.com/optimisticjp/Karma/pull/46) | 4 — Public inner pages | `3ebac61` |
+| [#47](https://github.com/optimisticjp/Karma/pull/47) | 5 — Admission + conversion | `50d1ca3` |
+| [#48](https://github.com/optimisticjp/Karma/pull/48) | 6 — Admin shell + bottom navigation | `218363c` |
+| [#49](https://github.com/optimisticjp/Karma/pull/49) | 7 — Core admin workflows | `0b27036` |
+| [#50](https://github.com/optimisticjp/Karma/pull/50) | 8 — Remaining admin workflows | `7c76216` |
+| [#51](https://github.com/optimisticjp/Karma/pull/51) | 9 — Responsive hardening | `7b795b0` |
+| [#52](https://github.com/optimisticjp/Karma/pull/52) | 10 — Final compactness pass | `242a98b` |
+
+Every one went through GitHub CI **and** a Cloudflare preview build before
+merge; both were green on all ten.
+
+## Objective 1 — light-first, measured
+
+**Zero** surfaces on the public site have a luminance at or below 0.45 over an
+area of 15,000px² or more, at 390px, across twelve routes — except **five
+vermilion primary buttons** at 354×50px. There is no dark band, no dark hero,
+no dark footer and no dark section anywhere on the site. That is a browser
+measurement of computed background colours, not a reading of the stylesheet.
+
+**Steel Mist** `--color-mist: #e6ebee` (hairline `#c9d4da`) is the new light
+technical surface. It needed **no re-pointed token block** — carbon 15.10:1,
+stone 5.41, needle 5.67, vermilion-deep 5.26, zari-deep 5.45, all computed —
+where the older Sand surface needed four overrides. `.band-machine` is
+re-specified as the *technical* band rather than the *dark* band, so the
+four-band vocabulary survives: the texture inverts to ink on light and the
+steel top edge strengthens, because on a pale ground the edge is what says
+technical.
+
+**The identity is intact.** Technique signatures, stitch paths, registration
+marks, the knot vocabulary and the 43-icon Karma Stitch family are unchanged.
+`.on-carbon` stays *defined* and is used by no public section — the plan
+permits a dark surface for a small isolated overlay whose own content needs the
+contrast, and deleting the one correct implementation would guarantee the next
+is hand-rolled. `SectionHeading`'s `onDark` prop and `MonoNote`'s `"ivory"`
+tone are gone, so a future dark band is now a TypeScript error rather than
+invisible white text.
+
+## Objective 2 — public density
+
+**The mobile type scale**, all at 390px: display-xl 44 → **36**, h1 36 → **29**,
+h2 30 → **22**, h4 20 → **17**, smallmeta 15 → **14**, button 15 → **14**.
+Section rhythm 48.5/40.5/28.2 → **32/24/16**; rhythm utilities 12/16/24 →
+**8/12/16**; `.ledger-row` block padding 12 → **8px**. **Body copy stays at
+16/1.625 and Gujarati stays at 1.8** — density was bought from headings,
+padding and rhythm, never from the reading size or the leading.
+
+Structural changes: the hero's three frames run across a phone instead of down
+it; `PageIntro` stopped being the cost centre on every inner page; the
+admission form's chrome came down and its Submit came back within reach; the
+Machine Index became rows; six case studies became disclosures; the footer's
+link columns paired up.
+
+**Everything the brief said to preserve is preserved.** All **eleven** courses
+are on the site and in the catalogue. The EMCAD DAHAO facts are unchanged and
+still the only verified ones — 3 months, ₹35,000 / ₹25,000 / ₹10,000, four
+batch timings, the free 2-day 2-hour demo — and the other ten still carry
+`durationMonths: null` with no published fee. Every conversion flow works:
+admission, demo booking, the B2B brief, WhatsApp, call, directions, verify.
+
+## Objective 3 — the console as a native operations app
+
+- **A compact app bar.** 72px carrying the brand over `name · role` became a
+  **52px** context line. The identity moved into the More sheet, beside the
+  account link where it belongs.
+- **A permission-aware bottom navigation.** At most four destinations plus
+  More, filled from a priority-ordered candidate list filtered by what the
+  caller can actually reach, with an unavailable destination **omitted** rather
+  than greyed. A full-permission admin gets **Today · Admissions · Students ·
+  Batches**; a fees-only admin gets Today · Fees; an attendance-only admin gets
+  Today · Attendance. Team is never a tab at any permission level — a bar that
+  differs between the Owner and every Admin teaches the wrong muscle memory for
+  a destination used a handful of times a year. It replaced a **795px** drawer
+  opened and closed dozens of times a shift.
+- **`/admin/batches` exists.** Batches used to be nested `<details>` two levels
+  inside a course row. A course is edited twice a year; a batch is opened every
+  day, and its row now leads with the register.
+- **Rows, not cards.** `<article className="panel">` per record is gone from
+  every module: 362px per certificate candidate, ~900px per design job, 443px
+  per admin, 212px per attendance row, seven Reports figures that measured
+  **806px** — 42px more than the whole phone content budget.
+- **Compact rows with full-size controls.** A two-line row is ~64px while every
+  control inside one keeps a ≥44px hit area, from padding that overflows the
+  row rather than a taller row.
+- **Horizontal filters** (`.chip-scroller`), **status chips**, **quick
+  actions** on the row, **sheets** (`.console-sheet`, `.rec-menu`) and
+  **progressive disclosure** (`summary.data-row`) throughout.
+- **No branding or proprietary UI was copied from any merchant app.** The
+  operating *model* is the borrowed thing — compact rows, many facts at once,
+  one status per row, a record's actions beside that record. The visual
+  language is the same Screen to Stitch system: same tokens, one vermilion
+  accent, borders over shadows, status colours used only as statuses, no
+  component kit, no chart library.
+
+Three query fixes came out of the same work: the Content Desk's 500-row student
+picker is gated on `content.manage`, the Design Desk's two unbounded selects
+are scoped to the jobs on screen, and `/admin/courses` counts its batches
+instead of selecting every column of every one.
+
+## Objective 4 — functionality from PRs #24–#41
+
+Preserved and asserted. `requireAdmin` / `requireOwner` on every page; every
+module permission gate; the attendance field contract (`status:<id>` /
+`note:<id>`, which `saveAttendanceAction` reads for the whole roster); the
+record-action policy with Owner-only permanent deletion, its dependency
+preflight, typed confirmation, written reason and tombstone-before-delete; the
+one-Owner / five-Admin invariants and Team's deliberate **absence of any delete
+affordance**; enrolment fee-agreement snapshots; fee status **derived**, never
+stored; the nine A4 print sheets; audit logging; RLS; password-only sign-in
+with no MFA gate.
+
+## Objective 5 — the photography architecture
+
+**32 slots defined, 32 expected, 0 filled.** `src/content/photo-manifest.ts`
+still types every shot on the owner's brief with its intrinsic dimensions, and
+`<ManifestPhoto>` still reserves each one's exact aspect ratio so dropping the
+real file in later causes **zero layout shift**. An empty slot renders as an
+honest labelled frame. No stock photograph, no generated image, no other
+institute's work and no course's photograph standing in for another was added.
+R2 was not activated.
+
+## Objective 6 — what was not touched
+
+`karmadesignstudio.in` is still not connected and no DNS was changed. R2 and
+Turnstile are still deferred, and `/api/health` still reports them absent —
+the expected state. No payment gateway, no MFA/TOTP/AAL2, no Supabase project
+change, no Neon, no Better Auth, no RLS loosening, no Hyperdrive rename, no
+manual deploy, no change to the production deployment architecture.
+
+## Accessibility — measured, not asserted
+
+At 390px across 280 route×viewport combinations:
+
+- **Every focusable carries a visible focus ring** (2px solid), checked by
+  walking sixty `Tab` stops per route.
+- **Every standalone control is ≥44px**, on all sixteen public routes in both
+  locales and both reachable console screens. Four were fixed in Phase 9 and
+  two in Phase 10, each found by measurement.
+- **Two sub-44px targets remain deliberately**: the footer's own links at
+  31.7px, which clear WCAG **2.5.8**'s 24px with margin and were padded to do
+  so (raising twenty of them would add ~250px to a footer on twenty-one pages),
+  and one link **inside a sentence**, exempt by 2.5.8's own inline exception.
+- **Nothing lands behind sticky chrome.** `html` carries `scroll-padding` at
+  both ends from the chrome tokens, with a separate block for the console.
+- **No text is clipped** by a fixed height that is not a deliberate line clamp.
+- **Status is never colour alone** — a dot *and* a word, everywhere.
+- **Gujarati is never uppercased or letterspaced**, enforced by a sweep *and* a
+  reverse sweep that catches a new letterspaced class with no `:lang(gu)`
+  neutraliser.
+
+## Responsive — 320 / 360 / 375 / 390 / 430 / 768 / 820 / 1024 / 1280 / 1440
+
+**No horizontal overflow at any width on any route.** No element renders past
+the viewport edge. Every public route now gets *shorter* as the screen widens
+through the tablet range — it did not before Phase 9, where `/en` was 18,556px
+at 768 against 18,251 at 430. The full table is `docs/compact-density-audit.md`
+§11.
+
+## The numbers
+
+| | |
+| --- | --- |
+| Tests | **794** in 54 files, all passing |
+| Worker | **2026.23 KiB gzip** against the 3 MB free plan |
+| Public routes measured | 16 × 2 locales, 10 viewports = 280 combinations |
+| Photograph slots | 32 reserved, 0 filled |
+| GitHub CI | green on all ten PRs |
+| Cloudflare preview | green on all ten PRs |
+
+## What is still the owner's
+
+**Content.** 32 photographs; 6 student stories; 3 trainer profiles; 6 gallery
+entries; 3 studio project types; the review wall — 29 `sample: true` records
+in `src/content/collections.ts`, every one visibly tagged `<SampleTag />` on
+the page.
+
+**Facts.** Ten of eleven course durations and ten of eleven fee plans; which
+mobile number is answered by a person and which is WhatsApp-only; B2B
+turnaround; supported machine file formats; exact opening hours; module topics
+per course; whether the Google rating may be stated as verified; trainer
+identities; the Terms wording (still `noIndex: true`).
+
+**The 10:30 pm / 23:00 conflict is still open.** The site says "evening batches
+till 10:30 pm"; the owner's own printed EMCAD DAHAO timetable ends its fourth
+slot at **23:00**. Both numbers came from the owner and neither has been
+changed to match the other. One sentence fixes the site hours, the FAQ,
+`src/lib/site.ts`, the timing labels and the meta descriptions in one pass.
+
+**One editorial decision this pass deliberately did not make.** `/en` is
+**18,381px at 390px — 21.8 viewports — across nineteen sections**, of which
+section padding is 4%. Making it shorter now means *removing sections*, which
+is a decision about what a homepage should carry rather than a compactness one.
+It belongs to the owner.
