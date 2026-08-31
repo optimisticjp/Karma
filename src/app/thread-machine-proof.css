@@ -983,6 +983,17 @@
 /* ---- the sample book -------------------------------------------------- */
 
 .kds .book-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.5rem 0 1.25rem; }
+/* A chip is `white-space: nowrap` because a pill that wraps mid-label reads as
+   two chips. But a filter chip carrying a full course name is 313px wide, and
+   at 320px it pushed the DOCUMENT to 333px — which is why the fixed dock on
+   `/batches` was measured hanging 13px off the right edge. It was never the
+   dock. Inside a filter row a chip may wrap rather than take the page with it. */
+.kds .book-tabs > .chip {
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  text-align: start;
+}
 .kds .book-strip { grid-auto-columns: minmax(11rem, 52vw); }
 @media (min-width: 48rem) { .kds .book-strip { grid-auto-columns: minmax(13rem, 28vw); } }
 @media (min-width: 64rem) { .kds .book-strip { grid-auto-columns: minmax(14rem, 19vw); } }
@@ -1331,6 +1342,14 @@
   .kds .fam-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; }
 }
 .kds .fam-list { display: grid; gap: 0.5rem; margin-top: 1rem; }
+/* Each row is a whole link, not a link inside a sentence, so WCAG 2.5.8's
+   inline exception does not cover it: it measured 22px on a phone. The floor
+   goes on the anchor rather than the row so the target IS the text. */
+.kds .fam-list .link-thread {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+}
 .kds .fam-notes {
   display: grid;
   gap: 1.25rem;
@@ -1675,7 +1694,11 @@
 
 /* ---- machine case notes ------------------------------------------------- */
 
-.kds .cases { display: grid; gap: 1.25rem; margin-top: 1.75rem; }
+/* `minmax(0, 1fr)`, not the implicit `auto`: a grid item's default
+   `min-width: auto` lets an unbreakable child push the TRACK wider than the
+   container, and at 320px the case cards measured 425px inside a 280px
+   column. Nothing scrolled sideways — the overflow was simply cut off. */
+.kds .cases { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; margin-top: 1.75rem; }
 @media (min-width: 64rem) {
   .kds .cases { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
 }
@@ -2361,7 +2384,9 @@
   inset: auto 0 0 0;
   z-index: 30;
   display: grid;
-  grid-template-columns: 1fr auto;
+  /* `minmax(0, 1fr)` for the same reason as `.cases`: at 320px the bar's own
+     content pushed it to 333px, so a fixed element ran off the screen. */
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.5rem;
   align-items: center;
   padding: 0.375rem 0.875rem calc(0.375rem + env(safe-area-inset-bottom));

@@ -1530,3 +1530,42 @@ Recommended, when the shoot is delivered:
 - Do **not** reach for `next/image` optimization here. On Workers it needs a
   loader this project does not run, and a manifest that already knows every
   intrinsic size gets the same result from plain `<picture>` with no runtime.
+
+---
+
+## `minmax(0, 1fr)`, and why three unrelated defects were one bug (Phase 10, 2026-08-31)
+
+A grid or flex child defaults to `min-width: auto`, which means it will not
+shrink below its content's minimum. One unbreakable child — a chip that cannot
+wrap, a long word, a nowrap label — therefore pushes its TRACK wider than the
+container, and the container wider than the screen.
+
+The whole public tree was measured in Chromium at nine widths in both
+languages. Three defects surfaced, all only at 320px, and all three were this:
+
+- `.cases` measured **425px inside a 280px column**;
+- the fixed `.dock` on `/batches` hung 13px off the right edge — because the
+  DOCUMENT was 333px wide (a filter chip carrying a full course name could not
+  wrap), and a fixed element resolves against the initial containing block;
+- a course link in `.fam-list` was a **22px** target.
+
+None of them scrolled the page sideways, which is exactly why none had been
+noticed: the overflow was cut off, not exposed.
+
+**The rules that follow from it:**
+
+1. **Any grid track whose child might be unbreakable gets `minmax(0, 1fr)`,
+   not the implicit `auto`.** `.split`, `.split-even`, `.cases`, `.dock`,
+   `.verdict` and `.pathway-step` all state it.
+2. **`white-space: nowrap` is a promise the container has to keep.** `.chip`
+   keeps it — a pill broken mid-label reads as two pills — except inside
+   `.book-tabs`, where a chip carries a full course name and may wrap rather
+   than take the page with it.
+3. **A link that is a whole row is not a link inside a sentence.** WCAG 2.5.8
+   exempts the second, not the first, so `.fam-list .link-thread` takes the
+   44px floor on the ANCHOR, so the target is the text.
+
+**Two false positives worth remembering**, so the next sweep does not re-raise
+them: `.sr-only` elements are 1px boxes by design, and a visually-hidden radio
+inside a `.choice-chip` label is the standard accessible pattern — the tap
+target is the label, which measures 44px.

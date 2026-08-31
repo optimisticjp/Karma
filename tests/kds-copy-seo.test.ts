@@ -212,7 +212,10 @@ describe("page metadata", () => {
   it("routes every public page's metadata through the one helper", () => {
     const pages = walk("src/app/[locale]").filter((f) => f.endsWith("/page.tsx"));
     for (const page of pages) {
-      const src = read(page);
+      /* Comments stripped first: the catch-all's doc comment EXPLAINS that
+         exporting `generateMetadata` there has no effect, and a filter reading
+         the raw file counted that explanation as an export. */
+      const src = strip(read(page));
       if (!src.includes("generateMetadata")) continue;
       if (/index:\s*false/.test(src)) continue;
       expect(src, page).toContain("pageMeta");

@@ -778,8 +778,8 @@ middleware. It is the rendered reference for the system at `/design`.
 **Phase record (2026-08-31):** Phase 0 recovery (PR #61), Phase 1 foundation
 (#62), Phase 2 shell (#63), Phase 3 homepage (#64), Phase 4 courses (#65),
 Phase 5 conversion routes (#66), Phase 6 work and notes (#67), Phase 7
-secondary routes (#68), Phase 8 copy and SEO (#69), Phase 9 photography. The
-homepage
+secondary routes (#68), Phase 8 copy and SEO (#69), Phase 9 photography (#70),
+Phase 10 hardening. The homepage
 is ten blocks
 in `src/components/kds/home/`, no two of the same shape; the twenty-two
 components in `src/components/home/` are deleted. Measured at 390px it is
@@ -848,6 +848,25 @@ carried forward — is in
    Assets binding — a different budget from the 3 MB script — and **R2 stays
    switched off**: it is for confidential brief files, not for photographs
    anyone may see.
+
+**And two from Phase 10:**
+
+9. **An unknown page answers a real 404, and still shows the branded page.**
+   `notFound()` inside a route that matched leaves the status at 200 — a
+   framework limitation, confirmed on the deployed Worker. Deleting the
+   catch-all fixes the status and costs the branded bilingual 404, and there
+   is no root layout to hang a branded root `not-found.tsx` on. So
+   `src/middleware.ts` rewrites an unknown localized path to ITSELF with
+   `status: 404`. `src/i18n/public-paths.ts` holds the route table as
+   literals — middleware runs on every request, and importing the catalogue
+   for eleven slugs would put the whole of it in that bundle;
+   `tests/kds-routing.test.ts` asserts the list matches the content exactly.
+10. **`minmax(0, 1fr)` on any grid track whose child can be unbreakable.**
+    Three defects at 320px were one bug: a grid or flex child's default
+    `min-width: auto` pushing its container wider than the screen, with
+    nothing scrolling sideways so the overflow was silently cut off. It hit
+    `.cases`, `.dock` (via a filter chip that could not wrap and widened the
+    whole document) and a 22px link in the family list.
 
 ---
 
@@ -2238,6 +2257,7 @@ which is the point — the policy survives a refactor:
 | `kds-work-notes` | the archive and the Content Desk feed staying two different things; the case notes carrying no sample marker because they claim nothing about a person; the notes search matching the question, fault and tags but never the answer; a note page answering before it explains, emitting `TechArticle` and never a `Person` |
 | `kds-admissions` | the batch board's filters built from the rows, its three distinct empty states and its bounded query; the admissions page carrying no second batch list; the form at a reading measure with 44px controls, the system's primitives and no console palette; none of the three routes offering a way to pay online |
 | `kds-courses` | the catalogue's five blocks and the course template's nine, in order and with no two adjacent grounds alike; no fee on a tile or in the hero; a duration only where the owner confirmed one; the same media box photographed or not; no payment provider, machine specification, unconfirmed trainer or week/month inside a syllabus module title |
+| `kds-routing` | an unknown localized path answering 404 through a middleware rewrite rather than a soft 200, with the public-path table matching the content modules exactly and agreeing with the sitemap about what is indexable; nothing overflowing a 320px phone; a standalone course link carrying the 44px floor; every animation reduced to nothing under `prefers-reduced-motion`; a visible focus ring |
 | `kds-photo` | the manifest holding exactly the owner's 32 slots in the briefed groups, each with the intrinsic size the frame reserves from; every slot placed in a real composition and resolved by slug rather than by position; the three courses with no station falling back to their own stitch swatch; no stock, generated or remote image anywhere; the placeholder honest to a screen reader and the shoot guidance never presented as an alt; no call site imposing its own ratio on a reserved frame |
 | `kds-copy-seo` | no public message the site does not render, and both catalogues the same shape with no empty Gujarati string; every page's title and description unique and inside what a result shows; no outcome, fee or guarantee promised in a search result that the page itself refuses to claim; a breadcrumb on every indexable second-level route, localized on both crumbs; hreflang and the sitemap derived from the one locale list; no route submitted that its own page tells the crawler to ignore; no Wilcom, no rupee figure, no machine specification and no duration for a course the owner has not confirmed one for |
 | `kds-secondary` | the eight secondary routes on the rebuilt system and none of the superseded primitives; no two neighbouring grounds alike; no locale ternary; `/services` quoting no turnaround, price or guarantee and drawing the commercial chain without the school's photographs; `/contact` ranking its channels, never labelling the call number as WhatsApp and taking every number from `site.ts`; the verify flow carrying no motion, answering with a word and a mark rather than colour alone, and degrading to "unavailable" rather than "not found"; both legal documents fully translated, stating no fee, refund window or duration, and `/terms` staying out of the index — plus every literal `t("…")` on every public ROUTE resolving in both catalogues |

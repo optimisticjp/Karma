@@ -63,7 +63,10 @@ describe("route parity", () => {
        requiring it here would push a later session into adding it. */
     const pages = localeFiles.filter((f) => {
       if (!f.endsWith("/page.tsx")) return false;
-      const source = read(f);
+      /* Comments stripped: the catch-all's doc comment explains that exporting
+         `generateMetadata` there has no effect, and reading the raw file
+         counted the explanation as an export. */
+      const source = read(f).replace(/\/\*[\s\S]*?\*\//g, " ");
       if (!source.includes("generateMetadata")) return false;
       return !/index:\s*false/.test(source);
     });
