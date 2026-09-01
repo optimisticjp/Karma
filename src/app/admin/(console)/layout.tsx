@@ -1,6 +1,8 @@
 import { ConsoleShell, type NavSection, type NavTab } from "@/components/admin/ConsoleShell";
 import { SignOutLink } from "@/components/admin/SignOutLink";
 import { getAdminT } from "@/lib/admin/i18n";
+import { recordsCopy } from "@/lib/admin/records-copy";
+import { canPerform, deletableEntities } from "@/lib/admin/record-actions";
 import { requireAdmin } from "@/lib/auth/guard";
 import { hasPermission } from "@/lib/auth/access";
 
@@ -9,6 +11,7 @@ import { hasPermission } from "@/lib/auth/access";
 export default async function ConsoleLayout({ children }: { children: React.ReactNode }) {
   const session = await requireAdmin();
   const t = getAdminT(session.staff.adminLocale);
+  const records = recordsCopy(session.staff.adminLocale);
 
   const canUseAdmissions = hasPermission(session.staff, "applications.view") || hasPermission(session.staff, "applications.manage");
   const canUseStudents = hasPermission(session.staff, "students.view") || hasPermission(session.staff, "students.manage");
@@ -23,6 +26,13 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
     hasPermission(session.staff, "reports.view") ||
     hasPermission(session.staff, "audit.view") ||
     hasPermission(session.staff, "exports.run");
+  const recordSubject = {
+    role: session.role,
+    has: (permission: Parameters<typeof hasPermission>[1]) => hasPermission(session.staff, permission)
+  };
+  const canUseCleanup = deletableEntities().some((entity) =>
+    canPerform(recordSubject, entity, "delete")
+  );
 
   /*
    * THE BOTTOM NAVIGATION
@@ -45,10 +55,10 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
    * cannot open, because a dead tab in a bar of five is a fifth of the
    * product's navigation.
    *
-   * Team is deliberately absent at any permission level. It is Owner-only with
-   * no permission key at all, and a bar that differs between the Owner and
-   * every Admin teaches the wrong muscle memory for the sake of a destination
-   * used a handful of times a year.
+   * Team and Record cleanup are deliberately absent from the bottom bar. They
+   * are administrative destinations used occasionally, while the bar is for
+   * standing-at-the-counter daily work. They remain reachable from More/the
+   * desktop rail when the caller has the authority to use them.
    *
    * This list is derived from the SAME booleans the rail uses, computed above
    * with no extra queries. The bar is a UX affordance: every one of these
@@ -91,6 +101,7 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
     {
       title: t("nav.sections.administration"),
       entries: [
+        ...(canUseCleanup ? [{ href: "/admin/records", label: records.cleanupTitle, available: true }] : []),
         ...(session.role === "owner" ? [{ href: "/admin/team", label: t("nav.team"), available: true }] : []),
         { href: "/admin/account/security", label: t("nav.account"), available: true }
       ]

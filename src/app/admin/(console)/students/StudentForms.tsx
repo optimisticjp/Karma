@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import type { StudentsCopy } from "@/lib/admin/students-copy";
@@ -189,17 +190,27 @@ export function AddEnrollmentForm({ studentId, batches, copy }: { studentId: num
 export function EnrollmentStatusForm({ enrollmentId, status, completedOn, copy }: { enrollmentId: number; status: EnrollmentStatus; completedOn: string | null; copy: StudentsCopy }) {
   const [state, action] = useActionState<StudentsState, FormData>(updateEnrollmentAction, IDLE);
   return (
-    <form action={action} className="grid gap-3 sm:grid-cols-[1fr_12rem_auto] sm:items-end">
-      <input type="hidden" name="enrollmentId" value={enrollmentId} />
-      <Message state={state} copy={copy} />
-      <Field label={copy.status} htmlFor={`enrollment-status-${enrollmentId}`}>
-        <select id={`enrollment-status-${enrollmentId}`} name="status" className="input" defaultValue={status}>
-          {ENROLLMENT_STATUSES.map((item) => <option key={item} value={item}>{copy.statuses[item]}</option>)}
-        </select>
-      </Field>
-      <Field label={copy.completedOn} htmlFor={`enrollment-completed-${enrollmentId}`}><input id={`enrollment-completed-${enrollmentId}`} name="completedOn" type="date" className="input" defaultValue={completedOn ?? ""} /></Field>
-      <Submit label={copy.updateEnrollment} busy={copy.saving} />
-    </form>
+    <div className="grid gap-2">
+      <form action={action} className="grid gap-3 sm:grid-cols-[1fr_12rem_auto] sm:items-end">
+        <input type="hidden" name="enrollmentId" value={enrollmentId} />
+        <Message state={state} copy={copy} />
+        <Field label={copy.status} htmlFor={`enrollment-status-${enrollmentId}`}>
+          <select id={`enrollment-status-${enrollmentId}`} name="status" className="input" defaultValue={status}>
+            {ENROLLMENT_STATUSES.map((item) => <option key={item} value={item}>{copy.statuses[item]}</option>)}
+          </select>
+        </Field>
+        <Field label={copy.completedOn} htmlFor={`enrollment-completed-${enrollmentId}`}><input id={`enrollment-completed-${enrollmentId}`} name="completedOn" type="date" className="input" defaultValue={completedOn ?? ""} /></Field>
+        <Submit label={copy.updateEnrollment} busy={copy.saving} />
+      </form>
+      <div className="flex justify-end">
+        <Link
+          className="text-smallmeta font-semibold text-error underline underline-offset-4"
+          href={`/admin/records/enrollment/${enrollmentId}/delete`}
+        >
+          {copy.deleteEnrollment}
+        </Link>
+      </div>
+    </div>
   );
 }
 

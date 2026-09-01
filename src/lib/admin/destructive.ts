@@ -37,12 +37,10 @@ type Db = NonNullable<ReturnType<typeof getDb>>;
  * than a visible error. `tests/record-actions.test.ts` asserts the two lists
  * match, because this is exactly the kind of omission a new entity introduces.
  *
- * Deliberately NOT a cascade. `courses.batches` and `batches.enrollments` are
- * declared `ON DELETE CASCADE` in the schema, so deleting a course really would
- * take every batch, enrolment, attendance record, fee row and certificate under
- * it. Blocking on those dependencies is what stops that from ever being one
- * click, and it is why the operator is shown the counts before being asked to
- * confirm rather than after.
+ * Deliberately NOT a broad cascade. `courses.batches`, `batches.enrollments`
+ * and some child tables are declared `ON DELETE CASCADE` in the schema, so a
+ * careless root delete really could remove a lot of history. Blocking on the
+ * high-value dependencies is what keeps cleanup deliberate.
  */
 export async function preflight(
   db: Db,
@@ -67,10 +65,7 @@ export async function preflight(
       dependencies.push({
         entity: "batch",
         count: await n(
-          db
-            .select({ n: count() })
-            .from(schema.batches)
-            .where(eq(schema.batches.courseId, id))
+          db.select({ n: count() }).from(schema.batches).where(eq(schema.batches.courseId, id))
         ),
         blocking: true
       });
@@ -87,20 +82,14 @@ export async function preflight(
       dependencies.push({
         entity: "enrollment",
         count: await n(
-          db
-            .select({ n: count() })
-            .from(schema.enrollments)
-            .where(eq(schema.enrollments.batchId, id))
+          db.select({ n: count() }).from(schema.enrollments).where(eq(schema.enrollments.batchId, id))
         ),
         blocking: true
       });
       dependencies.push({
         entity: "attendance_session",
         count: await n(
-          db
-            .select({ n: count() })
-            .from(schema.attendanceSessions)
-            .where(eq(schema.attendanceSessions.batchId, id))
+          db.select({ n: count() }).from(schema.attendanceSessions).where(eq(schema.attendanceSessions.batchId, id))
         ),
         blocking: false
       });
@@ -117,30 +106,21 @@ export async function preflight(
       dependencies.push({
         entity: "enrollment",
         count: await n(
-          db
-            .select({ n: count() })
-            .from(schema.enrollments)
-            .where(eq(schema.enrollments.studentId, id))
+          db.select({ n: count() }).from(schema.enrollments).where(eq(schema.enrollments.studentId, id))
         ),
         blocking: true
       });
       dependencies.push({
         entity: "attendance_record",
         count: await n(
-          db
-            .select({ n: count() })
-            .from(schema.attendanceRecords)
-            .where(eq(schema.attendanceRecords.studentId, id))
+          db.select({ n: count() }).from(schema.attendanceRecords).where(eq(schema.attendanceRecords.studentId, id))
         ),
         blocking: false
       });
       dependencies.push({
         entity: "guardian",
         count: await n(
-          db
-            .select({ n: count() })
-            .from(schema.guardians)
-            .where(eq(schema.guardians.studentId, id))
+          db.select({ n: count() }).from(schema.guardians).where(eq(schema.guardians.studentId, id))
         ),
         blocking: false
       });
@@ -157,12 +137,37 @@ export async function preflight(
       dependencies.push({
         entity: "application_note",
         count: await n(
-          db
-            .select({ n: count() })
-            .from(schema.applicationNotes)
-            .where(eq(schema.applicationNotes.applicationId, id))
+          db.select({ n: count() }).from(schema.applicationNotes).where(eq(schema.applicationNotes.applicationId, id))
         ),
         blocking: false
+      });
+      break;
+    }
+    case "enrollment": {
+      const rows = await db
+        .select({
+          id: schema.enrollments.id,
+          studentId: schema.enrollments.studentId,
+          batchId: schema.enrollments.batchId
+        })
+        .from(schema.enrollments)
+        .where(eq(schema.enrollments.id, id))
+        .limit(1);
+      if (!rows[0]) return null;
+      identifier = `#${rows[0].id}`;
+      dependencies.push({
+        entity: "fee_record",
+        count: await n(
+          db.select({ n: count() }).from(schema.feeRecords).where(eq(schema.feeRecords.enrollmentId, id))
+        ),
+        blocking: true
+      });
+      dependencies.push({
+        entity: "certificate",
+        count: await n(
+          db.select({ n: count() }).from(schema.certificates).where(eq(schema.certificates.enrollmentId, id))
+        ),
+        blocking: true
       });
       break;
     }
@@ -195,10 +200,7 @@ export async function preflight(
       dependencies.push({
         entity: "attendance_record",
         count: await n(
-          db
-            .select({ n: count() })
-            .from(schema.attendanceRecords)
-            .where(eq(schema.attendanceRecords.sessionId, id))
+          db.select({ n: count() }).from(schema.attendanceRecords).where(eq(schema.attendanceRecords.sessionId, id))
         ),
         blocking: false
       });
@@ -312,4 +314,3 @@ export function notArchived(entity: ArchivableEntity) {
 export function onlyArchived(entity: ArchivableEntity) {
   return isNotNull(ARCHIVABLE[entity].archivedAt);
 }
-
