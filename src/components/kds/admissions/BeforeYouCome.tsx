@@ -1,31 +1,20 @@
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { NeedlePoint } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
 
-/**
- * The four things people check before deciding, and the handbook in short.
- *
- * Fees, eligibility, language and what to bring were four separate answers
- * scattered across a page and a phone call. They are one block because they
- * are one question — *is this place going to work for me* — and because a
- * visitor chasing four basics through a call is a visitor who does not call.
- *
- * **The fee answer names the one course that has a published plan** and says
- * plainly that the others are settled in person. It never quotes a number for
- * a course whose fee the owner has not confirmed.
- *
- * The handbook is the rules that actually affect a student — attendance,
- * missed practicals, shared machines, phones — rather than a page of policy.
- * They are the institute's own, quoted from the message catalogue, and the
- * versioned admission norms are accepted separately on the form itself.
- */
+/** The practical things a visitor checks before deciding. Fee amounts and
+ * changing commercial terms are deliberately kept out of the public site. */
 export function BeforeYouCome() {
   const t = useTranslations("admissionsPage");
+  const locale = useLocale();
   const handbook = t.raw("handbook") as string[];
+  const currentFee = locale === "gu"
+    ? "હાલની fee અને payment schedule demo/counselling વખતે સ્ટુડિયોમાં જણાવવામાં આવે છે. Website પર fee amount publish થતી નથી અને online payment લેવાતું નથી."
+    : "The current fee and payment schedule are explained at the studio during your demo or counselling. Fee amounts are not published here and no online payment is taken.";
 
   const facts: Array<[string, string]> = [
-    [t("feesTitle"), t("feesBody")],
+    [t("feesTitle"), currentFee],
     [t("eligTitle"), t("eligBody")],
     [t("langTitle"), t("langBody")],
     [t("bringTitle"), t("bringBody")]
