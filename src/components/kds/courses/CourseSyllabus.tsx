@@ -1,7 +1,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import type { Course } from "@/content/courses";
 import type { CourseConfig } from "@/lib/course/config";
-import { pick, pickList } from "@/lib/i18n/localized";
+import { pick, pickList, tr } from "@/lib/i18n/localized";
 import type { Locale } from "@/i18n/routing";
 import { NeedlePoint } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
@@ -27,7 +27,7 @@ export function CourseSyllabus({ course, config }: { course: Course; config: Cou
           {curriculum.length > 0 ? (
             <ol className="grid gap-0 border-t border-rule" role="list">
               {curriculum.map((line, index) => {
-                const value = locale === "gu" ? line.gu : line.en;
+                const value = tr(line, locale);
                 return (
                   <li key={`${index}-${value}`} className="flex items-start gap-3 border-b border-rule py-3">
                     <span className="t-micro numeric shrink-0" aria-hidden="true">
