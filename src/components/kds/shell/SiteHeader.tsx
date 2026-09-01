@@ -9,39 +9,18 @@ import { LocaleSwitch } from "./LocaleSwitch";
 import { ThreadLine } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
 
-/**
- * The public header.
- *
- * Six destinations, in the order a visitor's questions arrive: what can I
- * learn, when can I come, what does the work look like, do these people know
- * the machine, can they do my job, who are they.
- *
- * WHAT IS NOT IN THE ROW, AND WHY
- * -------------------------------
- *  - **Home.** The brand mark is the home link. Two controls doing one job is
- *    how a row reaches eight items.
- *  - **Admissions.** `/batches` answers the question people actually navigate
- *    for — *when can I come* — and reaches the admission norms from its own
- *    joining sequence. Admissions stays in the footer and the mobile menu.
- *  - **Contact.** The plan permits this explicitly when contact is prominent
- *    elsewhere (§14). It is in the mobile menu, the footer, and one tap from
- *    the Studio page — and the menu carries the phone number directly.
- *
- * "Studio" is a LABEL, not a route: it points at `/about`, which keeps its
- * URL. A display name is a decision; a URL is a promise to everyone who has
- * already shared it.
- */
+/** Public navigation, including an explicit Home destination as requested. */
 const NAV = [
+  { href: "/", key: "home" },
   { href: "/courses", key: "courses" },
   { href: "/batches", key: "batches" },
   { href: "/student-work", key: "work" },
   { href: "/notes", key: "notes" },
   { href: "/services", key: "services" },
-  { href: "/about", key: "studio" },
+  { href: "/about", key: "studio" }
 ] as const;
 
-/** The phone menu adds Contact, because a phone menu is where a phone number
-    is looked for. */
+/** The phone menu adds Contact, because a phone menu is where a phone number is looked for. */
 const MENU_NAV = [...NAV, { href: "/contact", key: "contact" }] as const;
 
 export function SiteHeader() {
@@ -53,7 +32,7 @@ export function SiteHeader() {
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(`${href}/`);
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -95,14 +74,6 @@ export function SiteHeader() {
   }, [open, close]);
 
   return (
-    /* THE MENU IS A SIBLING OF THE HEADER, NOT A CHILD.
-       `.site-head` carries a `backdrop-filter`, and a filtered element becomes
-       the containing block for its `position: fixed` descendants — so a scrim
-       rendered inside it resolved `inset: 0` against the 56px header instead
-       of the viewport. Measured: the scrim was 390×56, and a tap in the middle
-       of the contextual dock still reached the dock while a modal dialog was
-       open. Moving it out is the fix; dropping the blur would have been the
-       other one. */
     <>
       <header className="site-head">
         <div className="wrap site-head-inner">
@@ -117,12 +88,7 @@ export function SiteHeader() {
                 aria-current={isActive(item.href) ? "page" : undefined}
               >
                 {t(item.key)}
-                {/* The active link is stitched, not underlined. A running stitch
-                  is the site's one repeated mark, so "you are here" uses it
-                  rather than inventing a second signal. */}
-                {isActive(item.href) ? (
-                  <ThreadLine className="site-nav-mark" />
-                ) : null}
+                {isActive(item.href) ? <ThreadLine className="site-nav-mark" /> : null}
               </Link>
             ))}
           </nav>
@@ -150,11 +116,7 @@ export function SiteHeader() {
                 strokeWidth="1.9"
                 aria-hidden="true"
               >
-                {open ? (
-                  <path d="M6 6l12 12M18 6L6 18" />
-                ) : (
-                  <path d="M4 7h16M4 12h16M4 17h16" />
-                )}
+                {open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
               </svg>
             </button>
           </div>
@@ -163,12 +125,7 @@ export function SiteHeader() {
 
       {open ? (
         <>
-          <button
-            type="button"
-            aria-label={tc("closeMenu")}
-            className="sheet-scrim"
-            onClick={close}
-          />
+          <button type="button" aria-label={tc("closeMenu")} className="sheet-scrim" onClick={close} />
           <div
             ref={panelRef}
             id="site-menu"
@@ -187,9 +144,7 @@ export function SiteHeader() {
                       aria-current={isActive(item.href) ? "page" : undefined}
                     >
                       <span>{t(item.key)}</span>
-                      <span aria-hidden="true" className="arrow">
-                        →
-                      </span>
+                      <span aria-hidden="true" className="arrow">→</span>
                     </Link>
                   </li>
                 ))}
@@ -197,19 +152,9 @@ export function SiteHeader() {
             </nav>
 
             <div className="site-menu-foot">
-              <Link href="/admission" className="act act-primary w-full">
-                {t("cta")}
-              </Link>
-              {/* Call and WhatsApp live here rather than in a bar pinned to
-                  every page. The two numbers keep their separate roles: the
-                  call action dials `callPhone` and the WhatsApp action opens
-                  `whatsapp`, and neither is ever labelled as the other.
-                  See src/lib/site.ts. */}
+              <Link href="/admission" className="act act-primary w-full">{t("cta")}</Link>
               <div className="site-menu-actions">
-                <a
-                  href={`tel:+${site.callPhone}`}
-                  className="act act-secondary"
-                >
+                <a href={`tel:+${site.callPhone}`} className="act act-secondary">
                   <Icon name="phone" size={17} /> {tc("call")}
                 </a>
                 <a
