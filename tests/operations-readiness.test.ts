@@ -56,4 +56,16 @@ describe("operations record", () => {
     expect(operations).not.toContain("0004_course_operations` (2026-08-30) has not been applied");
     expect(operations).toContain("`0000` through `0005`\nare applied");
   });
+
+  it("matches the deployed health gate while Resend is deferred", () => {
+    expect(operations).toContain("database, Supabase Auth or Turnstile");
+    expect(operations).toContain("Deferred Resend does **not** make the site unhealthy");
+    expect(operations).toContain("`checks.email` remains visible");
+    expect(operations).not.toContain("Auth, Turnstile or email is unconfigured");
+  });
+
+  it("records the accepted free-plan password-protection limitation", () => {
+    expect(operations).toContain("current free plan does not expose that\ncontrol");
+    expect(operations).toContain("accepted plan limitation");
+  });
 });
