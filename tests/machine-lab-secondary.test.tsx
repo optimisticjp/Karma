@@ -126,14 +126,14 @@ describe("404", () => {
     }
   });
 
-  it("marks it with a thread that stops, which is the mark for a break", () => {
+  it("marks it with a short thread, which is the mark for a break", () => {
     /* `<BrokenPath>` carried this before the rebuild; the system's own
-       running stitch does now, drawn short and ending. The rule is the one it
-       always was: this mark means something failed, so it appears here and
-       nowhere a page is working. */
+       running stitch does now. The rule is the one it always was: this mark
+       means something failed, so it appears here and nowhere a page is
+       working. */
     const source = read("src/app/[locale]/not-found.tsx");
     expect(source).toContain("<ThreadLine");
-    expect(source).toContain("The thread, ending");
+    expect(source).toContain('className="w-24"');
     expect(read("src/app/[locale]/page.tsx")).not.toContain("BrokenPath");
   });
 });
