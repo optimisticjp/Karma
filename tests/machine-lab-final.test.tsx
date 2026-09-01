@@ -36,39 +36,17 @@ const publicComponents = walk("src/components")
   .filter((f) => !f.startsWith("src/components/admin"));
 const css = read("src/app/machine-lab.css");
 
-/* ------------------------------------------------------------------ *
- * Dark surfaces are punctuation, not wallpaper
- * ------------------------------------------------------------------ */
-
 describe("page rhythm holds across the whole public site", () => {
   it("puts no dark band on any public surface", () => {
-    /* LIGHT-FIRST, 2026-08-31. This used to cap dark bands at four on the
-       homepage and two per page — and that cap is exactly the shape of
-       assertion that goes SILENTLY VACUOUS when the real number reaches zero.
-       It is now the rule the owner actually gave: the public site does not
-       use a dark full-width surface at all.
-   
-       `.on-carbon` itself is still defined in premium.css, deliberately — the
-       compact-density plan §3 keeps a dark surface available for a small
-       isolated overlay whose own content needs the contrast. What may not
-       come back is a public SECTION wearing it. */
     const offenders = [...publicComponents, ...publicPages].filter((f) =>
       stripComments(read(f)).includes("on-carbon")
     );
     expect(offenders, "no public file may wear .on-carbon").toEqual([]);
-
-    /* Non-vacuity: a walk that silently matched nothing would pass the line
-       above without proving anything. */
     expect(publicComponents.length).toBeGreaterThan(20);
     expect(publicPages.length).toBeGreaterThan(10);
   });
 
   it("still varies its surface, so a long scroll is not one flat ground", () => {
-    /* The danger on the other side of light-first is a beige monotone, and a
-       four-surface vocabulary is what prevents it. The vocabulary changed with
-       the public rebuild — `band-machine` / `-material` / `-human` / `-info`
-       became the four GROUNDS — and the rule is the one it always was: all
-       four must still be in use somewhere on the public site. */
     const all = [...publicComponents, ...publicPages].map((f) => read(f)).join("\n");
     for (const ground of ["on-canvas", "on-paper", "on-cloth", "on-mist"]) {
       expect(all, ground).toContain(ground);
@@ -76,17 +54,11 @@ describe("page rhythm holds across the whole public site", () => {
   });
 
   it("gives the console no dark band at all", () => {
-    /* The console is a work desk under fluorescent light, not a brand
-       surface. */
     for (const file of walk("src/app/admin").filter((f) => f.endsWith(".tsx"))) {
       expect(stripComments(read(file)), file).not.toContain("on-carbon");
     }
   });
 });
-
-/* ------------------------------------------------------------------ *
- * No fake technicality, anywhere
- * ------------------------------------------------------------------ */
 
 describe("nothing invents a specification", () => {
   it("publishes no machine number the studio has not supplied", () => {
@@ -102,7 +74,6 @@ describe("nothing invents a specification", () => {
     ]) {
       expect(copy, unit).not.toContain(unit);
     }
-    /* And no "<number> head" / "<number> needle" machine claim. */
     expect(copy).not.toMatch(/\b\d+\s*-?\s*(head|needle)s?\b/);
   });
 
@@ -118,7 +89,6 @@ describe("nothing invents a specification", () => {
   it("loops no decorative animation", () => {
     for (const file of ["src/app/globals.css", "src/app/premium.css", "src/app/machine-lab.css"]) {
       const sheet = read(file);
-      /* `infinite` may only appear on a loading skeleton, which is state. */
       for (const match of sheet.match(/animation:[^;]*infinite[^;]*/g) ?? []) {
         expect(match, `${file}: ${match}`).toMatch(/skeleton/);
       }
@@ -126,14 +96,8 @@ describe("nothing invents a specification", () => {
   });
 });
 
-/* ------------------------------------------------------------------ *
- * Accessibility hardening
- * ------------------------------------------------------------------ */
-
 describe("keyboard and motion", () => {
   it("draws a focus ring inside every full-bleed row", () => {
-    /* The global rule draws 3px OUTSIDE, which disappears inside a clipping
-       container and can cost a horizontal scrollbar at 320px. */
     const block = css.slice(css.indexOf(".queue-link:focus-visible"));
     expect(block).toContain("outline-offset: -2px");
     for (const cls of [".mi-link", ".note-archive-link", ".rail-tab"]) {
@@ -143,14 +107,7 @@ describe("keyboard and motion", () => {
 
   it("covers everything this redesign animates under reduced motion", () => {
     const reduced = css.split("@media (prefers-reduced-motion: reduce)").slice(1).join("\n");
-    for (const cls of [
-      ".sig-el",
-      ".btn-stitch::after",
-      ".rail-media",
-      ".queue-link",
-      ".mi-link",
-      ".m-l1"
-    ]) {
+    for (const cls of [".sig-el", ".btn-stitch::after", ".rail-media", ".queue-link", ".mi-link", ".m-l1"]) {
       expect(reduced, cls).toContain(cls);
     }
   });
@@ -163,20 +120,16 @@ describe("keyboard and motion", () => {
   });
 });
 
-/* ------------------------------------------------------------------ *
- * The creative-director question
- * ------------------------------------------------------------------ */
-
 describe("does this read as a real studio or as a concept for one", () => {
-  it("shows eleven real courses, not a curated shortlist", () => {
+  it("shows the complete public course list, not a client-side curated shortlist", () => {
     expect(courses).toHaveLength(11);
+    const home = read("src/app/[locale]/page.tsx");
     const book = read("src/components/kds/home/SampleBook.tsx");
-    expect(book).toContain("coursesByFamily");
-    /* The family filter narrows what is SHOWN; it must never narrow what
-       exists. "All" is the default, so a visitor without scripting — and a
-       crawler — sees the whole catalogue rather than one family. */
+    expect(home).toContain("getPublicCourses()");
+    expect(home).toContain("<SampleBook courses={courses}");
+    expect(book).toContain("{ courses }: { courses: Course[] }");
     expect(book).toContain('useState<FamilyKey | "all">("all")');
-    expect(book).not.toMatch(/coursesByFamily\.slice\(/);
+    expect(book).not.toContain(".slice(");
   });
 
   it("keeps every photograph a named, reserved frame rather than a stand-in", () => {
@@ -188,23 +141,11 @@ describe("does this read as a real studio or as a concept for one", () => {
   });
 
   it("still answers a working operator with faults, not adjectives", () => {
-    /* Named production faults and eight technical notes are the things no
-       competing institute has. If these ever thin out, the site has drifted
-       back to being a brochure.
-
-       The six `home.problems.p{n}f` entries carried this before the rebuild.
-       The homepage now names its faults where it SHOWS them — the failed
-       stitch-out marks four, each with the file change that fixes it — so the
-       rule reads the block that renders them rather than a catalogue entry no
-       page asks for. */
     const failed = en.home.smp.failedNote.toLowerCase();
     for (const fault of ["pucker", "gapping", "register", "broken thread"]) {
       expect(failed, fault).toContain(fault);
     }
     expect(gu.home.smp.failedNote.length).toBeGreaterThan(40);
-    /* Scoped to the failed stitch-out: other stages carry marker arrays of
-       their own, and counting all of them would pass while the faults
-       themselves disappeared. */
     const motif = read("src/components/kds/home/motif.tsx");
     const stage = motif.slice(motif.indexOf("export function StageFailed"));
     const marks = stage.slice(0, stage.indexOf("return ("));
