@@ -1,4 +1,4 @@
-# Operations — free-tier watchpoints & routine care
+# Operations - free-tier watchpoints & routine care
 
 ## The numbers that matter
 Provider limits change: treat this table as a prompt to check, not as fact.
@@ -7,32 +7,36 @@ Provider limits change: treat this table as a prompt to check, not as fact.
 | Service | Free limit | Our usage | Watch when |
 | --- | --- | --- | --- |
 | Workers requests | 100k/day | Small local site: tiny | Viral reel moment: fine; sustained bot floods: add a WAF rule |
-| Worker size | 3 MB gzip | ~2.06 MB at the Phase 11 audit | After adding npm deps → `npx wrangler deploy --dry-run` |
-| Workers CPU | 10 ms/request | SSR is a few ms; DB wait doesn't count | Heavy server work (PDF gen in Phase 4) → measure, consider queues |
+| Worker size | 3 MB gzip | ~2.06 MB at the Phase 11 audit | After adding npm deps -> `npx wrangler deploy --dry-run` |
+| Workers CPU | 10 ms/request | SSR is a few ms; DB wait doesn't count | Heavy server work (PDF gen in Phase 4) -> measure, consider queues |
 | Supabase database | free-tier storage cap | Text rows: years of headroom | Only if file-like data creeps into Postgres (don't: use R2) |
-| Supabase project | pauses when idle on free | Health pings keep it warm | A paused project fails closed, not silently — `/api/health` goes 503 |
+| Supabase project | pauses when idle on free | Health pings keep it warm | A paused project fails closed, not silently; `/api/health` goes 503 |
 | Cloudflare Hyperdrive | free tier | One connection per request | Only if the Worker starts holding connections open (it must not) |
-| R2 | 10 GB, zero egress | Brief files @ ≤8 MB × 3 | ~400+ briefs with max files → review/archive old briefs |
-| Resend | 100/day, 3k/mo | ~1 per lead + daily digest | A 50-lead day is still fine |
-| GitHub Actions | 2,000 min/mo | CI + 2 crons: minutes | Nothing realistic |
+| R2 | 10 GB, zero egress | Deferred | Activate only if private B2B file delivery is requested |
+| Resend | 100/day, 3k/mo | Deferred during workers.dev testing | Activate after the custom sending domain is verified |
+| GitHub Actions | 2,000 min/mo | CI + weekly backup; digest manual until launch | Nothing realistic |
 
 ## Routine
-- **Daily:** the 21:00 IST digest email lists new applications/briefs. If it
-  stops arriving, check the digest workflow run and `CRON_SECRET`.
+- **Daily during workers.dev testing:** review new applications and briefs in
+  Karma Console. The digest workflow is intentionally manual-only while Resend
+  and `CRON_SECRET` are deferred, so it cannot create a meaningless failed
+  scheduled run every day. At launch, configure the same `CRON_SECRET` in
+  GitHub and Cloudflare, verify Resend, restore the 21:00 IST schedule, run it
+  once manually, and then treat a missed digest as an operational alert.
 - **Weekly:** the backup workflow exports every current **public application
   table**, encrypts the archive with `BACKUP_ENCRYPTION_PASSPHRASE`, and keeps
-  only the encrypted GitHub artifact for 90 days. A missing encryption secret
-  makes the workflow fail rather than upload plaintext PII. Download an
-  encrypted copy occasionally and keep one offline together with the
+  only the encrypted GitHub artifact for 90 days. A missing `DATABASE_URL` or
+  encryption passphrase fails in an explicit preflight before export. Download
+  an encrypted copy occasionally and keep one offline together with the
   passphrase in the institution's password manager.
 - **Monthly:** open `/en` and `/gu` on a phone, submit a test application,
   check Search Console for coverage errors. Also open `/admin/team` and
-  confirm the admin list matches who should actually have access — a
+  confirm the admin list matches who should actually have access. A
   deactivated admin frees a seat, so this is also how you find a wasted one.
 
 ## Applying a schema change
 `npm run db:migrate` runs the SQL in `drizzle/` against the direct
-`DATABASE_URL` — never through Hyperdrive, which is a Worker-only path. Review
+`DATABASE_URL`, never through Hyperdrive, which is a Worker-only path. Review
 the generated SQL before running it; migrations here are additive by rule.
 
 **Production migration state after the 2026-09-01 audit: `0000` through `0005`
@@ -59,7 +63,7 @@ the intended deny-by-default design, not a missing-policy bug.
 `npm run db:seed` inserts missing courses and, on a course that already exists,
 updates **only** `nameEn`, `nameGu`, `family` and `modules`. It does **not**
 touch `sort_order`, `active`, `public_visible`, the fee plan, the timetable or
-the archive state — those belong to whoever has been managing the catalogue in
+the archive state; those belong to whoever has been managing the catalogue in
 Karma Console.
 
 This is a behaviour change. The seed used to write a zero-based `sort_order` and
@@ -72,13 +76,13 @@ share one projection (`VERIFIED_CATALOG_ROWS`), and
 ```bash
 npx wrangler tail            # live logs from the deployed worker
 ```
-Form issues: the routes log clearly (`[admission] …`, `[brief] …`,
-`[turnstile] …`, `[email] …`). "Demo mode" warnings mean the worker could reach
+Form issues: the routes log clearly (`[admission] ...`, `[brief] ...`,
+`[turnstile] ...`, `[email] ...`). "Demo mode" warnings mean the worker could reach
 no database: check the `HYPERDRIVE` binding in `wrangler.jsonc`, or the
 temporary `DATABASE_URL` secret if Hyperdrive is not bound yet.
 
-Console issues log as `[auth] …`, `[team] …`, `[login] …`, `[dashboard] …`.
-None of them ever print a password, token, key or invitation link — if you need
+Console issues log as `[auth] ...`, `[team] ...`, `[login] ...`, `[dashboard] ...`.
+None of them ever print a password, token, key or invitation link. If you need
 more detail, add it to the log message, never the payload.
 
 ## Known trade-offs
@@ -91,16 +95,18 @@ more detail, add it to the log message, never the payload.
   configured. When the shoot lands, decide between pre-sized static assets and
   a Cloudflare image pipeline; do not activate R2 just for public photography.
 - The Worker opens one Postgres connection per request (`max: 1`,
-  `maxUses: 1`) rather than pooling across requests. That is deliberate — an
-  isolate is shared between people — and Hyperdrive does the pooling on its
+  `maxUses: 1`) rather than pooling across requests. That is deliberate because
+  an isolate is shared between people, and Hyperdrive does the pooling on its
   side. Do not "optimise" it into a module-scope pool.
 - No per-IP rate limiting beyond Turnstile + honeypot + min-time. If abuse
-  appears: add a Cloudflare WAF rate-limiting rule on `/api/*`.
+  appears, add a Cloudflare WAF rate-limiting rule on `/api/*`.
 
 ## Post-audit operational changes
-- `/api/health` returns **503 in production** when the database, Supabase
-  Auth, Turnstile or email is unconfigured: point uptime monitoring at it and
-  treat non-200 as an incident. It also reports `dbViaHyperdrive` truthfully.
+- `/api/health` returns **503 in production** when any required request-path
+  dependency is unavailable: database, Supabase Auth or Turnstile. Deferred
+  Resend does **not** make the site unhealthy during workers.dev testing.
+  `checks.email` remains visible as notification-readiness telemetry, and
+  `dbViaHyperdrive` remains visible as database-route telemetry.
 - Upcoming batches come from the real batch query and are cached at the edge;
   `DEMO_MODE=false` on the production Worker means sample inventory cannot be
   substituted for production batch rows.
@@ -109,14 +115,17 @@ more detail, add it to the log message, never the payload.
   public base tables at runtime so newly-added Console tables are not silently
   omitted, and uploads only an encrypted `.gpg` artifact. Managed Supabase
   schemas (`auth`, `storage`) and the Drizzle ledger are outside this interim
-  CSV backup.
+  CSV backup. A change to the backup workflow or export script also triggers a
+  main-branch backup run so the pipeline is proved immediately rather than at
+  the next Sunday schedule.
 - Sample proof used by the public preview follows the centralized provenance
   registry and stays out of factual JSON-LD/SEO claims. Sample form responses
   and sample batch inventory are not production fallbacks.
 
 ## Security dashboard follow-up
 The 2026-09-01 Supabase advisor pass is clear of the function-execution and
-mutable-search-path warnings fixed by `0005`. The remaining actionable warning
-is **Leaked Password Protection disabled** in Supabase Auth. Enable it in the
-Supabase dashboard if the current plan exposes that control; it is an Auth
-setting, not a database migration.
+mutable-search-path warnings fixed by `0005`. Supabase still reports **Leaked
+Password Protection disabled**, but the current free plan does not expose that
+control. This is an accepted plan limitation, not an unfinished database or
+application change. Revisit it only if the project moves to a plan that exposes
+Leaked Password Protection.

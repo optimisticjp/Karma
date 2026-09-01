@@ -1,14 +1,28 @@
 name: Daily digest email
+
+# Resend is intentionally deferred while the site is on workers.dev. Keep the
+# workflow manually runnable for launch verification, but do not create a red
+# scheduled run every day before CRON_SECRET + the verified sending domain are
+# intentionally activated.
 on:
-  schedule:
-    - cron: "30 15 * * *" # 15:30 UTC = 21:00 IST
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   digest:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Trigger digest endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          CONFIGURED_SITE_URL: ${{ vars.SITE_URL }}
         run: |
-          curl -fsS -X POST -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            "${{ vars.SITE_URL || 'https://karma-design-studio.essanciaonline.workers.dev' }}/api/cron/digest"
+          set -euo pipefail
+          test -n "$CRON_SECRET" || { echo "CRON_SECRET is required when the digest is activated" >&2; exit 1; }
+          BASE_URL="${CONFIGURED_SITE_URL:-https://karma-design-studio.essanciaonline.workers.dev}"
+          curl --connect-timeout 10 --max-time 30 -fsS -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${BASE_URL%/}/api/cron/digest"

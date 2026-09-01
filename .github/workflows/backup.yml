@@ -1,13 +1,34 @@
 name: Weekly DB backup
+
 on:
   schedule:
     - cron: "30 21 * * 0" # Sunday 21:30 UTC = Monday 03:00 IST
   workflow_dispatch:
+  # A backup implementation change should prove it can actually produce an
+  # encrypted artifact on main instead of waiting until Sunday to discover a
+  # missing secret or broken export.
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/backup.yml"
+      - "scripts/backup.ts"
+
+permissions:
+  contents: read
 
 jobs:
   backup:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
+      - name: Check required backup secrets
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          test -n "$DATABASE_URL" || { echo "DATABASE_URL GitHub Actions secret is missing" >&2; exit 1; }
+          test -n "$BACKUP_ENCRYPTION_PASSPHRASE" || { echo "BACKUP_ENCRYPTION_PASSPHRASE GitHub Actions secret is missing" >&2; exit 1; }
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -21,7 +42,7 @@ jobs:
         env:
           BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
         run: |
-          test -n "$BACKUP_ENCRYPTION_PASSPHRASE" || { echo "BACKUP_ENCRYPTION_PASSPHRASE is missing" >&2; exit 1; }
+          set -euo pipefail
           tar -czf db-backup.tar.gz backups/
           printf '%s' "$BACKUP_ENCRYPTION_PASSPHRASE" | \
             gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
