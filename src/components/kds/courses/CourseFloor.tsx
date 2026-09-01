@@ -1,7 +1,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import type { Course } from "@/content/courses";
 import type { CourseConfig } from "@/lib/course/config";
-import { pick } from "@/lib/i18n/localized";
+import { pick, tr } from "@/lib/i18n/localized";
 import type { Locale } from "@/i18n/routing";
 import { MachineFrame } from "@/components/kds/Frame";
 import { NeedlePoint, ThreadLine } from "@/components/kds/marks";
@@ -27,7 +27,7 @@ export function CourseFloor({ course, config }: { course: Course; config: Course
             {practical.length > 0 ? (
               <ul className="module-points mt-5" role="list">
                 {practical.map((line) => {
-                  const value = locale === "gu" ? line.gu : line.en;
+                  const value = tr(line, locale);
                   return (
                     <li key={value}>
                       <NeedlePoint state="done" />
