@@ -23,6 +23,16 @@ export function BriefForm() {
   const startedAt = useRef(Date.now());
   const formRef = useRef<HTMLFormElement>(null);
 
+  // The English catalogue sentence predates the decision to defer R2. Keep
+  // this message in the normal translation flow, but correct that stale clause
+  // at render time so the public form never claims upload is already active.
+  // Gujarati already says the future-state correctly, so replace() is a no-op
+  // there. This can disappear when the catalogue file is next split/edited.
+  const filesDeferredCopy = t("form.filesDeferred").replace(
+    "Private in-form upload is switched on with secure storage.",
+    "Private in-form upload will be enabled only after secure private storage is connected."
+  );
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
@@ -123,7 +133,7 @@ export function BriefForm() {
        */}
       <div className="form-callout">
         <p className="t-micro">{t("form.files")}</p>
-        <p className="t-meta mt-2">{t("form.filesDeferred")}</p>
+        <p className="t-meta mt-2">{filesDeferredCopy}</p>
         <p className="t-meta mt-2">{t("confidential")}</p>
       </div>
       {/* Honeypot: hidden from humans, tempting to bots */}
