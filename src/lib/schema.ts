@@ -1,5 +1,5 @@
 import { site, ownerProvidedFacts } from "./site";
-import type { Course } from "@/content/courses";
+import { coursesByFamily, type Course } from "@/content/courses";
 
 /**
  * Every piece of structured data on this site is built here.
@@ -18,10 +18,11 @@ const TEACHING_LANGUAGES = ["gu", "hi", "en"] as const;
 
 /**
  * The organisation graph receives the already-resolved PUBLIC course list.
- * That prevents a course hidden, deactivated or archived in Karma Console from
- * surviving invisibly in JSON-LD after it has disappeared from the page.
+ * Public callers pass the Console-filtered list so a hidden/deactivated course
+ * disappears from JSON-LD too. The default keeps this pure helper usable in
+ * build-time tests and other non-request contexts.
  */
-export function studioSchema(locale: Locale, courses: Course[]) {
+export function studioSchema(locale: Locale, courses: Course[] = coursesByFamily) {
   return {
     "@context": "https://schema.org",
     "@type": ["LocalBusiness", "EducationalOrganization"],
