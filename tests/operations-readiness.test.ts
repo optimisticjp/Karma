@@ -69,3 +69,27 @@ describe("operations record", () => {
     expect(operations).toContain("accepted plan limitation");
   });
 });
+
+describe("owner-only launch checklist", () => {
+  const checklist = read("docs/content-checklist.md");
+
+  it("does not reopen the resolved closing-time conflict", () => {
+    expect(checklist).toContain("latest closing/evening-batch time: **11:00 PM**");
+    expect(checklist).not.toContain("10:30");
+  });
+
+  it("keeps the owner-approved public fee privacy policy", () => {
+    expect(checklist).toContain("public fee amounts remain intentionally private");
+    expect(checklist).not.toContain("published in full");
+  });
+
+  it("records the final photo allocation instead of asking again which courses get images", () => {
+    expect(checklist).toContain("The eight course photographs are already assigned");
+    expect(checklist).toContain("Flat Embroidery, Appliqué & 3D and Cross Stitch");
+  });
+
+  it("keeps sample proof and Terms as explicit pre-domain gates", () => {
+    expect(checklist).toContain("replace with real approved proof or hidden");
+    expect(checklist).toContain("`/terms` remains a draft");
+  });
+});
