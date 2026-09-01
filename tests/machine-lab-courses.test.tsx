@@ -128,10 +128,10 @@ describe("the duration and fee policy", () => {
     }
   });
 
-  it("renders operational facts from the resolved Console configuration", () => {
+  it("renders public operational facts from the resolved Console configuration but keeps fee amounts private", () => {
     expect(detailPage).toContain("getPublicCourseBySlug(slug)");
     expect(detailPage).toContain("getCourseConfig(slug)");
-    expect(courseFacts).toContain("config.fees");
+    expect(courseFacts).not.toContain("config.fees");
     expect(courseFacts).toContain("config.operations.scheduleOptions");
     expect(courseHero).toContain("config.durationMonths");
     expect(courseHero).toContain("config.software");
@@ -144,7 +144,7 @@ describe("the duration and fee policy", () => {
     }
   });
 
-  it("keeps the EMCAD verified seed as the reference bar", () => {
+  it("keeps the EMCAD verified seed as the private operational reference bar", () => {
     expect(EMCAD_DAHAO.durationMonths).toBe(3);
     expect(EMCAD_DAHAO.fees.feeTotal).toBe(35_000);
     expect(EMCAD_DAHAO.operations.scheduleOptions).toHaveLength(4);
