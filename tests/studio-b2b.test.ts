@@ -51,11 +51,12 @@ describe("the studio page promises nothing that has not been confirmed", () => {
     expect(read("src/app/api/brief/route.ts")).toContain("filesStored");
   });
 
-  it("builds machine capability from the catalogue, so it cannot overclaim", () => {
-    expect(page).toContain("coursesByFamily.map");
-    /* Every technique on the wall is a course the school teaches, named from
-       the catalogue — so the studio cannot advertise a capability the floor
-       does not have, and a twelfth course would appear here without an edit. */
+  it("builds machine capability from the Console-visible catalogue, so it cannot overclaim", () => {
+    expect(page).toContain("getPublicCourses()");
+    expect(page).toContain("publicCourses.map");
+    /* Every technique on the wall is a currently public course the school
+       teaches, so hiding a course in Console removes the matching public
+       capability instead of leaving a stale commercial promise behind. */
     expect(page).toContain('pick(c, "name", l)');
     expect(page).not.toMatch(/\b11 techniques\b/);
   });
@@ -95,7 +96,7 @@ describe("studio content is grounded in services the studio already offers", () 
     }
   });
 
-  it("covers the whole catalogue on the capability list", () => {
+  it("keeps the source fallback catalogue complete", () => {
     expect(coursesByFamily.length).toBe(11);
   });
 });
