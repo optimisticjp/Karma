@@ -22,13 +22,6 @@ declare global {
   }
 }
 
-function actionForPage() {
-  const path = window.location.pathname;
-  if (path.includes("/admission")) return "admission";
-  if (path.includes("/services")) return "brief";
-  return "public_form";
-}
-
 /**
  * Cloudflare Turnstile.
  *
@@ -70,7 +63,7 @@ export function TurnstileWidget({ onToken }: { onToken: (token: string) => void 
       if (widgetId.current || !ref.current || !window.turnstile) return;
       widgetId.current = window.turnstile.render(ref.current, {
         sitekey: siteKey,
-        action: actionForPage(),
+        action: "public_form",
         callback: onToken,
         "expired-callback": () => onToken(""),
         "error-callback": () => onToken(""),
