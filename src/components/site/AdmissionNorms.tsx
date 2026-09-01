@@ -4,8 +4,8 @@ import { admissionTerms } from "@/content/admission-terms";
 
 /**
  * The institute's admission norms, in full, on the page the visitor accepts
- * them from. They are intentionally always visible: acceptance should never
- * depend on noticing or opening a disclosure control.
+ * them from. The native disclosure is OPEN by default, so every clause is
+ * visible without the visitor having to notice or click a plus control.
  */
 export function AdmissionNorms({
   version,
@@ -42,14 +42,14 @@ export function AdmissionNorms({
           <ThreadLine draw className="mt-3 w-16" />
           <p className="t-body mt-4">{intro}</p>
 
-          <div className="module mt-4">
-            <div className="module-summary border-b border-rule">
+          <details open className="module mt-4">
+            <summary className="module-summary border-b border-rule">
               <span className="t-micro numeric module-index" aria-hidden="true">
                 {String(terms.clauses.length).padStart(2, "0")}
               </span>
               <span className="t-h4 min-w-0">{gu ? terms.titleGu : terms.titleEn}</span>
               <Icon name="check" size={17} className="text-[var(--brand-accent-strong)]" />
-            </div>
+            </summary>
             <div className="module-points">
               <ol className="norms-list">
                 {terms.clauses.map((clause) => (
@@ -67,7 +67,7 @@ export function AdmissionNorms({
 
               {!gu ? <p className="t-meta mt-3">{languageNote}</p> : null}
             </div>
-          </div>
+          </details>
         </div>
       </div>
     </section>
