@@ -19,19 +19,22 @@ describe("public and Console course UX", () => {
   it("has an explicit Home item in the public menu", () => {
     const header = read("src/components/kds/shell/SiteHeader.tsx");
     expect(header).toContain('{ href: "/", key: "home" }');
+    expect(header).toContain('homeLink("site-nav-link")');
+    expect(header).toContain('homeLink("site-menu-link")');
   });
 
   it("places social trust immediately after the hero", () => {
     const home = read("src/app/[locale]/page.tsx");
-    expect(home.indexOf("<TrustSignals />")).toBeGreaterThan(home.indexOf("<HomeHero"));
-    expect(home.indexOf("<TrustSignals />")).toBeLessThan(home.indexOf("<EntryPaths />"));
+    expect(home.indexOf("<HeroSocialProof />")).toBeGreaterThan(home.indexOf("<HomeHero"));
+    expect(home.indexOf("<HeroSocialProof />")).toBeLessThan(home.indexOf("<EntryPaths />"));
+    expect(read("src/components/kds/home/HeroSocialProof.tsx")).toContain("socialChannels");
   });
 
-  it("shows admission norms without a collapsed details control", () => {
+  it("shows admission norms openly without requiring a disclosure click", () => {
     const norms = read("src/components/site/AdmissionNorms.tsx");
     expect(norms).toContain('id="admission-norms"');
-    expect(norms).not.toContain("<details");
-    expect(norms).not.toContain("<summary");
+    expect(norms).toContain("<details open");
+    expect(norms).toContain("terms.clauses.map");
   });
 
   it("keeps public fee amounts private while retaining Console fee records", () => {
