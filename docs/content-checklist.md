@@ -19,6 +19,28 @@ decisions.
 - Never fill missing facts, photographs, reviews, people or outcomes with stock,
   generated or borrowed content.
 
+## Immediate account dependency: make the weekly backup runnable
+
+The 2026-09-01 main-branch backup preflight proved that
+`BACKUP_ENCRYPTION_PASSPHRASE` is present in GitHub Actions, but the
+`DATABASE_URL` GitHub Actions secret is still missing. Code cannot create or
+copy repository secrets on the owner's behalf.
+
+Owner action:
+
+1. copy the **direct Postgres connection string** for the production Supabase
+   project from the Supabase dashboard;
+2. add it to this repository as the GitHub Actions secret named exactly
+   `DATABASE_URL`;
+3. run **Actions -> Weekly DB backup -> Run workflow** once;
+4. confirm the run uploads only `db-backup-<run-id>` containing
+   `db-backup.tar.gz.gpg`;
+5. download one artifact and decrypt it offline with the existing backup
+   passphrase to prove recovery, not just backup creation.
+
+The workflow remains fail-closed: without that secret it produces no plaintext
+or partial backup artifact.
+
 ## Required before custom-domain launch
 
 ### 1. The 32 real photographs
@@ -137,7 +159,8 @@ moves from content to account configuration:
 2. update `NEXT_PUBLIC_SITE_URL` in source/build configuration;
 3. add the custom hostname to Turnstile and update `TURNSTILE_HOSTNAMES`;
 4. update Supabase Auth Site URL / redirect URLs;
-5. verify the sending domain and activate Resend notification email;
+5. verify the sending domain, configure the same `CRON_SECRET` in GitHub and
+   Cloudflare, activate Resend, then restore the 21:00 IST digest schedule;
 6. add Cloudflare WAF/rate-limit rules for `/api/*` and, if desired, `/admin/*`;
 7. redeploy and run final EN/GU browser, form, SEO, 404, certificate, batch,
    admission and mobile acceptance checks;

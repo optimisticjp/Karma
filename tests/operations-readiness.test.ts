@@ -116,6 +116,12 @@ describe("owner-only launch checklist", () => {
     expect(normalized).toContain("replaced with real approved proof or hidden");
     expect(normalized).toContain("`/terms` remains a draft");
   });
+
+  it("records the one proven missing backup secret and recovery check", () => {
+    expect(normalized).toContain("`DATABASE_URL` GitHub Actions secret is still missing");
+    expect(normalized).toContain("Run workflow");
+    expect(normalized).toContain("decrypt it offline");
+  });
 });
 
 describe("live production smoke", () => {
