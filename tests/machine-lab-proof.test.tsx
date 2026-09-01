@@ -211,15 +211,13 @@ describe("reserved portraits", () => {
  * ------------------------------------------------------------------ */
 
 describe("studio and technique proof", () => {
-  it("gives each of the eleven techniques its own mark on /about", () => {
-    /* Three shared family swatches told a visitor which bucket a course sat
-       in; eleven signatures tell them what the stitch does. */
-    /* Three shared family swatches told a visitor which bucket a course sat
-       in; eleven of the course's OWN marks tell them what the stitch does.
-       The mark changed with the rebuild — a stitch swatch rather than a drawn
-       signature — and the rule did not. */
+  it("gives each currently public technique its own mark on /about", () => {
+    /* The wall follows the same Console-filtered course set as the public
+       catalogue, while every source technique still owns its own stitch mark. */
     expect(aboutPage).toContain("<StitchSwatch slug={c.slug} />");
-    expect(aboutPage).toContain("coursesByFamily.map");
+    expect(aboutPage).toContain("publicCourses.map");
+    expect(aboutPage).toContain("getPublicCourses()");
+    expect(aboutPage).not.toContain("coursesByFamily.map");
     expect(aboutPage).not.toContain("TechniquePlate");
     expect(courses).toHaveLength(11);
   });
