@@ -78,15 +78,20 @@ describe("homepage architecture", () => {
 });
 
 describe("the hero", () => {
-  it("names the one software Karma teaches, from source", () => {
+  it("names the one software Karma teaches from the Console-backed EMCAD config", () => {
     expect(KARMA_SOFTWARE).toBe("EMCAD DAHAO");
-    expect(hero).toContain("KARMA_SOFTWARE");
+    expect(page).toContain("getCourseConfig(EMCAD_DAHAO_SLUG)");
+    expect(page).toContain("<HomeHero courses={courses} emcad={emcad}");
+    expect(hero).toContain("emcad?.software");
+    expect(hero).not.toContain("KARMA_SOFTWARE");
   });
 
-  it("renders the demo from the verified record rather than a round number", () => {
+  it("renders the demo from the Console-backed record rather than a round number", () => {
     expect(EMCAD_DAHAO.operations.demo?.days).toBe(2);
     expect(EMCAD_DAHAO.operations.demo?.free).toBe(true);
-    expect(hero).toContain("EMCAD_DAHAO.operations.demo");
+    expect(hero).toContain("emcad?.operations.demo");
+    expect(hero).toContain("demo.days");
+    expect(hero).not.toContain("EMCAD_DAHAO.operations.demo");
     expect(en.home.hero.factDemoLabel).toContain("EMCAD DAHAO");
     expect(gu.home.hero.factDemoLabel).toContain("EMCAD DAHAO");
   });
