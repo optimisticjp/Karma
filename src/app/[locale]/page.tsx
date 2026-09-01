@@ -38,7 +38,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
-      <HomeHero />
+      <HomeHero courseCount={courses.length} />
       <TrustSignals />
       <EntryPaths />
       <SampleBook courses={courses} />
