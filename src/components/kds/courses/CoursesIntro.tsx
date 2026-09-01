@@ -1,26 +1,32 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { families, type Course } from "@/content/courses";
-import { EMCAD_DAHAO, KARMA_SOFTWARE } from "@/content/course-operations";
 import { pick } from "@/lib/i18n/localized";
 import type { Locale } from "@/i18n/routing";
 import { StitchSwatch } from "@/components/kds/StitchSwatch";
 import { NeedlePoint, ThreadLine } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
 
-/** Opening counts and swatches are derived from the same Console-filtered list
- * as the catalogue, so hiding a course cannot leave a contradictory count. */
-export function CoursesIntro({ courses }: { courses: Course[] }) {
+/** Opening counts and the software/demo facts are resolved from the same
+ * Console-backed catalogue/configuration used by the detail and admission pages. */
+export function CoursesIntro({
+  courses,
+  software,
+  demoDays
+}: {
+  courses: Course[];
+  software: string | null;
+  demoDays: number;
+}) {
   const t = useTranslations("coursesPage");
   const tc = useTranslations("common");
   const locale = useLocale() as Locale;
-  const demo = EMCAD_DAHAO.operations.demo;
 
   const facts = [
     t("factMachine"),
     t("factLanguages"),
     t("factCertificate"),
-    t("factDemo", { days: demo?.days ?? 2 })
+    t("factDemo", { days: demoDays })
   ];
   const familyKeys = (Object.keys(families) as Array<keyof typeof families>).filter((key) =>
     courses.some((course) => course.family === key)
@@ -82,7 +88,7 @@ export function CoursesIntro({ courses }: { courses: Course[] }) {
                 ))}
               </ul>
             ) : null}
-            <p className="t-meta mt-3">{t("softwareNote", { software: KARMA_SOFTWARE })}</p>
+            {software ? <p className="t-meta mt-3">{t("softwareNote", { software })}</p> : null}
           </aside>
         </div>
       </div>
