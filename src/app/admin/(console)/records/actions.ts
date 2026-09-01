@@ -110,6 +110,7 @@ function listPathFor(entity: RecordEntity): string {
       return "/admin/courses";
     case "student":
     case "guardian":
+    case "enrollment":
       return "/admin/students";
     case "application":
     case "application_note":
@@ -229,6 +230,7 @@ const DELETE_TARGETS = {
   application_note: schema.applicationNotes,
   student: schema.students,
   guardian: schema.guardians,
+  enrollment: schema.enrollments,
   attendance_session: schema.attendanceSessions,
   fee_record: schema.feeRecords,
   certificate: schema.certificates,
@@ -250,13 +252,18 @@ export async function deleteRecordAction(
   const id = idOf(formData.get("id"));
   if (!entity || !id || !isDeletable(entity)) return fail("invalid");
 
-  /**
-   * Owner-only, always — even for an admin holding the module's manage
-   * permission. Destroying history is not a delegated capability, and
-   * `ownerOnly` is checked by the guard rather than inferred from a role field
-   * anywhere in this file.
+  /*
+   * Deletion is delegated only through the same module manage permission that
+   * owns the record. A policy can still explicitly reserve a future entity to
+   * Owner-only. The permission check is performed here, not inferred from
+   * whether the UI happened to draw a delete link.
    */
-  const auth = await authorizeAction({ ownerOnly: true });
+  const policy = policyFor(entity);
+  const auth = await authorizeAction(
+    policy.deletableBy === "owner" || policy.managePermission == null
+      ? { ownerOnly: true }
+      : { permission: policy.managePermission }
+  );
   if (!auth.ok) return fail("denied");
   if (!canPerform(subjectFor(auth.session), entity, "delete")) return fail("denied");
 
@@ -268,8 +275,8 @@ export async function deleteRecordAction(
     if (!report) return fail("missing");
     if (report.refusal === "locked") return fail("locked");
     if (report.refusal === "revokeFirst") return fail("revokeFirst");
-    /* Not a cascade. The operator is shown what depends on the record and has
-       to deal with it deliberately — see record-actions.ts. */
+    /* Not a broad cascade. The operator is shown what depends on the record
+       and has to deal with every blocking dependency deliberately. */
     if (report.blocked) return fail("blocked");
     if (!confirmationMatches(entity, report.identifier, formData.get("confirm"))) {
       return fail("confirm");
@@ -346,6 +353,17 @@ function tombstone(entity: DeletableEntity, row: Record<string, unknown>) {
       return pick("admissionNo", "fullName", "createdAt");
     case "guardian":
       return pick("studentId", "name", "relation");
+    case "enrollment":
+      return pick(
+        "studentId",
+        "batchId",
+        "status",
+        "joinedOn",
+        "completedOn",
+        "agreedFeeTotal",
+        "termsVersion",
+        "createdAt"
+      );
     case "attendance_session":
       return pick("batchId", "sessionDate", "openedBy");
     case "fee_record":
