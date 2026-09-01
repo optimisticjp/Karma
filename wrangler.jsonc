@@ -43,11 +43,12 @@
 
   // Non-secret runtime vars. Secrets (SUPABASE_SECRET_KEY, RESEND_API_KEY,
   // TURNSTILE_SECRET_KEY, CRON_SECRET) are set with `npx wrangler secret put`.
-  // NEVER put a secret in this block. The database credentials are not here at
-  // all: they live inside the Hyperdrive configuration above.
+  // TURNSTILE_SITE_KEY is public and is added here after the production widget
+  // is created. NEVER put the Turnstile secret in this block.
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://karma-design-studio.essanciaonline.workers.dev",
     "STUDIO_EMAIL": "karmadesignclasses@gmail.com",
-    "STUDIO_WHATSAPP": "919904376340"
+    "STUDIO_WHATSAPP": "919904376340",
+    "TURNSTILE_HOSTNAMES": "karma-design-studio.essanciaonline.workers.dev"
   }
 }
