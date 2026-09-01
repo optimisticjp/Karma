@@ -51,6 +51,11 @@ const en = () => ({
   archived: "Archived",
   showArchived: "Include archived",
   entityNames: entityNamesEn,
+  cleanupTitle: "Record cleanup",
+  cleanupLede:
+    "Review test, duplicate or mistaken operational records here. Permanent deletion still goes through dependency checks, typed confirmation and an audit entry.",
+  cleanupEmpty: "No records of this type are available.",
+  cleanupOpen: "Review deletion",
 
   deleteTitle: "Delete permanently",
   deleteLede:
@@ -101,6 +106,11 @@ const gu = (): RecordsCopy => ({
   archived: "Archived",
   showArchived: "Archived પણ બતાવો",
   entityNames: entityNamesGu,
+  cleanupTitle: "Record cleanup",
+  cleanupLede:
+    "Test, duplicate કે ભૂલથી બનેલા operational records અહીં તપાસો. કાયમી delete પહેલાં dependency check, typed confirmation અને audit entry ફરજિયાત રહે છે.",
+  cleanupEmpty: "આ પ્રકારનો કોઈ record ઉપલબ્ધ નથી.",
+  cleanupOpen: "Delete તપાસો",
 
   deleteTitle: "કાયમ માટે delete કરો",
   deleteLede:
