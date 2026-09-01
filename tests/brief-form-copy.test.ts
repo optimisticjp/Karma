@@ -14,11 +14,11 @@ describe("brief form deferred upload copy", () => {
   });
 
   it("keeps Turnstile on the brief form and refreshes a stale challenge safely", () => {
-    expect(briefForm).toContain(
-      "<TurnstileWidget onToken={setToken} resetKey={challengeVersion} />"
-    );
+    expect(briefForm).toContain('<div key={challengeVersion}>');
+    expect(briefForm).toContain('<TurnstileWidget onToken={setToken} />');
     expect(briefForm).toContain('fd.get("turnstileToken")');
     expect(briefForm).toContain('fd.set("turnstileToken", challengeToken)');
     expect(briefForm).toContain("setChallengeVersion((v) => v + 1)");
+    expect(briefForm).toContain("setToken(undefined)");
   });
 });
