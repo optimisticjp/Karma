@@ -11,23 +11,11 @@ import {
   photosInGroup
 } from "../src/content/photo-manifest";
 import { ICON_GROUPS, ICON_NAMES } from "../src/components/ui/Icon";
-/* `<TechniqueSignature>` and `<StitchMark>` were deleted in Phase 11 with the
-   rest of the superseded public system. `<StitchSwatch>` carries the eleven
-   technique marks now and `src/components/kds/marks.tsx` carries the shared
-   ones; every rule below is repointed, none dropped. */
 import { STITCH_SWATCHES } from "../src/components/kds/StitchSwatch";
 import { courses } from "../src/content/courses";
 
 const read = (p: string) => readFileSync(join(process.cwd(), p), "utf8");
 
-/**
- * Strip comments before asserting on source.
- *
- * These are policy tests, and policy is about what the interface RENDERS, not
- * about what a comment explains. Without this, a comment saying "no RPM, ever"
- * would fail the test that bans RPM — which would teach the next session to
- * delete the explanation rather than keep the rule.
- */
 const stripComments = (source: string) =>
   source.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/^\s*\/\/.*$/gm, " ");
 
@@ -35,10 +23,6 @@ const machineLabCss = read("src/app/machine-lab.css");
 const globalsCss = read("src/app/globals.css");
 const signatureSource = read("src/components/kds/StitchSwatch.tsx");
 const iconSource = read("src/components/ui/Icon.tsx");
-
-/* ------------------------------------------------------------------ *
- * The 32-photograph manifest
- * ------------------------------------------------------------------ */
 
 describe("photo manifest", () => {
   it("declares exactly the 32 photographs the owner's brief specifies", () => {
@@ -95,16 +79,9 @@ describe("photo manifest", () => {
   });
 });
 
-/* ------------------------------------------------------------------ *
- * No stock, no generated, no borrowed photography
- * ------------------------------------------------------------------ */
-
 describe("photography honesty", () => {
   it("ships no remote image source anywhere in the manifest or the frames", () => {
-    const sources = [
-      read("src/content/photo-manifest.ts"),
-      read("src/components/kds/Frame.tsx")
-    ].join("\n");
+    const sources = [read("src/content/photo-manifest.ts"), read("src/components/kds/Frame.tsx")].join("\n");
     for (const host of [
       "unsplash",
       "pexels",
@@ -128,16 +105,10 @@ describe("photography honesty", () => {
   });
 });
 
-/* ------------------------------------------------------------------ *
- * The Karma Stitch icon family
- * ------------------------------------------------------------------ */
-
 describe("icon family", () => {
   it("covers all four branded groups from the spec", () => {
     for (const [group, names] of Object.entries(ICON_GROUPS)) {
-      for (const name of names) {
-        expect(ICON_NAMES, `${group}/${name}`).toContain(name);
-      }
+      for (const name of names) expect(ICON_NAMES, `${group}/${name}`).toContain(name);
     }
   });
 
@@ -156,16 +127,13 @@ describe("icon family", () => {
     for (const name of ["pencil", "trash", "printer", "search", "arrow", "phone", "map"]) {
       expect(ICON_GROUPS.universal as readonly string[]).toContain(name);
     }
-    /* A branded icon must never be the one used for a universal action. */
     const branded = new Set<string>([
       ...ICON_GROUPS.production,
       ...ICON_GROUPS.technique,
       ...ICON_GROUPS.digitising,
       ...ICON_GROUPS.troubleshooting
     ]);
-    for (const name of ICON_GROUPS.universal) {
-      expect(branded.has(name), name).toBe(false);
-    }
+    for (const name of ICON_GROUPS.universal) expect(branded.has(name), name).toBe(false);
   });
 
   it("names no machine manufacturer or model — an icon is not a claim", () => {
@@ -175,10 +143,6 @@ describe("icon family", () => {
     }
   });
 });
-
-/* ------------------------------------------------------------------ *
- * Eleven technique signatures
- * ------------------------------------------------------------------ */
 
 describe("technique signatures", () => {
   it("gives every course in the catalogue a signature, and invents none", () => {
@@ -195,8 +159,6 @@ describe("technique signatures", () => {
   });
 
   it("carries no invented specification — no numbers presented as facts", () => {
-    /* Signature geometry is coordinates, not claims. Nothing may render a
-       unit that reads as a machine specification. */
     const rendered = stripComments(signatureSource).toLowerCase();
     for (const unit of ["rpm", "spm", "gsm", "stitches/", "stitches per", "mm/s"]) {
       expect(rendered).not.toContain(unit);
@@ -213,44 +175,24 @@ describe("technique signatures", () => {
       .split("\n")
       .filter((l) => l.includes(".sig-play") && l.includes("{"))
       .filter((l) => !l.includes(".is-in"));
-    /* Non-vacuity: if the selector shape ever changes, this test must fail
-       loudly rather than quietly checking nothing. */
     expect(hidden.length).toBeGreaterThanOrEqual(3);
-    for (const line of hidden) {
-      expect(line.trim().startsWith(".js "), line).toBe(true);
-    }
+    for (const line of hidden) expect(line.trim().startsWith(".js "), line).toBe(true);
   });
 });
 
-/* ------------------------------------------------------------------ *
- * Canonical stitch language
- * ------------------------------------------------------------------ */
-
 describe("stitch semantics", () => {
-  it("defines six marks and six meanings, each distinct", () => {
-    /* `STITCH_SEMANTICS` listed six marks and asserted each meant ONE thing.
-       The rebuilt system keeps that rule by having fewer marks rather than a
-       table of them: `marks.tsx` exports exactly the shared four, and the
-       eleven technique swatches are per-course drawings rather than a reusable
-       vocabulary. A fifth shared mark is what this now catches. */
+  it("keeps exactly the shared marks used by the rebuilt system", () => {
     const marks = read("src/components/kds/marks.tsx");
     const exported = [...marks.matchAll(/^export function (\w+)/gm)].map((m) => m[1]);
     expect(exported).toEqual(["ThreadLine", "NeedlePoint", "HoopWindow", "ThreadProgress"]);
   });
 
   it("keeps the running stitch geometry identical to the brand spec (9 on, 6 off)", () => {
-    /* The geometry moved from an SVG dash array into the CSS the whole system
-       shares, which is stricter: every stitched thing now takes the same
-       numbers from one place instead of each drawing repeating them. */
     const tmp = read("src/app/thread-machine-proof.css");
     expect(tmp).toContain("var(--brand-accent) 0 9px, transparent 9px 15px");
     expect(tmp).toContain("background-size: 15px 2px");
   });
 });
-
-/* ------------------------------------------------------------------ *
- * Machine Lab tokens, motion levels, glass and texture restrictions
- * ------------------------------------------------------------------ */
 
 describe("design system v4 foundation", () => {
   it("adds v4 tokens without renaming a single v3 token the console depends on", () => {
@@ -274,8 +216,6 @@ describe("design system v4 foundation", () => {
   it("loads no new font for machine notation — the platform stack only", () => {
     const monoDecl = globalsCss.slice(globalsCss.indexOf("--font-mono:"));
     expect(monoDecl.slice(0, 200)).toContain("ui-monospace");
-    /* @fontsource imports are how a font enters this project. There must be
-       no new one for v4. */
     const imports = globalsCss.match(/@import "@fontsource[^"]+"/g) ?? [];
     expect(imports).toHaveLength(2);
   });
@@ -285,7 +225,6 @@ describe("design system v4 foundation", () => {
       const guRule = machineLabCss.includes(`:lang(gu) ${cls}`);
       expect(guRule, cls).toBe(true);
     }
-    /* And the rules actually undo it rather than merely existing. */
     const guBlocks = machineLabCss.split(":lang(gu)").slice(1);
     expect(guBlocks.length).toBeGreaterThanOrEqual(3);
     for (const block of guBlocks) {
@@ -314,7 +253,6 @@ describe("design system v4 foundation", () => {
   it("restricts glass to one panel treatment — no frosted card variant", () => {
     expect(machineLabCss).toContain(".lab-glass {");
     expect(stripComments(machineLabCss)).not.toContain(".lab-glass--card");
-    /* Readable when backdrop-filter is unavailable. */
     expect(machineLabCss).toContain("@supports not ((backdrop-filter");
   });
 
@@ -338,13 +276,18 @@ describe("design system v4 foundation", () => {
     }
   });
 
-  it("loads the v4 stylesheet after premium.css in both root layouts", () => {
-    for (const layout of ["src/app/[locale]/layout.tsx", "src/app/admin/layout.tsx"]) {
-      const source = read(layout);
-      expect(source.indexOf('machine-lab.css'), layout).toBeGreaterThan(
-        source.indexOf('premium.css')
-      );
-    }
+  it("keeps Console CSS admin-only and the public THREAD / MACHINE / PROOF sheet public-only", () => {
+    const publicLayout = stripComments(read("src/app/[locale]/layout.tsx"));
+    const adminLayout = stripComments(read("src/app/admin/layout.tsx"));
+
+    expect(publicLayout).toContain('thread-machine-proof.css');
+    expect(publicLayout).not.toContain('premium.css');
+    expect(publicLayout).not.toContain('machine-lab.css');
+
+    expect(adminLayout).toContain('premium.css');
+    expect(adminLayout).toContain('machine-lab.css');
+    expect(adminLayout.indexOf('machine-lab.css')).toBeGreaterThan(adminLayout.indexOf('premium.css'));
+    expect(adminLayout).not.toContain('thread-machine-proof.css');
   });
 
   it("adds no new runtime dependency for the design system", () => {
@@ -366,14 +309,6 @@ describe("design system v4 foundation", () => {
   });
 });
 
-/* ------------------------------------------------------------------ *
- * Render smoke test
- *
- * Phase 1 ships no finished page, so nothing else would catch a
- * primitive that throws. Rendering each one to string is the cheapest
- * proof they work, and it runs in the node environment with no DOM.
- * ------------------------------------------------------------------ */
-
 describe("primitives render", () => {
   it("renders every icon in the family", async () => {
     const { renderToStaticMarkup } = await import("react-dom/server");
@@ -381,10 +316,7 @@ describe("primitives render", () => {
     for (const name of ICON_NAMES) {
       const html = renderToStaticMarkup(<Icon name={name} />);
       expect(html, name).toContain("<svg");
-      /* An icon with no geometry is a blank box on the page. */
-      expect(html.includes("<path") || html.includes("<circle") || html.includes("<rect"), name).toBe(
-        true
-      );
+      expect(html.includes("<path") || html.includes("<circle") || html.includes("<rect"), name).toBe(true);
       expect(html, name).toContain('aria-hidden="true"');
     }
   });
@@ -395,8 +327,6 @@ describe("primitives render", () => {
     for (const slug of Object.keys(STITCH_SWATCHES)) {
       const html = renderToStaticMarkup(<StitchSwatch slug={slug} />);
       expect(html, slug).toContain('aria-hidden="true"');
-      /* No fixed width or height: the mark scales with its container at 320,
-         390, 768 and 1440 alike. */
       expect(html, slug).toContain("viewBox");
       expect(html, slug).not.toMatch(/<svg[^>]*\swidth="/);
     }
@@ -411,35 +341,19 @@ describe("primitives render", () => {
   it("renders each stitch mark and each manifest frame", async () => {
     const { renderToStaticMarkup } = await import("react-dom/server");
     const marks = await import("../src/components/kds/marks");
-    /* The rebuilt marks are CSS-driven rather than SVG — a repeating
-       background is cheaper than a path and re-colours from the brand accent
-       for free — so what is asserted is that each one renders a box it can be
-       seen in, which is the defect that actually happened: `.hoop` shipped as
-       an inline span and was invisible. */
     for (const Mark of [marks.ThreadLine, marks.NeedlePoint]) {
       expect(renderToStaticMarkup(<Mark />)).toContain("<span");
     }
 
-    /* `<ManifestPhoto>` and `<PhotoSlot>` were deleted in Phase 9 — two
-       placeholder vocabularies for one job, the older drawn in the superseded
-       palette. `<PhotoFrame>` is the only one now, and the rule it carries is
-       the one that always mattered: the frame reserves the photograph's exact
-       ratio. */
     const { PhotoFrame } = await import("../src/components/kds/Frame");
     for (const slot of PHOTO_MANIFEST) {
       const html = renderToStaticMarkup(<PhotoFrame id={slot.id} scale="lead" />);
-      /* The frame reserves the photograph's exact ratio — this is what keeps
-         layout shift at zero when the real file lands. */
       expect(html, slot.id).toContain(`aspect-ratio:${slot.width} / ${slot.height}`);
       expect(html, slot.id).toContain(slot.label);
     }
   });
 
   it("still writes a stage index zero-padded, wherever it appears", async () => {
-    /* `<MonoNote>` / `<StepIndex>` were deleted with the superseded system.
-       The notation is now `.t-micro .numeric` written at the call site, and
-       the rule that survives is the zero-padding: 01, 02, 03 — a stage index
-       that jumps from 9 to 10 changes width and the column jitters. */
     const chain = read("src/components/kds/studio/StudioChain.tsx");
     expect(chain).toContain('String(i + 1).padStart(2, "0")');
     const terms = read("src/app/[locale]/terms/page.tsx");
