@@ -39,13 +39,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <>
       <HomeHero />
+      <TrustSignals />
       <EntryPaths />
       <SampleBook courses={courses} />
       <ScreenMachineProof />
       <EmcadPanel />
       <ProofWall />
       <HomeVoices />
-      <TrustSignals />
       <BatchesVisit />
       <HomeClose />
     </>
