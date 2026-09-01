@@ -7,7 +7,11 @@ import { CoursePathway } from "@/components/kds/courses/CoursePathway";
 import { CtaBand } from "@/components/kds/CtaBand";
 import { routing } from "@/i18n/routing";
 import { pageMeta } from "@/lib/seo";
+import { getPublicCourses } from "@/lib/course/public";
 import { PageCrumbs } from "@/components/kds/PageCrumbs";
+
+/** Course visibility/order is maintained in Karma Console. */
+export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -23,31 +27,6 @@ export async function generateMetadata({
   return pageMeta({ locale, path: "/courses", title: t("title"), description: t("description") });
 }
 
-/**
- * THE CATALOGUE.
- *
- * Five blocks, and each answers a different question:
- *
- *  1  Intro       what is on offer, and what is true of all of it
- *  2  Catalogue   the eleven, filterable by family, compared side by side
- *  3  Families    how they divide up and why — and every course as a link
- *  4  Pathway     where they lead, as a sequence rather than a list
- *  5  Close       the one action
- *
- * The page it replaces opened with a full-height intro and then repeated a
- * family heading, an icon plate and a section rule three times before any
- * course appeared. The eleven courses ARE the page; everything else is
- * context, and context goes after the thing it contextualises.
- *
- * **No fee anywhere on this page.** Fees are discussed offline and exactly one
- * course has a published plan, which lives on that course's own page.
- */
-
-/**
- * Two cues, both FACTS the owner confirmed on 2026-08-29 — never an invented
- * difficulty rating. No course carries a "beginner" or "advanced" label,
- * because every one of them is taught from zero.
- */
 const CUE: Record<string, "foundation" | "leads"> = {
   "flat-embroidery": "foundation",
   "zardosi-machine-embroidery": "leads"
@@ -56,17 +35,17 @@ const CUE: Record<string, "foundation" | "leads"> = {
 export default async function CoursesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations({ locale, namespace: "coursesPage" });
+  const [t, courses] = await Promise.all([
+    getTranslations({ locale, namespace: "coursesPage" }),
+    getPublicCourses()
+  ]);
 
   return (
     <>
       <PageCrumbs page="courses" path="/courses" />
       <CoursesIntro />
-      {/* `cues` is plain data. A render function would be a function crossing
-          the server/client boundary, which React refuses — the client
-          component resolves the label from the same catalogue. */}
-      <CourseCatalogue cues={CUE} />
-      <FamilyMap />
+      <CourseCatalogue courses={courses} cues={CUE} />
+      <FamilyMap courses={courses} />
       <CoursePathway />
       <CtaBand title={t("closeH2")} sub={t("closeSub")} />
     </>
