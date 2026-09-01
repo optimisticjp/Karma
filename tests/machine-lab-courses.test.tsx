@@ -34,7 +34,8 @@ describe("the course index", () => {
     expect(indexPage).toContain("<CourseCatalogue courses={courses}");
     expect(homePage).toContain("getPublicCourses()");
     expect(homePage).toContain("<SampleBook courses={courses}");
-    expect(catalogue).toContain("{ courses, cues }");
+    expect(catalogue).toContain("export function CourseCatalogue({");
+    expect(catalogue).toContain("courses: Course[];");
     expect(read("src/components/kds/home/SampleBook.tsx")).toContain("{ courses }: { courses: Course[] }");
     expect(indexPage).not.toContain("course-row");
   });
