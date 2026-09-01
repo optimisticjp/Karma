@@ -10,9 +10,9 @@ describe("public and Console course UX", () => {
     const adminLayout = read("src/app/admin/(console)/layout.tsx");
     expect(publicSwitch).toContain('code === "en" ? "EN" : "ગુજ"');
     expect(publicSwitch).toContain('className="locale-separator">।</span>');
-    expect(adminBar).toContain(">EN<");
-    expect(adminBar).toContain("ગુજ");
-    expect(adminBar).toContain(">।</span>");
+    expect(adminBar).toContain("EN।ગુજ");
+    expect(adminBar).toContain('value="en"');
+    expect(adminBar).toContain('value="gu"');
     expect(adminLayout).toContain("<AdminLanguageBar locale={session.staff.adminLocale} />");
   });
 
