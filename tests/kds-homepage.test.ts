@@ -5,35 +5,7 @@ import { courses, coursesByFamily } from "../src/content/courses";
 import { EMCAD_DAHAO, EMCAD_DAHAO_SLUG, KARMA_SOFTWARE } from "../src/content/course-operations";
 import { PHOTO_MANIFEST, photosInGroup } from "../src/content/photo-manifest";
 
-/**
- * THE HOMEPAGE, REBUILT.
- *
- * This suite replaces `machine-lab-homepage` and `machine-lab-shell`, which
- * asserted the composition of a twenty-section page whose components no longer
- * exist. What was worth keeping was never the section order of that page — it
- * was the FACTUAL and ACCESSIBILITY rules underneath it, and every one of them
- * is carried forward here against the new components:
- *
- *  - EMCAD DAHAO figures are rendered from the verified record, never typed
- *    into a message catalogue;
- *  - one course's confirmed facts never become the site's;
- *  - no online payment, anywhere, and the page says so;
- *  - no invented machine specification;
- *  - no student name, outcome or earning attached to a photograph;
- *  - no other digitising package;
- *  - the signature interaction never autoplays and never needs a drag.
- *
- * The old suites additionally asserted a specific twenty-tag order and a
- * four-band rhythm. Those encoded the composition the owner rejected, so they
- * are replaced rather than weakened: the durable rule — the order is a
- * DECISION and two adjacent sections never share a surface — is asserted
- * below against the ten blocks that exist now.
- */
-
 const read = (p: string) => readFileSync(join(process.cwd(), p), "utf8");
-
-/* Policy tests read what the page RENDERS, not what a comment explains. A doc
-   comment saying "no RPM, ever" must not fail the test that bans RPM. */
 const code = (source: string) =>
   source.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/^\s*\/\/.*$/gm, " ");
 
@@ -62,30 +34,21 @@ const BLOCKS = [
   "HomeClose"
 ] as const;
 
-/* ------------------------------------------------------------------ *
- * The composition
- * ------------------------------------------------------------------ */
-
 describe("homepage architecture", () => {
   it("renders the ten blocks in the order the questions arrive", () => {
-    const at = BLOCKS.map((tag) => page.indexOf(`<${tag} />`));
+    const at = BLOCKS.map((tag) => page.indexOf(`<${tag}`));
     expect(at.every((p) => p > -1)).toBe(true);
     expect([...at].sort((a, b) => a - b)).toEqual(at);
   });
 
   it("puts the money question inside the first half of the page", () => {
-    /* The one course with a confirmed duration and a published fee must not
-       sit behind five screens of preamble — that was the single worst thing
-       about the page this replaces. */
-    const at = (tag: string) => page.indexOf(`<${tag} />`);
+    const at = (tag: string) => page.indexOf(`<${tag}`);
     for (const later of ["ProofWall", "HomeVoices", "TrustSignals", "BatchesVisit"]) {
       expect(at("EmcadPanel"), `EmcadPanel before ${later}`).toBeLessThan(at(later));
     }
   });
 
   it("never puts two blocks with the same ground next to each other", () => {
-    /* Two adjacent sections sharing a surface is what makes a long scroll
-       read as one slab. Every block declares exactly one ground. */
     const GROUNDS = ["on-canvas", "on-paper", "on-cloth", "on-mist"] as const;
     const grounds = BLOCKS.map((tag) => {
       const source = code(read(`${HOME_DIR}/${tag}.tsx`));
@@ -97,14 +60,10 @@ describe("homepage architecture", () => {
       const pair = `${grounds[i - 1].tag} → ${grounds[i].tag}`;
       expect(grounds[i - 1].ground === grounds[i].ground, pair).toBe(false);
     }
-    /* Non-vacuity: all four grounds are actually in play. */
     expect(new Set(grounds.map((g) => g.ground)).size).toBe(4);
   });
 
   it("gives every block a different shape, not ten copies of one card", () => {
-    /* The addendum's §2: the site may use familiar patterns; what it must not
-       do is use the same one nine times. Each block owns its own layout
-       class, and no shared `card` component sits under all of them. */
     for (const tag of BLOCKS) {
       expect(read(`${HOME_DIR}/${tag}.tsx`), tag).not.toContain("card-lift");
     }
@@ -118,10 +77,6 @@ describe("homepage architecture", () => {
   });
 });
 
-/* ------------------------------------------------------------------ *
- * The hero
- * ------------------------------------------------------------------ */
-
 describe("the hero", () => {
   it("names the one software Karma teaches, from source", () => {
     expect(KARMA_SOFTWARE).toBe("EMCAD DAHAO");
@@ -132,8 +87,6 @@ describe("the hero", () => {
     expect(EMCAD_DAHAO.operations.demo?.days).toBe(2);
     expect(EMCAD_DAHAO.operations.demo?.free).toBe(true);
     expect(hero).toContain("EMCAD_DAHAO.operations.demo");
-    /* And the label carries the course the demo belongs to, so a visitor
-       cannot read it as an offer on all eleven. */
     expect(en.home.hero.factDemoLabel).toContain("EMCAD DAHAO");
     expect(gu.home.hero.factDemoLabel).toContain("EMCAD DAHAO");
   });
@@ -145,7 +98,7 @@ describe("the hero", () => {
     expect(gu.home.hero.factPracticalValue).toContain("મશીન");
   });
 
-  it("quotes no fee — fees are discussed offline", () => {
+  it("quotes no fee in the hero", () => {
     for (const cat of [en, gu]) {
       const block = JSON.stringify(cat.home.hero);
       expect(block).not.toContain("35,000");
@@ -156,20 +109,13 @@ describe("the hero", () => {
   it("never lets one course's duration become the site's", () => {
     for (const cat of [en, gu]) {
       const block = JSON.stringify(cat.home.hero);
-      /* Wherever a duration is stated in the hero, the same string names the
-         course it belongs to. */
-      if (/3\s*(months|મહિના)/.test(block)) {
-        expect(block).toContain("EMCAD DAHAO");
-      }
-      /* And it is never restated in weeks. */
+      if (/3\s*(months|મહિના)/.test(block)) expect(block).toContain("EMCAD DAHAO");
       expect(block.toLowerCase()).not.toContain("12 week");
       expect(block.toLowerCase()).not.toContain("twelve week");
     }
   });
 
   it("keeps follower counts out of the fact row", () => {
-    /* Social proof is a different kind of claim and lives in its own block.
-       Mixing them makes the verified facts read as marketing. */
     expect(hero).not.toContain("@/content/proof");
     expect(read(`${HOME_DIR}/TrustSignals.tsx`)).toContain("@/content/proof");
   });
@@ -179,8 +125,6 @@ describe("the hero", () => {
       expect(hero, id).toContain(id);
       expect(PHOTO_MANIFEST.some((s) => s.id === id), id).toBe(true);
     }
-    /* One continuous thread down the scene, not three connectors that happen
-       to line up. */
     expect((hero.match(/hero-scene-thread/g) ?? [])).toHaveLength(1);
   });
 
@@ -190,20 +134,19 @@ describe("the hero", () => {
   });
 });
 
-/* ------------------------------------------------------------------ *
- * The sample book
- * ------------------------------------------------------------------ */
-
 describe("the sample book", () => {
-  it("reaches all eleven courses, not a curated selection", () => {
+  it("receives the full Console-filtered catalogue rather than curating locally", () => {
     expect(coursesByFamily).toHaveLength(11);
     expect(coursesByFamily).toHaveLength(courses.length);
-    expect(book).toContain("coursesByFamily");
+    expect(page).toContain("getPublicCourses()");
+    expect(page).toContain("<SampleBook courses={courses}");
+    expect(book).toContain("{ courses }: { courses: Course[] }");
     expect(book).not.toContain(".slice(");
   });
 
-  it("shows a duration only where the owner confirmed one", () => {
-    expect(book).toContain("verifiedOperationsFor");
+  it("shows the duration carried by each Console-backed public course", () => {
+    expect(book).toContain("course.durationMonths");
+    expect(book).not.toContain("verifiedOperationsFor");
     const confirmed = courses.filter((c) => c.slug === EMCAD_DAHAO_SLUG);
     expect(confirmed).toHaveLength(1);
     expect(EMCAD_DAHAO.durationMonths).toBe(3);
@@ -215,12 +158,8 @@ describe("the sample book", () => {
   });
 });
 
-/* ------------------------------------------------------------------ *
- * The EMCAD DAHAO decision panel
- * ------------------------------------------------------------------ */
-
 describe("the EMCAD DAHAO decision panel", () => {
-  it("reads every figure from the verified record, not from a message", () => {
+  it("reads every figure from the same Console configuration as admission/course detail", () => {
     for (const cat of [en, gu]) {
       const block = JSON.stringify(cat.home.emcad);
       expect(block).not.toContain("35,000");
@@ -229,21 +168,21 @@ describe("the EMCAD DAHAO decision panel", () => {
       expect(block).not.toContain("35000");
       expect(block).not.toMatch(/\b3 months\b/);
     }
-    expect(emcad).toContain("EMCAD_DAHAO");
-    expect(emcad).toContain("fees.feeTotal");
-    expect(emcad).toContain("fees.feeAdmission");
-    expect(emcad).toContain("fees.feeBalanceDueDays");
-    expect(emcad).toContain("operations.scheduleOptions");
+    expect(emcad).toContain("getCourseConfig(EMCAD_DAHAO_SLUG)");
+    expect(emcad).toContain("money(fees.total)");
+    expect(emcad).toContain("money(fees.admission)");
+    expect(emcad).toContain("fees.balanceDueDays");
+    expect(emcad).toContain("operations.scheduleOptions.map");
   });
 
-  it("states the fee split the studio actually confirmed", () => {
+  it("keeps the verified seed as the reference bar for the confirmed facts", () => {
     expect(EMCAD_DAHAO.fees.feeTotal).toBe(35_000);
     expect(EMCAD_DAHAO.fees.feeAdmission).toBe(25_000);
     expect(EMCAD_DAHAO.fees.feeTotal - EMCAD_DAHAO.fees.feeAdmission).toBe(10_000);
     expect(EMCAD_DAHAO.fees.feeBalanceDueDays).toBe(30);
   });
 
-  it("shows the four batch timings and the free two-day demo", () => {
+  it("keeps four verified timetable slots and the free two-day demo seed", () => {
     expect(EMCAD_DAHAO.operations.scheduleOptions).toHaveLength(4);
     expect(EMCAD_DAHAO.operations.demo?.days).toBe(2);
     expect(EMCAD_DAHAO.operations.demo?.hours).toBe(2);
@@ -268,10 +207,6 @@ describe("the EMCAD DAHAO decision panel", () => {
     expect(emcad).toContain("EMCAD_DAHAO_SLUG");
   });
 });
-
-/* ------------------------------------------------------------------ *
- * The signature interaction
- * ------------------------------------------------------------------ */
 
 describe("screen → machine → proof", () => {
   it("never autoplays and never loops", () => {
@@ -305,18 +240,12 @@ describe("screen → machine → proof", () => {
   });
 
   it("says the faults are drawn diagrams, not a student's record", () => {
-    for (const cat of [en, gu]) {
-      expect(cat.home.smp.foot.length).toBeGreaterThan(40);
-    }
+    for (const cat of [en, gu]) expect(cat.home.smp.foot.length).toBeGreaterThan(40);
     const foot = en.home.smp.foot.toLowerCase();
     expect(foot).toContain("drawn");
     expect(foot).toContain("not a record");
   });
 });
-
-/* ------------------------------------------------------------------ *
- * The proof wall
- * ------------------------------------------------------------------ */
 
 describe("the proof wall", () => {
   it("uses the six work slots from the manifest", () => {
@@ -325,8 +254,6 @@ describe("the proof wall", () => {
   });
 
   it("lets each piece keep its own shape", () => {
-    /* A uniform tile grid throws away the one thing worth showing about
-       textile work. Frames take their ratio from the manifest. */
     expect(wall).not.toContain("aspect-");
   });
 
@@ -338,39 +265,12 @@ describe("the proof wall", () => {
   });
 });
 
-/* ------------------------------------------------------------------ *
- * Facts the whole page has to keep
- * ------------------------------------------------------------------ */
-
 const homeSources = readdirSync(HOME_DIR)
   .filter((f) => f.endsWith(".tsx"))
   .map((f) => code(read(join(HOME_DIR, f))));
 
-/**
- * The namespaces the ten blocks actually render.
- *
- * `messages.home` still carries copy written for the twenty-section page this
- * replaces — sixteen namespaces that no component reads any more. They are
- * translated assets rather than dead weight and several will be drawn on when
- * the pages that own those subjects are rebuilt, so they are kept and are
- * resolved in the Phase 8 copy pass. Scanning them here would test text the
- * homepage does not publish, so the copy rules below read what it renders.
- */
-const RENDERED = [
-  "hero",
-  "paths",
-  "book",
-  "smp",
-  "emcad",
-  "wall",
-  "voices",
-  "trust",
-  "when",
-  "close"
-] as const;
-
-const homeCopy = (cat: any) =>
-  RENDERED.map((ns) => JSON.stringify(cat.home[ns])).join(" ");
+const RENDERED = ["hero", "paths", "book", "smp", "emcad", "wall", "voices", "trust", "when", "close"] as const;
+const homeCopy = (cat: any) => RENDERED.map((ns) => JSON.stringify(cat.home[ns])).join(" ");
 
 describe("homepage facts", () => {
   it("reserves all thirty-two photographs and invents none", () => {
@@ -382,12 +282,7 @@ describe("homepage facts", () => {
     for (const spec of ["rpm", "stitches per minute", "spm", "mm/s"]) {
       expect(text, spec).not.toContain(spec);
     }
-    /* A head or needle count is a specification nobody has verified. Machines
-       are named by the technique they run and by nothing else. */
     expect(text).not.toMatch(/\d+\s*-?\s*(head|needle)s?\b/);
-    /* A counted quantity of machines is the same claim in another shape.
-       A stage index — "02 machine" — is not, which is why this asks for a
-       hyphenated compound or a plural rather than any digit nearby. */
     expect(text).not.toMatch(/\d+\s*-\s*machines?\b|\d+\s+machines\b/);
   });
 
