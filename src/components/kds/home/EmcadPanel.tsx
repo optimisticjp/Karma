@@ -11,7 +11,7 @@ import { ThreadLine } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
 
 /** Homepage EMCAD decision panel. Operational facts stay live from Console,
- * while fee amounts remain private and are confirmed only at the studio. */
+ * while fee amounts and changing commercial terms are confirmed at the studio. */
 export async function EmcadPanel() {
   const [t, td, tc, rawLocale, config] = await Promise.all([
     getTranslations("home.emcad"),
@@ -26,6 +26,10 @@ export async function EmcadPanel() {
   const { operations } = config;
   const demo = operations.demo;
   const proofLine = reviews.find((review) => review.courseSlug === EMCAD_DAHAO_SLUG);
+  const introEyebrow = locale === "gu" ? "Software course" : "Software course";
+  const introSub = locale === "gu"
+    ? "EMCAD DAHAO માટે duration, timetable, demo અને practical plan અહીં Consoleના હાલના recordમાંથી આવે છે. હાલની fee અને બદલાતા commercial terms સ્ટુડિયોમાં કન્ફર્મ થાય છે."
+    : "EMCAD DAHAO duration, timetable, demo and practical details come from the current Console record. The current fee and changing commercial terms are confirmed at the studio.";
 
   return (
     <section className="band on-cloth" aria-labelledby="emcad-heading">
@@ -33,9 +37,9 @@ export async function EmcadPanel() {
         <div className="emcad">
           <div className="emcad-intro">
             <StitchSwatch slug={EMCAD_DAHAO_SLUG} className="emcad-swatch" />
-            <p className="t-micro mt-4">{t("eyebrow")}</p>
+            <p className="t-micro mt-4">{introEyebrow}</p>
             <h2 id="emcad-heading" className="t-h2 mt-1.5">{t("h2")}</h2>
-            <p className="t-lede mt-3">{t("sub")}</p>
+            <p className="t-lede mt-3">{introSub}</p>
 
             <dl className="emcad-facts">
               {config.software ? (
@@ -76,7 +80,7 @@ export async function EmcadPanel() {
           </div>
 
           <div className="fee-sheet">
-            <p className="t-micro">{t("feeLabel")}</p>
+            <p className="t-micro">{locale === "gu" ? "હાલની fee" : "Current fee"}</p>
             <p className="t-h3 mt-2">{td("feeAskTitle")}</p>
             <p className="t-meta mt-2">{td("feeAskNote")}</p>
             <p className="t-meta fee-offline">{td("feeNoGateway")}</p>
