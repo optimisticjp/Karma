@@ -20,6 +20,13 @@ describe("Console course settings drive public course surfaces", () => {
     expect(config).not.toContain('if (!row) return fromSource(slug)');
   });
 
+  it("publishes active Console-only courses instead of dropping unknown slugs", () => {
+    expect(publicCourses).toContain("function consoleOnlyCourse");
+    expect(publicCourses).toContain("if (!source) return consoleOnlyCourse(row)");
+    expect(config).toContain("return rows.map(fromDatabase)");
+    expect(config).not.toContain("filter((row) => catalogue.has(row.slug))");
+  });
+
   it("uses the resolver across catalogue, detail, home, sitemap and structured data", () => {
     expect(read("src/app/[locale]/courses/page.tsx")).toContain("getPublicCourses()");
     expect(read("src/app/[locale]/courses/[slug]/page.tsx")).toContain("getPublicCourseBySlug(slug)");
@@ -30,14 +37,16 @@ describe("Console course settings drive public course surfaces", () => {
     expect(layout).toContain("studioSchema(asLocale(locale), courses)");
   });
 
-  it("publishes Console duration, software, fees, timetable, curriculum and practical data", () => {
+  it("publishes Console operational detail but keeps fee amounts off public pages", () => {
     expect(read("src/components/kds/courses/CourseHero.tsx")).toContain("config.durationMonths");
     expect(read("src/components/kds/courses/CourseHero.tsx")).toContain("config.software");
-    expect(read("src/components/kds/courses/CourseFacts.tsx")).toContain("config.fees");
-    expect(read("src/components/kds/courses/CourseFacts.tsx")).toContain("config.operations.scheduleOptions");
+    const facts = read("src/components/kds/courses/CourseFacts.tsx");
+    expect(facts).toContain("config.operations.scheduleOptions");
+    expect(facts).not.toContain("config.fees");
     expect(read("src/components/kds/courses/CourseSyllabus.tsx")).toContain("config.operations.curriculum");
     expect(read("src/components/kds/courses/CourseFloor.tsx")).toContain("config.operations.practical");
     expect(read("src/components/kds/home/EmcadPanel.tsx")).toContain("getCourseConfig(EMCAD_DAHAO_SLUG)");
+    expect(read("src/components/kds/home/EmcadPanel.tsx")).not.toContain("FeeSheet");
   });
 });
 
