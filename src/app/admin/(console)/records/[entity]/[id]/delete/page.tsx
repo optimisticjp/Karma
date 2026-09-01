@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getDb } from "@/lib/db";
-import { requireOwner } from "@/lib/auth/guard";
+import { requireAdmin } from "@/lib/auth/guard";
+import { hasPermission } from "@/lib/auth/access";
 import { recordsCopy } from "@/lib/admin/records-copy";
 import { preflight } from "@/lib/admin/destructive";
-import { RECORD_ENTITIES, policyFor, type RecordEntity } from "@/lib/admin/record-actions";
+import {
+  RECORD_ENTITIES,
+  canPerform,
+  policyFor,
+  type RecordEntity
+} from "@/lib/admin/record-actions";
 import { DeleteConfirmForm } from "./DeleteForm";
 import { PageHead } from "@/components/admin/PageHead";
 
@@ -19,8 +25,9 @@ export const dynamic = "force-dynamic";
  * blocks the deletion outright, and what the audit entry will keep. Only then
  * does a form appear, and only with a typed confirmation and a written reason.
  *
- * Owner-only at the page (`requireOwner`) **and** re-checked in the action.
- * A page that is merely "not linked anywhere" is not a permission.
+ * The page requires an active Console account and the centralized record policy
+ * decides whether this caller may delete this entity. The server action repeats
+ * the same authorization; a link or a hidden menu is never the security wall.
  */
 export default async function DeleteRecordPage({
   params
@@ -28,7 +35,7 @@ export default async function DeleteRecordPage({
   params: Promise<{ entity: string; id: string }>;
 }) {
   const { entity: rawEntity, id: rawId } = await params;
-  const session = await requireOwner(`/admin/records/${rawEntity}/${rawId}/delete`);
+  const session = await requireAdmin(`/admin/records/${rawEntity}/${rawId}/delete`);
   const copy = recordsCopy(session.staff.adminLocale);
 
   if (!(RECORD_ENTITIES as readonly string[]).includes(rawEntity)) notFound();
@@ -36,11 +43,14 @@ export default async function DeleteRecordPage({
   const id = Number(rawId);
   if (!Number.isInteger(id) || id <= 0) notFound();
 
-  const policy = policyFor(entity);
-  /* An entity the policy says is never deletable has no confirmation page at
-     all, rather than a page that refuses at the last step. */
-  if (policy.deletableBy !== "owner") notFound();
+  const subject = {
+    role: session.role,
+    has: (permission: Parameters<typeof hasPermission>[1]) =>
+      hasPermission(session.staff, permission)
+  };
+  if (!canPerform(subject, entity, "delete")) notFound();
 
+  const policy = policyFor(entity);
   const db = getDb();
   if (!db) redirect("/admin");
   const report = await preflight(db, entity, id);
@@ -58,9 +68,6 @@ export default async function DeleteRecordPage({
 
   return (
     <div className="max-w-[46rem]">
-      {/* The last console page on the legacy heading. Its title rendered 27px
-          at 390px — above the plan's 22-26px band — while every other page's
-          <PageHead> renders 22. One header implementation, one size. */}
       <PageHead title={copy.deleteTitle} context={`${entityName} · ${copy.deleteLede}`} />
 
       <p className="kv-label">{entityName}</p>
@@ -128,6 +135,7 @@ function backHref(entity: RecordEntity): string {
       return "/admin/courses";
     case "student":
     case "guardian":
+    case "enrollment":
       return "/admin/students";
     case "application":
     case "application_note":
