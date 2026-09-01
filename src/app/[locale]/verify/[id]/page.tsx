@@ -47,18 +47,26 @@ export default async function VerifyResultPage({
 
   const dbConfigured = getDb() !== null;
   const cert = dbConfigured ? await getCertificate(certNo) : null;
+  const revoked = cert?.status === "revoked";
 
-  const state = !dbConfigured ? "wait" : cert ? "ok" : "bad";
-  /* The heading is a WORD, and the sentence sits under it. Setting the long
-     "records system is coming online" line as the heading made a paragraph
-     look like a verdict. */
+  // A revoked record stays visible for auditability, but existence is not
+  // validity. It must use the same invalid visual state as an unresolved
+  // certificate and must never receive the green/check Verified verdict.
+  const state = !dbConfigured ? "wait" : cert && !revoked ? "ok" : "bad";
   const heading =
     state === "wait"
       ? t("unavailableTitle")
       : state === "ok"
         ? t("validTitle")
         : t("invalidTitle");
-  const body = state === "wait" ? t("unavailable") : state === "ok" ? t("validBody") : t("invalidBody");
+  const body =
+    state === "wait"
+      ? t("unavailable")
+      : revoked
+        ? t("revoked")
+        : state === "ok"
+          ? t("validBody")
+          : t("invalidBody");
   const mark = state === "wait" ? "phone" : state === "ok" ? "check" : "misregistration";
 
   return (
@@ -97,10 +105,6 @@ export default async function VerifyResultPage({
                     <dd className="t-body cert-no mt-1">{cert.certNo}</dd>
                   </div>
                 </dl>
-              ) : null}
-
-              {cert?.status === "revoked" ? (
-                <p className="form-callout mt-4">{t("revoked")}</p>
               ) : null}
             </div>
           </div>
