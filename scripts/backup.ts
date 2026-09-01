@@ -6,10 +6,11 @@
  * Supabase Postgres with DATABASE_URL — never through Hyperdrive. Exports
  * contain PII: treat the artifacts accordingly (docs/security.md).
  *
- * The table list is discovered from PostgreSQL at runtime. A static list went
- * stale as the Console gained new domains, which meant a green workflow could
- * silently omit newer tables. Managed Supabase schemas such as auth/storage and
- * Drizzle's migration ledger are intentionally outside this interim CSV backup.
+ * The table list is discovered from PostgreSQL at runtime. The current static
+ * list matched production at this audit, but it could silently miss a future
+ * table while the workflow still stayed green. Managed Supabase schemas such
+ * as auth/storage and Drizzle's migration ledger are intentionally outside this
+ * interim CSV backup.
  *
  * Roadmap (docs/admin-architecture.md): pg_dump → compress → encrypt →
  * private R2 bucket, with daily/monthly retention. Encrypted CSV artifacts are
