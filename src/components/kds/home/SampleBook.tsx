@@ -16,6 +16,7 @@ export function SampleBook({ courses }: { courses: Course[] }) {
   const t = useTranslations("home.book");
   const locale = useLocale() as Locale;
   const [family, setFamily] = useState<FamilyKey | "all">("all");
+  const monthsKey = "months" as const;
 
   const shown = family === "all" ? courses : courses.filter((course) => course.family === family);
   const familyKeys = (Object.keys(families) as FamilyKey[]).filter((key) =>
@@ -67,7 +68,7 @@ export function SampleBook({ courses }: { courses: Course[] }) {
                 <span className="sample-meta t-micro">
                   {pick(families[course.family], "name", locale)}
                   {course.durationMonths ? (
-                    <>{" · "}{t("months", { count: course.durationMonths })}</>
+                    <>{" · "}{t(monthsKey, { count: course.durationMonths })}</>
                   ) : null}
                 </span>
               </Link>
