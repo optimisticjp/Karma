@@ -49,9 +49,11 @@ the Supabase advisor audit:
 The production locale enum remains exactly `en, gu`. The abandoned Hindi
 website migration was never applied and is not part of migration history.
 
-All public application tables have RLS enabled. `audit_logs`, `rate_limits` and
-`note_engagements` deliberately have no client policies; app roles also have no
-table grants, so this is deny-by-default rather than a missing-policy bug.
+All public application tables have RLS enabled and deliberately expose **no
+client RLS policies**. Their table ACLs grant the application data path to the
+server-side service role, not `anon` or `authenticated`. Supabase therefore
+reports `rls_enabled_no_policy` at INFO level for these tables; in Karma this is
+the intended deny-by-default design, not a missing-policy bug.
 
 ## Seeding is non-destructive about operator data
 `npm run db:seed` inserts missing courses and, on a course that already exists,
