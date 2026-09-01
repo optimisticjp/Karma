@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { coursesByFamily, families, type Course } from "@/content/courses";
-import { verifiedOperationsFor } from "@/content/course-operations";
+import { families, type Course } from "@/content/courses";
 import { coursePhotoFor } from "@/content/photo-manifest";
 import { pick } from "@/lib/i18n/localized";
 import type { Locale } from "@/i18n/routing";
@@ -13,57 +12,32 @@ import { StitchSwatch } from "@/components/kds/StitchSwatch";
 import { PhotoFrame } from "@/components/kds/Frame";
 import { Icon } from "@/components/ui/Icon";
 
-/**
- * THE CATALOGUE — eleven techniques, as a product catalogue.
- *
- * WHY THIS ONE IS A GRID WHEN THE HOMEPAGE IS A RAIL
- * -------------------------------------------------
- * They are different jobs. The homepage sample book is a teaser you flick
- * through with a thumb; this is the page somebody arrives on having decided to
- * compare. Comparison wants everything visible at once, at the same size, on
- * the same axes — which is exactly what a grid is for and what a rail is not.
- *
- * Two columns on a phone rather than one. Eleven full-width rows is 4,000px of
- * scrolling to see a list that fits in six; and two columns keeps the media
- * large enough to actually distinguish zardosi from sequence work, which is
- * the whole basis on which this choice gets made.
- *
- * SAME BOX WHETHER THERE IS A PHOTOGRAPH OR NOT
- * ---------------------------------------------
- * The shoot covers eight of the eleven. The other three lead with their stitch
- * swatch **in the same 4:3 box at the same size**, so they never read as the
- * leftovers, and when the eight photographs land nothing in this layout moves.
- * They are never given a borrowed photograph — see `docs/content-checklist.md`.
- *
- * WHAT A TILE MAY CLAIM
- * ---------------------
- * The name, what the technique physically produces (trade knowledge, true
- * wherever you learn it), its family, and a duration **only** where the owner
- * has confirmed one — today EMCAD DAHAO and nothing else. No fee, no invented
- * "beginner/advanced" label, no "popular" or "recommended".
- */
-
 type FamilyKey = keyof typeof families;
 
+/** The public catalogue is handed in by the server after Console visibility,
+ * active/archive state and order have been applied. */
 export function CourseCatalogue({
-  /** Facts the owner confirmed, keyed by slug — never a difficulty rating. */
+  courses,
   cues
 }: {
+  courses: Course[];
   cues?: Record<string, "foundation" | "leads">;
 }) {
   const t = useTranslations("coursesPage");
   const locale = useLocale() as Locale;
   const [family, setFamily] = useState<FamilyKey | "all">("all");
 
-  const shown: Course[] =
-    family === "all" ? coursesByFamily : coursesByFamily.filter((c) => c.family === family);
+  const shown = family === "all" ? courses : courses.filter((c) => c.family === family);
+  const familyKeys = (Object.keys(families) as FamilyKey[]).filter((key) =>
+    courses.some((course) => course.family === key)
+  );
 
   const tabs: Array<{ key: FamilyKey | "all"; label: string; count: number }> = [
-    { key: "all", label: t("filterAll"), count: coursesByFamily.length },
-    ...(Object.keys(families) as FamilyKey[]).map((k) => ({
-      key: k,
-      label: pick(families[k], "name", locale),
-      count: coursesByFamily.filter((c) => c.family === k).length
+    { key: "all", label: t("filterAll"), count: courses.length },
+    ...familyKeys.map((key) => ({
+      key,
+      label: pick(families[key], "name", locale),
+      count: courses.filter((c) => c.family === key).length
     }))
   ];
 
@@ -78,8 +52,6 @@ export function CourseCatalogue({
           <p className="t-lede mt-3">{t("catalogueSub")}</p>
         </header>
 
-        {/* A filter, not a tablist: it narrows a list already on the page and
-            moves focus nowhere, so the roles are a group of toggle buttons. */}
         <div className="book-tabs" role="group" aria-label={t("filterLabel")}>
           {tabs.map((tab) => (
             <button
@@ -98,37 +70,26 @@ export function CourseCatalogue({
         <ul className="cat-grid" role="list">
           {shown.map((course) => {
             const photo = coursePhotoFor(course.slug);
-            const verified = verifiedOperationsFor(course.slug);
             const cue = cues?.[course.slug];
 
             return (
               <li key={course.slug}>
                 <Link href={`/courses/${course.slug}`} className="cat-item">
                   <span className="cat-media">
-                    {photo ? (
-                      <PhotoFrame id={photo.id} scale="thumb" />
-                    ) : (
-                      <StitchSwatch slug={course.slug} />
-                    )}
+                    {photo ? <PhotoFrame id={photo.id} scale="thumb" /> : <StitchSwatch slug={course.slug} />}
                   </span>
 
                   <span className="cat-name t-h4">
                     {pick(course, "name", locale)}
-                    {cue ? (
-                      <span className="cat-cue">{t(`cue.${cue}` as "cue.foundation")}</span>
-                    ) : null}
+                    {cue ? <span className="cat-cue">{t(`cue.${cue}` as "cue.foundation")}</span> : null}
                   </span>
 
-                  <span className="cat-produces t-meta">
-                    {pick(course.production, "produces", locale)}
-                  </span>
+                  <span className="cat-produces t-meta">{pick(course.production, "produces", locale)}</span>
 
                   <span className="cat-meta t-micro">
                     <span>{pick(families[course.family], "name", locale)}</span>
-                    {verified?.durationMonths ? (
-                      <span className="numeric">
-                        {t("months", { count: verified.durationMonths })}
-                      </span>
+                    {course.durationMonths ? (
+                      <span className="numeric">{t("months", { count: course.durationMonths })}</span>
                     ) : null}
                     <Icon name="arrow" size={15} className="cat-arrow arrow" />
                   </span>
@@ -138,9 +99,6 @@ export function CourseCatalogue({
           })}
         </ul>
 
-        {/* Says out loud what the filter is doing, for a reader who cannot see
-            the grid change. `aria-live` rather than a visible count, because
-            the chips already carry the numbers. */}
         <p className="sr-only" aria-live="polite">
           {t("showingCount", { count: shown.length })}
         </p>
