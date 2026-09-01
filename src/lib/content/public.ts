@@ -22,6 +22,21 @@ type PublishedRow = {
   ownerVerified: boolean;
 };
 
+const EVENING_FAQ = "I work during the day. Are evening batches available?";
+
+/** The source collection predates the owner's 11:00 PM confirmation. Keep the
+ * no-database fallback correct too, rather than relying on the managed override
+ * being available forever. */
+const verifiedSourceFaqs: Faq[] = sourceFaqs.map((faq) =>
+  faq.qEn === EVENING_FAQ
+    ? {
+        ...faq,
+        aEn: "Yes. The studio runs evening batches until 11:00 PM for working people and homemakers.",
+        aGu: "હા. કામ કરતા લોકો અને ગૃહિણીઓ માટે સ્ટુડિયોમાં સાંજની બેચ રાત્રે 11:00 વાગ્યા સુધી ચાલે છે."
+      }
+    : faq
+);
+
 function record(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -36,11 +51,6 @@ function text(value: Record<string, unknown>, key: string, required = true): str
   return clean;
 }
 
-/**
- * Public reads fail soft only for the Content Desk table. Code can deploy
- * before migration 0003 is applied and the existing source content stays
- * online. Other database errors are logged and use the same source fallback.
- */
 async function published(kind: "faq" | "gallery" | "testimonial" | "homepage_stat"): Promise<PublishedRow[]> {
   const db = getDb();
   if (!db) return [];
@@ -76,12 +86,12 @@ export async function getPublicFaqs(): Promise<Faq[]> {
     const aGu = text(p, "answerGu");
     return qEn && qGu && aEn && aGu ? [{ qEn, qGu, aEn, aGu }] : [];
   });
-  if (managed.length === 0) return sourceFaqs;
+  if (managed.length === 0) return verifiedSourceFaqs;
 
   const managedQuestions = new Set(managed.map((item) => item.qEn.trim().toLowerCase()));
   return [
     ...managed,
-    ...sourceFaqs.filter((item) => !managedQuestions.has(item.qEn.trim().toLowerCase()))
+    ...verifiedSourceFaqs.filter((item) => !managedQuestions.has(item.qEn.trim().toLowerCase()))
   ];
 }
 
