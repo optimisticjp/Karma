@@ -93,3 +93,28 @@ describe("owner-only launch checklist", () => {
     expect(checklist).toContain("`/terms` remains a draft");
   });
 });
+
+describe("live production smoke", () => {
+  const workflow = read(".github/workflows/live-smoke.yml");
+
+  it("runs after successful main CI and can also be dispatched manually", () => {
+    expect(workflow).toContain('workflows: ["CI"]');
+    expect(workflow).toContain("workflow_dispatch:");
+    expect(workflow).toContain("workflow_run.head_branch == 'main'");
+    expect(workflow).toContain("workflow_run.conclusion == 'success'");
+  });
+
+  it("waits for real production health and requires the request-path dependencies", () => {
+    expect(workflow).toContain("/api/health");
+    expect(workflow).toContain('["db", "supabaseAuth", "turnstile"]');
+    expect(workflow).toContain("health payload is not production-ready");
+  });
+
+  it("smokes both locales and asserts a real 404", () => {
+    expect(workflow).toContain("/en/courses");
+    expect(workflow).toContain("/gu/courses");
+    expect(workflow).toContain("/en/admission");
+    expect(workflow).toContain("/gu/admission");
+    expect(workflow).toContain("expected 404");
+  });
+});
