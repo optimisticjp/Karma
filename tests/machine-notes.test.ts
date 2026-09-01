@@ -36,9 +36,6 @@ describe("machine notes are complete and bilingual", () => {
     const note = machineNotes[0];
     expect(noteBySlug(note.slug)).toBe(note);
     expect(notesForCourse(note.courseSlug)).toContain(note);
-    /* The course side of the link moved into the block that renders it when
-       the course template was rebuilt. The RULE is unchanged: a course page
-       still surfaces the notes that answer questions about its technique. */
     expect(read("src/components/kds/courses/CourseBatches.tsx")).toContain("notesForCourse");
     expect(read("src/app/[locale]/courses/[slug]/page.tsx")).toContain("CourseBatches");
   });
@@ -68,7 +65,6 @@ describe("notes claim nothing about a person", () => {
   });
 
   it("emits TechArticle with no fabricated author or date", () => {
-    // Built in src/lib/schema.ts since Phase 8; the page hands it the note.
     const schema = read("src/lib/schema.ts");
     expect(schema).toContain('"@type": "TechArticle"');
     expect(schema).not.toContain('"@type": "Person"');
@@ -79,10 +75,11 @@ describe("notes claim nothing about a person", () => {
 });
 
 describe("notes are discoverable", () => {
-  it("lists the index and every note in the sitemap", () => {
+  it("lists the index and derives every note URL from machineNotes", () => {
     const sitemap = read("src/app/sitemap.ts");
     expect(sitemap).toContain('"/notes"');
-    expect(sitemap).toContain("machineNotes.map((n) => `/notes/${n.slug}`)");
+    expect(sitemap).toContain("machineNotes.map((note) =>");
+    expect(sitemap).toContain("`/notes/${note.slug}`");
   });
 
   it("covers the search themes the brief names, in the notes' own tags", () => {
@@ -101,18 +98,6 @@ describe("notes are discoverable", () => {
   });
 
   it("never targets or implies Wilcom training", () => {
-    /**
-     * Owner decision, 2026-08-30: Karma teaches EMCAD DAHAO and nothing else,
-     * and it is admission norm #3 that students are not to spend the trainer's
-     * time asking about other packages. A note that ranks for "Wilcom
-     * embroidery training Surat" would bring in exactly the enquiry the
-     * institute has asked not to receive, so the word is banned from the notes
-     * outright — tags, questions, answers and body alike.
-     *
-     * The one place "Wilcom" may legitimately appear in this repository is the
-     * institute's OWN admission norm, quoted verbatim in
-     * src/content/admission-terms.ts.
-     */
     const everything = JSON.stringify(machineNotes).toLowerCase();
     expect(everything).not.toContain("wilcom");
   });

@@ -16,17 +16,11 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-/**
- * Structured data is the one place an unverified claim stops being a labelled
- * placeholder and becomes a fact a search engine repeats and caches. These
- * tests are the mechanical half of that discipline.
- */
 describe("structured data is built in one place", () => {
   it("emits no schema type outside src/lib/schema.ts", () => {
     const offenders: string[] = [];
     for (const file of [...walk("src/app"), ...walk("src/components")]) {
       const source = read(file);
-      // A page may reference "@context" only by handing data to <JsonLd />.
       if (source.includes('"@context"')) offenders.push(file);
     }
     expect(offenders).toEqual([]);
@@ -35,8 +29,8 @@ describe("structured data is built in one place", () => {
 
 describe("nothing unverified reaches a search engine", () => {
   const everything = JSON.stringify([
-    studioSchema("en"),
-    studioSchema("gu"),
+    studioSchema("en", courses),
+    studioSchema("gu", courses),
     ...courses.map((c) => courseSchema(c, "en")),
     ...machineNotes.map((n) =>
       noteSchema({ slug: n.slug, headline: n.questionEn, description: n.answerEn, locale: "en" })
@@ -49,7 +43,6 @@ describe("nothing unverified reaches a search engine", () => {
     expect(everything).not.toContain("aggregateRating");
     expect(everything).not.toContain("ratingValue");
     expect(everything).not.toContain("reviewCount");
-    // And the owner-provided 4.8 specifically stays out.
     expect(everything).not.toContain("4.8");
   });
 
@@ -60,23 +53,12 @@ describe("nothing unverified reaches a search engine", () => {
   });
 
   it("never emits a price or an offer", () => {
-    // Karma takes no payment online. The EMCAD DAHAO fee is published in full
-    // on its course page, but an `offers` node invites a buy-now rich result
-    // for something that cannot be bought here.
     for (const key of ["offers", "price", "priceCurrency"]) {
       expect(everything, key).not.toContain(key);
     }
   });
 
   it("emits a duration ONLY for the one course whose duration the owner confirmed", () => {
-    /**
-     * Before 2026-08-30 no course had a confirmed duration, so `timeRequired`
-     * was banned outright. The owner then confirmed EMCAD DAHAO Embroidery
-     * Designing as a THREE MONTH course, in writing, so that one course may
-     * state it — and the ban still holds for the other ten.
-     *
-     * Months, not weeks: `P3M`, because "3 Months" is what the business said.
-     */
     const withDuration = courses.filter((c) => c.durationMonths != null);
     expect(withDuration.map((c) => c.slug)).toEqual(["emcad-embroidery-design"]);
 
@@ -96,7 +78,7 @@ describe("nothing unverified reaches a search engine", () => {
 });
 
 describe("the local identity is complete and consistent", () => {
-  const studio = studioSchema("en") as Record<string, unknown>;
+  const studio = studioSchema("en", courses) as Record<string, unknown>;
 
   it("declares both business types, because it is genuinely both", () => {
     expect(studio["@type"]).toEqual(["LocalBusiness", "EducationalOrganization"]);
@@ -112,9 +94,12 @@ describe("the local identity is complete and consistent", () => {
     expect(address.addressLocality).toContain("Mota Varachha");
   });
 
-  it("offers the whole catalogue, each course pointing back at the studio", () => {
-    const catalog = studio.hasOfferCatalog as { itemListElement: Array<Record<string, unknown>> };
-    expect(catalog.itemListElement.length).toBe(courses.length);
+  it("offers exactly the public course list handed to the schema", () => {
+    const visible = courses.slice(0, 3);
+    const scoped = studioSchema("en", visible) as Record<string, unknown>;
+    const catalog = scoped.hasOfferCatalog as { itemListElement: Array<Record<string, unknown>> };
+    expect(catalog.itemListElement).toHaveLength(visible.length);
+    expect(catalog.itemListElement.map((item) => item.name)).toEqual(visible.map((course) => course.nameEn));
     for (const item of catalog.itemListElement) {
       expect((item.provider as Record<string, string>)["@id"]).toContain("#studio");
     }
@@ -132,12 +117,10 @@ describe("every page is discoverable and the console is not", () => {
     ]) {
       expect(sitemap, path).toContain(path);
     }
-    /* `/terms` is deliberately absent: it is `noIndex` until the owner
-       approves the draft, and submitting a noindex URL is an error a crawler
-       reports back. It returns when the noIndex does. */
     expect(sitemap).not.toContain('"/terms"');
-    expect(sitemap).toContain("courses.map((c) => `/courses/${c.slug}`)");
-    expect(sitemap).toContain("machineNotes.map((n) => `/notes/${n.slug}`)");
+    expect(sitemap).toContain("getPublicCourses()");
+    expect(sitemap).toContain("courses.map((course) => `/courses/${course.slug}`)");
+    expect(sitemap).toContain("machineNotes.map((note) => `/notes/${note.slug}`)");
   });
 
   it("never lists an admin route", () => {
@@ -175,7 +158,6 @@ describe("the launch steps are written down but not executed", () => {
   });
 
   it("has not changed the site URL default away from the placeholder domain", () => {
-    // The cutover is an environment change, never a code change.
     expect(read("src/lib/site.ts")).toContain("process.env.NEXT_PUBLIC_SITE_URL ??");
   });
 });

@@ -5,16 +5,6 @@ import { courses, coursesByFamily, families } from "../src/content/courses";
 import { EMCAD_DAHAO_SLUG, verifiedOperationsFor } from "../src/content/course-operations";
 import { STITCH_SWATCHES } from "../src/components/kds/StitchSwatch";
 
-/**
- * THE CATALOGUE AND THE COURSE TEMPLATE.
- *
- * `tests/machine-lab-courses.test.tsx` still holds the DATA rules — eleven
- * courses, eight photographed, one course with confirmed operations, no two
- * pages sharing a produces line. This suite holds the rules the rebuilt
- * COMPOSITION has to keep: what a tile may claim, what the template may
- * publish, and what neither may invent.
- */
-
 const read = (p: string) => readFileSync(join(process.cwd(), p), "utf8");
 const code = (source: string) =>
   source.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/^\s*\/\/.*$/gm, " ");
@@ -36,42 +26,28 @@ const blocks = readdirSync(DIR)
   .filter((f) => f.endsWith(".tsx"))
   .map((f) => code(read(join(DIR, f))));
 
-/* ------------------------------------------------------------------ *
- * The catalogue
- * ------------------------------------------------------------------ */
-
 describe("the catalogue", () => {
   it("composes five blocks and no leftover page furniture", () => {
     for (const tag of ["CoursesIntro", "CourseCatalogue", "FamilyMap", "CoursePathway", "CtaBand"]) {
       expect(indexPage, tag).toContain(`<${tag}`);
     }
-    /* The old page's primitives are gone from this route, not hidden. */
     for (const gone of ["PageIntro", "SectionHeading", "Ledger", "Reveal"]) {
       expect(indexPage, gone).not.toContain(gone);
     }
   });
 
-  it("names every course as a link, so the section is navigable as text", () => {
-    /* The family map lists all eleven again, which is how somebody who would
-       rather read than scan gets through the page — and how a crawler sees
-       eleven internal links with real anchor text. */
+  it("names every public course as a link, using the Console-filtered list", () => {
     const familyMap = read(`${DIR}/FamilyMap.tsx`);
-    expect(familyMap).toContain("coursesInFamily(key)");
+    expect(indexPage).toContain("getPublicCourses()");
+    expect(familyMap).toContain("courses.filter((course) => course.family === key)");
     expect(familyMap).toContain("/courses/${course.slug}");
   });
 
   it("gives a tile no fee, ever", () => {
-    for (const source of [
-      catalogue,
-      read(`${DIR}/RelatedCourses.tsx`),
-      /* The hero states the confirmed facts and NOT the money: the fee has a
-         block of its own where the payment terms can sit with it. */
-      read(`${DIR}/CourseHero.tsx`)
-    ]) {
+    for (const source of [catalogue, read(`${DIR}/RelatedCourses.tsx`), read(`${DIR}/CourseHero.tsx`)]) {
       expect(source).not.toContain("feeTotal");
       expect(source).not.toContain("₹");
     }
-    /* And no fee is typed into the catalogue page's copy either. */
     for (const cat of [en, gu]) {
       const block = JSON.stringify(cat.coursesPage);
       expect(block).not.toContain("₹");
@@ -79,16 +55,14 @@ describe("the catalogue", () => {
     }
   });
 
-  it("shows a duration only where the owner confirmed one", () => {
-    expect(catalogue).toContain("verifiedOperationsFor(course.slug)");
-    expect(catalogue).toContain("verified?.durationMonths");
+  it("shows Console-managed duration only when a public course has one", () => {
+    expect(catalogue).toContain("course.durationMonths");
+    expect(catalogue).not.toContain("verifiedOperationsFor(course.slug)");
     const confirmed = courses.filter((c) => verifiedOperationsFor(c.slug)?.durationMonths);
     expect(confirmed.map((c) => c.slug)).toEqual([EMCAD_DAHAO_SLUG]);
   });
 
   it("keeps the media box identical whether a course is photographed or not", () => {
-    /* Otherwise the three courses the shoot does not cover become visibly
-       second-class, and the grid moves when the eight photographs arrive. */
     const block = css.slice(css.indexOf(".kds .cat-media > .swatch,"));
     expect(block.slice(0, 200)).toContain("aspect-ratio: 4 / 3");
     expect(block.slice(0, 200)).toContain(".kds .cat-media > .mframe");
@@ -102,23 +76,14 @@ describe("the catalogue", () => {
   });
 
   it("filters with buttons that say what they are", () => {
-    /* Tab semantics promise a tabpanel the control owns and moves focus into.
-       This narrows a list already on the page, so the honest roles are a group
-       of toggle buttons with `aria-pressed`. */
     expect(catalogue).toContain('role="group"');
     expect(catalogue).toContain("aria-pressed=");
     expect(catalogue).not.toContain('role="tab"');
-    /* The homepage sample book runs the same control and was corrected with
-       it, so the two cannot drift apart in their semantics. */
     const book = read("src/components/kds/home/SampleBook.tsx");
     expect(book).toContain("aria-pressed=");
     expect(book).not.toContain('role="tab"');
   });
 });
-
-/* ------------------------------------------------------------------ *
- * The course template
- * ------------------------------------------------------------------ */
 
 describe("the course template", () => {
   const ORDER = [
@@ -156,14 +121,11 @@ describe("the course template", () => {
   });
 
   it("carries its own navigation, on a laptop only", () => {
-    /* On a phone a second sticky bar would compete with the header and the
-       action dock for the same thumb. */
     expect(nav).toContain('aria-label={t("navLabel")}');
     const rule = css.slice(css.indexOf(".kds .course-nav {"), css.indexOf(".kds .course-nav-link"));
     expect(rule).toContain("display: none");
     expect(rule).toContain("@media (min-width: 64rem)");
     expect(rule).toContain("position: sticky");
-    /* And a jumped-to heading never lands under the two sticky bars. */
     expect(css).toContain("scroll-margin-top: calc(var(--header-h) + 3.5rem)");
   });
 
@@ -187,34 +149,29 @@ describe("the course template", () => {
   });
 });
 
-/* ------------------------------------------------------------------ *
- * What neither surface may invent
- * ------------------------------------------------------------------ */
-
 describe("course facts", () => {
-  it("publishes a fee for exactly one course, and says so on the other ten", () => {
-    expect(facts).toContain("verifiedOperationsFor(course.slug)");
-    /* Both branches state that there is no way to pay online. */
+  it("publishes a fee only when the Console configuration supplies one", () => {
+    expect(facts).toContain("const fees = config.fees");
+    expect(facts).toContain("{fees ? (");
     expect(en.courseDetail.feeNoGateway.toLowerCase()).toContain("no online payment");
     expect(en.courseDetail.feeNoGateway.toLowerCase()).toContain("no gateway");
     expect(en.courseOps.feeOffline.toLowerCase()).toContain("no online payment");
-    /* And the honest branch does not quote a number nobody confirmed. */
     for (const cat of [en, gu]) {
       const ask = JSON.stringify([cat.courseDetail.feeAskTitle, cat.courseDetail.feeAskNote]);
       expect(ask).not.toMatch(/\d{2},\d{3}/);
     }
   });
 
-  it("renders every published figure from the verified record", () => {
+  it("renders every published figure from the Console configuration", () => {
     for (const cat of [en, gu]) {
       const block = JSON.stringify(cat.courseDetail) + JSON.stringify(cat.courseOps);
       for (const figure of ["35,000", "25,000", "10,000", "35000"]) {
         expect(block, figure).not.toContain(figure);
       }
     }
-    expect(facts).toContain("verified.fees.feeTotal");
-    expect(facts).toContain("verified.fees.feeAdmission");
-    expect(facts).toContain("verified.operations.scheduleOptions");
+    expect(facts).toContain("money(fees.total)");
+    expect(facts).toContain("money(fees.admission)");
+    expect(facts).toContain("schedule.map((slot)");
   });
 
   it("offers no way to pay online from anywhere in the course tree", () => {
@@ -232,14 +189,10 @@ describe("course facts", () => {
       expect(text, spec).not.toContain(spec);
     }
     expect(text).not.toMatch(/\d+\s*-?\s*(head|needle)s?\b/);
-    /* The machine is DESCRIBED — what it does and what it is for. */
     expect(floor).toContain('pick(p, "machine", locale)');
   });
 
   it("publishes no week or month inside a syllabus module title", () => {
-    /* These titles used to read "Weeks 1-2" … "Final week", which published a
-       seven-week duration for ten courses whose duration the owner has NOT
-       confirmed — and contradicted the one course that has (three months). */
     const source = read("src/content/courses.ts");
     const titles = [...source.matchAll(/title(?:En|Gu): [`"]([^`"]*)[`"]/g)].map((m) => m[1]);
     expect(titles.length).toBeGreaterThanOrEqual(8);
@@ -270,21 +223,14 @@ describe("course facts", () => {
   });
 
   it("names no trainer who has not been confirmed", () => {
-    /* The template used to carry a trainer card built from sample data. Real
-       names, specialities and portraits go on when the owner supplies them —
-       together with the photographs, not before. */
     const everything = blocks.join(" ");
     expect(everything).not.toContain("trainers");
     expect(everything).not.toContain("sample-machine-trainer");
   });
 });
 
-/* ------------------------------------------------------------------ *
- * Bilingual, structurally
- * ------------------------------------------------------------------ */
-
 describe("both languages", () => {
-  it("resolves every locale through pick(), never a ternary", () => {
+  it("resolves every locale through shared helpers, never a ternary", () => {
     for (const source of blocks) {
       expect(source).not.toMatch(/locale === "gu" \?/);
       expect(source).not.toMatch(/\bgu \?/);

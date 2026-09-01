@@ -13,31 +13,13 @@ import { Icon } from "@/components/ui/Icon";
 import { PageCrumbs } from "@/components/kds/PageCrumbs";
 
 /**
- * `/[locale]/batches` — when you can actually come.
+ * `/[locale]/batches` — the public view of open Console batches.
  *
- * THE RULE THAT SHAPES EVERY LINE
- * -------------------------------
- * Real rows or nothing. `getUpcomingBatches()` filters `status = 'open'`, a
- * future start date and both archive flags **in SQL** before the limit, and in
- * production returns an empty result rather than fiction:
- *
- *  - **no invented start date, seat count, trainer, language or availability**;
- *  - **no fabricated weekend batch** — `sampleBatches()` in
- *    `src/content/courses.ts` is the only "Sat-Sun" string in this repository
- *    and it is gated behind demo mode. This page never calls it, so a weekend
- *    row can only come from the database;
- *  - **every field is conditional**, and a `seats` value of 0 means *not
- *    tracked* rather than *full*.
- *
- * SERVER-RENDERED, deliberately: one query, no client fetch, no hydration, no
- * loading skeleton. The board is a client component only because the FILTERS
- * are, and it is handed the rows the server already read.
- *
- * 24 is a real cap, not a page size: the studio runs a handful of batches at a
- * time, and an unbounded public SELECT is the one thing a free-tier database
- * cannot afford on a crawlable URL.
+ * A batch can already have started and still accept students. The shared query
+ * therefore keeps an `open` batch visible until its end date passes (or staff
+ * closes/archives it), and also respects the parent course's Active and Public
+ * visibility switches. No production sample rows are invented.
  */
-
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
@@ -66,6 +48,7 @@ export default async function BatchesPage({
 
   const rows: BatchRow[] = result.rows.map((row) => ({
     id: row.id,
+    label: row.label,
     days: row.days,
     startTime: row.startTime,
     endTime: row.endTime,
@@ -99,11 +82,6 @@ export default async function BatchesPage({
             {rows.length > 0 ? (
               <BatchBoard rows={rows} sample={result.sample} />
             ) : (
-              /* Two different empty states, because they are two different
-                 facts. "Nothing is open" is the normal state between intakes;
-                 "we could not load the list" is a failure, and pretending it
-                 is the first would tell a visitor there are no batches when
-                 there may be several. */
               <div className="when-empty">
                 <p className="t-h4">{failed ? t("errorTitle") : t("emptyTitle")}</p>
                 <p className="t-body mt-2 max-w-[52ch]">
@@ -132,9 +110,7 @@ export default async function BatchesPage({
       </section>
 
       <JoiningSteps />
-
       <CtaBand title={t("closeH2")} sub={t("closeSub")} ground="on-cloth" />
-
       <ActionDock surface="batches" demoHref="/admission" />
     </>
   );
