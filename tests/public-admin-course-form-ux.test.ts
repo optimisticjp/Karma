@@ -47,9 +47,9 @@ describe("public and Console course UX", () => {
   });
 
   it("makes selected Book Demo choices visibly vermilion", () => {
-    const css = read("src/app/thread-machine-proof.css");
+    const css = read("src/app/requested-ux.css");
     expect(css).toContain(".choice-chip:has(input:checked)");
-    expect(css).toContain("var(--brand-accent)");
+    expect(css).toContain("var(--color-vermilion-deep)");
     expect(css).toContain('content: "✓"');
   });
 
