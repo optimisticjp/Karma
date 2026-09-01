@@ -25,15 +25,15 @@ export function CourseSyllabus({ course, config }: { course: Course; config: Cou
           </div>
 
           {curriculum.length > 0 ? (
-            <ol className="data-list" role="list">
+            <ol className="grid gap-0 border-t border-rule" role="list">
               {curriculum.map((line, index) => {
                 const value = locale === "gu" ? line.gu : line.en;
                 return (
-                  <li key={`${index}-${value}`} className="data-row">
-                    <span className="data-row__title">
-                      <span className="t-micro numeric mr-3">{String(index + 1).padStart(2, "0")}</span>
-                      {value}
+                  <li key={`${index}-${value}`} className="flex items-start gap-3 border-b border-rule py-3">
+                    <span className="t-micro numeric shrink-0" aria-hidden="true">
+                      {String(index + 1).padStart(2, "0")}
                     </span>
+                    <span className="t-body min-w-0">{value}</span>
                   </li>
                 );
               })}
