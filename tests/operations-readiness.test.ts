@@ -48,6 +48,27 @@ describe("database backup safety", () => {
     expect(workflow).toContain("path: db-backup.tar.gz.gpg");
     expect(workflow).not.toContain("path: backups/");
   });
+
+  it("preflights both required secrets before export", () => {
+    expect(workflow).toContain("DATABASE_URL GitHub Actions secret is missing");
+    expect(workflow).toContain("BACKUP_ENCRYPTION_PASSPHRASE GitHub Actions secret is missing");
+  });
+
+  it("proves backup changes on main instead of waiting for Sunday", () => {
+    expect(workflow).toContain("push:");
+    expect(workflow).toContain('branches: [main]');
+    expect(workflow).toContain('"scripts/backup.ts"');
+  });
+});
+
+describe("deferred digest scheduling", () => {
+  const workflow = read(".github/workflows/digest.yml");
+
+  it("is manual-only until Resend and CRON_SECRET are deliberately launched", () => {
+    expect(workflow).toContain("workflow_dispatch:");
+    expect(workflow).not.toContain("schedule:");
+    expect(workflow).toContain("CRON_SECRET is required when the digest is activated");
+  });
 });
 
 describe("operations record", () => {
