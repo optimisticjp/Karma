@@ -35,6 +35,13 @@ export type Db = NodePgDatabase<typeof schema>;
  * promise immediately, which would break every query issued after it. The
  * short idle timeout plus `maxUses: 1` closes sockets without that hazard.
  *
+ * node-postgres can emit a background `error` event when an idle connection is
+ * interrupted by a backend restart or network partition. EventEmitter treats
+ * an unhandled `error` as an uncaught exception, which can surface as a
+ * Cloudflare Worker Error 1101 even though every actual query is wrapped in a
+ * try/catch. Every request pool therefore installs a non-throwing listener;
+ * pg itself removes the failed client from the pool.
+ *
  * The binding is read through OpenNext's public `getCloudflareContext()` API,
  * in SYNC mode. Sync is the right mode here and not a shortcut: it resolves
  * from the context the Worker entrypoint (and `initOpenNextCloudflareForDev`)
@@ -105,12 +112,24 @@ export const getDb = cache((): Db | null => {
       connectionString: resolved.connectionString,
       max: 1,
       maxUses: 1,
+      connectionTimeoutMillis: 5_000,
       idleTimeoutMillis: 5_000,
       allowExitOnIdle: true,
       // Hyperdrive terminates TLS to the origin for us. A direct Supabase URL
       // carries its own `sslmode` in the connection string.
       ...(resolved.viaHyperdrive ? { ssl: false } : {})
     });
+
+    pool.on("error", (error) => {
+      // Do not log connection strings, hosts or credentials. pg terminates and
+      // removes the failed idle client automatically; the important part here
+      // is consuming EventEmitter's error event so it cannot crash the Worker.
+      console.error(
+        "[db] idle Postgres connection failed; client discarded",
+        error instanceof Error ? error.name : "unknown"
+      );
+    });
+
     return drizzle(pool, { schema });
   } catch (e) {
     console.error("[db] failed to create Postgres client", e);
