@@ -13,33 +13,14 @@ import { Icon } from "@/components/ui/Icon";
 /**
  * THE BOARD — every open batch, as a production board.
  *
- * WHAT A ROW MAY SAY
- * ------------------
- * Exactly what the database holds, and nothing else. Every field is
- * conditional: a row with no `days` renders no days, a row with no `language`
- * says nothing about language, and a `seats` value of 0 means the studio does
- * not track a capacity for that batch — it is **not** "full", and printing
- * "0 seats left" would invent scarcity. Nothing here is computed into a claim.
- *
- * THE FILTERS ARE BUILT FROM THE ROWS, NOT FROM A LIST OF COURSES
- * --------------------------------------------------------------
- * A filter offering eleven courses when two have an open batch teaches a
- * visitor that the page is a brochure. The course chips are derived from the
- * rows actually on the board, so every chip leads somewhere, and the timing
- * chips appear only when the board genuinely holds both.
- *
- * Morning and evening are read from `startTime` — 16:00 is the boundary the
- * studio's own four batch timings fall either side of. It is a reading of the
- * data, not a stored field, and it is never shown as one.
- *
- * NO JAVASCRIPT, NO PROBLEM
- * -------------------------
- * "All" is the default on both filters, so a visitor without scripting sees
- * every open batch rather than an empty board.
+ * Every visible field comes from the batch/course records maintained in Karma
+ * Console. The batch label is deliberately shown: it is the operator's name
+ * for the intake and gives the owner an obvious way to confirm that a Console
+ * edit reached the public site.
  */
-
 export type BatchRow = {
   id: number;
+  label: string;
   days: string | null;
   startTime: string;
   endTime: string;
@@ -140,10 +121,7 @@ export function BatchBoard({ rows, sample }: { rows: BatchRow[]; sample?: boolea
               <li key={row.id} className="board-row">
                 <span className="min-w-0">
                   <span className="t-h4 block">{pick(row, "courseName", locale)}</span>
-                  {/* Every uncertain field is conditional. A row with no days
-                      renders no days; one with no language says nothing about
-                      language. The way not to invent a field is not to render
-                      it. */}
+                  <span className="t-micro mt-0.5 block">{row.label}</span>
                   <span className="t-meta numeric mt-0.5 block">
                     {formatDate(row.startDate, locale)}
                     {row.days ? ` · ${row.days}` : null}
@@ -187,9 +165,6 @@ export function BatchBoard({ rows, sample }: { rows: BatchRow[]; sample?: boolea
           })}
         </ul>
       ) : (
-        /* The filter found nothing. Not an error, and not a dead end: the
-           control that produced it is right above, and clearing it is one
-           tap away. */
         <div className="when-empty">
           <p className="t-h4">{t("filterEmpty")}</p>
           <div className="when-empty-actions">
