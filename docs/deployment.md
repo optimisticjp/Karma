@@ -12,11 +12,11 @@ one covers the accounts.
 > not connected. Do not point Supabase Auth or `NEXT_PUBLIC_SITE_URL` at it
 > until the owner says the website is complete.
 >
-> **Three sections below are DEFERRED, not pending.** Steps 2 (Turnstile) and 4
-> (R2) describe how to activate infrastructure the owner has deliberately not
-> activated yet, and the custom domain in step 6 is the same. Do not work
-> through them as part of an unrelated task: `/api/health` reporting Turnstile
-> or R2 absent is the expected state today. See `docs/project-context.md` §40.
+> **Current infrastructure state:** Turnstile is ACTIVE on the workers.dev
+> production hostname. Resend notification email is deliberately deferred until
+> the custom domain is connected and verified. R2 file storage and the custom
+> domain are also deferred. `/api/health` reports email readiness separately,
+> but deferred Resend does not make the site unhealthy during testing.
 
 ## 0. GitHub + Codespaces
 1. Create a GitHub repo, push this project, open a Codespace.
@@ -50,34 +50,44 @@ Free-tier note: a Supabase free project pauses after a period of inactivity.
 The weekly backup workflow and the uptime monitor (step 7) keep it warm.
 Re-check the current pause policy before launch — provider limits change.
 
-## 2. Turnstile (spam protection) — DEFERRED
+## 2. Turnstile (spam protection) — ACTIVE
 
-**Do not do this as part of another task.** Turnstile is deliberately not
-configured; both keys are empty and the verification path already fails closed
-in production. Activate it only when the owner asks, or when form abuse actually
-appears. The steps, for that day:
+Turnstile protects the public admission and B2B brief forms.
 
-1. Cloudflare dashboard → Turnstile → Add site (domain: your site, plus
-   `localhost` for dev if you want).
-2. Put the **site key** in `.env` as `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
-   (build-time: it gets inlined into the client bundle).
-3. Keep the **secret key** handy for step 5.
+Current production setup:
+- Managed Turnstile widget.
+- Allowed hostname: `karma-design-studio.essanciaonline.workers.dev`.
+- Public site key is stored in `wrangler.jsonc` as `TURNSTILE_SITE_KEY`.
+- Secret key is stored only in Cloudflare as the Worker secret
+  `TURNSTILE_SECRET_KEY`; never commit or paste that value into source control.
+- Server verification checks Cloudflare success, the expected hostname, and the
+  stable `public_form` action.
 
-## 3. Resend (email notifications)
+When the custom domain is connected later, add it to the Turnstile widget's
+allowed hostnames, update `TURNSTILE_HOSTNAMES`, and redeploy before removing
+the workers.dev hostname.
+
+## 3. Resend (email notifications) — DEFERRED UNTIL CUSTOM DOMAIN
 
 Karma has **two independent email paths**, and they are easy to confuse:
 *notification* mail (a new application, a new brief, the daily digest) goes
-through **Resend**, configured here; *auth and invitation* mail goes through
-**Supabase Auth with custom SMTP**, configured in the Supabase dashboard
-(step 1). `/api/health`'s `email` check reads `RESEND_API_KEY` — it reports on
-the notification path only and says nothing about Supabase SMTP.
+through **Resend**; *auth and invitation* mail goes through **Supabase Auth with
+custom SMTP**. `/api/health`'s `email` check reads `RESEND_API_KEY` and reports
+only on the Resend notification path.
 
-1. https://resend.com → API key → `.env` `RESEND_API_KEY`.
-2. Until you verify a domain, keep `EMAIL_FROM` as
-   `Karma Design Studio <onboarding@resend.dev>`. After DNS verification of
-   karmadesignstudio.in, switch to e.g. `studio@karmadesignstudio.in`.
-3. Free tier: 100 emails/day. The site sends one per application/brief plus
-   one daily digest, so this is comfortable.
+The owner has explicitly deferred Resend until `karmadesignstudio.in` is linked
+and verified. During testing, application/brief records are still stored in the
+database; notification email is skipped when `RESEND_API_KEY` is absent.
+
+After the custom domain is connected:
+1. Verify the sending domain in Resend.
+2. Create a Resend API key and store it in Cloudflare as the Worker secret
+   `RESEND_API_KEY`.
+3. Set `EMAIL_FROM` to a verified sender, for example
+   `Karma Design Studio <studio@karmadesignstudio.in>`.
+4. Submit one test admission and one test design brief and confirm both the
+   database record and notification email.
+5. Confirm `/api/health` reports `checks.email: true`.
 
 ## 4. Cloudflare account (+ R2, DEFERRED)
 
@@ -111,10 +121,10 @@ runtime secret is not a substitute. `NEXT_PUBLIC_SITE_URL`, `STUDIO_EMAIL` and
 ### 5b. Runtime secrets
 ```bash
 npx wrangler secret put SUPABASE_SECRET_KEY   # privileged; never a build var
-npx wrangler secret put RESEND_API_KEY
-npx wrangler secret put TURNSTILE_SECRET_KEY  # later; owner is configuring it
+npx wrangler secret put TURNSTILE_SECRET_KEY  # active production secret
 npx wrangler secret put CRON_SECRET           # any long random string
-npx wrangler secret put DATABASE_URL          # ONLY until Hyperdrive is bound
+# npx wrangler secret put RESEND_API_KEY      # after custom-domain verification
+# npx wrangler secret put DATABASE_URL        # ONLY until Hyperdrive is bound
 ```
 
 ### 5c. Hyperdrive (the Worker's route to Postgres)
@@ -169,14 +179,18 @@ owner says the complete website is ready. When that day comes: Cloudflare
 dashboard → Workers & Pages → karma-design-studio → Settings → Domains &
 Routes → add the domain (its DNS must be on Cloudflare), then update
 `NEXT_PUBLIC_SITE_URL` in `.env`, `wrangler.jsonc` and Cloudflare's build
-variables, add the new callback URL to Supabase Auth, and redeploy.
+variables, add the new callback URL to Supabase Auth, add the new hostname to
+Turnstile, configure Resend, and redeploy.
 
-## 6.5 Production behavior checks (new)
+## 6.5 Production behavior checks
 - Do NOT set `ALLOW_DEMO_MODE` on production; it exists for staging only.
-- Open `/api/health`: it must return 200 with all checks true. A 503 means a
-  dependency is missing and forms will refuse submissions rather than silently
-  dropping them. `dbViaHyperdrive` is reported truthfully but does not gate
-  `ok`, so you can see a deploy still running on the direct-URL fallback.
+- Open `/api/health`: during the testing phase it should return 200 when the
+  required request-path dependencies are ready: database, Supabase Auth and
+  Turnstile. `dbViaHyperdrive` and `email` remain visible operational checks but
+  do not gate `ok`. `checks.email: false` is expected until the custom domain
+  is linked and Resend is intentionally activated.
+- After Resend is activated at launch, `checks.email` should also be true even
+  though the endpoint keeps reporting it separately.
 - Cloudflare dashboard → Security → WAF → Rate limiting rules: add one rule
   on path starts-with `/api/` (e.g. 20 requests / 1 minute per IP, block).
   This is the real per-IP wall; the in-app limiter is best-effort only.
