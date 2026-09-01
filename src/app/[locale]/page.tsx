@@ -10,8 +10,10 @@ import { HomeVoices } from "@/components/kds/home/HomeVoices";
 import { TrustSignals } from "@/components/kds/home/TrustSignals";
 import { BatchesVisit } from "@/components/kds/home/BatchesVisit";
 import { HomeClose } from "@/components/kds/home/HomeClose";
+import { EMCAD_DAHAO_SLUG } from "@/content/course-operations";
 import { routing } from "@/i18n/routing";
 import { pageMeta } from "@/lib/seo";
+import { getCourseConfig } from "@/lib/course/config";
 import { getPublicCourses } from "@/lib/course/public";
 
 /* Courses, batches, Content Desk stats and FAQs are database-backed. */
@@ -34,11 +36,14 @@ export async function generateMetadata({
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const courses = await getPublicCourses();
+  const [courses, emcad] = await Promise.all([
+    getPublicCourses(),
+    getCourseConfig(EMCAD_DAHAO_SLUG)
+  ]);
 
   return (
     <>
-      <HomeHero />
+      <HomeHero courses={courses} emcad={emcad} />
       <EntryPaths />
       <SampleBook courses={courses} />
       <ScreenMachineProof />

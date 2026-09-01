@@ -13,27 +13,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return { robots: { index: false, follow: false } };
 }
 
-/**
- * THE ANSWER.
- *
- * The anti-fraud page every certificate QR points to. It says one word first —
- * verified, not found, or unavailable — and then shows the record behind it.
- *
- * THREE SIGNALS, NEVER ONE
- * ------------------------
- * The verdict carries a word, an icon and a rule down its left edge. Colour is
- * the fourth signal and never the only one, because this page gets printed,
- * forwarded and read on a cracked phone in daylight.
- *
- * NOTHING MOVES. The result used to arrive inside a `seal-in` animation on a
- * dashed circle: a certificate stamping itself is precisely the gesture a fake
- * one would make. `tests/machine-lab-secondary.test.tsx` holds the rule.
- *
- * "NOT FOUND" IS NOT AN ACCUSATION. A number that does not resolve can be a
- * typo, an old paper certificate, or a record not yet entered — so the copy
- * sends the reader to the studio's phone rather than concluding anything about
- * the person holding the certificate.
- */
+/** Certificate verification deliberately distinguishes an issued certificate
+ * from a revoked one. A revoked record remains visible for auditability, but
+ * must never receive the green "Verified" verdict. */
 export default async function VerifyResultPage({
   params
 }: {
@@ -47,18 +29,26 @@ export default async function VerifyResultPage({
 
   const dbConfigured = getDb() !== null;
   const cert = dbConfigured ? await getCertificate(certNo) : null;
-
-  const state = !dbConfigured ? "wait" : cert ? "ok" : "bad";
-  /* The heading is a WORD, and the sentence sits under it. Setting the long
-     "records system is coming online" line as the heading made a paragraph
-     look like a verdict. */
+  const revoked = cert?.status === "revoked";
+  const state = !dbConfigured ? "wait" : revoked ? "bad" : cert ? "ok" : "bad";
   const heading =
-    state === "wait"
+    !dbConfigured
       ? t("unavailableTitle")
-      : state === "ok"
-        ? t("validTitle")
-        : t("invalidTitle");
-  const body = state === "wait" ? t("unavailable") : state === "ok" ? t("validBody") : t("invalidBody");
+      : revoked
+        ? l === "gu"
+          ? "રદ કરાયેલ"
+          : "Revoked"
+        : cert
+          ? t("validTitle")
+          : t("invalidTitle");
+  const body =
+    !dbConfigured
+      ? t("unavailable")
+      : revoked
+        ? t("revoked")
+        : cert
+          ? t("validBody")
+          : t("invalidBody");
   const mark = state === "wait" ? "phone" : state === "ok" ? "check" : "misregistration";
 
   return (
@@ -98,14 +88,9 @@ export default async function VerifyResultPage({
                   </div>
                 </dl>
               ) : null}
-
-              {cert?.status === "revoked" ? (
-                <p className="form-callout mt-4">{t("revoked")}</p>
-              ) : null}
             </div>
           </div>
 
-          {/* Whatever the verdict, the studio's phone is the next step. */}
           <p className="t-meta mt-5">
             <a className="act-quiet" href={`tel:+${site.whatsapp}`}>
               <Icon name="phone" size={15} /> {site.phoneDisplay}
