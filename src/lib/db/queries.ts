@@ -1,4 +1,4 @@
-import { and, asc, eq, gte, isNull } from "drizzle-orm";
+import { and, asc, eq, gte, isNull, or } from "drizzle-orm";
 import { getDb, schema } from "./index";
 import { demoModeAllowed } from "@/lib/env";
 import { sampleBatches, type BatchRow } from "@/content/courses";
@@ -13,11 +13,23 @@ export type BatchesResult = {
   unavailable?: boolean;
 };
 
+function kolkataDate() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date());
+}
+
 /**
- * Upcoming open batches. Audit fixes applied:
- *  - courseSlug filter and status filter run in SQL, before LIMIT
- *  - sample data appears ONLY outside production (or ALLOW_DEMO_MODE)
- *  - production failures return honest empty/error states, never fiction
+ * Publicly available batches.
+ *
+ * A batch stays on the public board while its status is `open` and it has not
+ * ended. Its start date may already be in the past: that is a running intake,
+ * not an expired one. Staff close admissions by changing the status, setting
+ * an end date in the past, archiving the batch, or hiding/deactivating its
+ * course. All of those Console decisions are enforced in this SQL query.
  */
 export async function getUpcomingBatches(opts?: {
   limit?: number;
@@ -34,14 +46,13 @@ export async function getUpcomingBatches(opts?: {
   }
 
   try {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = kolkataDate();
     const conditions = [
-      gte(schema.batches.startDate, today),
       eq(schema.batches.status, "open"),
-      /* Archived rows are out of the operational picture, and the public site
-         is the most operational surface there is: a visitor must never be
-         shown a batch the studio has taken out of play. */
+      or(isNull(schema.batches.endDate), gte(schema.batches.endDate, today))!,
       isNull(schema.batches.archivedAt),
+      eq(schema.courses.active, true),
+      eq(schema.courses.publicVisible, true),
       isNull(schema.courses.archivedAt)
     ];
     if (opts?.courseSlug) conditions.push(eq(schema.courses.slug, opts.courseSlug));
@@ -64,7 +75,7 @@ export async function getUpcomingBatches(opts?: {
       .from(schema.batches)
       .innerJoin(schema.courses, eq(schema.batches.courseId, schema.courses.id))
       .where(and(...conditions))
-      .orderBy(asc(schema.batches.startDate))
+      .orderBy(asc(schema.batches.startDate), asc(schema.batches.startTime))
       .limit(limit);
 
     return { rows: rows as BatchRow[], sample: false };
