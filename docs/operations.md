@@ -14,20 +14,20 @@ Provider limits change: treat this table as a prompt to check, not as fact.
 | Cloudflare Hyperdrive | free tier | One connection per request | Only if the Worker starts holding connections open (it must not) |
 | R2 | 10 GB, zero egress | Deferred | Activate only if private B2B file delivery is requested |
 | Resend | 100/day, 3k/mo | Deferred during workers.dev testing | Activate after the custom sending domain is verified |
-| GitHub Actions | 2,000 min/mo | CI + 2 crons: minutes | Nothing realistic |
+| GitHub Actions | 2,000 min/mo | CI + weekly backup; digest manual until launch | Nothing realistic |
 
 ## Routine
 - **Daily during workers.dev testing:** review new applications and briefs in
-  Karma Console. The 21:00 IST digest endpoint may run, but Resend notification
-  email is intentionally deferred until the custom domain is connected and
-  verified. After Resend is activated, the digest email becomes the daily
-  notification path; if it stops arriving, check the digest workflow run,
-  `CRON_SECRET`, Resend configuration and `checks.email` on `/api/health`.
+  Karma Console. The digest workflow is intentionally manual-only while Resend
+  and `CRON_SECRET` are deferred, so it cannot create a meaningless failed
+  scheduled run every day. At launch, configure the same `CRON_SECRET` in
+  GitHub and Cloudflare, verify Resend, restore the 21:00 IST schedule, run it
+  once manually, and then treat a missed digest as an operational alert.
 - **Weekly:** the backup workflow exports every current **public application
   table**, encrypts the archive with `BACKUP_ENCRYPTION_PASSPHRASE`, and keeps
-  only the encrypted GitHub artifact for 90 days. A missing encryption secret
-  makes the workflow fail rather than upload plaintext PII. Download an
-  encrypted copy occasionally and keep one offline together with the
+  only the encrypted GitHub artifact for 90 days. A missing `DATABASE_URL` or
+  encryption passphrase fails in an explicit preflight before export. Download
+  an encrypted copy occasionally and keep one offline together with the
   passphrase in the institution's password manager.
 - **Monthly:** open `/en` and `/gu` on a phone, submit a test application,
   check Search Console for coverage errors. Also open `/admin/team` and
@@ -115,7 +115,9 @@ more detail, add it to the log message, never the payload.
   public base tables at runtime so newly-added Console tables are not silently
   omitted, and uploads only an encrypted `.gpg` artifact. Managed Supabase
   schemas (`auth`, `storage`) and the Drizzle ledger are outside this interim
-  CSV backup.
+  CSV backup. A change to the backup workflow or export script also triggers a
+  main-branch backup run so the pipeline is proved immediately rather than at
+  the next Sunday schedule.
 - Sample proof used by the public preview follows the centralized provenance
   registry and stays out of factual JSON-LD/SEO claims. Sample form responses
   and sample batch inventory are not production fallbacks.
