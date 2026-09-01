@@ -1,0 +1,74 @@
+name: Cloudflare runtime smoke
+
+on:
+  push:
+    branches: [debug/cloudflare-1101]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: karma
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d karma"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      CI: "true"
+      WRANGLER_SEND_METRICS: "false"
+      CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE: "postgres://postgres:postgres@127.0.0.1:5432/karma?sslmode=disable"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build actual Cloudflare Worker
+        run: npx opennextjs-cloudflare build
+      - name: Boot Worker runtime and smoke public routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx opennextjs-cloudflare preview --port 8787 > /tmp/karma-worker.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true; cat /tmp/karma-worker.log' EXIT
+
+          ready=0
+          for _ in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8787/en -o /tmp/en.html; then
+              ready=1
+              break
+            fi
+            if ! kill -0 "$PID" 2>/dev/null; then
+              echo "Worker preview exited before becoming ready"
+              exit 1
+            fi
+            sleep 1
+          done
+
+          if [ "$ready" -ne 1 ]; then
+            echo "Worker preview did not become ready"
+            exit 1
+          fi
+
+          curl -fsS http://127.0.0.1:8787/gu -o /tmp/gu.html
+          curl -fsS http://127.0.0.1:8787/en/courses -o /tmp/courses.html
+          curl -fsS http://127.0.0.1:8787/en/batches -o /tmp/batches.html
+          curl -fsS http://127.0.0.1:8787/en/admissions -o /tmp/admissions.html
+          status=$(curl -sS -o /tmp/404.html -w '%{http_code}' http://127.0.0.1:8787/en/nope)
+          test "$status" = "404"
+
+          grep -q '<html' /tmp/en.html
+          grep -q '<html' /tmp/gu.html
+          grep -q '<html' /tmp/courses.html
+          grep -q '<html' /tmp/batches.html
+          grep -q '<html' /tmp/admissions.html
