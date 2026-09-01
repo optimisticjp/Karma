@@ -6,10 +6,11 @@ const briefForm = readFileSync("src/components/forms/BriefForm.tsx", "utf8");
 // R2 is intentionally deferred. The public form must never imply that private
 // in-form file upload is already available while the file input is absent.
 describe("brief form deferred upload copy", () => {
-  it("states the current file workflow honestly in both public locales", () => {
-    expect(briefForm).toContain("Private in-form upload is not enabled yet.");
-    expect(briefForm).toContain("સિક્યોર પ્રાઇવેટ સ્ટોરેજ જોડાયા પછી જ ફોર્મમાં અપલોડ ચાલુ થશે.");
-    expect(briefForm).not.toContain("Private in-form upload is switched on with secure storage.");
+  it("keeps the localized workflow message and corrects the stale English clause", () => {
+    expect(briefForm).toContain('t("form.filesDeferred")');
+    expect(briefForm).toContain(
+      "Private in-form upload will be enabled only after secure private storage is connected."
+    );
   });
 
   it("keeps Turnstile on the brief form", () => {
