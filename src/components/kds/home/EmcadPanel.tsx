@@ -2,36 +2,28 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { EMCAD_DAHAO_SLUG } from "@/content/course-operations";
 import { getCourseConfig } from "@/lib/course/config";
-import { intlLocale, pick } from "@/lib/i18n/localized";
+import { pick } from "@/lib/i18n/localized";
 import { asLocale } from "@/i18n/routing";
 import { StitchSwatch } from "@/components/kds/StitchSwatch";
 import { MicroProof } from "@/components/kds/proof";
-import { FeeSheet } from "@/components/kds/FeeSheet";
 import { reviews } from "@/content/proof";
+import { ThreadLine } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
 
-/** The homepage EMCAD decision panel reads the same Console configuration as
- * the course page and admission form. If staff hides the course or removes its
- * published fee, this promotional fee panel disappears rather than going stale. */
+/** Homepage EMCAD decision panel. Operational facts stay live from Console,
+ * while fee amounts remain private and are confirmed only at the studio. */
 export async function EmcadPanel() {
-  const [t, tc, rawLocale, config] = await Promise.all([
+  const [t, td, tc, rawLocale, config] = await Promise.all([
     getTranslations("home.emcad"),
+    getTranslations("courseDetail"),
     getTranslations("common"),
     getLocale(),
     getCourseConfig(EMCAD_DAHAO_SLUG)
   ]);
-  if (!config?.fees) return null;
+  if (!config) return null;
 
   const locale = asLocale(rawLocale);
-  const { fees, operations } = config;
-  const money = (n: number) =>
-    new Intl.NumberFormat(intlLocale(locale), {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0
-    }).format(n);
-
-  const balance = fees.total - fees.admission;
+  const { operations } = config;
   const demo = operations.demo;
   const proofLine = reviews.find((review) => review.courseSlug === EMCAD_DAHAO_SLUG);
 
@@ -83,24 +75,18 @@ export async function EmcadPanel() {
             ) : null}
           </div>
 
-          <FeeSheet
-            label={t("feeLabel")}
-            total={money(fees.total)}
-            totalNote={t("feeTotalNote")}
-            rows={[
-              { amount: money(fees.admission), note: t("feeAtAdmission"), paid: true },
-              { amount: money(balance), note: t("feeBalance", { days: fees.balanceDueDays }) }
-            ]}
-            offline={t("offline")}
-            actions={
-              <>
-                <Link href={`/admission?course=${EMCAD_DAHAO_SLUG}`} className="act act-primary">
-                  {tc("bookDemo")} <Icon name="arrow" size={17} className="arrow" />
-                </Link>
-                <Link href={`/courses/${EMCAD_DAHAO_SLUG}`} className="act act-secondary">{t("ctaCourse")}</Link>
-              </>
-            }
-          >
+          <div className="fee-sheet">
+            <p className="t-micro">{t("feeLabel")}</p>
+            <p className="t-h3 mt-2">{td("feeAskTitle")}</p>
+            <p className="t-meta mt-2">{td("feeAskNote")}</p>
+            <p className="t-meta fee-offline">{td("feeNoGateway")}</p>
+            <ThreadLine className="my-5" />
+            <div className="fee-actions">
+              <Link href={`/admission?course=${EMCAD_DAHAO_SLUG}`} className="act act-primary">
+                {tc("bookDemo")} <Icon name="arrow" size={17} className="arrow" />
+              </Link>
+              <Link href={`/courses/${EMCAD_DAHAO_SLUG}`} className="act act-secondary">{t("ctaCourse")}</Link>
+            </div>
             {proofLine ? (
               <MicroProof
                 className="mt-6"
@@ -109,7 +95,7 @@ export async function EmcadPanel() {
                 status={proofLine.status}
               />
             ) : null}
-          </FeeSheet>
+          </div>
         </div>
       </div>
     </section>
