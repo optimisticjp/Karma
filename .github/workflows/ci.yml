@@ -17,5 +17,80 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
-      # Builds with sample data: DATABASE_URL is not needed for CI.
+      # Next's production build is still useful, but it is not enough to prove
+      # the OpenNext bundle boots inside the Cloudflare Workers runtime.
       - run: npm run build
+
+  cloudflare-runtime:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: karma
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d karma"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      CI: "true"
+      WRANGLER_SEND_METRICS: "false"
+      DATABASE_URL: "postgres://postgres:postgres@127.0.0.1:5432/karma?sslmode=disable"
+      # Wrangler/OpenNext maps this to the local HYPERDRIVE binding so the
+      # preview exercises the same request-time database path as production.
+      CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE: "postgres://postgres:postgres@127.0.0.1:5432/karma?sslmode=disable"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Prepare realistic local Postgres
+        run: |
+          npm run db:migrate
+          npm run db:seed
+      - name: Build actual Cloudflare Worker
+        run: npx opennextjs-cloudflare build
+      - name: Boot Worker and smoke dynamic public routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx opennextjs-cloudflare preview --port 8787 > /tmp/karma-worker.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true; cat /tmp/karma-worker.log' EXIT
+
+          ready=0
+          for _ in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8787/en -o /tmp/en.html; then
+              ready=1
+              break
+            fi
+            if ! kill -0 "$PID" 2>/dev/null; then
+              echo "Worker preview exited before becoming ready"
+              exit 1
+            fi
+            sleep 1
+          done
+          test "$ready" = "1"
+          grep -q '<html' /tmp/en.html
+
+          for path in /gu /en/courses /en/batches /en/admissions /en/about /en/services; do
+            curl -fsS "http://127.0.0.1:8787$path" -o /tmp/route.html
+            grep -q '<html' /tmp/route.html
+          done
+
+          status=$(curl -sS -o /tmp/404.html -w '%{http_code}' http://127.0.0.1:8787/en/nope)
+          test "$status" = "404"
+
+          # Repeated requests catch request-scoped pool/binding failures that a
+          # single successful cold request can miss.
+          for _ in $(seq 1 12); do
+            curl -fsS http://127.0.0.1:8787/en -o /dev/null
+            curl -fsS http://127.0.0.1:8787/en/batches -o /dev/null
+          done
