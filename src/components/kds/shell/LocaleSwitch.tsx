@@ -16,11 +16,10 @@ import { cn } from "@/lib/utils";
  * without JavaScript and stays meaningful to assistive technology/crawlers.
  */
 export function LocaleSwitch({
-  className,
-  /** Kept for backwards-compatible callers; the visible label is now always compact. */
-  full: _full = false
+  className
 }: {
   className?: string;
+  /** Kept for backwards-compatible callers; the visible label is always compact. */
   full?: boolean;
 }) {
   const current = useLocale() as Locale;
