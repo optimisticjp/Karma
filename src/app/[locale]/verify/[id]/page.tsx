@@ -29,34 +29,27 @@ export default async function VerifyResultPage({
 
   const dbConfigured = getDb() !== null;
   const cert = dbConfigured ? await getCertificate(certNo) : null;
-
-  const state = !dbConfigured
-    ? "wait"
-    : cert?.status === "revoked"
-      ? "revoked"
-      : cert
-        ? "ok"
-        : "bad";
+  const revoked = cert?.status === "revoked";
+  const state = !dbConfigured ? "wait" : revoked ? "bad" : cert ? "ok" : "bad";
   const heading =
-    state === "wait"
+    !dbConfigured
       ? t("unavailableTitle")
-      : state === "revoked"
+      : revoked
         ? l === "gu"
           ? "રદ કરાયેલ"
           : "Revoked"
-        : state === "ok"
+        : cert
           ? t("validTitle")
           : t("invalidTitle");
   const body =
-    state === "wait"
+    !dbConfigured
       ? t("unavailable")
-      : state === "revoked"
+      : revoked
         ? t("revoked")
-        : state === "ok"
+        : cert
           ? t("validBody")
           : t("invalidBody");
   const mark = state === "wait" ? "phone" : state === "ok" ? "check" : "misregistration";
-  const visualState = state === "revoked" ? "bad" : state;
 
   return (
     <section className="band on-mist" aria-labelledby="verdict-heading">
@@ -64,7 +57,7 @@ export default async function VerifyResultPage({
         <div className="reading-shell">
           <p className="t-micro">{t("eyebrow")}</p>
 
-          <div className={`verdict verdict-${visualState} mt-4`}>
+          <div className={`verdict verdict-${state} mt-4`}>
             <span className="verdict-mark" aria-hidden="true">
               <Icon name={mark} size={22} strokeWidth={2} />
             </span>
