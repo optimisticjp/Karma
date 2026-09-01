@@ -14,7 +14,9 @@ describe("Cloudflare Postgres pool resilience", () => {
   });
 
   it("does not log the resolved connection string from the pool error listener", () => {
-    const listener = source.slice(source.indexOf('pool.on("error"'), source.indexOf("return drizzle", source.indexOf('pool.on("error"'))));
+    const start = source.indexOf('pool.on("error"');
+    const end = source.indexOf("return drizzle", start);
+    const listener = source.slice(start, end);
     expect(listener).not.toContain("resolved.connectionString");
   });
 });
