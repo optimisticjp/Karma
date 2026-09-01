@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { families } from "@/content/courses";
 import { photosInGroup } from "@/content/photo-manifest";
 import { trainers as proofTrainers } from "@/content/proof";
 import { pick } from "@/lib/i18n/localized";
