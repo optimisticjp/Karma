@@ -1,76 +1,27 @@
 import { site, ownerProvidedFacts } from "./site";
-import { coursesByFamily, type Course } from "@/content/courses";
+import type { Course } from "@/content/courses";
 
 /**
  * Every piece of structured data on this site is built here.
  *
- * ## Why one file
- *
  * Schema is the one place where an unverified claim stops being a labelled
- * placeholder and becomes a fact a search engine repeats. A visitor can see
- * that a review card says "sample"; a rich result in Google cannot say that,
- * and by the time anyone notices, it has been cached, syndicated and quoted
- * back at the business.
- *
- * So the rule is not "be careful when adding schema" — it is that schema is
- * built in one module, from a known-safe set of inputs, and a test asserts
- * nothing else emits it.
- *
- * ## What may never appear here
- *
- * - `aggregateRating` / `ratingValue` — the 4.8 is owner-provided, not an
- *   audited aggregate, and there is no verified review count to pair with it.
- * - `Review` — every review on the site is sample text.
- * - `Person` — no trainer has been confirmed by the owner. A named person in
- *   schema is a claim about a real human being.
- * - `offers` / `price` — Karma takes no payment online. The EMCAD DAHAO fee is
- *   published in full on its course page, but an `offers` node invites a
- *   buy-now rich result for something that cannot be bought on this site.
- * - `openingHoursSpecification` — exact day-by-day opening hours are still
- *   owner-confirmation-needed. "Evening batches till 10:30 pm" does not prove
- *   that the business closes at 22:30 every day.
- * - Student outcomes, pass rates, placement figures, student counts.
- *
- * ## What may appear
- *
- * The address, the landmark, the three published phone numbers, the social
- * profiles, the course catalogue and the machine notes — all of which are
- * either verified against two sources or are descriptions of the studio's own
- * offering.
- *
- * `timeRequired` joined that list on 2026-08-30, but ONLY for a course whose
- * duration the owner has confirmed in writing. That is EMCAD DAHAO Embroidery
- * Designing (`P3M`) and no other course; the remaining ten still carry
- * `durationMonths: null` and emit no duration at all.
+ * placeholder and becomes a fact a search engine repeats. Keep sample proof,
+ * ratings, people, prices and unverified opening hours out of this module.
  */
-
-/** Stable node ids, so the graph refers to one studio rather than repeating it. */
 export const STUDIO_ID = `${site.url}/#studio`;
 
 type Locale = "en" | "gu";
 
-/**
- * The studio itself.
- *
- * A training institute genuinely is both a `LocalBusiness` and an
- * `EducationalOrganization`; declaring only the first loses course
- * eligibility, and declaring only the second loses the local pack.
- */
-/**
- * The languages Karma teaches in. Verified in `docs/content-checklist.md`
- * ("Teaching in Gujarati and Hindi").
- *
- * DELIBERATELY NOT `routing.locales`. The website is published in English and
- * Gujarati; the teaching happens in Gujarati, Hindi and English. Those are two
- * different claims about two different things, and collapsing them would
- * either publish a Hindi website nobody asked for or tell a crawler Karma
- * cannot teach a Hindi speaker. It can.
- *
- * One constant because two blocks on the same page used to disagree.
- */
+/** Teaching languages are not website locales: Karma teaches in Gujarati,
+ * Hindi and English while the public website itself remains EN/GU only. */
 const TEACHING_LANGUAGES = ["gu", "hi", "en"] as const;
 
-export function studioSchema(locale: Locale) {
+/**
+ * The organisation graph receives the already-resolved PUBLIC course list.
+ * That prevents a course hidden, deactivated or archived in Karma Console from
+ * surviving invisibly in JSON-LD after it has disappeared from the page.
+ */
+export function studioSchema(locale: Locale, courses: Course[]) {
   return {
     "@context": "https://schema.org",
     "@type": ["LocalBusiness", "EducationalOrganization"],
@@ -79,8 +30,6 @@ export function studioSchema(locale: Locale) {
     alternateName: site.name,
     description: locale === "gu" ? site.descriptorGu : site.descriptorEn,
     url: site.url,
-    /* All three published numbers. Which mobile answers what is unconfirmed,
-       so none is promoted to "the" number. */
     telephone: [`+${site.callPhone}`, `+${site.whatsapp}`, `+${site.landline}`],
     email: site.email,
     address: {
@@ -96,9 +45,9 @@ export function studioSchema(locale: Locale) {
     areaServed: { "@type": "City", name: "Surat" },
     availableLanguage: TEACHING_LANGUAGES,
     knowsLanguage: ["gu", "hi", "en"],
-    /* Exact day-by-day business hours are deliberately absent until the owner
-       confirms them. The public copy may still truthfully say that evening
-       batches run till 10:30 pm; that is a batch fact, not a closing-hours fact. */
+    /* Exact day-by-day opening hours remain absent. The confirmed 11:00 PM
+       figure describes the latest training slot, not a seven-day closing-hours
+       schedule, so it still does not justify OpeningHoursSpecification. */
     sameAs: [
       site.socials.instagram,
       site.socials.youtube,
@@ -108,7 +57,7 @@ export function studioSchema(locale: Locale) {
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: locale === "gu" ? "એમ્બ્રોઇડરી કોર્સ" : "Embroidery courses",
-      itemListElement: coursesByFamily.map((course) => ({
+      itemListElement: courses.map((course) => ({
         "@type": "Course",
         name: course.nameEn,
         description: course.production.producesEn,
@@ -116,17 +65,13 @@ export function studioSchema(locale: Locale) {
         provider: { "@id": STUDIO_ID }
       }))
     }
-    /* Deliberately absent: aggregateRating. `ownerProvidedFacts.googleRating`
-       is shown in the interface, attributed to Google and linked to the live
-       listing — but it is not an audited aggregate and there is no verified
-       review count, so it must not be emitted as a rich result. */
+    /* Deliberately absent: aggregateRating. The owner-provided Google figure
+       may be shown in the interface with attribution, but it is not an audited
+       aggregate and there is no verified review count for rating schema. */
   };
 }
 
-/**
- * One course. No offers, no price, no rating — see the file note. `timeRequired`
- * appears only for a course whose duration the owner has confirmed in writing.
- */
+/** One public course. No offers, price or rating. */
 export function courseSchema(course: Course, locale: Locale) {
   return {
     "@context": "https://schema.org",
@@ -135,32 +80,10 @@ export function courseSchema(course: Course, locale: Locale) {
     name: course.nameEn,
     description: course.production.producesEn,
     url: `${site.url}/${locale}/courses/${course.slug}`,
-    /* The teaching languages, and they must not disagree with the studio's own
-       `availableLanguage` above. They did: this said `["gu","en"]` while the
-       organisation said `["gu","hi","en"]`, so one JSON-LD block on the same
-       page contradicted another about whether Karma teaches in Hindi. It does
-       — a confirmed fact in `docs/content-checklist.md` — and both now read
-       from one constant. */
     inLanguage: TEACHING_LANGUAGES,
     teaches: course.outcomesEn,
-    /* Real, and useful: this is genuinely on-site, in-person instruction. */
     courseMode: "onsite",
     provider: { "@id": STUDIO_ID },
-    /**
-     * `timeRequired` is emitted ONLY where the owner has confirmed a duration
-     * in writing — today that is EMCAD DAHAO Embroidery Designing at three
-     * months, and nothing else. Every other course has `durationMonths: null`
-     * and the key is omitted entirely rather than guessed.
-     *
-     * ISO 8601 months (`P3M`), not weeks: the institute says three months, and
-     * converting that into "P12W" would have this repository restate a business
-     * fact in a shape the business did not choose.
-     *
-     * `offers` and `price` stay out even for this course. The fee is published
-     * on the page in full, but Karma takes no payment online, and an `offers`
-     * node invites a buy-now rich result for something that cannot be bought
-     * on this site.
-     */
     ...(course.durationMonths ? { timeRequired: `P${course.durationMonths}M` } : {}),
     hasCourseInstance: {
       "@type": "CourseInstance",
@@ -196,20 +119,12 @@ export function noteSchema(opts: {
     description: opts.description,
     url: `${site.url}/${opts.locale}/notes/${opts.slug}`,
     inLanguage: opts.locale,
-    /* The studio is the publisher. No `author` Person: no trainer has been
-       confirmed, and a byline would be a claim about a real human. */
     publisher: { "@id": STUDIO_ID },
     ...(opts.courseName ? { about: { "@type": "Course", name: opts.courseName } } : {})
   };
 }
 
-/**
- * Breadcrumbs. `trail` is [name, path] pairs after the home crumb.
- *
- * `home` is passed in rather than hardcoded: the crumb used to read the
- * English word "Home" on a Gujarati page, which is a structured-data
- * description of a page in a language the page is not written in.
- */
+/** Breadcrumbs. `trail` is [name, path] pairs after the home crumb. */
 export function breadcrumbSchema(
   locale: Locale,
   trail: Array<[string, string]>,
@@ -230,10 +145,7 @@ export function breadcrumbSchema(
   };
 }
 
-/**
- * FAQ. Callers must pass only the catalogue's own questions — never a review,
- * a story or anything carrying a sample flag.
- */
+/** FAQ schema receives only public factual FAQs, never proof content. */
 export function faqSchema(items: Array<{ q: string; a: string }>) {
   return {
     "@context": "https://schema.org",
@@ -246,5 +158,5 @@ export function faqSchema(items: Array<{ q: string; a: string }>) {
   };
 }
 
-/** Referenced so the fact-discipline note above stays honest about its scope. */
+/** Referenced so the fact-discipline rule remains explicit about its scope. */
 export const OWNER_PROVIDED_NOT_IN_SCHEMA = ownerProvidedFacts;
