@@ -21,6 +21,7 @@ function walk(dir: string, out: string[] = []): string[] {
 
 const GUJARATI = /[઀-૿]/;
 const DEVANAGARI = /[ऀ-ॿ]/;
+const SNAPSHOT_FREE_CUSTOM_MIGRATIONS = new Set(["0005_security_hardening"]);
 
 /**
  * THE PUBLIC WEBSITE IS ENGLISH + GUJARATI.
@@ -157,19 +158,27 @@ describe("the locale enum matches the database", () => {
     );
   });
 
-  it("has no unapplied migration left in the journal", () => {
+  it("keeps migration files, journal and schema snapshots internally consistent", () => {
     const journal = JSON.parse(read("drizzle/meta/_journal.json")) as {
       entries: { idx: number; tag: string }[];
     };
     const tags = journal.entries.map((e) => e.tag);
     expect(tags).not.toContain("0005_trilingual_locale");
-    /* Every journal entry has both a SQL file and a snapshot on disk, and
-       every SQL file on disk has a journal entry. A file without an entry
-       never runs; an entry without a file crashes `db:migrate`. */
+    /* Every migration has a SQL file and every SQL file has a journal entry.
+       Drizzle's schema-generating migrations also have snapshots. A custom SQL
+       migration that changes function configuration or grants, but not the
+       Drizzle schema model, deliberately has no cloned snapshot: cloning the
+       previous snapshot would duplicate its internal id/prevId chain and make
+       a future `drizzle-kit generate` report a snapshot collision. */
     const sql = readdirSync(join(process.cwd(), "drizzle")).filter((f) => f.endsWith(".sql")).sort();
     expect(sql.map((f) => f.replace(/\.sql$/, ""))).toEqual([...tags].sort());
     for (const entry of journal.entries) {
-      expect(existsSync(join(process.cwd(), `drizzle/meta/${String(entry.idx).padStart(4, "0")}_snapshot.json`)), entry.tag).toBe(true);
+      const snapshot = join(process.cwd(), `drizzle/meta/${String(entry.idx).padStart(4, "0")}_snapshot.json`);
+      if (SNAPSHOT_FREE_CUSTOM_MIGRATIONS.has(entry.tag)) {
+        expect(existsSync(snapshot), `${entry.tag}: custom migration must not clone a schema snapshot`).toBe(false);
+      } else {
+        expect(existsSync(snapshot), entry.tag).toBe(true);
+      }
     }
   });
 
