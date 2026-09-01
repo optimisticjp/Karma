@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { EMCAD_DAHAO, KARMA_SOFTWARE } from "@/content/course-operations";
+import type { Course } from "@/content/courses";
+import type { CourseConfig } from "@/lib/course/config";
 import { PhotoFrame } from "@/components/kds/Frame";
 import { NeedlePoint, ThreadLine } from "@/components/kds/marks";
 import { StitchSwatch } from "@/components/kds/StitchSwatch";
@@ -9,49 +10,39 @@ import { Icon } from "@/components/ui/Icon";
 /**
  * The hero. Thirty seconds, on a phone, on mobile data.
  *
- * A visitor arriving from an Instagram reel has to learn four things before
- * they scroll: the software is EMCAD DAHAO, the teaching happens on live
- * machines, the studio is in Mota Varachha, and the first step is a free
- * two-day demo. Everything here serves that.
- *
- * THE SCENE IS ONE COMPOSITION, NOT THREE RECTANGLES
- * --------------------------------------------------
- * The finished piece leads because it is the thing being promised; the screen
- * and the machine sit beneath it as the two steps that produced it; and a
- * thread runs down the column through a needle point at each stage. Three
- * unlinked frames say "here are some photographs". Three frames on a thread
- * say "this became that", which is the entire brand idea in one picture.
- *
- * FOUR SWATCHES, IN THE FIRST VIEWPORT
- * ------------------------------------
- * Without them the hero reads as a clean training company that could teach
- * anything. Four cut samples — metallic satin, sequin discs, tufted loops, a
- * vector path — say "eleven techniques, physically different from each other"
- * faster than a sentence can, and they say it in the material rather than in
- * an adjective.
- *
- * THE FACTS ARE FOUR, AND EVERY ONE IS VERIFIED
- * ---------------------------------------------
- * The demo is rendered from `course-operations.ts` and **labelled with the
- * course it belongs to**. Only EMCAD DAHAO has a confirmed duration, fee and
- * demo; a fact floated loose beside "eleven techniques" would read as true of
- * all eleven, and ten of them have no confirmed anything.
- *
- * No fee here. Fees are a decision-page fact, and the EMCAD panel further down
- * states them properly with the payment terms attached.
+ * Course-specific operational facts come from the same Console-backed EMCAD
+ * configuration used by the course page and admission flow. If staff hides
+ * that course or removes a demo/software fact, the hero stops advertising it
+ * instead of keeping a source-coded copy alive.
  */
-export function HomeHero() {
+export function HomeHero({
+  courses,
+  emcad
+}: {
+  courses: Course[];
+  emcad: CourseConfig | null;
+}) {
   const t = useTranslations("home.hero");
   const tc = useTranslations("common");
+  const demo = emcad?.operations.demo ?? null;
 
-  const demo = EMCAD_DAHAO.operations.demo;
-
-  const facts: Array<[string, string]> = [
-    [t("factSoftwareLabel"), KARMA_SOFTWARE],
+  const facts: Array<[string, string]> = [];
+  if (emcad?.software) facts.push([t("factSoftwareLabel"), emcad.software]);
+  facts.push(
     [t("factPracticalLabel"), t("factPracticalValue")],
-    [t("factWhereLabel"), t("factWhereValue")],
-    [t("factDemoLabel"), t("factDemoValue", { days: demo?.days ?? 2 })]
+    [t("factWhereLabel"), t("factWhereValue")]
+  );
+  if (demo) facts.push([t("factDemoLabel"), t("factDemoValue", { days: demo.days })]);
+
+  const preferredSwatches = [
+    "zardosi-machine-embroidery",
+    "sequence-work",
+    "tufting",
+    "emcad-embroidery-design"
   ];
+  const visible = new Set(courses.map((course) => course.slug));
+  const swatches = preferredSwatches.filter((slug) => visible.has(slug));
+  const more = Math.max(courses.length - swatches.length, 0);
 
   const stages = [
     { key: "screen", id: "H1_EMCAD_SCREEN", register: "machine" as const },
@@ -78,16 +69,16 @@ export function HomeHero() {
               ))}
             </dl>
 
-            <ul className="hero-swatches" role="list">
-              {["zardosi-machine-embroidery", "sequence-work", "tufting", "emcad-embroidery-design"].map(
-                (slug) => (
+            {swatches.length > 0 ? (
+              <ul className="hero-swatches" role="list">
+                {swatches.map((slug) => (
                   <li key={slug}>
                     <StitchSwatch slug={slug} />
                   </li>
-                )
-              )}
-              <li className="t-micro self-center">{t("swatchMore")}</li>
-            </ul>
+                ))}
+                {more > 0 ? <li className="t-micro self-center">{t("swatchMore", { count: more })}</li> : null}
+              </ul>
+            ) : null}
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <Link href="/admission" className="act act-primary">
