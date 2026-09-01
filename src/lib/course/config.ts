@@ -94,25 +94,27 @@ function fromDatabase(row: DbCourseConfigRow): CourseConfig {
   };
 }
 
+const configSelection = {
+  slug: schema.courses.slug,
+  nameEn: schema.courses.nameEn,
+  nameGu: schema.courses.nameGu,
+  durationMonths: schema.courses.durationMonths,
+  software: schema.courses.software,
+  feeTotal: schema.courses.feeTotal,
+  feeAdmission: schema.courses.feeAdmission,
+  feeBalanceDueDays: schema.courses.feeBalanceDueDays,
+  termsVersion: schema.courses.termsVersion,
+  operations: schema.courses.operations,
+  sortOrder: schema.courses.sortOrder
+};
+
 export async function getCourseConfig(slug: string): Promise<CourseConfig | null> {
   const db = getDb();
   if (!db) return fromSource(slug);
 
   try {
     const rows = await db
-      .select({
-        slug: schema.courses.slug,
-        nameEn: schema.courses.nameEn,
-        nameGu: schema.courses.nameGu,
-        durationMonths: schema.courses.durationMonths,
-        software: schema.courses.software,
-        feeTotal: schema.courses.feeTotal,
-        feeAdmission: schema.courses.feeAdmission,
-        feeBalanceDueDays: schema.courses.feeBalanceDueDays,
-        termsVersion: schema.courses.termsVersion,
-        operations: schema.courses.operations,
-        sortOrder: schema.courses.sortOrder
-      })
+      .select(configSelection)
       .from(schema.courses)
       .where(
         and(
@@ -131,27 +133,14 @@ export async function getCourseConfig(slug: string): Promise<CourseConfig | null
   }
 }
 
-/** Configuration for every course the public admission form may offer. */
+/** Configuration for every active, public Console course the admission form may offer. */
 export async function getPublicCourseConfigs(): Promise<CourseConfig[]> {
   const db = getDb();
-  const catalogue = new Set(catalogueSlugs());
   if (!db) return coursesByFamily.map((course) => fromSource(course.slug)).filter(nonNull);
 
   try {
     const rows = await db
-      .select({
-        slug: schema.courses.slug,
-        nameEn: schema.courses.nameEn,
-        nameGu: schema.courses.nameGu,
-        durationMonths: schema.courses.durationMonths,
-        software: schema.courses.software,
-        feeTotal: schema.courses.feeTotal,
-        feeAdmission: schema.courses.feeAdmission,
-        feeBalanceDueDays: schema.courses.feeBalanceDueDays,
-        termsVersion: schema.courses.termsVersion,
-        operations: schema.courses.operations,
-        sortOrder: schema.courses.sortOrder
-      })
+      .select(configSelection)
       .from(schema.courses)
       .where(
         and(
@@ -162,7 +151,7 @@ export async function getPublicCourseConfigs(): Promise<CourseConfig[]> {
       )
       .orderBy(asc(schema.courses.sortOrder), asc(schema.courses.nameEn));
 
-    return rows.filter((row) => catalogue.has(row.slug)).map(fromDatabase);
+    return rows.map(fromDatabase);
   } catch (error) {
     console.error("[courses] catalogue config lookup failed; using source fallback", error);
     return coursesByFamily.map((course) => fromSource(course.slug)).filter(nonNull);
@@ -171,10 +160,6 @@ export async function getPublicCourseConfigs(): Promise<CourseConfig[]> {
 
 function nonNull<T>(value: T | null): value is T {
   return value != null;
-}
-
-function catalogueSlugs(): string[] {
-  return coursesByFamily.map((course) => course.slug);
 }
 
 /* ------------------------- validating a submission ------------------------ */
