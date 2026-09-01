@@ -1,32 +1,21 @@
-import type { Metadata } from "next";
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import NotFound from "../not-found";
+import { notFound } from "next/navigation";
 
 /**
- * Middleware supplies the real HTTP 404 status for unknown locale-prefixed
- * paths. Rendering the branded boundary directly here lets this matched route
- * also own correct noindex metadata and a 404 browser-tab title, instead of
- * calling notFound() and inheriting the home page title.
+ * Catch-all: unknown localized paths render the branded 404 below.
+ *
+ * THE RESPONSE STATUS DOES NOT COME FROM HERE. `notFound()` inside a route
+ * that matched renders the not-found boundary but leaves the status at 200 —
+ * a soft 404 confirmed on the deployed Worker, not only locally. The status is
+ * set in `src/middleware.ts`, which rewrites an unknown localized path to
+ * ITSELF with `status: 404`; `src/i18n/public-paths.ts` explains why the route
+ * list lives there and why deleting this file is not the fix.
+ *
+ * KNOWN AND LEFT ALONE: the tab title on a 404 is the home page's, because a
+ * not-found boundary cannot export metadata and Next discards the metadata of
+ * the page that called `notFound()`. Exporting `generateMetadata` here was
+ * tried and has no effect. The page is `noindex`, so this shows in a browser
+ * tab and a history entry and nowhere else.
  */
-export async function generateMetadata({
-  params
-}: {
-  params: Promise<{ locale: string; rest: string[] }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "notFound" });
-  return {
-    title: `${t("title")} | Karma Design Studio`,
-    robots: { index: false, follow: false }
-  };
-}
-
-export default async function CatchAllPage({
-  params
-}: {
-  params: Promise<{ locale: string; rest: string[] }>;
-}) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-  return <NotFound />;
+export default function CatchAllPage() {
+  notFound();
 }

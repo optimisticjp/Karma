@@ -9,16 +9,13 @@ import { NeedlePoint, ThreadLine } from "@/components/kds/marks";
 import { StitchSwatch } from "@/components/kds/StitchSwatch";
 import { CtaBand } from "@/components/kds/CtaBand";
 import { machineNotes, noteBySlug } from "@/content/notes";
+import { courseBySlug } from "@/content/courses";
 import { routing } from "@/i18n/routing";
 import { site } from "@/lib/site";
-import { getPublicCourseBySlug } from "@/lib/course/public";
 import { breadcrumbSchema, noteSchema } from "@/lib/schema";
 import { pageMeta } from "@/lib/seo";
 import { pick, pickList } from "@/lib/i18n/localized";
 import { asLocale } from "@/i18n/routing";
-
-/** Related-course visibility is Console-backed. */
-export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return routing.locales.flatMap((locale) =>
@@ -43,6 +40,19 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * One machine note.
+ *
+ * The order is the order a person needs it: the question, then the answer in
+ * two sentences, then why it happens, then what to check. Someone standing at
+ * a machine with a bad sample gets their answer in the first screen; someone
+ * deciding whether to learn this properly reads on and finds the course.
+ *
+ * Emitted as `TechArticle` rather than `BlogPosting` — these are reference
+ * notes, not posts, and there is no publication date to claim. No author
+ * `Person` is emitted, because no trainer has been confirmed and a fabricated
+ * byline is exactly the kind of thing structured data must never carry.
+ */
 export default async function NotePage({
   params
 }: {
@@ -53,15 +63,17 @@ export default async function NotePage({
   const note = noteBySlug(slug);
   if (!note) notFound();
 
-  const [t, tc, tcr, rawLocale, course] = await Promise.all([
+  const [t, tc, tcr, rawLocale] = await Promise.all([
     getTranslations("notesPage"),
     getTranslations("common"),
     getTranslations("crumbs"),
-    getLocale(),
-    getPublicCourseBySlug(note.courseSlug)
+    getLocale()
   ]);
   const l = asLocale(rawLocale);
+  const course = courseBySlug(note.courseSlug);
   const others = machineNotes.filter((n) => n.slug !== note.slug).slice(0, 3);
+  /* The note's own number in the archive. Stable because the array is
+     append-only, and it is what the index shows on the same note. */
   const noteIndex = machineNotes.findIndex((n) => n.slug === note.slug) + 1;
   const question = pick(note, "question", l);
   const answer = pick(note, "answer", l);
@@ -74,6 +86,9 @@ export default async function NotePage({
     courseName: course?.nameEn
   });
 
+  /* Both crumbs in the page's own language. They used to be the English
+     section name and the English question on the Gujarati page — a structured
+     description of a page in a language the page is not written in. */
   const crumbs = breadcrumbSchema(
     l,
     [
@@ -88,6 +103,9 @@ export default async function NotePage({
       <JsonLd data={articleLd} />
       <JsonLd data={crumbs} />
 
+      {/* The question, then the answer in two sentences. Somebody standing at
+          a machine with a bad sample gets what they came for in the first
+          screen; somebody deciding whether to learn this properly reads on. */}
       <section className="band-hero on-paper" aria-labelledby="note-heading">
         <div className="wrap">
           <div className="split">
@@ -125,6 +143,8 @@ export default async function NotePage({
                 <p className="t-meta mt-2">
                   {pick(course.production, "produces", l)}
                 </p>
+                {/* The note-to-course hop is the conversion this whole content
+                    system exists to produce, so it is the one that is counted. */}
                 <p className="mt-4">
                   <TrackedLink
                     href={`/${l}/courses/${course.slug}`}
@@ -163,6 +183,9 @@ export default async function NotePage({
               <p className="t-meta mt-3">{t("exampleNote")}</p>
             </div>
 
+            {/* What to check, in the order somebody on the floor would check
+                it. A seam rather than a list, because the order is the
+                method. */}
             <div className="fee-sheet">
               <p className="t-micro">{t("checksTitle")}</p>
               <ol className="pathway mt-4" role="list">
@@ -182,6 +205,8 @@ export default async function NotePage({
                 ))}
               </ol>
 
+              {/* Renders only when the owner has supplied a verified link.
+                  Outbound, never an embedded player. */}
               {note.reelUrl || note.youtubeUrl ? (
                 <p className="mt-5">
                   <a

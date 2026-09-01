@@ -118,18 +118,13 @@ describe("the admissions decision page", () => {
     expect(new Set(grounds.map((g) => g.g)).size).toBe(4);
   });
 
-  it("states the demo from the Console-resolved record and offers nothing bookable", () => {
+  it("states the demo from the verified record and offers nothing bookable", () => {
     const demo = read("src/components/kds/admissions/DemoBlock.tsx");
-    expect(admissionsPage).toContain("getCourseConfig(EMCAD_DAHAO_SLUG)");
-    expect(admissionsPage).toContain("<DemoBlock demo={demo} />");
-    expect(demo).toContain('demo: CourseConfig["operations"]["demo"]');
-    expect(demo).toContain("demo.days");
-    expect(demo).toContain("demo.hours");
-    expect(demo).toContain("demo.slots.map");
+    expect(demo).toContain("EMCAD_DAHAO.operations.demo");
     expect(demo).not.toContain("<input");
     expect(EMCAD_DAHAO.operations.demo?.slots).toHaveLength(4);
     for (const cat of [en, gu]) {
-      /* The figures are rendered from runtime data, so the catalogue holds none of them. */
+      /* The figures are rendered, so the catalogue holds none of them. */
       expect(JSON.stringify(cat.admissionsPage.demo)).not.toMatch(/\b2 days\b/);
     }
   });

@@ -3,11 +3,10 @@ import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { BriefForm } from "@/components/forms/BriefForm";
 import { Icon } from "@/components/ui/Icon";
 import { studioProblems, studioProjects } from "@/content/collections";
-import { families } from "@/content/courses";
+import { coursesByFamily, families } from "@/content/courses";
 import { pick } from "@/lib/i18n/localized";
 import { asLocale, routing } from "@/i18n/routing";
 import { site, waLink } from "@/lib/site";
-import { getPublicCourses } from "@/lib/course/public";
 import { pageMeta } from "@/lib/seo";
 import { TrackedLink } from "@/components/site/TrackedLink";
 import { PageHead } from "@/components/kds/PageHead";
@@ -16,9 +15,6 @@ import { StitchSwatch } from "@/components/kds/StitchSwatch";
 import { SampleMark } from "@/components/kds/proof";
 import { NeedlePoint, ThreadLine } from "@/components/kds/marks";
 import { PageCrumbs } from "@/components/kds/PageCrumbs";
-
-/** The capability list follows the current Console-visible course catalogue. */
-export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -37,19 +33,34 @@ export async function generateMetadata({
 /**
  * KARMA STUDIO — the business side.
  *
- * A boutique or production unit arrives with a problem rather than a browsing
- * intent, so the page leads with the exchange, then the chain and the problems.
- * It does not invent a turnaround time, file format or price. File upload also
- * remains deferred until private R2 storage is active.
+ * The student site and this page are aimed at different people, and the
+ * mistake would be to blur them. A student is buying a skill; a boutique or a
+ * production unit is buying a RESULT and arrives with a problem rather than a
+ * browsing intent. So the page leads with the exchange — what you can bring,
+ * what comes back — then the chain, then the problems, and names the service
+ * after all three.
+ *
+ * THREE THINGS THIS PAGE STILL WILL NOT SAY
+ * -----------------------------------------
+ * A turnaround time, a file format, or a price. The studio has confirmed none
+ * of them (`docs/content-checklist.md`), and a B2B page that invents a
+ * delivery window writes a cheque the floor has to cash. The copy asks for the
+ * buyer's deadline and their machine's format instead of announcing ours.
+ *
+ * **There is no file upload**, and the brief form says so plainly rather than
+ * showing a dead control. Private file delivery waits on R2, which is
+ * deliberately not activated.
+ *
+ * The sample projects are generic WORK TYPES, not named clients, and each
+ * carries its own preview marker.
  */
 export default async function ServicesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, tc, rawLocale, publicCourses] = await Promise.all([
+  const [t, tc, rawLocale] = await Promise.all([
     getTranslations("servicesPage"),
     getTranslations("common"),
-    getLocale(),
-    getPublicCourses()
+    getLocale()
   ]);
   const l = asLocale(rawLocale);
   const howSteps = t.raw("howSteps") as Array<{ t: string; d: string }>;
@@ -85,6 +96,8 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
         }
       />
 
+      {/* The exchange, stated plainly: a buyer's first question is whether
+          their particular mess is something this studio takes. */}
       <section className="band on-canvas" aria-labelledby="exchange-heading">
         <div className="wrap">
           <h2 id="exchange-heading" className="sr-only">
@@ -121,6 +134,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
 
       <StudioChain />
 
+      {/* Problem-led: a business arrives with a situation, not a noun. */}
       <section className="band on-cloth" aria-labelledby="problems-heading">
         <div className="wrap">
           <header className="max-w-prose">
@@ -154,6 +168,8 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
         </div>
       </section>
 
+      {/* What the studio can actually make, drawn from the same eleven
+          techniques the school teaches — because they are the same floor. */}
       <section className="band on-canvas" aria-labelledby="capability-heading">
         <div className="wrap">
           <header className="max-w-prose">
@@ -164,7 +180,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
           </header>
 
           <ul className="capability-grid" role="list">
-            {publicCourses.map((c) => (
+            {coursesByFamily.map((c) => (
               <li key={c.slug}>
                 <StitchSwatch slug={c.slug} />
                 <p className="t-h4 mt-2">{pick(c, "name", l)}</p>
@@ -192,6 +208,8 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
         </div>
       </section>
 
+      {/* Sample projects: generic work types, never a named client, each
+          carrying its own preview marker. */}
       <section className="band on-paper" aria-labelledby="projects-heading">
         <div className="wrap">
           <header className="max-w-prose">
@@ -233,6 +251,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
         </div>
       </section>
 
+      {/* How a job runs, and what to send. */}
       <section className="band on-mist" aria-labelledby="how-heading">
         <div className="wrap">
           <div className="split">
@@ -276,12 +295,16 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
         </div>
       </section>
 
+      {/* The brief. No uploader — files go over WhatsApp until private
+          storage is activated, and the form says so in its own words. */}
       <section className="band on-cloth" id="brief" aria-labelledby="brief-heading">
         <div className="wrap">
           <h2 id="brief-heading" className="sr-only">
             {t("formTitle")}
           </h2>
           <div className="split">
+            {/* `<BriefForm>` carries its own `.form-shell`. Wrapping it in a
+                second one drew a box inside a box. */}
             <div className="min-w-0">
               <BriefForm />
             </div>
@@ -315,6 +338,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
         </div>
       </section>
 
+      {/* The three ways a business actually gets in touch. */}
       <section className="band-tight on-canvas" aria-labelledby="talk-heading">
         <div className="wrap">
           <div className="split">

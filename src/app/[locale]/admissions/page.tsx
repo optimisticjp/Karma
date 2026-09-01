@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getPublicFaqs } from "@/lib/content/public";
-import { getCourseConfig } from "@/lib/course/config";
-import { EMCAD_DAHAO_SLUG } from "@/content/course-operations";
 import { FaqList } from "@/components/site/FaqList";
 import { faqSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/site/JsonLd";
@@ -19,7 +17,7 @@ import { ActionDock } from "@/components/kds/shell/ActionDock";
 import { Icon } from "@/components/ui/Icon";
 import { PageCrumbs } from "@/components/kds/PageCrumbs";
 
-/* Published FAQs and the EMCAD demo policy are database-backed. */
+/* Published FAQs are database-backed with a source fallback. */
 export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
@@ -41,6 +39,26 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * ADMISSIONS — the decision page.
+ *
+ * Six blocks, in the order somebody decides:
+ *
+ *  1  Intro       what this is, and the three things to confirm before asking
+ *  2  Steps       how joining goes — five, none of which cost anything
+ *  3  Demo        the free demo, stated exactly as the studio runs it
+ *  4  Before      fees, eligibility, language, what to bring, the handbook
+ *  5  FAQ         the questions people actually ask
+ *  6  Close       the form
+ *
+ * **The batch list is not on this page.** It used to be, twelve rows deep, two
+ * thirds of the way down — a second copy of a page that now exists, cannot be
+ * linked to from here, and went stale in a different way. `/batches` owns it;
+ * this page links to it.
+ *
+ * Nothing on this route takes money. There is no gateway in this repository to
+ * enable, which is why the copy can state it as a fact rather than a promise.
+ */
 export default async function AdmissionsPage({
   params
 }: {
@@ -49,27 +67,27 @@ export default async function AdmissionsPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [t, tc, faqs, emcad] = await Promise.all([
+  const [t, tc, faqs] = await Promise.all([
     getTranslations("admissionsPage"),
     getTranslations("common"),
-    getPublicFaqs(),
-    getCourseConfig(EMCAD_DAHAO_SLUG)
+    getPublicFaqs()
   ]);
   const l = asLocale(locale);
-  const demo = emcad?.operations.demo ?? null;
 
   return (
     <>
       <PageCrumbs page="admissions" path="/admissions" />
+      {/* Only the questions actually published get structured data, and the
+          builder emits no rating, price or offer — see `src/lib/schema.ts`. */}
       <JsonLd
         data={faqSchema(
           faqs.map((f) => ({ q: pick(f, "q", l), a: pick(f, "a", l) }))
         )}
       />
 
-      <AdmissionsIntro demo={demo} />
+      <AdmissionsIntro />
       <AdmissionSteps />
-      <DemoBlock demo={demo} />
+      <DemoBlock />
       <BeforeYouCome />
 
       <section className="band on-paper" id="faq" aria-labelledby="faq-heading">

@@ -105,9 +105,8 @@ describe("nothing unconfirmed is promised", () => {
  * ------------------------------------------------------------------ */
 
 describe("what the studio says it can do", () => {
-  it("draws the capability list from the Console-visible catalogue, so it cannot overclaim", () => {
-    expect(page).toContain("getPublicCourses()");
-    expect(page).toContain("publicCourses.map");
+  it("draws the capability list from the catalogue, so it cannot overclaim", () => {
+    expect(page).toContain("coursesByFamily.map");
     expect(courses).toHaveLength(11);
   });
 

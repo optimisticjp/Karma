@@ -1,23 +1,27 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import type { CourseConfig } from "@/lib/course/config";
+import { EMCAD_DAHAO } from "@/content/course-operations";
 import { pick } from "@/lib/i18n/localized";
 import type { Locale } from "@/i18n/routing";
 import { site, waLink } from "@/lib/site";
 import { NeedlePoint, ThreadLine } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
 
-/** The admissions opening receives the same Console-resolved demo policy as
- * the form. A hidden course or removed demo policy cannot leave a stale two-day
- * claim behind on this page. */
-export function AdmissionsIntro({
-  demo
-}: {
-  demo: CourseConfig["operations"]["demo"];
-}) {
+/**
+ * How admission works, from the top.
+ *
+ * The aside states the three things somebody about to fill in a form wants
+ * confirmed before they start: **nothing is paid on this website**, the demo
+ * is free and its length is a verified figure, and a person replies. Every one
+ * of them is true and checkable — the demo length renders from
+ * `course-operations.ts`, and the no-payment rule is architectural rather than
+ * a promise (there is no gateway in this repository to enable).
+ */
+export function AdmissionsIntro() {
   const t = useTranslations("admissionsPage");
   const tc = useTranslations("common");
   const locale = useLocale() as Locale;
+  const demo = EMCAD_DAHAO.operations.demo;
 
   return (
     <section className="band-hero on-paper" aria-labelledby="admissions-heading">
@@ -53,14 +57,12 @@ export function AdmissionsIntro({
           <aside className="courses-aside">
             <p className="t-micro">{t("asideTitle")}</p>
             <ul className="courses-facts" role="list">
-              {demo ? (
-                <li>
-                  <NeedlePoint state="done" />
-                  <span className="t-body">
-                    {t("asideDemo", { days: demo.days, hours: demo.hours })}
-                  </span>
-                </li>
-              ) : null}
+              <li>
+                <NeedlePoint state="done" />
+                <span className="t-body">
+                  {t("asideDemo", { days: demo?.days ?? 2, hours: demo?.hours ?? 2 })}
+                </span>
+              </li>
               <li>
                 <NeedlePoint state="done" />
                 <span className="t-body">{t("asideNoPayment")}</span>

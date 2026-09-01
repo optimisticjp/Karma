@@ -10,9 +10,14 @@ import { cn } from "@/lib/utils";
 import { NeedlePoint } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
 
-/** Every visible field comes from the batch/course records maintained in
- * Karma Console. The CTA carries the course and timing preference that the
- * admission form actually stores; it does not pretend to reserve a batch. */
+/**
+ * THE BOARD — every open batch, as a production board.
+ *
+ * Every visible field comes from the batch/course records maintained in Karma
+ * Console. The batch label is deliberately shown: it is the operator's name
+ * for the intake and gives the owner an obvious way to confirm that a Console
+ * edit reached the public site.
+ */
 export type BatchRow = {
   id: number;
   label: string;
@@ -147,6 +152,7 @@ export function BatchBoard({ rows, sample }: { rows: BatchRow[]; sample?: boolea
                     query: {
                       course: row.courseSlug,
                       timing: isEvening(row.startTime) ? "evening" : "morning",
+                      batch: String(row.id),
                       src: "batches"
                     }
                   }}

@@ -1,19 +1,36 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import type { CourseConfig } from "@/lib/course/config";
+import { EMCAD_DAHAO } from "@/content/course-operations";
 import { ThreadLine } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
 
-/** The demo block renders only the current Console-resolved demo policy. */
-export function DemoBlock({
-  demo
-}: {
-  demo: CourseConfig["operations"]["demo"];
-}) {
+/**
+ * The free demo, exactly as the studio runs it.
+ *
+ * The demo IS the conversion: nobody in this trade commits three months and a
+ * fee to a place they have not stood in. So the page states what it actually
+ * is — two days, two hours a session, free, bring nothing — instead of the
+ * vague "book a free demo class" a visitor has read on ten other institute
+ * sites.
+ *
+ * **The figures render from the verified record.** Days, hours and the four
+ * askable times all come from `src/content/course-operations.ts`; the message
+ * catalogue holds labels and sentences and no numbers, so the demo cannot be
+ * described one way here and another way on a course page.
+ *
+ * **The times are preferences, not inventory.** Karma keeps no per-date demo
+ * capacity, so rendering these as bookable slots would have the site promise a
+ * seat nobody reserved. The copy says so, and there is no date picker.
+ */
+export function DemoBlock() {
   const t = useTranslations("admissionsPage.demo");
+  const demo = EMCAD_DAHAO.operations.demo;
   if (!demo) return null;
 
   const facts: Array<[string, string]> = [
+    /* The sentence is a catalogue string and the FIGURES are the verified
+       record's — so neither language can drift from the other, and neither
+       can drift from `course-operations.ts`. */
     [t("daysLabel"), t("daysValue", { days: demo.days, hours: demo.hours })],
     [t("costLabel"), t("costValue")],
     [t("bringLabel"), t("bringValue")]

@@ -15,7 +15,6 @@ const form = read("src/components/forms/AdmissionForm.tsx");
 const progress = read("src/components/kds/marks.tsx");
 /* The demo block was rebuilt into the new system; the rules follow it. */
 const demoFacts = read("src/components/kds/admissions/DemoBlock.tsx");
-const admissionsPage = read("src/app/[locale]/admissions/page.tsx");
 const contact = read("src/app/[locale]/contact/page.tsx");
 
 const stripComments = (source: string) =>
@@ -71,7 +70,7 @@ describe("the admission form keeps every defence it had", () => {
     for (const [name, source] of [
       ["form", form],
       ["admission page", read("src/app/[locale]/admission/page.tsx")],
-      ["admissions page", admissionsPage],
+      ["admissions page", read("src/app/[locale]/admissions/page.tsx")],
       ["demo facts", demoFacts]
     ] as const) {
       const code = stripComments(source).toLowerCase();
@@ -143,13 +142,8 @@ describe("motion level 0 where it matters", () => {
  * ------------------------------------------------------------------ */
 
 describe("the demo decision surface", () => {
-  it("renders its figures from the Console-resolved record, never from a message", () => {
-    expect(admissionsPage).toContain("getCourseConfig(EMCAD_DAHAO_SLUG)");
-    expect(admissionsPage).toContain("<DemoBlock demo={demo} />");
-    expect(demoFacts).toContain('demo: CourseConfig["operations"]["demo"]');
-    expect(demoFacts).toContain("demo.days");
-    expect(demoFacts).toContain("demo.hours");
-    expect(demoFacts).toContain("demo.slots.map");
+  it("renders its figures from the verified record, never from a message", () => {
+    expect(demoFacts).toContain("EMCAD_DAHAO.operations.demo");
     for (const cat of [en, gu]) {
       const block = JSON.stringify(cat.admissionsPage.demo);
       expect(block).not.toMatch(/\b2 days\b/);

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { pick } from "@/lib/i18n/localized";
 import { asLocale } from "@/i18n/routing";
@@ -32,7 +32,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   const course = await getPublicCourseBySlug(slug);
-  if (!course) return { robots: { index: false, follow: false } };
+  if (!course) return {};
   const l = asLocale(locale);
   return pageMeta({
     locale,
@@ -55,7 +55,7 @@ export default async function CourseDetailPage({
   setRequestLocale(locale);
 
   const course = await getPublicCourseBySlug(slug);
-  if (!course) redirect(`/${locale}/courses`);
+  if (!course) notFound();
 
   const [config, publicCourses, t, tcr, rawLocale] = await Promise.all([
     getCourseConfig(slug),
@@ -64,7 +64,7 @@ export default async function CourseDetailPage({
     getTranslations("crumbs"),
     getLocale()
   ]);
-  if (!config) redirect(`/${locale}/courses`);
+  if (!config) notFound();
 
   const l = asLocale(rawLocale);
   const name = pick(course, "name", l);
