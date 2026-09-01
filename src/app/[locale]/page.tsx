@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { HomeHero } from "@/components/kds/home/HomeHero";
+import { HeroSocialProof } from "@/components/kds/home/HeroSocialProof";
 import { EntryPaths } from "@/components/kds/home/EntryPaths";
 import { SampleBook } from "@/components/kds/home/SampleBook";
 import { ScreenMachineProof } from "@/components/kds/home/ScreenMachineProof";
@@ -39,13 +40,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <>
       <HomeHero courseCount={courses.length} />
-      <TrustSignals />
+      <HeroSocialProof />
       <EntryPaths />
       <SampleBook courses={courses} />
       <ScreenMachineProof />
       <EmcadPanel />
       <ProofWall />
       <HomeVoices />
+      <TrustSignals />
       <BatchesVisit />
       <HomeClose />
     </>
