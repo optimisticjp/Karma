@@ -46,7 +46,7 @@ describe("permanent deletion", () => {
     expect(deletableEntities().length).toBeGreaterThan(0);
   });
 
-  it("keeps security and evidence records non-deletable", () => {
+  it("keeps security and evidence records out of permanent record deletion", () => {
     for (const entity of [
       "audit_log",
       "attendance_correction",
@@ -57,8 +57,15 @@ describe("permanent deletion", () => {
       expect(RECORD_POLICY[entity].deletableBy, entity).toBe("never");
       expect(canPerform(owner, entity, "delete"), entity).toBe(false);
       expect(canPerform(adminWithEverything, entity, "delete"), entity).toBe(false);
+    }
+    for (const entity of ["audit_log", "attendance_correction", "attendance_record", "staff"] as const) {
       expect(supportsAction(entity, "delete"), entity).toBe(false);
     }
+    // Permission grants are removed by the Owner-only team editor. The policy
+    // uses the verb "delete" for that narrow grant operation, but the generic
+    // permanent-record deletion route can never act on staff_permission rows.
+    expect(supportsAction("staff_permission", "delete")).toBe(true);
+    expect(RECORD_POLICY.staff_permission.managePermission).toBeNull();
   });
 
   it("keeps team administration ungrantable", () => {
