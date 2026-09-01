@@ -1,0 +1,39 @@
+/* Owner-requested interaction clarity: selected booking choices use the same
+   vermilion as primary actions, with a visible check independent of colour. */
+.choice-chip:has(input:checked) {
+  border-color: var(--color-vermilion-deep) !important;
+  background: rgb(197 72 50 / 0.12) !important;
+  color: var(--color-vermilion-deep);
+  box-shadow: inset 0 0 0 1px var(--color-vermilion-deep);
+  font-weight: 800;
+}
+
+.choice-chip:has(input:checked)::after {
+  content: "✓";
+  margin-left: auto;
+  color: var(--color-vermilion-deep);
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.choice-chip:hover {
+  border-color: var(--color-vermilion);
+}
+
+/* The language control must read as one compact text mark everywhere: EN।ગુજ. */
+.locale-switch {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.locale-separator {
+  color: var(--color-stone);
+  line-height: 1;
+  user-select: none;
+}
+
+.locale-option[aria-current="true"] {
+  color: var(--color-vermilion-deep);
+  font-weight: 800;
+}
