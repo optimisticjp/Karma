@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { courses, coursesByFamily, families } from "@/content/courses";
 import { photosInGroup } from "@/content/photo-manifest";
 import { trainers as proofTrainers } from "@/content/proof";
 import { pick } from "@/lib/i18n/localized";
 import { asLocale, routing } from "@/i18n/routing";
 import { site, verifiedFacts } from "@/lib/site";
+import { getPublicCourses } from "@/lib/course/public";
 import { pageMeta } from "@/lib/seo";
 import { PageHead } from "@/components/kds/PageHead";
 import { PhotoFrame } from "@/components/kds/Frame";
@@ -16,6 +16,9 @@ import { CtaBand } from "@/components/kds/CtaBand";
 import { NeedlePoint, ThreadLine } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
 import { PageCrumbs } from "@/components/kds/PageCrumbs";
+
+/** Course count and machine-wall visibility are Console-backed. */
+export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -34,39 +37,28 @@ export async function generateMetadata({
 /**
  * THE STUDIO.
  *
- * The question this page really gets asked is: *is this a real floor with real
- * machines, or a computer classroom with a nice name?* So it answers with the
- * floor — the studio photographs at full width — and with facts that are
- * checkable against the catalogue and the studio's own hours.
- *
- * **The founding story and the meaning of the name are the owner's to tell**
- * and have not been collected (content checklist Q6/Q7). They are deliberately
- * absent rather than rendered as an "awaiting the owner" block on a live page.
- *
- * The trainer profiles are preview content and say so on each card. A labelled
- * placeholder that answers "what would I be told about a trainer" is more
- * useful than an empty section, and it is the shape the real profiles drop
- * straight into — with the photographs, not before.
+ * The question this page really gets asked is: is this a real floor with real
+ * machines, or a computer classroom with a nice name? It answers with the
+ * floor, checkable facts and the current public course catalogue.
  */
 export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, tc, tp, rawLocale] = await Promise.all([
+  const [t, tc, tp, rawLocale, publicCourses] = await Promise.all([
     getTranslations("aboutPage"),
     getTranslations("common"),
     getTranslations("proof.trainers"),
-    getLocale()
+    getLocale(),
+    getPublicCourses()
   ]);
   const l = asLocale(rawLocale);
+  const familyCount = new Set(publicCourses.map((course) => course.family)).size;
 
-  /* Built as a list, not as fixed cells: the row takes its count from the
-     number of VERIFIED facts, so an unverified one can never leave an empty
-     box on the page. */
   const stats = [
     ...(verifiedFacts.studentsTrained500 ? [{ label: t("n1"), value: "500+" }] : []),
-    { label: t("n2"), value: String(courses.length) },
-    { label: t("n4"), value: String(Object.keys(families).length) },
-    { label: t("n3"), value: "10:30" }
+    { label: t("n2"), value: String(publicCourses.length) },
+    { label: t("n4"), value: String(familyCount) },
+    { label: t("n3"), value: "11:00" }
   ];
 
   const studio = photosInGroup("studio");
@@ -115,9 +107,6 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         }
       />
 
-      {/* The floor, at full width. For somebody deciding whether a real place
-          exists, one wide shot of the machines does more than any adjective —
-          which is why these frames are large and not a strip of thumbnails. */}
       <section className="band on-canvas" aria-labelledby="place-heading">
         <div className="wrap">
           <header className="max-w-prose">
@@ -147,7 +136,6 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
 
-      {/* Two sides of one floor. */}
       <section className="band on-paper" aria-labelledby="two-sides-heading">
         <div className="wrap">
           <header className="max-w-prose">
@@ -180,10 +168,6 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
 
-      {/* The machines, named by the technique each one runs and by nothing
-          else. No head count, no speed, no model number — none of those has
-          been verified, and inventing one is the same lie as a stock
-          photograph. */}
       <section className="band on-cloth" aria-labelledby="machines-heading">
         <div className="wrap">
           <header className="max-w-prose">
@@ -194,7 +178,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
           </header>
 
           <ul className="capability-grid" role="list">
-            {coursesByFamily.map((c) => (
+            {publicCourses.map((c) => (
               <li key={c.slug}>
                 <StitchSwatch slug={c.slug} />
                 <p className="t-h4 mt-2">{pick(c, "name", l)}</p>
@@ -205,8 +189,6 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
 
-      {/* Who teaches. Preview content, marked as such on every card, in the
-          shape the real profiles drop into. */}
       <section className="band on-canvas" aria-labelledby="trainers-heading">
         <div className="wrap">
           <header className="max-w-prose">
