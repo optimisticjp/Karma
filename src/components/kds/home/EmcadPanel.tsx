@@ -30,6 +30,7 @@ export async function EmcadPanel() {
   const introSub = locale === "gu"
     ? "EMCAD DAHAO માટે duration, timetable, demo અને practical plan અહીં Consoleના હાલના recordમાંથી આવે છે. હાલની fee અને બદલાતા commercial terms સ્ટુડિયોમાં કન્ફર્મ થાય છે."
     : "EMCAD DAHAO duration, timetable, demo and practical details come from the current Console record. The current fee and changing commercial terms are confirmed at the studio.";
+  const courseCtaKey = "ctaCourse" as const;
 
   return (
     <section className="band on-cloth" aria-labelledby="emcad-heading">
@@ -89,7 +90,7 @@ export async function EmcadPanel() {
               <Link href={`/admission?course=${EMCAD_DAHAO_SLUG}`} className="act act-primary">
                 {tc("bookDemo")} <Icon name="arrow" size={17} className="arrow" />
               </Link>
-              <Link href={`/courses/${EMCAD_DAHAO_SLUG}`} className="act act-secondary">{t("ctaCourse")}</Link>
+              <Link href={`/courses/${EMCAD_DAHAO_SLUG}`} className="act act-secondary">{t(courseCtaKey)}</Link>
             </div>
             {proofLine ? (
               <MicroProof
