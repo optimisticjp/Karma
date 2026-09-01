@@ -1,4 +1,4 @@
-import { and, eq, isNull, or } from "drizzle-orm";
+import { and, asc, eq, isNull } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import {
   readCourseOperations,
@@ -11,20 +11,10 @@ import { courseBySlug, coursesByFamily } from "@/content/courses";
 import { CURRENT_TERMS_VERSION, isKnownTermsVersion } from "@/content/admission-terms";
 
 /**
- * ONE resolver for "how is this course configured?", used by the public
- * admission page AND by the admission API route.
- *
- * They must agree. If the page offered a demo slot the route then rejected, a
- * visitor would fill in a form and be told nothing was wrong with it; if the
- * route accepted a slot the page never offered, the institute would receive a
- * request for a time it does not run. So the option list and the validator come
- * from the same function, always.
- *
- * Precedence: the database row is the operational truth once it exists, because
- * that is what staff edit in Karma Console. The verified source profile
- * (`src/content/course-operations.ts`) is the fallback for a deploy whose
- * catalogue has not been imported yet, and for `npm run build`, which runs with
- * no database at all.
+ * One resolver for how a PUBLIC course is configured. When Postgres is
+ * reachable, Console state is authoritative: hidden, inactive, archived or
+ * missing rows are not resurrected from source control. Source fallback exists
+ * only when no database is configured (build/dev) or the query itself fails.
  */
 export type CourseConfig = {
   slug: string;
@@ -35,9 +25,14 @@ export type CourseConfig = {
   fees: { total: number; admission: number; balanceDueDays: number } | null;
   termsVersion: number;
   operations: CourseOperations;
-  /** True when this came from the database rather than the source fallback. */
+  sortOrder: number;
   fromDatabase: boolean;
 };
+
+function sourceRank(slug: string) {
+  const index = coursesByFamily.findIndex((course) => course.slug === slug);
+  return index < 0 ? Number.MAX_SAFE_INTEGER : index + 1;
+}
 
 function fromSource(slug: string): CourseConfig | null {
   const course = courseBySlug(slug);
@@ -58,15 +53,47 @@ function fromSource(slug: string): CourseConfig | null {
       : null,
     termsVersion: verified?.termsVersion ?? CURRENT_TERMS_VERSION,
     operations: verified?.operations ?? readCourseOperations(null),
+    sortOrder: sourceRank(slug),
     fromDatabase: false
   };
 }
 
-/**
- * Reads a course's configuration. Falls back to source on any database
- * problem — an unreachable database must not make the admission form claim the
- * institute runs no batches.
- */
+type DbCourseConfigRow = {
+  slug: string;
+  nameEn: string;
+  nameGu: string;
+  durationMonths: number | null;
+  software: string | null;
+  feeTotal: number | null;
+  feeAdmission: number | null;
+  feeBalanceDueDays: number | null;
+  termsVersion: number | null;
+  operations: unknown;
+  sortOrder: number;
+};
+
+function fromDatabase(row: DbCourseConfigRow): CourseConfig {
+  const hasFees = row.feeTotal != null && row.feeAdmission != null;
+  return {
+    slug: row.slug,
+    nameEn: row.nameEn,
+    nameGu: row.nameGu,
+    durationMonths: row.durationMonths,
+    software: row.software,
+    fees: hasFees
+      ? {
+          total: row.feeTotal as number,
+          admission: row.feeAdmission as number,
+          balanceDueDays: row.feeBalanceDueDays ?? 30
+        }
+      : null,
+    termsVersion: isKnownTermsVersion(row.termsVersion) ? row.termsVersion : CURRENT_TERMS_VERSION,
+    operations: readCourseOperations(row.operations),
+    sortOrder: row.sortOrder,
+    fromDatabase: true
+  };
+}
+
 export async function getCourseConfig(slug: string): Promise<CourseConfig | null> {
   const db = getDb();
   if (!db) return fromSource(slug);
@@ -83,56 +110,32 @@ export async function getCourseConfig(slug: string): Promise<CourseConfig | null
         feeAdmission: schema.courses.feeAdmission,
         feeBalanceDueDays: schema.courses.feeBalanceDueDays,
         termsVersion: schema.courses.termsVersion,
-        operations: schema.courses.operations
+        operations: schema.courses.operations,
+        sortOrder: schema.courses.sortOrder
       })
       .from(schema.courses)
       .where(
         and(
           eq(schema.courses.slug, slug),
           eq(schema.courses.active, true),
+          eq(schema.courses.publicVisible, true),
           isNull(schema.courses.archivedAt)
         )
       )
       .limit(1);
 
-    const row = rows[0];
-    if (!row) return fromSource(slug);
-
-    const operations = readCourseOperations(row.operations);
-    const hasFees = row.feeTotal != null && row.feeAdmission != null;
-    return {
-      slug: row.slug,
-      nameEn: row.nameEn,
-      nameGu: row.nameGu,
-      durationMonths: row.durationMonths,
-      software: row.software,
-      fees: hasFees
-        ? {
-            total: row.feeTotal as number,
-            admission: row.feeAdmission as number,
-            balanceDueDays: row.feeBalanceDueDays ?? 30
-          }
-        : null,
-      termsVersion: isKnownTermsVersion(row.termsVersion)
-        ? row.termsVersion
-        : CURRENT_TERMS_VERSION,
-      operations,
-      fromDatabase: true
-    };
-  } catch (e) {
-    console.error("[courses] config lookup failed; using source fallback", e);
+    return rows[0] ? fromDatabase(rows[0]) : null;
+  } catch (error) {
+    console.error("[courses] config lookup failed; using source fallback", error);
     return fromSource(slug);
   }
 }
 
-/**
- * Configuration for every course the public admission form may offer. One
- * query, not one per course — the form lists the whole catalogue.
- */
+/** Configuration for every course the public admission form may offer. */
 export async function getPublicCourseConfigs(): Promise<CourseConfig[]> {
   const db = getDb();
-  const catalogue = catalogueSlugs();
-  if (!db) return catalogue.map((slug) => fromSource(slug)).filter(nonNull);
+  const catalogue = new Set(catalogueSlugs());
+  if (!db) return coursesByFamily.map((course) => fromSource(course.slug)).filter(nonNull);
 
   try {
     const rows = await db
@@ -146,47 +149,23 @@ export async function getPublicCourseConfigs(): Promise<CourseConfig[]> {
         feeAdmission: schema.courses.feeAdmission,
         feeBalanceDueDays: schema.courses.feeBalanceDueDays,
         termsVersion: schema.courses.termsVersion,
-        operations: schema.courses.operations
+        operations: schema.courses.operations,
+        sortOrder: schema.courses.sortOrder
       })
       .from(schema.courses)
       .where(
         and(
           eq(schema.courses.active, true),
-          isNull(schema.courses.archivedAt),
-          or(eq(schema.courses.publicVisible, true), isNull(schema.courses.publicVisible))
+          eq(schema.courses.publicVisible, true),
+          isNull(schema.courses.archivedAt)
         )
-      );
+      )
+      .orderBy(asc(schema.courses.sortOrder), asc(schema.courses.nameEn));
 
-    const byslug = new Map(rows.map((r) => [r.slug, r]));
-    return catalogue
-      .map((slug) => {
-        const row = byslug.get(slug);
-        if (!row) return fromSource(slug);
-        const hasFees = row.feeTotal != null && row.feeAdmission != null;
-        return {
-          slug: row.slug,
-          nameEn: row.nameEn,
-          nameGu: row.nameGu,
-          durationMonths: row.durationMonths,
-          software: row.software,
-          fees: hasFees
-            ? {
-                total: row.feeTotal as number,
-                admission: row.feeAdmission as number,
-                balanceDueDays: row.feeBalanceDueDays ?? 30
-              }
-            : null,
-          termsVersion: isKnownTermsVersion(row.termsVersion)
-            ? row.termsVersion
-            : CURRENT_TERMS_VERSION,
-          operations: readCourseOperations(row.operations),
-          fromDatabase: true
-        } satisfies CourseConfig;
-      })
-      .filter(nonNull);
-  } catch (e) {
-    console.error("[courses] catalogue config lookup failed; using source fallback", e);
-    return catalogue.map((slug) => fromSource(slug)).filter(nonNull);
+    return rows.filter((row) => catalogue.has(row.slug)).map(fromDatabase);
+  } catch (error) {
+    console.error("[courses] catalogue config lookup failed; using source fallback", error);
+    return coursesByFamily.map((course) => fromSource(course.slug)).filter(nonNull);
   }
 }
 
@@ -194,13 +173,8 @@ function nonNull<T>(value: T | null): value is T {
   return value != null;
 }
 
-/**
- * The catalogue in DISPLAY order (`coursesByFamily`), so the admission form
- * lists courses the way the site lists them. Storage order stays untouched —
- * that is the catalogue-import contract, and a different question.
- */
 function catalogueSlugs(): string[] {
-  return coursesByFamily.map((c) => c.slug);
+  return coursesByFamily.map((course) => course.slug);
 }
 
 /* ------------------------- validating a submission ------------------------ */
@@ -221,12 +195,6 @@ export function demoSlotFor(
   return config.operations.demo?.slots.find((s) => s.key === key) ?? null;
 }
 
-/**
- * The legacy morning/evening field, derived from the precise slot rather than
- * asked twice. `preferredTiming` predates the timetable and is still read by
- * console filters and by the course-page CTAs, so it keeps working; the exact
- * slot key is stored alongside it in `preferredSchedule`.
- */
 export function timingForSchedule(slot: ScheduleOption | null): "morning" | "evening" | null {
   if (!slot) return null;
   return slot.partOfDay === "morning" || slot.partOfDay === "afternoon" ? "morning" : "evening";
