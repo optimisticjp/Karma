@@ -9,6 +9,9 @@ import { LocaleSwitch } from "./LocaleSwitch";
 import { ThreadLine } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
 
+/** Home remains an explicit menu destination while the section row stays compact. */
+const HOME_NAV = { href: "/", key: "home" } as const;
+
 /** The six section destinations. Home is rendered explicitly before this row. */
 const NAV = [
   { href: "/courses", key: "courses" },
@@ -73,9 +76,15 @@ export function SiteHeader() {
   }, [open, close]);
 
   const homeLink = (className: string) => (
-    <Link href="/" className={className} aria-current={isActive("/") ? "page" : undefined}>
-      {t("home")}
-      {className === "site-nav-link" && isActive("/") ? <ThreadLine className="site-nav-mark" /> : null}
+    <Link
+      href={HOME_NAV.href}
+      className={className}
+      aria-current={isActive(HOME_NAV.href) ? "page" : undefined}
+    >
+      {t(HOME_NAV.key)}
+      {className === "site-nav-link" && isActive(HOME_NAV.href) ? (
+        <ThreadLine className="site-nav-mark" />
+      ) : null}
     </Link>
   );
 
