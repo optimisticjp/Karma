@@ -55,7 +55,7 @@ const en = () => ({
   deleteTitle: "Delete permanently",
   deleteLede:
     "This removes the record from the database. Archiving is almost always the better answer: it takes the record out of every operational list and keeps its history. Deleting keeps nothing except the audit entry written below.",
-  ownerOnly: "Permanent deletion is available to the Owner only.",
+  ownerOnly: "Permanent deletion requires this module's manage permission or Owner access.",
   whatDepends: "What depends on this record",
   noDependencies: "Nothing else in the system points at this record.",
   blockedTitle: "This cannot be deleted yet",
@@ -105,7 +105,7 @@ const gu = (): RecordsCopy => ({
   deleteTitle: "કાયમ માટે delete કરો",
   deleteLede:
     "આનાથી record database માંથી નીકળી જશે. મોટા ભાગે Archive કરવું જ સાચો રસ્તો છે: record દરેક operational list માંથી હટી જાય છે અને એની history સચવાઈ રહે છે. Delete કર્યા પછી નીચે લખાતી audit entry સિવાય કશું બચતું નથી.",
-  ownerOnly: "કાયમી delete માત્ર Owner કરી શકે છે.",
+  ownerOnly: "કાયમી delete માટે આ module ની manage permission અથવા Owner access જોઈએ.",
   whatDepends: "આ record સાથે શું જોડાયેલું છે",
   noDependencies: "System માં બીજું કશું આ record તરફ ઇશારો કરતું નથી.",
   blockedTitle: "આ હમણાં delete થઈ શકે એમ નથી",
