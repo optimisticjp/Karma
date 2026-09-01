@@ -43,7 +43,7 @@ export default async function CoursesPage({ params }: { params: Promise<{ locale
   return (
     <>
       <PageCrumbs page="courses" path="/courses" />
-      <CoursesIntro />
+      <CoursesIntro courses={courses} />
       <CourseCatalogue courses={courses} cues={CUE} />
       <FamilyMap courses={courses} />
       <CoursePathway />
