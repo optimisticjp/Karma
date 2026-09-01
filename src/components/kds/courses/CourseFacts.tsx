@@ -19,6 +19,7 @@ export function CourseFacts({ course, config }: { course: Course; config: Course
 
   const demo = config.operations.demo ?? EMCAD_DAHAO.operations.demo;
   const schedule = config.operations.scheduleOptions;
+  const batchTitleKey = "batchTitle" as const;
 
   const demoActions = (
     <>
@@ -50,7 +51,7 @@ export function CourseFacts({ course, config }: { course: Course; config: Course
 
             {schedule.length > 0 ? (
               <div className="course-timings">
-                <p className="t-micro">{to("batchTitle")}</p>
+                <p className="t-micro">{to(batchTitleKey)}</p>
                 <ul className="emcad-timing-list" role="list">
                   {schedule.map((slot) => (
                     <li key={slot.key} className="t-body numeric">
