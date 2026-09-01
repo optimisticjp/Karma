@@ -21,7 +21,7 @@ export function AdminLanguageBar({ locale }: { locale: AdminLocale }) {
           value="en"
           aria-pressed={locale === "en"}
           className={`min-h-9 rounded-md px-3 text-sm font-extrabold transition ${
-            locale === "en" ? "bg-[var(--color-vermilion)] text-white" : "text-[var(--color-ink)] hover:bg-[var(--brand-accent-soft)]"
+            locale === "en" ? "bg-[var(--color-vermilion)] text-white" : "text-[var(--color-carbon)] hover:bg-[var(--brand-accent-soft)]"
           }`}
         >
           EN
@@ -34,7 +34,7 @@ export function AdminLanguageBar({ locale }: { locale: AdminLocale }) {
           aria-pressed={locale === "gu"}
           lang="gu"
           className={`min-h-9 rounded-md px-3 text-sm font-extrabold transition ${
-            locale === "gu" ? "bg-[var(--color-vermilion)] text-white" : "text-[var(--color-ink)] hover:bg-[var(--brand-accent-soft)]"
+            locale === "gu" ? "bg-[var(--color-vermilion)] text-white" : "text-[var(--color-carbon)] hover:bg-[var(--brand-accent-soft)]"
           }`}
         >
           ગુજ
