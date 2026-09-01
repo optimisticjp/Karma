@@ -2,12 +2,10 @@
  * Cloudflare Turnstile server-side verification.
  *
  * Production validates more than the `success` bit: the token must be for the
- * expected form action and for one of this deployment's own hostnames. Tokens
- * are single-use and expire after five minutes, so every submission is checked
- * with Siteverify before any application/brief data is processed.
+ * expected public-form action and for one of this deployment's own hostnames.
+ * Tokens are single-use and expire after five minutes, so every submission is
+ * checked with Siteverify before any application/brief data is processed.
  */
-export type TurnstileAction = "admission" | "brief";
-
 type SiteverifyResult = {
   success?: boolean;
   hostname?: string;
@@ -31,11 +29,7 @@ function expectedHostnames() {
   }
 }
 
-export async function verifyTurnstile(
-  token: string | undefined,
-  ip: string | null | undefined,
-  expectedAction: TurnstileAction
-) {
+export async function verifyTurnstile(token: string | undefined, ip?: string | null) {
   const secret = process.env.TURNSTILE_SECRET_KEY;
   if (!secret) {
     console.warn("[turnstile] TURNSTILE_SECRET_KEY not set; skipping verification (dev only)");
@@ -67,7 +61,7 @@ export async function verifyTurnstile(
     const data = (await res.json()) as SiteverifyResult;
     const hostname = data.hostname?.toLowerCase();
     const hostnameOk = hostnames.size === 0 || (!!hostname && hostnames.has(hostname));
-    const actionOk = data.action === expectedAction;
+    const actionOk = data.action === "public_form";
 
     if (!data.success || !hostnameOk || !actionOk) {
       console.warn("[turnstile] token rejected", {
