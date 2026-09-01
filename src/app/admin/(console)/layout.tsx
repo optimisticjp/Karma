@@ -1,3 +1,4 @@
+import { AdminLanguageBar } from "@/components/admin/AdminLanguageBar";
 import { ConsoleShell, type NavSection, type NavTab } from "@/components/admin/ConsoleShell";
 import { SignOutLink } from "@/components/admin/SignOutLink";
 import { getAdminT } from "@/lib/admin/i18n";
@@ -34,36 +35,6 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
     canPerform(recordSubject, entity, "delete")
   );
 
-  /*
-   * THE BOTTOM NAVIGATION
-   *
-   * The plan's recommended IA is Today / Admissions / Students / Batches /
-   * More, and the audit's evidence supports it: Admissions owns two of the
-   * four Today queues and the only due-today count; Students is granted by
-   * four of the five permission templates, is the record-of-record, carries
-   * both walk-in intake paths and three of the nine A4 sheets; batches.view is
-   * granted by four templates and a batch is already an addressable record
-   * that Today deep-links.
-   *
-   * But a fixed list of four is wrong for the operators the audit actually
-   * found. A fees-only admin's Today screen is empty, and an attendance-only
-   * admin's one daily module appears as a button 1,100px below the fold. So
-   * the bar is a PRIORITY-ORDERED CANDIDATE LIST filtered by what the caller
-   * can reach, and it takes the first four that survive. A full-permission
-   * admin gets exactly the plan's four; a fees-only admin gets Today and Fees;
-   * an attendance-only admin gets Today and Attendance. Nobody gets a tab they
-   * cannot open, because a dead tab in a bar of five is a fifth of the
-   * product's navigation.
-   *
-   * Team and Record cleanup are deliberately absent from the bottom bar. They
-   * are administrative destinations used occasionally, while the bar is for
-   * standing-at-the-counter daily work. They remain reachable from More/the
-   * desktop rail when the caller has the authority to use them.
-   *
-   * This list is derived from the SAME booleans the rail uses, computed above
-   * with no extra queries. The bar is a UX affordance: every one of these
-   * routes re-checks its own permission server-side.
-   */
   const tabCandidates: Array<{ tab: NavTab; allowed: boolean }> = [
     { tab: { href: "/admin", label: t("nav.today"), icon: "home" }, allowed: true },
     { tab: { href: "/admin/admissions", label: t("nav.admissions"), icon: "tray" }, allowed: canUseAdmissions },
@@ -125,7 +96,10 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
       moreNavLabel={t("nav.moreNav")}
       signOut={<SignOutLink label={t("nav.signOut")} />}
     >
-      <div lang={session.staff.adminLocale}>{children}</div>
+      <div lang={session.staff.adminLocale}>
+        <AdminLanguageBar locale={session.staff.adminLocale} />
+        {children}
+      </div>
     </ConsoleShell>
   );
 }
