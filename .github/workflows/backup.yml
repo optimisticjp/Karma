@@ -17,8 +17,20 @@ jobs:
       - run: npx tsx scripts/backup.ts
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Encrypt backup before it becomes an artifact
+        env:
+          BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+        run: |
+          test -n "$BACKUP_ENCRYPTION_PASSPHRASE" || { echo "BACKUP_ENCRYPTION_PASSPHRASE is missing" >&2; exit 1; }
+          tar -czf db-backup.tar.gz backups/
+          printf '%s' "$BACKUP_ENCRYPTION_PASSPHRASE" | \
+            gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
+              --symmetric --cipher-algo AES256 \
+              --output db-backup.tar.gz.gpg db-backup.tar.gz
+          rm -rf backups db-backup.tar.gz
       - uses: actions/upload-artifact@v4
         with:
           name: db-backup-${{ github.run_id }}
-          path: backups/
+          path: db-backup.tar.gz.gpg
           retention-days: 90
+          if-no-files-found: error
