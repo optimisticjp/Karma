@@ -1,12 +1,12 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import { partners, socialChannels, stats as sourceStats } from "@/content/proof";
+import { partners, stats as sourceStats } from "@/content/proof";
 import { getHomepageStats } from "@/lib/content/public";
 import { asLocale } from "@/i18n/routing";
-import { SocialProof, TrustedByRail } from "@/components/kds/proof";
+import { TrustedByRail } from "@/components/kds/proof";
 import { ThreadLine } from "@/components/kds/marks";
 
-/** Owner-verified Content Desk stats replace the source fallback as soon as at
- * least one is published. Social and partner proof remain in the proof registry. */
+/** The social follower proof moved directly below the hero. This later trust
+ * rail keeps the broader owner-managed stats and partner placeholders. */
 export async function TrustSignals() {
   const [t, rawLocale, managedStats] = await Promise.all([
     getTranslations("home.trust"),
@@ -41,9 +41,7 @@ export async function TrustSignals() {
         </dl>
 
         <ThreadLine tone="ink" className="my-8" />
-
-        <SocialProof items={socialChannels} label={t("socialLabel")} followCta={t("follow")} />
-        <TrustedByRail items={partners} locale={locale} label={t("partnersLabel")} className="mt-8" />
+        <TrustedByRail items={partners} locale={locale} label={t("partnersLabel")} />
       </div>
     </section>
   );

@@ -4,13 +4,10 @@ import { useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { TurnstileWidget } from "./TurnstileWidget";
 import { waLink } from "@/lib/site";
-/* The size and count guards stay live: the submit handler still checks
-   anything that posts files, even with the input deferred. `ACCEPT_ATTR`
-   comes back with the field — see the note in the form body. */
 import { MAX_FILE_BYTES, MAX_FILES } from "@/lib/files";
 import { Link } from "@/i18n/navigation";
 
-/** B2B design brief (plan 9.6/10.2): one screen, files optional, quote by conversation. */
+/** B2B design brief: one screen, files deferred to WhatsApp, quote by conversation. */
 export function BriefForm() {
   const t = useTranslations("servicesPage");
   const te = useTranslations("admissionForm.errors");
@@ -20,18 +17,22 @@ export function BriefForm() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ reference: string; filesStored: number } | null>(null);
   const [token, setToken] = useState<string | undefined>();
+  const [challengeVersion, setChallengeVersion] = useState(0);
   const startedAt = useRef(Date.now());
   const formRef = useRef<HTMLFormElement>(null);
 
-  // The English catalogue sentence predates the decision to defer R2. Keep
-  // this message in the normal translation flow, but correct that stale clause
-  // at render time so the public form never claims upload is already active.
-  // Gujarati already says the future-state correctly, so replace() is a no-op
-  // there. This can disappear when the catalogue file is next split/edited.
   const filesDeferredCopy = t("form.filesDeferred").replace(
     "Private in-form upload is switched on with secure storage.",
     "Private in-form upload will be enabled only after secure private storage is connected."
   );
+  const securityError =
+    locale === "gu"
+      ? "સિક્યોરિટી ચેક પૂરું થયું નથી. થોડી ક્ષણ રાહ જોઈ ફરી મોકલો."
+      : "The security check has not finished. Wait a moment and send again.";
+  const securityRetryError =
+    locale === "gu"
+      ? "સિક્યોરિટી ચેક રિફ્રેશ થયું છે. થોડી ક્ષણ પછી ફરી મોકલો."
+      : "The security check was refreshed. Wait a moment, then send again.";
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -42,6 +43,17 @@ export function BriefForm() {
     fd.set("startedAt", String(startedAt.current));
     if (token) fd.set("turnstileToken", token);
 
+    /* Turnstile also writes a native hidden `turnstileToken` field. Prefer the
+       callback token, but retain the native value so a same-frame React state
+       update can never turn a valid challenge into a missing token. */
+    const nativeToken = fd.get("turnstileToken");
+    const challengeToken = token || (typeof nativeToken === "string" ? nativeToken : "");
+    if (!challengeToken) {
+      setError(securityError);
+      return;
+    }
+    fd.set("turnstileToken", challengeToken);
+
     const files = fd.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
     if (files.length > MAX_FILES || files.some((f) => f.size > MAX_FILE_BYTES)) {
       setError(te("generic"));
@@ -51,11 +63,27 @@ export function BriefForm() {
     setBusy(true);
     try {
       const res = await fetch("/api/brief", { method: "POST", body: fd });
-      const data = (await res.json()) as { ok: boolean; reference?: string; filesStored?: number };
-      if (!res.ok || !data.ok || !data.reference) throw new Error("failed");
+      const data = (await res.json()) as {
+        ok: boolean;
+        reference?: string;
+        filesStored?: number;
+        error?: string;
+      };
+      if (!res.ok || !data.ok || !data.reference) {
+        if (data.error === "turnstile" || data.error === "turnstile_unavailable") {
+          setChallengeVersion((v) => v + 1);
+          setToken(undefined);
+          setError(securityRetryError);
+          return;
+        }
+        setError(te("generic"));
+        return;
+      }
       setDone({ reference: data.reference, filesStored: data.filesStored ?? 0 });
       form.reset();
     } catch {
+      setChallengeVersion((v) => v + 1);
+      setToken(undefined);
       setError(te("generic"));
     } finally {
       setBusy(false);
@@ -118,34 +146,18 @@ export function BriefForm() {
         {field("deadline", t("form.deadline"), { type: "date" })}
       </div>
       {field("details", t("form.details"), { textarea: true })}
-      {/* Deferred upload, stated honestly.
-       *
-       * Private file storage (R2) is not switched on yet. With the binding
-       * missing, an attached file either fails the request in production or is
-       * silently dropped in demo mode — so offering a file input here would be
-       * promising something that cannot happen, and losing a business's
-       * artwork is the most expensive way to find that out.
-       *
-       * The field returns unchanged the day the bucket is bound; until then
-       * the brief says how to send files, and the API still accepts them if
-       * anything else posts one. `ACCEPT_ATTR` and the size limits stay
-       * imported for exactly that restoration.
-       */}
       <div className="form-callout">
         <p className="t-micro">{t("form.files")}</p>
         <p className="t-meta mt-2">{filesDeferredCopy}</p>
         <p className="t-meta mt-2">{t("confidential")}</p>
       </div>
-      {/* Honeypot: hidden from humans, tempting to bots */}
       <div className="hidden" aria-hidden="true">
         <label htmlFor="brief-website">Website</label>
         <input id="brief-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
-      <TurnstileWidget onToken={setToken} />
-      {/* A persistent live region, not an element that appears on error.
-          `role="alert"` on a node inserted into the DOM is announced by most
-          screen readers most of the time; a region that is already present
-          and then filled is announced reliably by all of them. */}
+      <div key={challengeVersion}>
+        <TurnstileWidget onToken={setToken} />
+      </div>
       <div role="alert" aria-live="assertive" className="empty:hidden">
         {error ? <p className="field-error">{error}</p> : null}
       </div>

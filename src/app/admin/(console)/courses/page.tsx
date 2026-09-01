@@ -22,12 +22,6 @@ export default async function CoursesPage({
   const copy = catalogCopy(session.staff.adminLocale);
   const records = recordsCopy(session.staff.adminLocale);
   const { archived } = await searchParams;
-  /**
-   * Archived courses are OUT of the operational picture by default and one
-   * checkbox away from being visible. Hiding them permanently would make an
-   * archived course indistinguishable from a deleted one, which is the whole
-   * distinction this page is trying to teach.
-   */
   const showArchived = archived === "1";
 
   const canViewCourses =
@@ -36,10 +30,6 @@ export default async function CoursesPage({
     hasPermission(session.staff, "batches.view") || hasPermission(session.staff, "batches.manage");
   const canManageCourses = hasPermission(session.staff, "courses.manage");
 
-  /* Batches moved to /admin/batches on 2026-08-31, so this page is the
-     catalogue and nothing else. An operator holding only `batches.*` is not
-     sent to a page of course rows they cannot edit — they get the batch list,
-     which is the daily object anyway. */
   if (!canViewCourses) {
     redirect("/admin/no-access?reason=permission");
   }
@@ -78,10 +68,6 @@ export default async function CoursesPage({
     .where(showArchived ? undefined : isNull(schema.courses.archivedAt))
     .orderBy(asc(schema.courses.sortOrder), asc(schema.courses.nameEn));
 
-  /* A COUNT, not a list. This page used to select every column of every batch
-     with a trainer join, purely to nest them inside course rows — and then to
-     render a number on the closed row. One grouped query answers the only
-     question this page still asks about batches. */
   const batchCounts = canViewBatches
     ? await db
         .select({ courseId: schema.batches.courseId, total: count() })
@@ -91,11 +77,8 @@ export default async function CoursesPage({
     : [];
   const batchesByCourse = new Map(batchCounts.map((row) => [row.courseId, Number(row.total)]));
   const totalBatches = batchCounts.reduce((sum, row) => sum + Number(row.total), 0);
-
   const activeCourses = courses.filter((course) => course.active && !course.archivedAt).length;
 
-  /* What the caller may do to a record of each kind. Navigation only — every
-     action re-checks the same policy server-side. */
   const subject = {
     role: session.role,
     has: (permission: Parameters<typeof hasPermission>[1]) =>
@@ -106,14 +89,12 @@ export default async function CoursesPage({
     restore: canPerform(subject, "course", "restore"),
     delete: canPerform(subject, "course", "delete")
   };
+  const gu = session.staff.adminLocale === "gu";
 
   return (
     <div className="max-w-[72rem]">
       <PageHead title={copy.title} context={copy.lede} />
 
-      {/* A hairline strip, not three stacked cards. Three `panel panel-body`
-          metrics went single-column at 390px and cost 308px before the first
-          course row — on the page whose whole job is the catalogue. */}
       <div className="console-metrics mt-3">
         <div>
           <span className="kv-label">{copy.coursesCount}</span>
@@ -127,6 +108,17 @@ export default async function CoursesPage({
           <span className="kv-label">{copy.batchesCount}</span>
           <span className="kv-value">{totalBatches}</span>
         </div>
+      </div>
+
+      <div className="mt-3 rounded-xl border border-[var(--color-vermilion)] bg-[var(--brand-accent-soft)] px-4 py-3">
+        <p className="text-smallmeta font-bold text-[var(--color-vermilion-deep)]">
+          {gu ? "Fee અને admission terms હવે staff record છે" : "Fees and admission terms are staff records"}
+        </p>
+        <p className="form-note mt-1">
+          {gu
+            ? "Public website પર fee amount દેખાતી નથી. અહીં course ખોલો અને current fee, admission payment, balance days અને norms version અપડેટ રાખો."
+            : "The public website does not show fee amounts. Open a course here to keep the current fee, admission payment, balance timing and norms version up to date."}
+        </p>
       </div>
 
       {canViewBatches ? (
@@ -150,9 +142,6 @@ export default async function CoursesPage({
         </details>
       ) : null}
 
-      {/* One dense list. Each course is a <details> whose <summary> IS the row,
-          so opening a course costs no JavaScript and no page change — the
-          operator stays exactly where they were in the list. */}
       <section className="mt-6" aria-label={copy.title}>
         <form method="get" className="toolbar">
           <label className="choice-chip text-smallmeta w-fit">
@@ -196,12 +185,16 @@ export default async function CoursesPage({
                 active: course.active,
                 operations: operationsToForm(readCourseOperations(course.operations))
               };
+              const balance =
+                course.feeTotal != null && course.feeAdmission != null
+                  ? Math.max(course.feeTotal - course.feeAdmission, 0)
+                  : null;
 
               return (
                 <details key={course.id} id={`course-${course.id}`} className="record-anchor">
                   <summary className={`data-row ${isArchived ? "is-archived" : ""}`}>
                     <span className="data-row__title">
-                      {session.staff.adminLocale === "gu" ? course.nameGu : course.nameEn}
+                      {gu ? course.nameGu : course.nameEn}
                     </span>
                     <span className="data-row__actions">
                       <span className={`chip ${isArchived ? "status-off" : course.active ? "status-active" : "status-pending"}`}>
@@ -213,13 +206,50 @@ export default async function CoursesPage({
                       <span>{course.slug}</span>
                       {course.durationMonths ? <span>{course.durationMonths} mo</span> : null}
                       {course.feeTotal != null ? <span className="data-num">{money(course.feeTotal)}</span> : null}
-                      <span>
-                        {courseBatches} · {copy.batchesCount}
-                      </span>
+                      <span>{courseBatches} · {copy.batchesCount}</span>
                     </span>
                   </summary>
 
                   <div className="border-t border-line bg-ivory-2/40 px-3 py-4 md:px-4">
+                    <div className="mb-4 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-xl border border-[var(--color-vermilion)] bg-card p-4">
+                        <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.12em] text-[var(--color-vermilion-deep)]">
+                          {gu ? "Internal fee record" : "Internal fee record"}
+                        </p>
+                        <p className="mt-2 text-lg font-extrabold text-carbon">
+                          {course.feeTotal != null ? money(course.feeTotal) : (gu ? "હજુ સેટ નથી" : "Not set")}
+                        </p>
+                        {course.feeAdmission != null ? (
+                          <p className="form-note mt-1">
+                            {gu ? "Admission વખતે" : "At admission"}: {money(course.feeAdmission)}
+                          </p>
+                        ) : null}
+                        {balance != null ? (
+                          <p className="form-note mt-1">
+                            {gu ? "બાકી" : "Balance"}: {money(balance)}
+                            {course.feeBalanceDueDays != null ? ` · ${course.feeBalanceDueDays} ${gu ? "દિવસ" : "days"}` : ""}
+                          </p>
+                        ) : null}
+                        <p className="mt-2 text-xs font-semibold text-[var(--color-vermilion-deep)]">
+                          {gu ? "Staff only · public page પર amount નથી" : "Staff only · amount is not public"}
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl border border-line bg-card p-4">
+                        <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.12em] text-stone">
+                          {gu ? "Admission norms" : "Admission norms"}
+                        </p>
+                        <p className="mt-2 text-lg font-extrabold text-carbon">
+                          {gu ? "Version" : "Version"} {course.termsVersion ?? "—"}
+                        </p>
+                        <p className="form-note mt-1">
+                          {gu
+                            ? "Terms બદલાય ત્યારે અહીં લાગુ પડતું version અપડેટ કરો."
+                            : "When terms change, update the applicable version here."}
+                        </p>
+                      </div>
+                    </div>
+
                     {canManageCourses || courseCan.delete ? (
                       <div className="mb-4 flex justify-end">
                         <RecordMenu
@@ -245,7 +275,6 @@ export default async function CoursesPage({
                         </div>
                       </details>
                     ) : null}
-
                   </div>
                 </details>
               );
@@ -257,7 +286,6 @@ export default async function CoursesPage({
   );
 }
 
-/** Whole rupees, with tabular figures so a column of fees does not jitter. */
 function money(value: number) {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -269,4 +297,3 @@ function money(value: number) {
 function asFamily(value: string): CourseFamily {
   return COURSE_FAMILIES.includes(value as CourseFamily) ? (value as CourseFamily) : "machine";
 }
-

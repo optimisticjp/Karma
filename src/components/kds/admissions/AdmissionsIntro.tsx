@@ -7,21 +7,16 @@ import { site, waLink } from "@/lib/site";
 import { NeedlePoint, ThreadLine } from "@/components/kds/marks";
 import { Icon } from "@/components/ui/Icon";
 
-/**
- * How admission works, from the top.
- *
- * The aside states the three things somebody about to fill in a form wants
- * confirmed before they start: **nothing is paid on this website**, the demo
- * is free and its length is a verified figure, and a person replies. Every one
- * of them is true and checkable — the demo length renders from
- * `course-operations.ts`, and the no-payment rule is architectural rather than
- * a promise (there is no gateway in this repository to enable).
- */
+/** Admission starts with the demo. No fee amount is published because the
+ * institute confirms current commercial terms at the studio. */
 export function AdmissionsIntro() {
   const t = useTranslations("admissionsPage");
   const tc = useTranslations("common");
   const locale = useLocale() as Locale;
   const demo = EMCAD_DAHAO.operations.demo;
+  const feePolicy = locale === "gu"
+    ? "હાલની course fee અને લાગુ પડતા admission terms સ્ટુડિયોમાં તમારી સાથે કન્ફર્મ થાય છે. Website પર fee amount publish થતી નથી."
+    : "The current course fee and applicable admission terms are confirmed with you at the studio. Fee amounts are not published on this website.";
 
   return (
     <section className="band-hero on-paper" aria-labelledby="admissions-heading">
@@ -69,7 +64,7 @@ export function AdmissionsIntro() {
               </li>
               <li>
                 <NeedlePoint state="done" />
-                <span className="t-body">{t("asideBody")}</span>
+                <span className="t-body">{feePolicy}</span>
               </li>
             </ul>
             <ThreadLine className="my-5" />

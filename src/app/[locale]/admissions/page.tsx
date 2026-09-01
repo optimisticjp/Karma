@@ -73,6 +73,7 @@ export default async function AdmissionsPage({
     getPublicFaqs()
   ]);
   const l = asLocale(locale);
+  const closeCopyKey = "formNote" as const;
 
   return (
     <>
@@ -117,7 +118,7 @@ export default async function AdmissionsPage({
         </div>
       </section>
 
-      <CtaBand title={t("closeTitle")} sub={t("formNote")} ground="on-canvas" />
+      <CtaBand title={t("closeTitle")} sub={t(closeCopyKey)} ground="on-canvas" />
 
       <ActionDock surface="admissions" demoHref="/admission" />
     </>

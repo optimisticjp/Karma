@@ -1,0 +1,1 @@
+Production checklist item: the Cloudflare Turnstile widget hostname allowlist must include every hostname used to submit public Admission and Services Brief forms. This is an edge-account setting, not an application/database migration.

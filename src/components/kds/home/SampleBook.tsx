@@ -16,6 +16,7 @@ export function SampleBook({ courses }: { courses: Course[] }) {
   const t = useTranslations("home.book");
   const locale = useLocale() as Locale;
   const [family, setFamily] = useState<FamilyKey | "all">("all");
+  const monthsKey = "months" as const;
 
   const shown = family === "all" ? courses : courses.filter((course) => course.family === family);
   const familyKeys = (Object.keys(families) as FamilyKey[]).filter((key) =>
@@ -29,6 +30,9 @@ export function SampleBook({ courses }: { courses: Course[] }) {
       count: courses.filter((course) => course.family === key).length
     }))
   ];
+  const sub = locale === "gu"
+    ? `${courses.length} કોર્સ ત્રણ familiesમાં. જે material અને machine work તમે શીખવા માંગો છો એ પ્રમાણે પસંદ કરો, પછી course ખોલો.`
+    : `${courses.length} courses across three families. Pick by the material and machine work you want to learn, then open the course that fits.`;
 
   return (
     <section className="band on-canvas" aria-labelledby="book-heading">
@@ -36,7 +40,7 @@ export function SampleBook({ courses }: { courses: Course[] }) {
         <header className="max-w-prose">
           <p className="t-micro">{t("eyebrow")}</p>
           <h2 id="book-heading" className="t-h2 mt-1.5">{t("h2")}</h2>
-          <p className="t-lede mt-3">{t("sub")}</p>
+          <p className="t-lede mt-3">{sub}</p>
         </header>
 
         <div className="book-tabs" role="group" aria-label={t("filterLabel")}>
@@ -64,7 +68,7 @@ export function SampleBook({ courses }: { courses: Course[] }) {
                 <span className="sample-meta t-micro">
                   {pick(families[course.family], "name", locale)}
                   {course.durationMonths ? (
-                    <>{" · "}{t("months", { count: course.durationMonths })}</>
+                    <>{" · "}{t(monthsKey, { count: course.durationMonths })}</>
                   ) : null}
                 </span>
               </Link>

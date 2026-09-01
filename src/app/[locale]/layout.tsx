@@ -12,6 +12,7 @@ import { studioSchema } from "@/lib/schema";
 import { getPublicCourses } from "@/lib/course/public";
 import "../globals.css";
 import "../thread-machine-proof.css";
+import "../requested-ux.css";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -47,8 +48,6 @@ export default async function LocaleLayout({
     getPublicCourses()
   ]);
 
-  /* Structured data receives the same Console-filtered course list as the
-     visible catalogue, so hidden/deactivated courses cannot remain in JSON-LD. */
   const businessLd = studioSchema(asLocale(locale), courses);
 
   return (

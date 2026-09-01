@@ -4,17 +4,8 @@ import { admissionTerms } from "@/content/admission-terms";
 
 /**
  * The institute's admission norms, in full, on the page the visitor accepts
- * them from.
- *
- * Rendered server-side rather than passed into the form as props: fifteen
- * clauses in two languages is several kilobytes of text that would otherwise
- * ship in the client bundle for a checkbox to reference, and the Worker has a
- * size budget. It is a native `<details>` so it costs no JavaScript, is
- * findable by in-page search when open, and works with no JS at all.
- *
- * The Gujarati is the institute's own wording. The English is a working
- * translation for the English site; where the two could be read differently,
- * the Gujarati governs — and that is said on the page rather than assumed.
+ * them from. The native disclosure is OPEN by default, so every clause is
+ * visible without the visitor having to notice or click a plus control.
  */
 export function AdmissionNorms({
   version,
@@ -39,17 +30,25 @@ export function AdmissionNorms({
     <section id="admission-norms" className="band on-cloth">
       <div className="wrap">
         <div className="reading-shell">
-          <h2 className="t-h3">{title}</h2>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="t-micro">{String(terms.clauses.length).padStart(2, "0")} · {declarationLabel}</p>
+              <h2 className="t-h3 mt-1.5">{title}</h2>
+            </div>
+            <span className="verdict-mark shrink-0" aria-hidden="true">
+              <Icon name="check" size={19} />
+            </span>
+          </div>
           <ThreadLine draw className="mt-3 w-16" />
           <p className="t-body mt-4">{intro}</p>
 
-          <details className="module mt-4">
-            <summary className="module-summary">
+          <details open className="module mt-4">
+            <summary className="module-summary border-b border-rule">
               <span className="t-micro numeric module-index" aria-hidden="true">
                 {String(terms.clauses.length).padStart(2, "0")}
               </span>
               <span className="t-h4 min-w-0">{gu ? terms.titleGu : terms.titleEn}</span>
-              <Icon name="plus" size={17} className="module-plus" />
+              <Icon name="check" size={17} className="text-[var(--brand-accent-strong)]" />
             </summary>
             <div className="module-points">
               <ol className="norms-list">

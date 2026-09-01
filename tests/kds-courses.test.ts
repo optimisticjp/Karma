@@ -150,27 +150,26 @@ describe("the course template", () => {
 });
 
 describe("course facts", () => {
-  it("publishes a fee only when the Console configuration supplies one", () => {
-    expect(facts).toContain("const fees = config.fees");
-    expect(facts).toContain("{fees ? (");
+  it("keeps current fee amounts off the public course page", () => {
+    expect(facts).not.toContain("config.fees");
+    expect(facts).not.toContain("FeeSheet");
     expect(en.courseDetail.feeNoGateway.toLowerCase()).toContain("no online payment");
     expect(en.courseDetail.feeNoGateway.toLowerCase()).toContain("no gateway");
-    expect(en.courseOps.feeOffline.toLowerCase()).toContain("no online payment");
     for (const cat of [en, gu]) {
       const ask = JSON.stringify([cat.courseDetail.feeAskTitle, cat.courseDetail.feeAskNote]);
       expect(ask).not.toMatch(/\d{2},\d{3}/);
     }
   });
 
-  it("renders every published figure from the Console configuration", () => {
+  it("renders public operational figures from the Console but not fee figures", () => {
     for (const cat of [en, gu]) {
       const block = JSON.stringify(cat.courseDetail) + JSON.stringify(cat.courseOps);
       for (const figure of ["35,000", "25,000", "10,000", "35000"]) {
         expect(block, figure).not.toContain(figure);
       }
     }
-    expect(facts).toContain("money(fees.total)");
-    expect(facts).toContain("money(fees.admission)");
+    expect(facts).not.toContain("money(fees.total)");
+    expect(facts).not.toContain("money(fees.admission)");
     expect(facts).toContain("schedule.map((slot)");
   });
 
