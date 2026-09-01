@@ -25,6 +25,11 @@ export function supabaseAdminConfigured() {
   return Boolean(process.env.SUPABASE_SECRET_KEY);
 }
 
+function turnstileConfigured() {
+  const siteKey = process.env.TURNSTILE_SITE_KEY || process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  return Boolean(siteKey && process.env.TURNSTILE_SECRET_KEY);
+}
+
 /**
  * Readiness booleans only — never a host, user, key or binding id.
  * `db` is true when the request can reach Postgres at all: through the
@@ -36,7 +41,7 @@ export function prodReadiness() {
     db: dbConfigured(),
     dbViaHyperdrive: dbViaHyperdrive(),
     supabaseAuth: supabaseConfigured(),
-    turnstile: Boolean(process.env.TURNSTILE_SECRET_KEY),
+    turnstile: turnstileConfigured(),
     email: Boolean(process.env.RESEND_API_KEY)
   };
 }
