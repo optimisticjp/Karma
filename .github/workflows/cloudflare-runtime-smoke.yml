@@ -39,7 +39,7 @@ jobs:
           npm run db:seed
       - name: Build actual Cloudflare Worker
         run: npx opennextjs-cloudflare build
-      - name: Boot Worker runtime and smoke public routes
+      - name: Boot Worker runtime and stress public routes
         shell: bash
         run: |
           set -euo pipefail
@@ -59,22 +59,27 @@ jobs:
             fi
             sleep 1
           done
+          test "$ready" = "1"
 
-          if [ "$ready" -ne 1 ]; then
-            echo "Worker preview did not become ready"
-            exit 1
-          fi
-
-          for path in /gu /en/courses /en/batches /en/admissions /en/about /en/services; do
+          for path in /gu /en/courses /en/batches /en/admissions /en/about /en/services /en/student-work /en/success-stories /en/notes /en/contact; do
             curl -fsS "http://127.0.0.1:8787$path" -o /tmp/route.html
             grep -q '<html' /tmp/route.html
           done
 
-          status=$(curl -sS -o /tmp/404.html -w '%{http_code}' http://127.0.0.1:8787/en/nope)
-          test "$status" = "404"
-
-          # Repeated requests exercise the request-scoped pg/Hyperdrive pool path.
-          for _ in $(seq 1 12); do
-            curl -fsS http://127.0.0.1:8787/en -o /dev/null
-            curl -fsS http://127.0.0.1:8787/en/batches -o /dev/null
+          for path in /en/nope /gu/nope /en/courses/nope /en/notes/nope; do
+            status=$(curl -sS -o /tmp/404.html -w '%{http_code}' "http://127.0.0.1:8787$path")
+            test "$status" = "404"
           done
+
+          # Simulate browser prefetch/navigation bursts and multiple simultaneous visitors.
+          seq 1 80 | xargs -P 12 -I{} sh -c '
+            case $(({} % 6)) in
+              0) path=/en ;;
+              1) path=/gu ;;
+              2) path=/en/batches ;;
+              3) path=/en/courses ;;
+              4) path=/en/admissions ;;
+              *) path=/en/about ;;
+            esac
+            curl -fsS "http://127.0.0.1:8787$path" -o /dev/null
+          '
