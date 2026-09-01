@@ -91,8 +91,10 @@ describe("owner-confirmed operational facts stay current", () => {
 describe("certificate verification reflects revocation", () => {
   it("never gives a revoked certificate the Verified verdict", () => {
     const verify = read("src/app/[locale]/verify/[id]/page.tsx");
-    expect(verify).toContain('cert?.status === "revoked"');
-    expect(verify).toContain('state === "revoked"');
+    expect(verify).toContain('const revoked = cert?.status === "revoked"');
+    expect(verify).toContain('revoked ? "bad"');
+    expect(verify).toContain('revoked\n        ? t("revoked")');
     expect(verify).toContain('state === "ok" ? "check" : "misregistration"');
+    expect(verify).not.toContain('revoked ? "ok"');
   });
 });
