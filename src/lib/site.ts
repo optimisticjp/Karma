@@ -70,8 +70,9 @@ export const site = {
   landmarkEn: "Near Dhara Arcade, opposite Krishna Township Road",
   landmarkGu: "ધારા આર્કેડ પાસે, કૃષ્ણા ટાઉનશિપ રોડની સામે",
 
-  hoursEn: "Open daily · Evening batches till 10:30 pm",
-  hoursGu: "રોજ ખુલ્લું · સાંજની બેચ 10:30 સુધી",
+  /** Owner-confirmed 2026-09-01: the latest evening batch ends at 11:00 PM. */
+  hoursEn: "Open daily · Evening batches till 11:00 pm",
+  hoursGu: "રોજ ખુલ્લું · સાંજની બેચ 11:00 સુધી",
 
   /**
    * The studio's actual Google Business pin, not a name search. `ftid` is the
@@ -137,7 +138,7 @@ export const verifiedFacts = {
 } as const;
 
 /** Bump when site content meaningfully changes (sitemap lastModified). */
-export const CONTENT_LAST_UPDATED = new Date("2026-08-29");
+export const CONTENT_LAST_UPDATED = new Date("2026-09-01");
 
 export function waLink(message: string) {
   return `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(message)}`;
