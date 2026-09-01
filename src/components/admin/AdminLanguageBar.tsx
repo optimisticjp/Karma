@@ -3,14 +3,21 @@ import { quickSetAdminLocale } from "@/lib/admin/quick-locale-action";
 
 /** Always-visible console language control. The mark matches the public site: EN।ગુજ. */
 export function AdminLanguageBar({ locale }: { locale: AdminLocale }) {
+  const gu = locale === "gu";
+
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--color-vermilion)] bg-[var(--brand-accent-soft)] px-3 py-2 shadow-sm">
       <div className="min-w-0">
-        <p className="text-[0.68rem] font-extrabold uppercase tracking-[0.13em] text-[var(--color-vermilion-deep)]">
-          {locale === "gu" ? "કન્સોલ ભાષા" : "Console language"}
+        <p
+          lang={gu ? "gu" : "en"}
+          className={`text-[0.68rem] font-extrabold text-[var(--color-vermilion-deep)] ${
+            gu ? "" : "uppercase tracking-[0.13em]"
+          }`}
+        >
+          {gu ? "કન્સોલ ભાષા" : "Console language"}
         </p>
-        <p className="mt-0.5 text-xs text-[var(--color-stone)]">
-          {locale === "gu" ? "એક ટૅપમાં આખું admin બદલો" : "Switch the whole admin in one tap"}
+        <p lang={gu ? "gu" : "en"} className="mt-0.5 text-xs text-[var(--color-stone)]">
+          {gu ? "એક ટૅપમાં આખું admin બદલો" : "Switch the whole admin in one tap"}
         </p>
       </div>
 
