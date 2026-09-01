@@ -41,6 +41,7 @@ export function BriefForm() {
     const fd = new FormData(form);
     fd.set("locale", locale);
     fd.set("startedAt", String(startedAt.current));
+    if (token) fd.set("turnstileToken", token);
 
     /* Turnstile also writes a native hidden `turnstileToken` field. Prefer the
        callback token, but retain the native value so a same-frame React state
@@ -71,6 +72,7 @@ export function BriefForm() {
       if (!res.ok || !data.ok || !data.reference) {
         if (data.error === "turnstile" || data.error === "turnstile_unavailable") {
           setChallengeVersion((v) => v + 1);
+          setToken(undefined);
           setError(securityRetryError);
           return;
         }
@@ -81,6 +83,7 @@ export function BriefForm() {
       form.reset();
     } catch {
       setChallengeVersion((v) => v + 1);
+      setToken(undefined);
       setError(te("generic"));
     } finally {
       setBusy(false);
@@ -152,7 +155,9 @@ export function BriefForm() {
         <label htmlFor="brief-website">Website</label>
         <input id="brief-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
-      <TurnstileWidget onToken={setToken} resetKey={challengeVersion} />
+      <div key={challengeVersion}>
+        <TurnstileWidget onToken={setToken} />
+      </div>
       <div role="alert" aria-live="assertive" className="empty:hidden">
         {error ? <p className="field-error">{error}</p> : null}
       </div>
