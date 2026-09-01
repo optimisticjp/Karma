@@ -1,45 +1,24 @@
 "use client";
 
+import { Fragment } from "react";
 import { useLocale } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
-import { LOCALE_NAMES, routing, type Locale } from "@/i18n/routing";
+import { routing, type Locale } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 /**
- * EN | ગુ.
+ * Compact bilingual switch used everywhere on the public site.
  *
- * WHY THIS REPLACED A BOTTOM SHEET
- * --------------------------------
- * The previous control was a popover-on-desktop, bottom-sheet-on-mobile dialog
- * with focus trapping, scroll locking and a native-script preview line per
- * option. It was built for three locales. With two, the plan is explicit: do
- * not over-engineer a giant language bottom sheet (§14). A dialog to choose
- * between two things you can see at once is a dialog too many.
- *
- * WHY LINKS RATHER THAN BUTTONS
- * -----------------------------
- * Each option is the SAME PAGE in the other language, which is a destination,
- * so it is an anchor. That is not pedantry — it means the control works with
- * no JavaScript, opens in a new tab on a middle click, is announced as a link,
- * and gives a crawler the same-page alternate it already sees in `hreflang`.
- *
- * Remembering the choice needs script, so that is layered on top: the click
- * handler writes the preference and the navigation happens either way. Nothing
- * auto-redirects on it — `localeDetection` stays off and the URL still
- * decides. The stored value is read only by the one-time banner.
- *
- * ACCESSIBILITY
- * -------------
- * The group is a `nav` with a name, each option carries its own `lang` so it
- * is announced in the right voice and its marks get the line box they need,
- * and the current one is marked `aria-current="true"` rather than being
- * identified by colour alone. Targets are 44px.
+ * The visible treatment is deliberately fixed to `EN।ગુજ`: the same two
+ * choices in the same place and script on desktop, mobile menus and any future
+ * public surface. Each half remains a real same-page locale link, so it works
+ * without JavaScript and stays meaningful to assistive technology/crawlers.
  */
 export function LocaleSwitch({
   className,
-  /** The mobile menu renders full names; the header renders short codes. */
-  full = false
+  /** Kept for backwards-compatible callers; the visible label is now always compact. */
+  full: _full = false
 }: {
   className?: string;
   full?: boolean;
@@ -57,22 +36,26 @@ export function LocaleSwitch({
 
   return (
     <nav className={cn("locale-switch", className)} aria-label="Language">
-      {routing.locales.map((code) => {
-        const meta = LOCALE_NAMES[code];
+      {routing.locales.map((code, index) => {
         const isCurrent = code === current;
+        const visible = code === "en" ? "EN" : "ગુજ";
+        const accessible = code === "en" ? "English" : "ગુજરાતી";
         return (
-          <Link
-            key={code}
-            href={pathname}
-            locale={code}
-            hrefLang={code}
-            lang={code}
-            aria-current={isCurrent ? "true" : undefined}
-            onClick={() => remember(code)}
-            className="locale-option"
-          >
-            {full ? meta.name : meta.short}
-          </Link>
+          <Fragment key={code}>
+            {index > 0 ? <span aria-hidden="true" className="locale-separator">।</span> : null}
+            <Link
+              href={pathname}
+              locale={code}
+              hrefLang={code}
+              lang={code}
+              aria-label={accessible}
+              aria-current={isCurrent ? "true" : undefined}
+              onClick={() => remember(code)}
+              className="locale-option"
+            >
+              {visible}
+            </Link>
+          </Fragment>
         );
       })}
     </nav>
