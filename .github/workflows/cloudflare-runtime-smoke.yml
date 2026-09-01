@@ -24,6 +24,7 @@ jobs:
     env:
       CI: "true"
       WRANGLER_SEND_METRICS: "false"
+      DATABASE_URL: "postgres://postgres:postgres@127.0.0.1:5432/karma?sslmode=disable"
       CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE: "postgres://postgres:postgres@127.0.0.1:5432/karma?sslmode=disable"
     steps:
       - uses: actions/checkout@v4
@@ -32,6 +33,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Prepare realistic local Postgres
+        run: |
+          npm run db:migrate
+          npm run db:seed
       - name: Build actual Cloudflare Worker
         run: npx opennextjs-cloudflare build
       - name: Boot Worker runtime and smoke public routes
@@ -60,15 +65,16 @@ jobs:
             exit 1
           fi
 
-          curl -fsS http://127.0.0.1:8787/gu -o /tmp/gu.html
-          curl -fsS http://127.0.0.1:8787/en/courses -o /tmp/courses.html
-          curl -fsS http://127.0.0.1:8787/en/batches -o /tmp/batches.html
-          curl -fsS http://127.0.0.1:8787/en/admissions -o /tmp/admissions.html
+          for path in /gu /en/courses /en/batches /en/admissions /en/about /en/services; do
+            curl -fsS "http://127.0.0.1:8787$path" -o /tmp/route.html
+            grep -q '<html' /tmp/route.html
+          done
+
           status=$(curl -sS -o /tmp/404.html -w '%{http_code}' http://127.0.0.1:8787/en/nope)
           test "$status" = "404"
 
-          grep -q '<html' /tmp/en.html
-          grep -q '<html' /tmp/gu.html
-          grep -q '<html' /tmp/courses.html
-          grep -q '<html' /tmp/batches.html
-          grep -q '<html' /tmp/admissions.html
+          # Repeated requests exercise the request-scoped pg/Hyperdrive pool path.
+          for _ in $(seq 1 12); do
+            curl -fsS http://127.0.0.1:8787/en -o /dev/null
+            curl -fsS http://127.0.0.1:8787/en/batches -o /dev/null
+          done
