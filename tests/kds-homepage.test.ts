@@ -159,7 +159,7 @@ describe("the sample book", () => {
 });
 
 describe("the EMCAD DAHAO decision panel", () => {
-  it("reads every figure from the same Console configuration as admission/course detail", () => {
+  it("reads public operational facts from the Console while keeping fee amounts private", () => {
     for (const cat of [en, gu]) {
       const block = JSON.stringify(cat.home.emcad);
       expect(block).not.toContain("35,000");
@@ -169,10 +169,12 @@ describe("the EMCAD DAHAO decision panel", () => {
       expect(block).not.toMatch(/\b3 months\b/);
     }
     expect(emcad).toContain("getCourseConfig(EMCAD_DAHAO_SLUG)");
-    expect(emcad).toContain("money(fees.total)");
-    expect(emcad).toContain("money(fees.admission)");
-    expect(emcad).toContain("fees.balanceDueDays");
+    expect(emcad).not.toContain("money(fees.total)");
+    expect(emcad).not.toContain("money(fees.admission)");
+    expect(emcad).not.toContain("fees.balanceDueDays");
     expect(emcad).toContain("operations.scheduleOptions.map");
+    expect(emcad).toContain("config.durationMonths");
+    expect(emcad).toContain("config.software");
   });
 
   it("keeps the verified seed as the reference bar for the confirmed facts", () => {
