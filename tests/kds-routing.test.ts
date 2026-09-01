@@ -33,21 +33,10 @@ const middleware = strip(read("src/middleware.ts"));
  * ------------------------------------------------------------------ */
 
 /**
- * `/en/anything-unknown` answered **HTTP 200** — confirmed on the deployed
- * Worker, not only under `next start`. The branded 404 rendered and carried
- * `noindex`, so nothing was ever indexed, but a soft 404 spends crawl budget
- * and is the kind of thing Search Console reports months later.
- *
- * The cause is a framework limitation: `notFound()` inside a route that
- * MATCHED renders the not-found boundary and leaves the status at 200.
- * Deleting the catch-all does produce a real 404 — and loses the branded
- * bilingual page with it, which is a worse public surface for the human who
- * followed the broken link. So the middleware rewrites an unknown localized
- * path to ITSELF with `status: 404`: same HTML, right status.
- *
- * Measured after the fix, on a production server: `/en/nope`, `/gu/nope`,
- * `/en/courses/nope` and `/en/notes/nope` all answer 404 and still render the
- * branded page in the right language.
+ * `/en/anything-unknown` once answered HTTP 200. The branded 404 rendered and
+ * carried noindex, but a soft 404 still wastes crawl budget. Middleware now
+ * owns the real 404 status for unknown localized paths, while the catch-all
+ * owns the localized branded body and its explicit noindex metadata.
  */
 describe("an unknown page answers 404", () => {
   it("sets the status in the middleware, where it can be set", () => {
@@ -63,12 +52,15 @@ describe("an unknown page answers 404", () => {
     }
   });
 
-  it("keeps the catch-all, because the branded page is the point", () => {
+  it("keeps the catch-all and gives it explicit localized 404 metadata", () => {
     const catchAll = strip(read("src/app/[locale]/[...rest]/page.tsx"));
-    expect(catchAll).toContain("notFound()");
-    /* And the 404 it renders is the localized one. */
+    expect(catchAll).toContain('import NotFound from "../not-found"');
+    expect(catchAll).toContain("setRequestLocale(locale)");
+    expect(catchAll).toContain("return <NotFound />");
+    expect(catchAll).toContain('namespace: "notFound"');
+    expect(catchAll).toContain("robots: { index: false, follow: false }");
     const notFound = read("src/app/[locale]/not-found.tsx");
-    expect(notFound).toContain("useTranslations");
+    expect(notFound).toContain('getTranslations("notFound")');
   });
 
   it("recognises every real public path and nothing else", () => {
