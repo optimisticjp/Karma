@@ -4,24 +4,32 @@ import { useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { TurnstileWidget } from "./TurnstileWidget";
 import { waLink } from "@/lib/site";
+import { tr } from "@/lib/i18n/localized";
+import type { Locale } from "@/i18n/routing";
 /* The size and count guards stay live: the submit handler still checks
    anything that posts files, even with the input deferred. `ACCEPT_ATTR`
    comes back with the field — see the note in the form body. */
 import { MAX_FILE_BYTES, MAX_FILES } from "@/lib/files";
 import { Link } from "@/i18n/navigation";
 
+const FILES_DEFERRED_COPY = {
+  en: "Private in-form upload is not enabled yet. For now, submit the brief first, then send up to 3 reference files on WhatsApp and include the reference number from your confirmation. In-form upload will be enabled only after secure private storage is connected.",
+  gu: "અત્યારે ફોર્મમાં પ્રાઇવેટ ફાઇલ અપલોડ ચાલુ નથી. પહેલાં બ્રીફ મોકલો, પછી કન્ફર્મેશનમાં મળેલો રેફરન્સ નંબર લખીને WhatsApp પર વધુમાં વધુ 3 રેફરન્સ ફાઇલ મોકલો. સિક્યોર પ્રાઇવેટ સ્ટોરેજ જોડાયા પછી જ ફોર્મમાં અપલોડ ચાલુ થશે."
+} as const;
+
 /** B2B design brief (plan 9.6/10.2): one screen, files optional, quote by conversation. */
 export function BriefForm() {
   const t = useTranslations("servicesPage");
   const te = useTranslations("admissionForm.errors");
   const tf = useTranslations("footer");
-  const locale = useLocale();
+  const locale = useLocale() as Locale;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ reference: string; filesStored: number } | null>(null);
   const [token, setToken] = useState<string | undefined>();
   const startedAt = useRef(Date.now());
   const formRef = useRef<HTMLFormElement>(null);
+  const filesDeferredCopy = tr(FILES_DEFERRED_COPY, locale);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -123,7 +131,7 @@ export function BriefForm() {
        */}
       <div className="form-callout">
         <p className="t-micro">{t("form.files")}</p>
-        <p className="t-meta mt-2">{t("form.filesDeferred")}</p>
+        <p className="t-meta mt-2">{filesDeferredCopy}</p>
         <p className="t-meta mt-2">{t("confidential")}</p>
       </div>
       {/* Honeypot: hidden from humans, tempting to bots */}
