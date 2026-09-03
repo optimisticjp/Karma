@@ -6,11 +6,13 @@ updates:
       interval: monthly
       time: "04:00"
       timezone: "Asia/Kolkata"
-    open-pull-requests-limit: 2
+    # Routine version updates are paused while the product is still being
+    # finished and polished. Dependabot security updates use a separate limit
+    # and remain available when a vulnerability needs remediation.
+    open-pull-requests-limit: 0
     allow:
-      # Routine version maintenance stays non-breaking. Dependabot security
-      # updates are not restricted by update-types and can still cross majors
-      # when that is required to remediate a vulnerability.
+      # Retain the intended non-breaking policy for when routine maintenance
+      # is re-enabled after product polish.
       - dependency-name: "*"
         update-types:
           - version-update:semver-patch
@@ -35,7 +37,7 @@ updates:
     ignore:
       # Keep the qualified Next/OpenNext/Cloudflare/i18n toolchain on its
       # current minor lines while the site is still being finished. Patch and
-      # security updates remain eligible.
+      # security updates remain eligible when routine maintenance is resumed.
       - dependency-name: next
         update-types:
           - version-update:semver-minor
@@ -63,6 +65,6 @@ updates:
       interval: monthly
       time: "04:15"
       timezone: "Asia/Kolkata"
-    # GitHub Actions are referenced by major tags. Avoid automatic major-tag
-    # churn during product polish; security updates can still be raised.
+    # Routine GitHub Actions updates are paused during product polish;
+    # security updates remain available separately.
     open-pull-requests-limit: 0
