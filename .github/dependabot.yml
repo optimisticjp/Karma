@@ -3,41 +3,66 @@ updates:
   - package-ecosystem: npm
     directory: "/"
     schedule:
-      interval: weekly
-      day: monday
+      interval: monthly
       time: "04:00"
       timezone: "Asia/Kolkata"
-    open-pull-requests-limit: 6
+    open-pull-requests-limit: 2
+    allow:
+      # Routine version maintenance stays non-breaking. Dependabot security
+      # updates are not restricted by update-types and can still cross majors
+      # when that is required to remediate a vulnerability.
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-patch
+          - version-update:semver-minor
     groups:
       production-maintenance:
+        applies-to: version-updates
         dependency-type: production
         update-types:
           - patch
           - minor
       development-maintenance:
+        applies-to: version-updates
         dependency-type: development
         update-types:
           - patch
           - minor
+      security-maintenance:
+        applies-to: security-updates
+        patterns:
+          - "*"
     ignore:
-      # Karma is deliberately pinned to the supported Next 15 maintenance line
-      # until OpenNext/Hyperdrive compatibility is explicitly re-qualified.
+      # Keep the qualified Next/OpenNext/Cloudflare/i18n toolchain on its
+      # current minor lines while the site is still being finished. Patch and
+      # security updates remain eligible.
       - dependency-name: next
         update-types:
+          - version-update:semver-minor
           - version-update:semver-major
       - dependency-name: eslint-config-next
         update-types:
+          - version-update:semver-minor
+          - version-update:semver-major
+      - dependency-name: next-intl
+        update-types:
+          - version-update:semver-minor
+          - version-update:semver-major
+      - dependency-name: "@opennextjs/cloudflare"
+        update-types:
+          - version-update:semver-minor
+          - version-update:semver-major
+      - dependency-name: wrangler
+        update-types:
+          - version-update:semver-minor
           - version-update:semver-major
 
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: weekly
-      day: monday
+      interval: monthly
       time: "04:15"
       timezone: "Asia/Kolkata"
-    open-pull-requests-limit: 3
-    groups:
-      github-actions-maintenance:
-        patterns:
-          - "*"
+    # GitHub Actions are referenced by major tags. Avoid automatic major-tag
+    # churn during product polish; security updates can still be raised.
+    open-pull-requests-limit: 0
