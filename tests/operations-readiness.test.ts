@@ -147,4 +147,20 @@ describe("live production smoke", () => {
     expect(workflow).toContain("/gu/admission");
     expect(workflow).toContain("expected 404");
   });
+
+  it("proves the unauthenticated admin boundary in the deployed Worker", () => {
+    expect(workflow).toContain("/admin/login");
+    expect(workflow).toContain("%{url_effective}");
+    expect(workflow).toContain("Unauthenticated /admin ended at");
+  });
+
+  it("requires the production security headers the Next config promises", () => {
+    expect(workflow).toContain("content-security-policy:");
+    expect(workflow).toContain("strict-transport-security:");
+    expect(workflow).toContain("x-content-type-options:");
+    expect(workflow).toContain("x-frame-options:");
+    expect(workflow).toContain("referrer-policy:");
+    expect(workflow).toContain("nosniff");
+    expect(workflow).toContain("DENY");
+  });
 });
