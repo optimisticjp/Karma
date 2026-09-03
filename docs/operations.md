@@ -26,9 +26,12 @@ Provider limits change: treat this table as a prompt to check, not as fact.
 - **Weekly:** the backup workflow exports every current **public application
   table**, encrypts the archive with `BACKUP_ENCRYPTION_PASSPHRASE`, and keeps
   only the encrypted GitHub artifact for 90 days. A missing `DATABASE_URL` or
-  encryption passphrase fails in an explicit preflight before export. Download
-  an encrypted copy occasionally and keep one offline together with the
-  passphrase in the institution's password manager.
+  encryption passphrase fails in an explicit preflight before export. **As of
+  2026-09-03 the repository `DATABASE_URL` Actions secret is still the owner-side
+  blocker, so the workflow is correctly failing closed rather than producing a
+  partial backup.** Once the secret is added, run it manually, download one
+  encrypted artifact and prove an offline decrypt/restore before calling backup
+  recovery operational.
 - **Monthly:** open `/en` and `/gu` on a phone, submit a test application,
   check Search Console for coverage errors. Also open `/admin/team` and
   confirm the admin list matches who should actually have access. A
@@ -58,6 +61,16 @@ client RLS policies**. Their table ACLs grant the application data path to the
 server-side service role, not `anon` or `authenticated`. Supabase therefore
 reports `rls_enabled_no_policy` at INFO level for these tables; in Karma this is
 the intended deny-by-default design, not a missing-policy bug.
+
+### 2026-09-03 advisor follow-up
+A fresh Supabase advisor pass confirmed the deny-by-default RLS posture and the
+one accepted Auth warning: leaked-password protection remains unavailable on
+the current plan. The performance advisor also reports several foreign keys
+without covering indexes. Production data is still tiny and the current stats
+do not justify mass-adding indexes to every audit/reference foreign key. Treat
+those notices as a growth watchlist: add indexes through a tracked Drizzle
+migration when real query plans or table growth show a hot path, rather than
+blindly satisfying the linter and increasing write/storage overhead.
 
 ## Seeding is non-destructive about operator data
 `npm run db:seed` inserts missing courses and, on a course that already exists,
@@ -107,6 +120,15 @@ more detail, add it to the log message, never the payload.
   Resend does **not** make the site unhealthy during workers.dev testing.
   `checks.email` remains visible as notification-readiness telemetry, and
   `dbViaHyperdrive` remains visible as database-route telemetry.
+- CI now runs `npm audit --omit=dev --audit-level=high` through
+  `npm run audit:prod`, so a known high/critical vulnerability in a shipped
+  production dependency blocks the build. The full `npm ci` audit summary may
+  still mention development/transitive findings; triage those separately rather
+  than using `npm audit fix --force` blindly.
+- The live production smoke workflow now proves more than public route uptime:
+  unauthenticated `/admin` must finish at `/admin/login`, and production must
+  emit the CSP, HSTS, `nosniff`, frame-denial and referrer-policy headers promised
+  by `next.config.ts`.
 - Upcoming batches come from the real batch query and are cached at the edge;
   `DEMO_MODE=false` on the production Worker means sample inventory cannot be
   substituted for production batch rows.
@@ -121,6 +143,16 @@ more detail, add it to the log message, never the payload.
 - Sample proof used by the public preview follows the centralized provenance
   registry and stays out of factual JSON-LD/SEO claims. Sample form responses
   and sample batch inventory are not production fallbacks.
+
+## GitHub repository controls
+The repository's written workflow is feature branch → pull request → green CI →
+merge, but a direct repository check on **2026-09-03** found `main` itself is not
+protected. The current ChatGPT GitHub integration can read that setting but
+cannot write branch-protection/ruleset configuration. Enable protection in
+GitHub so the technical control matches the written contract: block direct
+pushes to `main`, require a pull request, and require the CI jobs (`build` and
+`cloudflare-runtime`) before merge. Keep the existing post-merge live production
+smoke as an operational deployment check rather than a PR status requirement.
 
 ## Security dashboard follow-up
 The 2026-09-01 Supabase advisor pass is clear of the function-execution and

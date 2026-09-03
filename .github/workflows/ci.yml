@@ -8,12 +8,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Audit production dependencies
+        run: npm run audit:prod
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
@@ -45,8 +47,8 @@ jobs:
       # preview exercises the same request-time database path as production.
       CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE: "postgres://postgres:postgres@127.0.0.1:5432/karma?sslmode=disable"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm

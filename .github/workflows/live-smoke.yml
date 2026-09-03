@@ -85,6 +85,35 @@ jobs:
             check_200 "$path"
           done
 
+      - name: Verify admin boundary and security headers
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_URL="${CONFIGURED_SITE_URL:-https://karma-design-studio.essanciaonline.workers.dev}"
+          BASE_URL="${BASE_URL%/}"
+
+          login_code="$(curl --connect-timeout 10 --max-time 30 --silent --show-error --output /dev/null --write-out '%{http_code}' "${BASE_URL}/admin/login")"
+          test "$login_code" = "200" || { echo "/admin/login returned ${login_code}"; exit 1; }
+
+          final_url="$(curl --connect-timeout 10 --max-time 30 --silent --show-error --location --output /dev/null --write-out '%{url_effective}' "${BASE_URL}/admin")"
+          case "$final_url" in
+            "${BASE_URL}/admin/login"*) ;;
+            *) echo "Unauthenticated /admin ended at ${final_url}, expected /admin/login"; exit 1 ;;
+          esac
+
+          curl --connect-timeout 10 --max-time 30 --silent --show-error --dump-header /tmp/headers --output /dev/null "${BASE_URL}/en"
+          for header in \
+            "content-security-policy:" \
+            "strict-transport-security:" \
+            "x-content-type-options:" \
+            "x-frame-options:" \
+            "referrer-policy:"
+          do
+            grep -qi "^${header}" /tmp/headers || { echo "Missing security header: ${header}"; exit 1; }
+          done
+          grep -qi '^x-content-type-options:[[:space:]]*nosniff' /tmp/headers
+          grep -qi '^x-frame-options:[[:space:]]*DENY' /tmp/headers
+
       - name: Verify real localized 404
         shell: bash
         run: |

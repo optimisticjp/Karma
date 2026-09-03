@@ -41,25 +41,34 @@ decision. Full setup — Supabase Auth settings, Cloudflare build variables, the
 Hyperdrive binding — is in **docs/admin-architecture.md**.
 
 ## Deploy
-Full walkthrough in **docs/deployment.md** (Supabase → Hyperdrive → Resend →
-Cloudflare build). CI, weekly DB backups and the daily digest email run from
-`.github/workflows/`. R2 and Turnstile are deliberately deferred, and the
-custom domain is a launch step that is **not** connected yet; the live URL is
+Full walkthrough in **docs/deployment.md** (Supabase → Hyperdrive → Turnstile →
+Resend → Cloudflare build). CI, weekly DB backups and the digest email workflow
+live in `.github/workflows/`. Turnstile is active on the current Workers.dev
+review hostname. Resend scheduling and private R2 storage are deliberately
+deferred, and the custom domain is a launch step that is **not** connected yet;
+the live review URL is
 `https://karma-design-studio.essanciaonline.workers.dev`.
 
 ## Production readiness, in one glance
-In production the site **fails closed**: without a database, Supabase Auth or
-`TURNSTILE_SECRET_KEY`, the APIs return 503 and the UI routes people to
-WhatsApp instead of pretending. `/api/health` returns 503 until everything is
-configured: point your uptime monitor at it. Turnstile is not configured yet,
-so a 503 there is the expected state, not a fault.
-Sample data and demo form responses exist only in dev (`ALLOW_DEMO_MODE=true`
-enables them on a staging deploy, never production). The console shows an
-honest "not configured" state rather than a plausible zero. Run `npm test`
-(271 tests across 26 files: EN/GU catalog parity, permissions, account
-invariants, the auth guard's six states, invitation validation, audit hygiene,
-the sample-content policy and structured-data discipline) before committing: CI
-enforces it.
+In production the site **fails closed**: if the database, Supabase Auth or
+Turnstile request path is unavailable, `/api/health` returns 503 and public form
+APIs do not fall back to demo data. Deferred Resend does not make the current
+Workers.dev deployment unhealthy; email readiness stays visible separately in
+the health payload. Sample data and demo form responses exist only in dev
+(`ALLOW_DEMO_MODE=true` enables them on a staging deploy, never production).
+The console shows an honest "not configured" state rather than a plausible
+zero.
+
+Run the full local gate before committing:
+
+```bash
+npm run typecheck && npm run lint && npm test && npm run audit:prod && npm run build
+```
+
+The test suite is intentionally broad and grows with the product, so this file
+does not pin a test-count number that will immediately go stale. CI enforces the
+same core checks and separately boots the actual OpenNext/Cloudflare Worker
+against migrated PostgreSQL.
 
 ## Read next
 - `CLAUDE.md` — rules for every Claude Code session (start here)
@@ -71,14 +80,15 @@ enforces it.
   checklist the owner still has to work through
 - `docs/karma-master-plan-final.md` — the full strategy this implements
 - `docs/phase-prompts.md` — paste-ready prompts for phases 2-5
-- `docs/content-checklist.md` — the 16 owner questions + photo shoot list
-  that block launch (code is not the bottleneck; answers and photos are)
+- `docs/content-checklist.md` — the owner-only facts/media/approval handoff that
+  blocks launch where code cannot manufacture the answer
 
 ## Scripts
 | `npm run …` | Does |
 | --- | --- |
 | `dev` / `build` / `start` | Next.js dev / production build / serve |
 | `typecheck` / `lint` | `tsc --noEmit` / ESLint |
+| `test` / `audit:prod` | Vitest suite / high-severity production dependency audit |
 | `db:generate` / `db:migrate` / `db:seed` / `db:backup` / `db:studio` | Drizzle + Supabase Postgres |
 | `admin:bootstrap` | Create the single Owner account (invitation-only) |
 | `preview` / `deploy` / `upload` | OpenNext's delegated path — **local experimentation only.** Production deploys from Git with `OPEN_NEXT_DEPLOY=true npx wrangler deploy --keep-vars`; see docs/deployment.md §6 |

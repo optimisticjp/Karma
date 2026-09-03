@@ -1,14 +1,17 @@
 import { defineConfig } from "vitest/config";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src"),
+      "@": path.resolve(rootDir, "src"),
       // `server-only` throws by design outside a React Server Component, which
       // would stop a Node test runner from importing any server module. The
       // stub keeps the guard real in the app and inert in tests.
-      "server-only": path.resolve(__dirname, "tests/stubs/server-only.ts")
+      "server-only": path.resolve(rootDir, "tests/stubs/server-only.ts")
     }
   },
   /* tsconfig sets jsx: "preserve" because Next.js does its own transform.
