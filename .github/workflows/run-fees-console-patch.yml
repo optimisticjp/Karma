@@ -6,6 +6,7 @@ on:
       - feat/fees-and-console-ux
     paths:
       - .github/workflows/run-fees-console-patch.yml
+      - .github/scripts/fix_set_based_test.py
 
 permissions:
   contents: write
