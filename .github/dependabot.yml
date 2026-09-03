@@ -1,0 +1,43 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "04:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 6
+    groups:
+      production-maintenance:
+        dependency-type: production
+        update-types:
+          - patch
+          - minor
+      development-maintenance:
+        dependency-type: development
+        update-types:
+          - patch
+          - minor
+    ignore:
+      # Karma is deliberately pinned to the supported Next 15 maintenance line
+      # until OpenNext/Hyperdrive compatibility is explicitly re-qualified.
+      - dependency-name: next
+        update-types:
+          - version-update:semver-major
+      - dependency-name: eslint-config-next
+        update-types:
+          - version-update:semver-major
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "04:15"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 3
+    groups:
+      github-actions-maintenance:
+        patterns:
+          - "*"
