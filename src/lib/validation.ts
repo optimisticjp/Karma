@@ -63,7 +63,7 @@ export const admissionSchema = z
     utmSource: z.string().max(80).optional().or(z.literal("")),
     utmCampaign: z.string().max(80).optional().or(z.literal("")),
     turnstileToken: z.string().optional(),
-    idempotencyKey: z.string().uuid().optional(),
+    idempotencyKey: z.string().uuid().optional()
   })
   .superRefine((v, ctx) => {
     if (v.ageBand === "under18" && (!v.guardianName || v.guardianName.length < 2)) {
@@ -104,9 +104,7 @@ export const briefSchema = z.object({
     .or(z.literal(""))
     .refine((s) => !s || isoDateNotPast(s), "invalid date"),
   details: z.string().trim().max(2000).optional().or(z.literal("")),
-  startedAt: z.coerce.number(),
-  turnstileToken: z.string().optional(),
-  website: z.string().optional()
+  turnstileToken: z.string().optional()
 });
 
 export type BriefInput = z.infer<typeof briefSchema>;
