@@ -128,10 +128,8 @@ export function AdmissionForm({
   const [token, setToken] = useState<string | undefined>();
   const [done, setDone] = useState<{ reference: string; waUrl: string } | null>(null);
 
-  const startedAt = useRef(Date.now());
   const idemKey = useRef<string>("");
   const utm = useRef({ utmSource: "", utmCampaign: "" });
-  const honeypot = useRef<HTMLInputElement>(null);
   const stepHeading = useRef<HTMLHeadingElement>(null);
   const successHeading = useRef<HTMLHeadingElement>(null);
 
@@ -313,10 +311,8 @@ export function AdmissionForm({
             ? timingFor(data.preferredSchedule)
             : data.preferredTiming,
           termsVersion,
-          startedAt: startedAt.current,
           turnstileToken: token,
           idempotencyKey: idemKey.current,
-          website: honeypot.current?.value ?? "",
           utmSource: utm.current.utmSource || context?.src || "",
           utmCampaign: utm.current.utmCampaign
         })
@@ -850,12 +846,6 @@ export function AdmissionForm({
                 </span>
               </label>
               {err("terms")}
-            </div>
-
-            {/* Honeypot */}
-            <div className="hidden" aria-hidden="true">
-              <label htmlFor="adm-website">{t("fields.website")}</label>
-              <input ref={honeypot} id="adm-website" type="text" tabIndex={-1} autoComplete="off" />
             </div>
 
             <TurnstileWidget onToken={setToken} />

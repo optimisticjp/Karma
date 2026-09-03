@@ -65,9 +65,14 @@ describe("nothing that protects a submission was traded for density", () => {
   it("keeps every public-form defence", () => {
     /* Each of these is load-bearing, and each is one careless "simplification"
        away from disappearing during a layout pass. */
-    expect(source, "honeypot").toContain("honeypot");
-    expect(source, "minimum fill-time window").toContain("startedAt");
     expect(source, "client idempotency key").toContain("idempotencyKey");
+    expect(source, "saved draft for recoverable retries").toContain("DRAFT_KEY");
+    const route = stripComments(read("src/app/api/admission/route.ts"));
+    expect(route, "server Turnstile verification").toContain("verifyTurnstile");
+    expect(route, "server rate limiting").toContain("rateLimit");
+    expect(route, "server idempotency").toContain("idempotencyKey");
+    /* A success sentinel that bypasses persistence is explicitly forbidden. */
+    expect(route).not.toContain("KDS-RECEIVED");
     expect(source, "versioned admission norms").toContain("termsVersion");
     expect(source, "guardian mobile, required of every applicant").toContain("guardianPhone");
     /* The guardian number may not simply be the applicant's own again. */

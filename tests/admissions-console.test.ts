@@ -80,14 +80,14 @@ describe("admissions CRM validation", () => {
   });
 
   it("rejects an under-18 manual enquiry without guardian details", () => {
-    expect(
-      validateManualEnquiry({
-        fullName: "Student",
-        whatsapp: "9876543210",
-        heardFrom: "phone",
-        ageBand: "under18"
-      })
-    ).toEqual({ ok: false });
+    const result = validateManualEnquiry({
+      fullName: "Student",
+      whatsapp: "9876543210",
+      heardFrom: "phone",
+      ageBand: "under18"
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.invalidFields).toEqual(["guardianName", "guardianPhone"]);
   });
 
   it("accepts valid assignment and follow-up changes", () => {

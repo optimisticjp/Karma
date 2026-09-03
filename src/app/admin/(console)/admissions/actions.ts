@@ -24,10 +24,20 @@ export type AdmissionsState = {
     | "updated"
     | "noteAdded"
     | "created";
+  values?: Record<string, string>;
+  invalidFields?: string[];
 };
 
 const err = (message: AdmissionsState["message"]): AdmissionsState => ({ status: "error", message });
 const ok = (message: AdmissionsState["message"]): AdmissionsState => ({ status: "success", message });
+
+function formSnapshot(formData: FormData): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const [key, value] of formData.entries()) {
+    if (typeof value === "string") result[key] = value;
+  }
+  return result;
+}
 
 function pgCode(error: unknown): string | null {
   if (!error || typeof error !== "object" || !("code" in error)) return null;
@@ -64,8 +74,9 @@ export async function createManualEnquiryAction(
   _prev: AdmissionsState,
   formData: FormData
 ): Promise<AdmissionsState> {
+  const submittedValues = formSnapshot(formData);
   const auth = await authorizeAction({ permission: "applications.manage" });
-  if (!auth.ok) return err("denied");
+  if (!auth.ok) return { ...err("denied"), values: submittedValues };
 
   const parsed = validateManualEnquiry({
     fullName: formData.get("fullName"),
@@ -86,21 +97,23 @@ export async function createManualEnquiryAction(
     assignedTo: formData.get("assignedTo"),
     nextFollowUp: formData.get("nextFollowUp")
   });
-  if (!parsed.ok) return err("invalid");
+  if (!parsed.ok) {
+    return { ...err("invalid"), values: submittedValues, invalidFields: parsed.invalidFields };
+  }
 
   const db = getDb();
-  if (!db) return err("generic");
+  if (!db) return { ...err("generic"), values: submittedValues };
 
   try {
     const d = parsed.value;
-    if (!(await validAssignee(db, d.assignedTo))) return err("missing");
+    if (!(await validAssignee(db, d.assignedTo))) return { ...err("missing"), values: submittedValues };
     if (d.courseSlug) {
       const course = await db
         .select({ slug: schema.courses.slug })
         .from(schema.courses)
         .where(eq(schema.courses.slug, d.courseSlug))
         .limit(1);
-      if (!course[0]) return err("missing");
+      if (!course[0]) return { ...err("missing"), values: submittedValues };
     }
 
     const previous = await db
@@ -161,7 +174,7 @@ export async function createManualEnquiryAction(
       );
     });
   } catch (error) {
-    return mapDbError(error, "[admissions] create manual enquiry");
+    return { ...mapDbError(error, "[admissions] create manual enquiry"), values: submittedValues };
   }
 
   revalidatePath("/admin/admissions");

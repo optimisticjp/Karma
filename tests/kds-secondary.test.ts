@@ -155,9 +155,10 @@ describe("/services", () => {
     expect(source.services).toContain("<BriefForm");
     expect(source.services).toContain('t("confidential")');
     const form = read("src/components/forms/BriefForm.tsx");
-    for (const defence of ["startedAt", 'name="website"', "turnstileToken"]) {
+    for (const defence of ["TurnstileWidget", "turnstileToken", "MAX_FILES", "MAX_FILE_BYTES"]) {
       expect(form, defence).toContain(defence);
     }
+    expect(read("src/app/api/brief/route.ts")).not.toContain("KDS-B-RECEIVED");
   });
 });
 

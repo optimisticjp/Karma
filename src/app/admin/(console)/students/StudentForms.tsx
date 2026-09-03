@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import type { StudentsCopy } from "@/lib/admin/students-copy";
 import { ENROLLMENT_STATUSES, type EnrollmentStatus } from "@/lib/admin/students";
@@ -127,10 +127,43 @@ function PersonFields({
   );
 }
 
+function restoreSubmittedForm(form: HTMLFormElement, values?: Record<string, string>, invalidFields?: string[]) {
+  for (const item of Array.from(form.elements)) {
+    if (item instanceof HTMLInputElement || item instanceof HTMLSelectElement || item instanceof HTMLTextAreaElement) {
+      item.classList.remove("input-error");
+      item.removeAttribute("aria-invalid");
+    }
+  }
+  for (const [name, value] of Object.entries(values ?? {})) {
+    const item = form.elements.namedItem(name);
+    if (item instanceof HTMLInputElement && item.type === "checkbox") item.checked = value === "on" || value === "true";
+    else if (item instanceof HTMLInputElement || item instanceof HTMLSelectElement || item instanceof HTMLTextAreaElement) item.value = value;
+  }
+  let first: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null = null;
+  for (const name of invalidFields ?? []) {
+    const item = form.elements.namedItem(name);
+    if (item instanceof HTMLInputElement || item instanceof HTMLSelectElement || item instanceof HTMLTextAreaElement) {
+      item.classList.add("input-error");
+      item.setAttribute("aria-invalid", "true");
+      first ??= item;
+    }
+  }
+  first?.focus();
+}
 export function DirectAdmissionForm({ batches, copy }: { batches: BatchOption[]; copy: StudentsCopy }) {
   const [state, action] = useActionState<StudentsState, FormData>(directAdmissionAction, IDLE);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (!formRef.current || (!state.values && !state.invalidFields)) return;
+    const frame = requestAnimationFrame(() => {
+      if (formRef.current) restoreSubmittedForm(formRef.current, state.values, state.invalidFields);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [state.values, state.invalidFields]);
+
   return (
-    <form action={action} className="grid gap-5">
+    <form ref={formRef} action={action} className="grid gap-5">
       <Message state={state} copy={copy} />
       <PersonFields copy={copy} requireGuardian />
       <div className="grid gap-4 md:grid-cols-2">

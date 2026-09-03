@@ -110,9 +110,51 @@ export type ManualEnquiryInput = {
   nextFollowUp: string | null;
 };
 
+export type ManualEnquiryField =
+  | "fullName"
+  | "whatsapp"
+  | "email"
+  | "heardFrom"
+  | "guardianName"
+  | "guardianPhone"
+  | "referencePhone"
+  | "assignedTo"
+  | "nextFollowUp";
+
+export function manualEnquiryInvalidFields(input: Record<string, unknown>): ManualEnquiryField[] {
+  const invalid = new Set<ManualEnquiryField>();
+  const fullName = cleanText(input.fullName, 160);
+  const whatsapp = cleanIndianMobile(cleanText(input.whatsapp, 30));
+  const email = optionalText(input.email, 160)?.toLowerCase() ?? null;
+  const ageBand = optionalText(input.ageBand, 20);
+  const guardianName = optionalText(input.guardianName, 160);
+  const rawGuardianPhone = optionalText(input.guardianPhone, 30);
+  const guardianPhone = rawGuardianPhone ? cleanIndianMobile(rawGuardianPhone) : null;
+  const rawReferencePhone = optionalText(input.referencePhone, 30);
+  const referencePhone = rawReferencePhone ? cleanIndianMobile(rawReferencePhone) : null;
+  const assignedTo = optionalPositiveId(input.assignedTo);
+  const nextFollowUp = optionalDate(input.nextFollowUp);
+  const heardFrom = input.heardFrom;
+
+  if (fullName.length < 2) invalid.add("fullName");
+  if (!isIndianMobile(whatsapp)) invalid.add("whatsapp");
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) invalid.add("email");
+  if (assignedTo === undefined) invalid.add("assignedTo");
+  if (nextFollowUp === undefined) invalid.add("nextFollowUp");
+  if (typeof heardFrom !== "string" || !SOURCE_SET.has(heardFrom)) invalid.add("heardFrom");
+  if (guardianPhone && !isIndianMobile(guardianPhone)) invalid.add("guardianPhone");
+  if (referencePhone && !isIndianMobile(referencePhone)) invalid.add("referencePhone");
+  if (ageBand === "under18" && !guardianName) invalid.add("guardianName");
+  if (ageBand === "under18" && !guardianPhone) invalid.add("guardianPhone");
+  return [...invalid];
+}
+
 export function validateManualEnquiry(input: Record<string, unknown>):
   | { ok: true; value: ManualEnquiryInput }
-  | { ok: false } {
+  | { ok: false; invalidFields: ManualEnquiryField[] } {
+  const invalidFields = manualEnquiryInvalidFields(input);
+  if (invalidFields.length > 0) return { ok: false, invalidFields };
+
   const fullName = cleanText(input.fullName, 160);
   const whatsapp = cleanIndianMobile(cleanText(input.whatsapp, 30));
   const email = optionalText(input.email, 160)?.toLowerCase() ?? null;
@@ -132,13 +174,12 @@ export function validateManualEnquiry(input: Record<string, unknown>):
   const nextFollowUp = optionalDate(input.nextFollowUp);
   const heardFrom = input.heardFrom;
 
-  if (fullName.length < 2 || !isIndianMobile(whatsapp)) return { ok: false };
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false };
-  if (assignedTo === undefined || nextFollowUp === undefined) return { ok: false };
-  if (typeof heardFrom !== "string" || !SOURCE_SET.has(heardFrom)) return { ok: false };
-  if (guardianPhone && !isIndianMobile(guardianPhone)) return { ok: false };
-  if (referencePhone && !isIndianMobile(referencePhone)) return { ok: false };
-  if (ageBand === "under18" && (!guardianName || !guardianPhone)) return { ok: false };
+  if (assignedTo === undefined || nextFollowUp === undefined) {
+    const fallback: ManualEnquiryField[] = [];
+    if (assignedTo === undefined) fallback.push("assignedTo");
+    if (nextFollowUp === undefined) fallback.push("nextFollowUp");
+    return { ok: false, invalidFields: fallback };
+  }
 
   return {
     ok: true,

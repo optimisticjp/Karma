@@ -167,15 +167,19 @@ describe("no public surface still speaks the superseded language", () => {
     ]) {
       const src = read(file);
       expect(src, file).toContain("form-shell");
-      /* The honeypot: the brief form names the input, the admission form
-         reads it through a ref and posts it under the same key. Either way
-         the field exists and the server still checks it. */
-      expect(src, file).toMatch(/name="website"|ref=\{honeypot\}/);
-      expect(src, file).toContain("startedAt"); // minimum-time check
       expect(src, file).toContain("TurnstileWidget");
       expect(src, file).toContain('aria-live'); // the persistent error region
     }
-    expect(read("src/components/forms/AdmissionForm.tsx")).toContain("guardianPhone");
-    expect(read("src/components/forms/AdmissionForm.tsx")).toContain("termsVersion");
+    const admissionForm = read("src/components/forms/AdmissionForm.tsx");
+    const briefForm = read("src/components/forms/BriefForm.tsx");
+    expect(admissionForm).toContain("idempotencyKey");
+    expect(admissionForm).toContain("guardianPhone");
+    expect(admissionForm).toContain("termsVersion");
+    expect(briefForm).toContain("MAX_FILES");
+    expect(briefForm).toContain("MAX_FILE_BYTES");
+    /* Neither endpoint may claim success through the old non-persisting
+       anti-bot sentinels. */
+    expect(read("src/app/api/admission/route.ts")).not.toContain("KDS-RECEIVED");
+    expect(read("src/app/api/brief/route.ts")).not.toContain("KDS-B-RECEIVED");
   });
 });

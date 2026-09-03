@@ -25,15 +25,18 @@ const stripComments = (source: string) =>
  * ------------------------------------------------------------------ */
 
 describe("the admission form keeps every defence it had", () => {
-  it("still runs the layered public-form defence", () => {
-    for (const guard of ["honeypot", "TurnstileWidget", "idemKey", "startedAt"]) {
+  it("still runs layered public-form defence without acknowledging unstored submissions", () => {
+    for (const guard of ["TurnstileWidget", "idemKey", "idempotencyKey"]) {
       expect(form, guard).toContain(guard);
     }
-    /* The minimum-fill window is enforced on the server, where a bot cannot
-       skip it. The client only reports when the form was opened. */
     const route = read("src/app/api/admission/route.ts");
-    expect(route).toContain("Date.now() - d.startedAt");
-    expect(read("src/lib/validation.ts")).toContain("startedAt");
+    for (const guard of ["verifyTurnstile", "rateLimit", "idempotencyKey"]) {
+      expect(route, guard).toContain(guard);
+    }
+    /* A public success must come from the persistence path, never a timing or
+       honeypot shortcut that can discard a legitimate autofilled submission. */
+    expect(route).not.toContain("KDS-RECEIVED");
+    expect(route).not.toContain("Date.now() - d.startedAt");
   });
 
   it("still collects the required parent/guardian mobile", () => {
