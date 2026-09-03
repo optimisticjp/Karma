@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import type { StudentsCopy } from "@/lib/admin/students-copy";
+import type { FeesCopy } from "@/lib/admin/fees-copy";
+import { FEE_METHODS } from "@/lib/admin/fees";
 import { ENROLLMENT_STATUSES, type EnrollmentStatus } from "@/lib/admin/students";
 import {
   addEnrollmentAction,
@@ -16,7 +18,7 @@ import {
 
 const IDLE: StudentsState = { status: "idle", message: null };
 
-export type BatchOption = { id: number; label: string; courseName: string; seats: number; seatsTaken: number; status: string };
+export type BatchOption = { id: number; label: string; courseName: string; seats: number; seatsTaken: number; status: string; feeTotal: number | null; feeAdmission: number | null; feeBalanceDueDays: number | null };
 export type EnquiryOption = { id: number; reference: string; fullName: string; courseSlug: string | null };
 export type StudentEditValue = {
   id: number;
@@ -150,15 +152,19 @@ function restoreSubmittedForm(form: HTMLFormElement, values?: Record<string, str
   }
   first?.focus();
 }
-export function DirectAdmissionForm({ batches, copy }: { batches: BatchOption[]; copy: StudentsCopy }) {
+export function DirectAdmissionForm({ batches, copy, feeCopy }: { batches: BatchOption[]; copy: StudentsCopy; feeCopy?: FeesCopy }) {
   const [state, action] = useActionState<StudentsState, FormData>(directAdmissionAction, IDLE);
   const formRef = useRef<HTMLFormElement>(null);
+  const [selectedBatchId, setSelectedBatchId] = useState<number | null>(null);
+  const selectedBatch = batches.find((batch) => batch.id === selectedBatchId) ?? null;
 
   useEffect(() => {
     if (!formRef.current || (!state.values && !state.invalidFields)) return;
     const frame = requestAnimationFrame(() => {
       if (formRef.current) restoreSubmittedForm(formRef.current, state.values, state.invalidFields);
     });
+    const restoredBatchId = Number(state.values?.batchId ?? "");
+    if (Number.isInteger(restoredBatchId) && restoredBatchId > 0) setSelectedBatchId(restoredBatchId);
     return () => cancelAnimationFrame(frame);
   }, [state.values, state.invalidFields]);
 
@@ -167,11 +173,55 @@ export function DirectAdmissionForm({ batches, copy }: { batches: BatchOption[];
       <Message state={state} copy={copy} />
       <PersonFields copy={copy} requireGuardian />
       <div className="grid gap-4 md:grid-cols-2">
-        <BatchField batches={batches} copy={copy} id="direct-batch" />
+        <BatchField batches={batches} copy={copy} id="direct-batch" onChange={setSelectedBatchId} />
         <Field label={copy.joinedOn} htmlFor="direct-joined"><input id="direct-joined" name="joinedOn" type="date" className="input" /></Field>
       </div>
+      {feeCopy ? <AdmissionFeeSetup key={selectedBatchId ?? "none"} batch={selectedBatch} copy={feeCopy} /> : null}
       <div><Submit label={copy.createAdmission} busy={copy.saving} /></div>
     </form>
+  );
+}
+
+function AdmissionFeeSetup({ batch, copy }: { batch: BatchOption | null; copy: FeesCopy }) {
+  return (
+    <section className="panel">
+      <div className="panel-head"><h3 className="text-h4">{copy.admissionSetupTitle}</h3></div>
+      <div className="panel-body grid gap-4">
+        <p className="form-note">{copy.admissionSetupHint}</p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Field label={copy.agreedFeeTotal} htmlFor="direct-fee-total">
+            <input id="direct-fee-total" name="agreedFeeTotal" type="number" min={0} step={1} className="input" defaultValue={batch?.feeTotal ?? ""} inputMode="numeric" />
+          </Field>
+          <Field label={copy.agreedAdmissionAmount} htmlFor="direct-fee-admission">
+            <input id="direct-fee-admission" name="agreedAdmissionAmount" type="number" min={0} step={1} className="input" defaultValue={batch?.feeAdmission ?? ""} inputMode="numeric" />
+          </Field>
+          <Field label={copy.agreedBalanceDueOn} htmlFor="direct-fee-due-on">
+            <input id="direct-fee-due-on" name="agreedBalanceDueOn" type="date" className="input" />
+          </Field>
+        </div>
+        <p className="form-note">{copy.courseDefaultNote}</p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Field label={copy.discountTotal} htmlFor="direct-fee-discount">
+            <input id="direct-fee-discount" name="feeDiscount" type="number" min={0} step={1} className="input" defaultValue={0} inputMode="numeric" />
+          </Field>
+          <Field label={copy.receivedNow} htmlFor="direct-fee-received">
+            <input id="direct-fee-received" name="feeReceived" type="number" min={0} step={1} className="input" defaultValue={0} inputMode="numeric" />
+          </Field>
+          <Field label={copy.method} htmlFor="direct-fee-method">
+            <select id="direct-fee-method" name="feeMethod" className="input" defaultValue="">
+              <option value="">—</option>{FEE_METHODS.map((method) => <option key={method} value={method}>{copy.methods[method]}</option>)}
+            </select>
+          </Field>
+        </div>
+        <details className="border-t border-rule pt-3">
+          <summary className="cursor-pointer text-smallmeta font-semibold">{copy.moreOptions}</summary>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <Field label={copy.receiptNo} htmlFor="direct-fee-receipt"><input id="direct-fee-receipt" name="feeReceiptNo" className="input" maxLength={40} /></Field>
+            <Field label={copy.notes} htmlFor="direct-fee-note"><input id="direct-fee-note" name="feeNote" className="input" maxLength={300} /></Field>
+          </div>
+        </details>
+      </div>
+    </section>
   );
 }
 
@@ -247,10 +297,10 @@ export function EnrollmentStatusForm({ enrollmentId, status, completedOn, copy }
   );
 }
 
-function BatchField({ batches, copy, id }: { batches: BatchOption[]; copy: StudentsCopy; id: string }) {
+function BatchField({ batches, copy, id, onChange }: { batches: BatchOption[]; copy: StudentsCopy; id: string; onChange?: (batchId: number | null) => void }) {
   return (
     <Field label={copy.selectBatch} htmlFor={id}>
-      <select id={id} name="batchId" className="input" required defaultValue="">
+      <select id={id} name="batchId" className="input" required defaultValue="" onChange={(event) => onChange?.(event.target.value ? Number(event.target.value) : null)}>
         <option value="" disabled>{copy.choose}</option>
         {batches.map((b) => <option key={b.id} value={b.id}>{b.courseName} · {b.label} · {Math.max(0, b.seats - b.seatsTaken)} seats</option>)}
       </select>

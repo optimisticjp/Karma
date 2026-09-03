@@ -14,7 +14,7 @@ import { printCopy } from "@/lib/admin/print-copy";
 import { kolkataDate } from "@/lib/admin/dates";
 import { AgreementForm, FeeEntryForm } from "./FeeForm";
 
-type Props = { searchParams: Promise<{ q?: string; pending?: string }> };
+type Props = { searchParams: Promise<{ q?: string; status?: string }> };
 
 type FeeRow = {
   id: number;
@@ -49,7 +49,9 @@ export default async function FeesPage({ searchParams }: Props) {
   if (!db) return <div className="max-w-[78rem]"><PageHead title={copy.title} context={copy.lede} /><p className="alert alert-error mt-8">Database unavailable.</p></div>;
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q.trim().toLowerCase().slice(0, 120) : "";
-  const pendingOnly = params.pending === "1";
+  const statusFilter = ["pending", "overdue", "paid"].includes(params.status ?? "")
+    ? params.status as "pending" | "overdue" | "paid"
+    : "all";
 
   /* The enrolments first, then only the ledger rows those enrolments own.
      The ledger read used to be `select … from fee_records` with no filter at
@@ -113,7 +115,7 @@ export default async function FeesPage({ searchParams }: Props) {
    * would disagree the first time a receipt was corrected.
    */
   const today = kolkataToday();
-  const cards = enrollments.map((enrollment) => {
+  const allCards = enrollments.map((enrollment) => {
     const rows = byEnrollment.get(enrollment.enrollmentId) ?? [];
     const summary = summariseFees(
       {
@@ -124,15 +126,23 @@ export default async function FeesPage({ searchParams }: Props) {
       rows
     );
     return { ...enrollment, rows, latest: rows[0] ?? null, summary, overdue: isOverdue(summary, today) };
-  }).filter((card) => {
-    if (pendingOnly && card.summary.balance <= 0) return false;
-    if (!q) return true;
-    return [card.fullName, card.admissionNo, card.phone, card.whatsapp ?? "", card.batchLabel].some((value) => value.toLowerCase().includes(q));
   });
 
-  const totalNet = cards.reduce((sum, card) => sum + card.summary.net, 0);
-  const totalReceived = cards.reduce((sum, card) => sum + card.summary.received, 0);
-  const totalDue = cards.reduce((sum, card) => sum + card.summary.balance, 0);
+  const totalNet = allCards.reduce((sum, card) => sum + card.summary.net, 0);
+  const totalReceived = allCards.reduce((sum, card) => sum + card.summary.received, 0);
+  const totalDue = allCards.reduce((sum, card) => sum + card.summary.balance, 0);
+  const overdueCount = allCards.filter((card) => card.overdue).length;
+
+  const cards = allCards
+    .filter((card) => {
+      if (statusFilter === "pending" && card.summary.balance <= 0) return false;
+      if (statusFilter === "overdue" && !card.overdue) return false;
+      if (statusFilter === "paid" && (card.summary.unset || card.summary.balance > 0)) return false;
+      if (!q) return true;
+      return [card.fullName, card.admissionNo, card.phone, card.whatsapp ?? "", card.batchLabel, card.courseNameEn, card.courseNameGu]
+        .some((value) => value.toLowerCase().includes(q));
+    })
+    .sort((a, b) => Number(b.overdue) - Number(a.overdue) || b.summary.balance - a.summary.balance || a.fullName.localeCompare(b.fullName));
 
   return (
     <div className="max-w-[80rem]">
@@ -154,11 +164,22 @@ export default async function FeesPage({ searchParams }: Props) {
           <span className="kv-label">{copy.totalPending}</span>
           <span className="kv-value data-num">{money(totalDue)}</span>
         </div>
+        <div>
+          <span className="kv-label">{copy.overdueCount}</span>
+          <span className="kv-value data-num">{overdueCount}</span>
+        </div>
       </div>
 
-      <form method="get" className="toolbar mt-3 grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_auto] md:items-end">
+      <form method="get" className="toolbar mt-3 grid-cols-[1fr_auto] md:grid-cols-[1fr_14rem_auto] md:items-end">
         <Field label={copy.search} htmlFor="fee-search"><input id="fee-search" name="q" className="input" defaultValue={params.q ?? ""} placeholder={copy.searchPlaceholder} /></Field>
-        <label className="choice-chip text-smallmeta"><input type="checkbox" name="pending" value="1" className="size-4 accent-vermilion" defaultChecked={pendingOnly} />{copy.pendingOnly}</label>
+        <Field label={copy.filterStatus} htmlFor="fee-status">
+          <select id="fee-status" name="status" className="input" defaultValue={statusFilter}>
+            <option value="all">{copy.filterAll}</option>
+            <option value="pending">{copy.filterPending}</option>
+            <option value="overdue">{copy.filterOverdue}</option>
+            <option value="paid">{copy.filterPaid}</option>
+          </select>
+        </Field>
         <button className="btn btn-primary" type="submit">{copy.show}</button>
       </form>
       {!canManage ? <p className="form-note mt-3">{copy.viewOnly}</p> : null}
@@ -284,15 +305,16 @@ export default async function FeesPage({ searchParams }: Props) {
                 </details>
               ) : <p className="form-note">{copy.noLedger}</p>}
 
-              {canManage ? (
-                <details className="border-t border-rule pt-5">
-                  <summary className="cursor-pointer font-semibold">{copy.recordPayment}</summary>
-                  <div className="mt-5"><FeeEntryForm enrollmentId={card.enrollmentId} courseFee={card.summary.agreed ?? 0} discount={card.summary.discount} dueDate={card.summary.nextDueOn} copy={copy} /></div>
-                </details>
+              {canManage && !card.summary.unset ? (
+                <section className="border-t border-rule pt-5" aria-labelledby={`payment-${card.enrollmentId}`}>
+                  <h4 id={`payment-${card.enrollmentId}`} className="font-semibold">{copy.recordPayment}</h4>
+                  <div className="mt-4"><FeeEntryForm enrollmentId={card.enrollmentId} discount={card.summary.discount} dueDate={card.summary.nextDueOn} copy={copy} /></div>
+                </section>
               ) : null}
+              {canManage && card.summary.unset ? <p className="alert alert-warn">{copy.agreementNeeded}</p> : null}
 
               {canManage ? (
-                <details className="border-t border-rule pt-5">
+                <details className="border-t border-rule pt-5" open={card.summary.unset}>
                   <summary className="cursor-pointer font-semibold">{copy.editAgreement}</summary>
                   <div className="mt-5">
                     <p className="form-note mb-4">{copy.agreementHint}</p>

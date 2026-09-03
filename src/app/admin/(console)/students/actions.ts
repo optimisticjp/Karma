@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache";
 import { and, eq, inArray, lt, ne, sql } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { authorizeAction } from "@/lib/auth/guard";
-import { auditValues, STUDENT_AUDIT_ACTIONS } from "@/lib/admin/audit";
+import { auditValues, FEE_AUDIT_ACTIONS, STUDENT_AUDIT_ACTIONS } from "@/lib/admin/audit";
 import { agreementAuditValues, agreementForBatch } from "@/lib/admin/enrollment-agreement";
 import { pad } from "@/lib/utils";
+import { validateAdmissionFeeSetup, type AdmissionFeeSetupInput } from "@/lib/admin/fees";
 import { kolkataDate } from "@/lib/admin/dates";
 import {
   positiveId,
@@ -67,6 +68,17 @@ export async function directAdmissionAction(
   const submittedValues = formSnapshot(formData);
   const auth = await authorizeAction({ permission: "students.manage" });
   if (!auth.ok) return { ...errorState("denied"), values: submittedValues };
+
+  const feeFieldNames = ["agreedFeeTotal", "agreedAdmissionAmount", "agreedBalanceDueOn", "feeDiscount", "feeReceived", "feeMethod", "feeReceiptNo", "feeNote"];
+  const hasFeeSetup = feeFieldNames.some((name) => formData.has(name));
+  let feeSetup: AdmissionFeeSetupInput | null = null;
+  if (hasFeeSetup) {
+    const feeAuth = await authorizeAction({ permission: "fees.manage" });
+    if (!feeAuth.ok) return { ...errorState("denied"), values: submittedValues };
+    const feeParsed = validateAdmissionFeeSetup(formObject(formData));
+    if (!feeParsed.ok) return { ...errorState("invalid"), values: submittedValues, invalidFields: feeFieldNames };
+    feeSetup = feeParsed.value;
+  }
 
   const parsed = validateDirectAdmission(formObject(formData));
   if (!parsed.ok) return { ...errorState("invalid"), values: submittedValues, invalidFields: parsed.invalidFields };
@@ -132,12 +144,49 @@ export async function directAdmissionAction(
          later must never reprice this student. */
       const joinDate = d.joinedOn ?? kolkataDate();
       const agreement = await agreementForBatch(tx, d.batchId, joinDate);
+      if (feeSetup) {
+        agreement.agreedFeeTotal = feeSetup.agreedFeeTotal ?? agreement.agreedFeeTotal;
+        agreement.agreedAdmissionAmount = feeSetup.agreedAdmissionAmount ?? agreement.agreedAdmissionAmount;
+        agreement.agreedBalanceDueOn = feeSetup.agreedBalanceDueOn ?? agreement.agreedBalanceDueOn;
+        if (agreement.agreedFeeTotal == null && (agreement.agreedAdmissionAmount != null || feeSetup.discount > 0 || feeSetup.received > 0)) throw new FeeSetupInvalidError();
+        if (agreement.agreedFeeTotal != null) {
+          if (agreement.agreedAdmissionAmount != null && agreement.agreedAdmissionAmount > agreement.agreedFeeTotal) throw new FeeSetupInvalidError();
+          if (feeSetup.discount > agreement.agreedFeeTotal) throw new FeeSetupInvalidError();
+          if (feeSetup.received > agreement.agreedFeeTotal - feeSetup.discount) throw new FeeSetupInvalidError();
+          if (agreement.agreedAdmissionAmount != null && agreement.agreedAdmissionAmount >= agreement.agreedFeeTotal && feeSetup.agreedBalanceDueOn == null) agreement.agreedBalanceDueOn = null;
+        }
+      }
       const enrollment = await tx
         .insert(schema.enrollments)
         .values({ studentId, batchId: d.batchId, status: "active", joinedOn: joinDate, ...agreement })
         .returning({ id: schema.enrollments.id });
       const enrollmentId = enrollment[0]?.id;
       if (!enrollmentId) throw new Error("enrollment insert returned no id");
+
+      if (feeSetup && agreement.agreedFeeTotal != null && (feeSetup.received > 0 || feeSetup.discount > 0 || feeSetup.notes)) {
+        const feeRows = await tx.insert(schema.feeRecords).values({
+          enrollmentId,
+          courseFee: agreement.agreedFeeTotal,
+          discount: feeSetup.discount,
+          received: feeSetup.received,
+          method: feeSetup.method,
+          receiptNo: feeSetup.receiptNo,
+          dueDate: agreement.agreedBalanceDueOn,
+          notes: feeSetup.notes
+        }).returning({ id: schema.feeRecords.id });
+        const feeRecordId = feeRows[0]?.id;
+        if (!feeRecordId) throw new Error("direct admission fee insert returned no id");
+        const receiptNo = feeSetup.receiptNo ?? (feeSetup.received > 0 ? `KDS-R-${joinDate.slice(0, 4)}-${pad(feeRecordId)}` : null);
+        if (receiptNo && !feeSetup.receiptNo) await tx.update(schema.feeRecords).set({ receiptNo }).where(eq(schema.feeRecords.id, feeRecordId));
+        await tx.insert(schema.auditLogs).values(auditValues({
+          actor: String(auth.session.staff.id),
+          action: FEE_AUDIT_ACTIONS.recordCreated,
+          entity: "fee_record",
+          entityId: feeRecordId,
+          newValue: { enrollmentId, courseFee: agreement.agreedFeeTotal, discount: feeSetup.discount, received: feeSetup.received, method: feeSetup.method, receiptNo, dueDate: agreement.agreedBalanceDueOn },
+          reason: feeSetup.notes ?? "fee recorded at direct admission"
+        }));
+      }
 
       if (seat[0].status === "open" && seat[0].seatsTaken >= seat[0].seats) {
         await tx.update(schema.batches).set({ status: "full" }).where(eq(schema.batches.id, d.batchId));
@@ -164,6 +213,7 @@ export async function directAdmissionAction(
     });
   } catch (error) {
     if (error instanceof SeatUnavailableError) return { ...errorState("seat"), values: submittedValues };
+    if (error instanceof FeeSetupInvalidError) return { ...errorState("invalid"), values: submittedValues, invalidFields: feeFieldNames };
     return { ...mapDbError(error, "[students] direct admission"), values: submittedValues };
   }
 
@@ -541,11 +591,13 @@ function formObject(formData: FormData): Record<string, unknown> {
 
 function revalidateStudentPaths() {
   revalidatePath("/admin/students");
+  revalidatePath("/admin/fees");
   revalidatePath("/admin/courses");
   revalidatePath("/admin/batches");
   revalidatePath("/admin");
 }
 
 class SeatUnavailableError extends Error {}
+class FeeSetupInvalidError extends Error {}
 class AlreadyConvertedError extends Error {}
 class MissingError extends Error {}

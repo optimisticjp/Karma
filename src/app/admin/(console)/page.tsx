@@ -74,21 +74,8 @@ export default async function TodayPage() {
   const quickActions = [
     hasPermission(session.staff, "applications.manage") ? { href: "/admin/admissions", label: t("nav.admissions") } : null,
     hasPermission(session.staff, "students.manage") ? { href: "/admin/students", label: t("nav.students") } : null,
-    hasPermission(session.staff, "attendance.manage") ? { href: "/admin/attendance", label: t("nav.attendance") } : null,
     hasPermission(session.staff, "fees.manage") ? { href: "/admin/fees", label: t("permissions.groups.fees") } : null,
-    hasPermission(session.staff, "batches.manage")
-      ? { href: "/admin/batches", label: t("nav.batches") }
-      : null,
-    hasPermission(session.staff, "courses.manage")
-      ? { href: "/admin/courses", label: t("nav.courses") }
-      : null,
-    hasPermission(session.staff, "design.manage") ? { href: "/admin/design", label: t("nav.designDesk") } : null,
-    hasPermission(session.staff, "certificates.manage") ? { href: "/admin/certificates", label: t("nav.certificates") } : null,
-    hasPermission(session.staff, "content.manage") ? { href: "/admin/content", label: t("nav.content") } : null,
-    hasPermission(session.staff, "reports.view") || hasPermission(session.staff, "audit.view") || hasPermission(session.staff, "exports.run")
-      ? { href: "/admin/reports", label: t("nav.reports") }
-      : null,
-    session.role === "owner" ? { href: "/admin/team", label: t("nav.team") } : null
+    hasPermission(session.staff, "attendance.manage") ? { href: "/admin/attendance", label: t("nav.attendance") } : null
   ].filter((item): item is { href: string; label: string } => item !== null);
 
   const dateFmt = new Intl.DateTimeFormat(session.staff.adminLocale === "gu" ? "gu-IN" : "en-IN", {
@@ -218,7 +205,7 @@ export default async function TodayPage() {
               count={c.feesOverdue}
               urgent
               emptyLabel={t("today.queueEmptyFees")}
-              moreHref="/admin/fees?pending=1"
+              moreHref="/admin/fees?status=pending"
               moreLabel={t("today.queueMore")}
             >
               {queues.fees.map((row) => (

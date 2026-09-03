@@ -22,13 +22,11 @@ function Submit({ copy }: { copy: FeesCopy }) {
 
 export function FeeEntryForm({
   enrollmentId,
-  courseFee,
   discount,
   dueDate,
   copy
 }: {
   enrollmentId: number;
-  courseFee: number;
   discount: number;
   dueDate: string | null;
   copy: FeesCopy;
@@ -38,21 +36,37 @@ export function FeeEntryForm({
     <form action={action} className="grid gap-4">
       <input type="hidden" name="enrollmentId" value={enrollmentId} />
       <Message state={state} copy={copy} />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Field label={copy.courseFee} htmlFor={`fee-total-${enrollmentId}`}><input id={`fee-total-${enrollmentId}`} name="courseFee" type="number" min={0} step={1} className="input" required defaultValue={courseFee} /></Field>
-        <Field label={copy.discount} htmlFor={`fee-discount-${enrollmentId}`}><input id={`fee-discount-${enrollmentId}`} name="discount" type="number" min={0} step={1} className="input" required defaultValue={discount} /></Field>
-        <Field label={copy.receivedNow} htmlFor={`fee-received-${enrollmentId}`}><input id={`fee-received-${enrollmentId}`} name="received" type="number" min={0} step={1} className="input" required defaultValue={0} /></Field>
+      <p className="form-note">{copy.paymentHint}</p>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={copy.receivedNow} htmlFor={`fee-received-${enrollmentId}`}>
+          <input id={`fee-received-${enrollmentId}`} name="received" type="number" min={0} step={1} className="input" required defaultValue={0} inputMode="numeric" />
+        </Field>
         <Field label={copy.method} htmlFor={`fee-method-${enrollmentId}`}>
           <select id={`fee-method-${enrollmentId}`} name="method" className="input" defaultValue="">
             <option value="">—</option>{FEE_METHODS.map((method) => <option key={method} value={method}>{copy.methods[method]}</option>)}
           </select>
         </Field>
       </div>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Field label={copy.receiptNo} htmlFor={`fee-receipt-${enrollmentId}`}><input id={`fee-receipt-${enrollmentId}`} name="receiptNo" className="input" maxLength={40} /></Field>
-        <Field label={copy.dueDate} htmlFor={`fee-due-${enrollmentId}`}><input id={`fee-due-${enrollmentId}`} name="dueDate" type="date" className="input" defaultValue={dueDate ?? ""} /></Field>
-        <Field label={copy.notes} htmlFor={`fee-note-${enrollmentId}`}><input id={`fee-note-${enrollmentId}`} name="notes" className="input" maxLength={300} /></Field>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label={copy.dueDate} htmlFor={`fee-due-${enrollmentId}`}>
+          <input id={`fee-due-${enrollmentId}`} name="dueDate" type="date" className="input" defaultValue={dueDate ?? ""} />
+        </Field>
+        <Field label={copy.notes} htmlFor={`fee-note-${enrollmentId}`}>
+          <input id={`fee-note-${enrollmentId}`} name="notes" className="input" maxLength={300} />
+        </Field>
       </div>
+      <details className="border-t border-rule pt-3">
+        <summary className="cursor-pointer text-smallmeta font-semibold">{copy.moreOptions}</summary>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <Field label={copy.discountTotal} htmlFor={`fee-discount-${enrollmentId}`}>
+            <input id={`fee-discount-${enrollmentId}`} name="discount" type="number" min={discount} step={1} className="input" defaultValue={discount} inputMode="numeric" />
+            <p className="form-note mt-1">{copy.discountHint}</p>
+          </Field>
+          <Field label={copy.receiptNo} htmlFor={`fee-receipt-${enrollmentId}`}>
+            <input id={`fee-receipt-${enrollmentId}`} name="receiptNo" className="input" maxLength={40} />
+          </Field>
+        </div>
+      </details>
       <div><Submit copy={copy} /></div>
     </form>
   );

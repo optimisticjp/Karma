@@ -572,7 +572,12 @@
       "generic": "કંઈક ખોટું થયું. ફરી પ્રયત્ન કરો, અથવા સીધા WhatsApp કરો.",
       "summaryTitle": "કૃપા કરીને આ સુધારો:",
       "guardianSame": "માતા-પિતા / વાલીનો નંબર તમારા પોતાના નંબરથી અલગ હોવો જોઈએ",
-      "terms": "આગળ વધવા માટે એડમિશન નિયમો વાંચીને સ્વીકારો"
+      "terms": "આગળ વધવા માટે એડમિશન નિયમો વાંચીને સ્વીકારો",
+      "rateLimited": "હમણાં બહુ attempts થયા છે. થોડા મિનિટ પછી ફરી try કરો.",
+      "security": "Security check expire થયું છે અથવા verify થયું નથી. તે refresh થાય પછી ફરી try કરો.",
+      "serverValidation": "Formમાં saved થયેલી કેટલીક વિગતો હવે valid નથી. એક વાર પાછળ જઈ course અને timing ફરી પસંદ કરીને submit કરો.",
+      "service": "હમણાં application service ઉપલબ્ધ નથી. તમારું form આ device પર saved છે; થોડી વાર પછી ફરી try કરો.",
+      "supportRef": "Support reference: {ref}."
     },
     "buttons": {
       "next": "આગળ",

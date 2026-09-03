@@ -122,7 +122,7 @@ export function AdmissionForm({
   const [step, setStep] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
-  const [serverError, setServerError] = useState(false);
+  const [serverError, setServerError] = useState<{ message: string; requestId?: string } | null>(null);
   const [restored, setRestored] = useState(false);
   const [fromContext, setFromContext] = useState(false);
   const [token, setToken] = useState<string | undefined>();
@@ -158,16 +158,41 @@ export function AdmissionForm({
       }
     } catch {}
     if (!idemKey.current) idemKey.current = crypto.randomUUID();
+    let resetToCourseStep = false;
     if (validContextCourse) {
+      const courseChanged = next.courseSlug !== validContextCourse;
       next = {
         ...next,
         courseSlug: validContextCourse,
-        preferredTiming: context?.timing ?? next.preferredTiming
+        preferredTiming: context?.timing ?? next.preferredTiming,
+        preferredSchedule: courseChanged ? "" : next.preferredSchedule,
+        demoSlot: courseChanged ? "" : next.demoSlot
       };
+      resetToCourseStep = courseChanged;
       setFromContext(true);
     }
+
+    /* A saved draft can outlive a staff timetable/course edit. Never carry a
+       stale slot into the review step: the API correctly rejects it, but the
+       visitor would otherwise see only a generic failure for a hidden value. */
+    const restoredCourse = courses.find((course) => course.slug === next.courseSlug);
+    if (!restoredCourse && next.courseSlug) {
+      next = { ...next, courseSlug: "", preferredSchedule: "", demoSlot: "" };
+      resetToCourseStep = true;
+    } else if (restoredCourse) {
+      if (
+        next.preferredSchedule &&
+        !restoredCourse.scheduleOptions.some((slot) => slot.key === next.preferredSchedule)
+      ) {
+        next = { ...next, preferredSchedule: "" };
+        resetToCourseStep = true;
+      }
+      if (next.demoSlot && !restoredCourse.demoSlots.some((slot) => slot.key === next.demoSlot)) {
+        next = { ...next, demoSlot: "" };
+      }
+    }
     setData(next);
-    setStep(nextStep);
+    setStep(resetToCourseStep ? 0 : nextStep);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -288,14 +313,24 @@ export function AdmissionForm({
   };
 
   const onSubmit = async () => {
-    const e = validate(3);
+    /* Revalidate every step at the final boundary. A draft can be restored
+       after the catalogue changed, so "the visitor already passed step 1" is
+       not a safe assumption. */
+    const e = Object.assign({}, validate(0), validate(1), validate(2), validate(3));
     setErrors(e);
-    if (Object.keys(e).length > 0) {
-      requestAnimationFrame(() => focusField(Object.keys(e)[0]));
+    const errorKeys = Object.keys(e);
+    if (errorKeys.length > 0) {
+      const first = errorKeys[0];
+      const targetStep =
+        ["courseSlug", "preferredTiming", "preferredSchedule"].includes(first) ? 0 :
+        ["fullName", "whatsapp", "guardianPhone"].includes(first) ? 1 :
+        ["ageBand", "guardianName", "referencePhone", "occupation", "experience", "area"].includes(first) ? 2 : 3;
+      if (targetStep !== step) go(targetStep);
+      requestAnimationFrame(() => focusField(first));
       return;
     }
     setBusy(true);
-    setServerError(false);
+    setServerError(null);
     try {
       const res = await fetch("/api/admission", {
         method: "POST",
@@ -317,8 +352,27 @@ export function AdmissionForm({
           utmCampaign: utm.current.utmCampaign
         })
       });
-      const out = (await res.json()) as { ok: boolean; reference?: string; waUrl?: string };
-      if (!res.ok || !out.ok || !out.reference) throw new Error("submit failed");
+      const out = (await res.json()) as {
+        ok: boolean;
+        reference?: string;
+        waUrl?: string;
+        error?: string;
+        requestId?: string;
+      };
+      if (!res.ok || !out.ok || !out.reference) {
+        const message =
+          out.error === "validation"
+            ? t("errors.serverValidation")
+            : out.error === "turnstile" || out.error === "turnstile_unavailable"
+              ? t("errors.security")
+              : out.error === "rate_limited"
+                ? t("errors.rateLimited")
+                : out.error === "service_unavailable"
+                  ? t("errors.service")
+                  : t("errors.generic");
+        setServerError({ message, requestId: out.requestId });
+        return;
+      }
       const waUrl = out.waUrl ?? waLink(t("success.waMessage", { ref: out.reference }));
       /* Funnel end. The course slug is an enumerable value from our own
          catalogue; nothing the visitor typed is included. */
@@ -328,7 +382,7 @@ export function AdmissionForm({
         localStorage.removeItem(DRAFT_KEY);
       } catch {}
     } catch {
-      setServerError(true);
+      setServerError({ message: t("errors.service") });
     } finally {
       setBusy(false);
     }
@@ -852,9 +906,12 @@ export function AdmissionForm({
             <p className="t-meta">{t("turnstileNote")}</p>
             <p className="t-meta">{t("responseNote")}</p>
             {serverError ? (
-              <p role="alert" className="field-error">
-                {t("errors.generic")}
-              </p>
+              <div role="alert" className="field-error">
+                <p>{serverError.message}</p>
+                {serverError.requestId ? (
+                  <p className="mt-1">{t("errors.supportRef", { ref: serverError.requestId })}</p>
+                ) : null}
+              </div>
             ) : null}
           </>
         ) : null}

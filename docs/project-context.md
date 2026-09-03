@@ -3049,3 +3049,7 @@ credentials, the Resend API key, `CRON_SECRET`, any cookie, JWT or TOTP secret.
 | `docs/phase-prompts.md` | Paste-ready prompts from an earlier phase model. | **Historical** |
 | `docs/audit-response.md` | Response to an external audit. | **Historical**, with a superseding note |
 | `README.md` | Repository front door and quickstart. | **Current** |
+
+### Front-desk fee workflow (2026-09-03)
+
+Karma Console treats fees as a front-desk ledger, not an ERP payment module. A direct admission may capture that student’s agreed total, admission amount, balance date, concession and first offline receipt in the same transaction when the operator also has `fees.manage`. Daily payment entry never accepts the agreed course fee from the receipt form; it derives the agreement from the enrolment snapshot, so recording cash cannot accidentally reprice a student. Fee status remains derived from the immutable ledger. The mobile primary destinations prioritise Today → Admissions → Students → Fees; specialist modules remain in More / the desktop rail.

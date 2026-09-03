@@ -572,7 +572,12 @@
       "generic": "Something went wrong. Please try again, or WhatsApp us directly.",
       "summaryTitle": "Please fix the following:",
       "guardianSame": "The parent / guardian number must be different from your own",
-      "terms": "Please read and accept the admission norms to continue"
+      "terms": "Please read and accept the admission norms to continue",
+      "rateLimited": "Too many attempts just now. Wait a few minutes, then try again.",
+      "security": "The security check expired or could not be verified. Wait for it to refresh, then try again.",
+      "serverValidation": "Some saved form details are no longer valid. Go back once, reselect the course and timing, then submit again.",
+      "service": "The application service is temporarily unavailable. Your form is still saved on this device; please try again shortly.",
+      "supportRef": "Support reference: {ref}."
     },
     "buttons": {
       "next": "Next",
