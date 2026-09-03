@@ -19,6 +19,7 @@
     "db:seed": "tsx scripts/seed.ts",
     "db:backup": "tsx scripts/backup.ts",
     "test": "vitest run",
+    "audit:prod": "npm audit --omit=dev --audit-level=high",
     "admin:bootstrap": "tsx scripts/bootstrap-owner.ts"
   },
   "dependencies": {
