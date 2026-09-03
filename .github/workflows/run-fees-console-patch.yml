@@ -17,38 +17,12 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: feat/fees-and-console-ux
-      - name: Apply embedded patch source
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          source = Path('.github/workflows/apply-fees-console-ux.yml').read_text()
-          marker = "          python - <<'PY'\n"
-          start = source.index(marker) + len(marker)
-          end = source.index("\n          PY\n", start)
-          raw = source[start:end].splitlines()
-          body = []
-          in_triple = False
-          for line in raw:
-              candidate = line[10:] if line.startswith("          ") else line
-              triple_count = candidate.count("'''")
-              if in_triple:
-                  if triple_count:
-                      body.append(candidate)
-                      if triple_count % 2:
-                          in_triple = False
-                  else:
-                      body.append(line)
-              else:
-                  body.append(candidate)
-                  if triple_count % 2:
-                      in_triple = True
-          exec(compile("\n".join(body), 'embedded-fees-console-patch.py', 'exec'))
-          PY
       - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
+      - name: Apply front desk patch
+        run: python .github/scripts/apply_front_desk_patch.py
       - run: npm ci
       - name: Verify patch
         run: |
