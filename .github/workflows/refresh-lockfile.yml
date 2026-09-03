@@ -18,10 +18,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Refresh Next.js maintenance lockfile
+      - name: Refresh audited production lockfile
         run: |
-          npm install --package-lock-only --ignore-scripts --save-exact next@15.5.25
-          npm install --package-lock-only --ignore-scripts --save-dev --save-exact eslint-config-next@15.5.25
+          npm install --package-lock-only --ignore-scripts
           npm audit --omit=dev --audit-level=high
       - name: Commit refreshed lockfile
         shell: bash
@@ -34,5 +33,5 @@ jobs:
             echo "Lockfile already current"
             exit 0
           fi
-          git commit -m "security: refresh Next.js lockfile"
+          git commit -m "security: refresh audited lockfile"
           git push origin "HEAD:${GITHUB_REF_NAME}"
