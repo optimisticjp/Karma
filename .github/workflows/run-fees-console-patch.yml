@@ -26,9 +26,24 @@ jobs:
           marker = "          python - <<'PY'\n"
           start = source.index(marker) + len(marker)
           end = source.index("\n          PY\n", start)
-          body = source[start:end]
-          body = "\n".join(line[10:] if line.startswith("          ") else line for line in body.splitlines())
-          exec(compile(body, 'embedded-fees-console-patch.py', 'exec'))
+          raw = source[start:end].splitlines()
+          body = []
+          in_triple = False
+          for line in raw:
+              candidate = line[10:] if line.startswith("          ") else line
+              triple_count = candidate.count("'''")
+              if in_triple:
+                  if triple_count:
+                      body.append(candidate)
+                      if triple_count % 2:
+                          in_triple = False
+                  else:
+                      body.append(line)
+              else:
+                  body.append(candidate)
+                  if triple_count % 2:
+                      in_triple = True
+          exec(compile("\n".join(body), 'embedded-fees-console-patch.py', 'exec'))
           PY
       - uses: actions/setup-node@v7
         with:
