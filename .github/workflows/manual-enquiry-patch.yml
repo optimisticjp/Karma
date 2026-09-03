@@ -1,0 +1,236 @@
+name: Manual enquiry source patch
+
+on:
+  push:
+    branches:
+      - fix/admission-flow-reliability
+    paths:
+      - .github/workflows/manual-enquiry-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix/admission-flow-reliability
+      - name: Apply source patch
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          # 1) Validator returns exact controls that failed.
+          path = Path('src/lib/admin/admissions.ts')
+          text = path.read_text()
+          marker = 'export function validateManualEnquiry(input: Record<string, unknown>):\n'
+          helper = '''export type ManualEnquiryField =
+  | "fullName"
+  | "whatsapp"
+  | "email"
+  | "heardFrom"
+  | "guardianName"
+  | "guardianPhone"
+  | "referencePhone"
+  | "assignedTo"
+  | "nextFollowUp";
+
+export function manualEnquiryInvalidFields(input: Record<string, unknown>): ManualEnquiryField[] {
+  const invalid = new Set<ManualEnquiryField>();
+  const fullName = cleanText(input.fullName, 160);
+  const whatsapp = cleanIndianMobile(cleanText(input.whatsapp, 30));
+  const email = optionalText(input.email, 160)?.toLowerCase() ?? null;
+  const ageBand = optionalText(input.ageBand, 20);
+  const guardianName = optionalText(input.guardianName, 160);
+  const rawGuardianPhone = optionalText(input.guardianPhone, 30);
+  const guardianPhone = rawGuardianPhone ? cleanIndianMobile(rawGuardianPhone) : null;
+  const rawReferencePhone = optionalText(input.referencePhone, 30);
+  const referencePhone = rawReferencePhone ? cleanIndianMobile(rawReferencePhone) : null;
+  const assignedTo = optionalPositiveId(input.assignedTo);
+  const nextFollowUp = optionalDate(input.nextFollowUp);
+  const heardFrom = input.heardFrom;
+
+  if (fullName.length < 2) invalid.add("fullName");
+  if (!isIndianMobile(whatsapp)) invalid.add("whatsapp");
+  if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) invalid.add("email");
+  if (assignedTo === undefined) invalid.add("assignedTo");
+  if (nextFollowUp === undefined) invalid.add("nextFollowUp");
+  if (typeof heardFrom !== "string" || !SOURCE_SET.has(heardFrom)) invalid.add("heardFrom");
+  if (guardianPhone && !isIndianMobile(guardianPhone)) invalid.add("guardianPhone");
+  if (referencePhone && !isIndianMobile(referencePhone)) invalid.add("referencePhone");
+  if (ageBand === "under18" && !guardianName) invalid.add("guardianName");
+  if (ageBand === "under18" && !guardianPhone) invalid.add("guardianPhone");
+  return [...invalid];
+}
+
+'''
+          if marker not in text:
+              raise SystemExit('manual enquiry validator marker missing')
+          text = text.replace(marker, helper + marker, 1)
+          old = '''  | { ok: true; value: ManualEnquiryInput }
+  | { ok: false } {
+  const fullName = cleanText(input.fullName, 160);'''
+          new = '''  | { ok: true; value: ManualEnquiryInput }
+  | { ok: false; invalidFields: ManualEnquiryField[] } {
+  const invalidFields = manualEnquiryInvalidFields(input);
+  if (invalidFields.length > 0) return { ok: false, invalidFields };
+
+  const fullName = cleanText(input.fullName, 160);'''
+          if old not in text:
+              raise SystemExit('manual enquiry return type block missing')
+          text = text.replace(old, new, 1)
+          for old_line in [
+              '  if (fullName.length < 2 || !isIndianMobile(whatsapp)) return { ok: false };\n',
+              '  if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return { ok: false };\n',
+              '  if (assignedTo === undefined || nextFollowUp === undefined) return { ok: false };\n',
+              '  if (typeof heardFrom !== "string" || !SOURCE_SET.has(heardFrom)) return { ok: false };\n',
+              '  if (guardianPhone && !isIndianMobile(guardianPhone)) return { ok: false };\n',
+              '  if (referencePhone && !isIndianMobile(referencePhone)) return { ok: false };\n',
+              '  if (ageBand === "under18" && (!guardianName || !guardianPhone)) return { ok: false };\n'
+          ]:
+              if old_line not in text:
+                  raise SystemExit(f'manual enquiry old validation line missing: {old_line!r}')
+              text = text.replace(old_line, '', 1)
+          path.write_text(text)
+
+          # 2) Server action keeps submitted values on any failed save.
+          path = Path('src/app/admin/(console)/admissions/actions.ts')
+          text = path.read_text()
+          old = '    | "created";\n};'
+          new = '    | "created";\n  values?: Record<string, string>;\n  invalidFields?: string[];\n};'
+          if old not in text:
+              raise SystemExit('AdmissionsState tail missing')
+          text = text.replace(old, new, 1)
+          old = '''export async function createManualEnquiryAction(
+  _prev: AdmissionsState,
+  formData: FormData
+): Promise<AdmissionsState> {
+  const auth = await authorizeAction({ permission: "applications.manage" });
+  if (!auth.ok) return err("denied");
+'''
+          new = '''export async function createManualEnquiryAction(
+  _prev: AdmissionsState,
+  formData: FormData
+): Promise<AdmissionsState> {
+  const submittedValues = formSnapshot(formData);
+  const auth = await authorizeAction({ permission: "applications.manage" });
+  if (!auth.ok) return { ...err("denied"), values: submittedValues };
+'''
+          if old not in text:
+              raise SystemExit('manual action head missing')
+          text = text.replace(old, new, 1)
+          old = '  if (!parsed.ok) return err("invalid");\n\n  const db = getDb();\n  if (!db) return err("generic");'
+          new = '  if (!parsed.ok) return { ...err("invalid"), values: submittedValues, invalidFields: parsed.invalidFields };\n\n  const db = getDb();\n  if (!db) return { ...err("generic"), values: submittedValues };'
+          if old not in text:
+              raise SystemExit('manual action validation branch missing')
+          text = text.replace(old, new, 1)
+          text = text.replace('    if (!(await validAssignee(db, d.assignedTo))) return err("missing");', '    if (!(await validAssignee(db, d.assignedTo))) return { ...err("missing"), values: submittedValues };', 1)
+          text = text.replace('      if (!course[0]) return err("missing");', '      if (!course[0]) return { ...err("missing"), values: submittedValues };', 1)
+          old = '  } catch (error) {\n    return mapDbError(error, "[admissions] create manual enquiry");\n  }'
+          new = '  } catch (error) {\n    return { ...mapDbError(error, "[admissions] create manual enquiry"), values: submittedValues };\n  }'
+          if old not in text:
+              raise SystemExit('manual action catch missing')
+          text = text.replace(old, new, 1)
+          text += '''
+
+function formSnapshot(formData: FormData): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const [key, value] of formData.entries()) {
+    if (typeof value === "string") result[key] = value;
+  }
+  return result;
+}
+'''
+          path.write_text(text)
+
+          # 3) UI restores values, marks invalid fields and focuses the first.
+          path = Path('src/app/admin/(console)/admissions/AdmissionForms.tsx')
+          text = path.read_text()
+          text = text.replace('import { useActionState } from "react";', 'import { useActionState, useEffect, useRef } from "react";', 1)
+          marker = 'export function ManualEnquiryForm({\n'
+          helper = '''function restoreSubmittedForm(
+  form: HTMLFormElement,
+  values?: Record<string, string>,
+  invalidFields?: string[]
+) {
+  for (const item of Array.from(form.elements)) {
+    if (item instanceof HTMLInputElement || item instanceof HTMLSelectElement || item instanceof HTMLTextAreaElement) {
+      item.classList.remove("input-error");
+      item.removeAttribute("aria-invalid");
+    }
+  }
+  for (const [name, value] of Object.entries(values ?? {})) {
+    const item = form.elements.namedItem(name);
+    if (item instanceof HTMLInputElement || item instanceof HTMLSelectElement || item instanceof HTMLTextAreaElement) {
+      item.value = value;
+    }
+  }
+  let first: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null = null;
+  for (const name of invalidFields ?? []) {
+    const item = form.elements.namedItem(name);
+    if (item instanceof HTMLInputElement || item instanceof HTMLSelectElement || item instanceof HTMLTextAreaElement) {
+      item.classList.add("input-error");
+      item.setAttribute("aria-invalid", "true");
+      first ??= item;
+    }
+  }
+  first?.focus();
+}
+
+'''
+          if marker not in text:
+              raise SystemExit('ManualEnquiryForm marker missing')
+          text = text.replace(marker, helper + marker, 1)
+          old = '  const [state, formAction] = useActionState<AdmissionsState, FormData>(createManualEnquiryAction, IDLE);\n\n  return (\n    <form action={formAction} className="grid gap-5">'
+          new = '  const [state, formAction] = useActionState<AdmissionsState, FormData>(createManualEnquiryAction, IDLE);\n  const formRef = useRef<HTMLFormElement>(null);\n\n  useEffect(() => {\n    if (!formRef.current || (!state.values && !state.invalidFields)) return;\n    const frame = requestAnimationFrame(() => {\n      if (formRef.current) restoreSubmittedForm(formRef.current, state.values, state.invalidFields);\n    });\n    return () => cancelAnimationFrame(frame);\n  }, [state.values, state.invalidFields]);\n\n  return (\n    <form ref={formRef} action={formAction} className="grid gap-5">'
+          if old not in text:
+              raise SystemExit('ManualEnquiryForm action body missing')
+          path.write_text(text.replace(old, new, 1))
+
+          # 4) Extend focused regression coverage.
+          path = Path('tests/admission-reliability.test.ts')
+          text = path.read_text()
+          text = text.replace('import { validateDirectAdmission } from "@/lib/admin/students";', 'import { validateDirectAdmission } from "@/lib/admin/students";\nimport { validateManualEnquiry } from "@/lib/admin/admissions";', 1)
+          text += '''
+
+describe("manual enquiry errors are recoverable", () => {
+  it("returns exact invalid controls", () => {
+    const result = validateManualEnquiry({
+      fullName: "A",
+      whatsapp: "bad",
+      email: "bad",
+      heardFrom: "walk_in",
+      locale: "gu",
+      ageBand: "under18",
+      guardianName: "",
+      guardianPhone: ""
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.invalidFields).toContain("fullName");
+      expect(result.invalidFields).toContain("whatsapp");
+      expect(result.invalidFields).toContain("email");
+      expect(result.invalidFields).toContain("guardianName");
+      expect(result.invalidFields).toContain("guardianPhone");
+    }
+  });
+
+  it("preserves staff-entered values after failed save", () => {
+    const action = read("src/app/admin/(console)/admissions/actions.ts");
+    const form = read("src/app/admin/(console)/admissions/AdmissionForms.tsx");
+    expect(action).toContain("const submittedValues = formSnapshot(formData)");
+    expect(action).toContain("values: submittedValues, invalidFields: parsed.invalidFields");
+    expect(form).toContain("restoreSubmittedForm");
+    expect(form).toContain('setAttribute("aria-invalid", "true")');
+  });
+});
+'''
+          path.write_text(text)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src tests
+          git commit -m "fix: preserve manual enquiry errors"
+          git push origin HEAD:fix/admission-flow-reliability
