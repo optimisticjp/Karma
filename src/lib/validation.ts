@@ -62,10 +62,8 @@ export const admissionSchema = z
     termsVersion: z.number().int().positive(),
     utmSource: z.string().max(80).optional().or(z.literal("")),
     utmCampaign: z.string().max(80).optional().or(z.literal("")),
-    startedAt: z.number(),
     turnstileToken: z.string().optional(),
     idempotencyKey: z.string().uuid().optional(),
-    website: z.string().optional() // honeypot: checked in the route BEFORE validation
   })
   .superRefine((v, ctx) => {
     if (v.ageBand === "under18" && (!v.guardianName || v.guardianName.length < 2)) {

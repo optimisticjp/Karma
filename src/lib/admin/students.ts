@@ -127,13 +127,53 @@ export type DirectAdmissionInput = StudentInput & {
  * 2026-08-30): this is the path that produces a student record, an enrolment,
  * a fee agreement and a printed admission sheet.
  */
+export type DirectAdmissionField =
+  | "fullName"
+  | "phone"
+  | "whatsapp"
+  | "email"
+  | "guardianName"
+  | "guardianPhone"
+  | "referencePhone"
+  | "batchId"
+  | "joinedOn";
+
+export function directAdmissionInvalidFields(input: Record<string, unknown>): DirectAdmissionField[] {
+  const invalid = new Set<DirectAdmissionField>();
+  const fullName = text(input.fullName, 160);
+  const phone = cleanIndianMobile(text(input.phone, 30));
+  const rawWhatsapp = text(input.whatsapp, 30);
+  const whatsapp = rawWhatsapp ? cleanIndianMobile(rawWhatsapp) : null;
+  const parsedEmail = email(input.email);
+  const isMinor = input.isMinor === true || input.isMinor === "on" || input.isMinor === "true";
+  const guardianName = optionalText(input.guardianName, 160);
+  const rawGuardianPhone = text(input.guardianPhone, 30);
+  const guardianPhone = rawGuardianPhone ? cleanIndianMobile(rawGuardianPhone) : null;
+  const rawReferencePhone = text(input.referencePhone, 30);
+  const referencePhone = rawReferencePhone ? cleanIndianMobile(rawReferencePhone) : null;
+
+  if (fullName.length < 2) invalid.add("fullName");
+  if (!isIndianMobile(phone)) invalid.add("phone");
+  if (whatsapp && !isIndianMobile(whatsapp)) invalid.add("whatsapp");
+  if (parsedEmail === "invalid") invalid.add("email");
+  if (isMinor && !guardianName) invalid.add("guardianName");
+  if (!guardianPhone || !isIndianMobile(guardianPhone)) invalid.add("guardianPhone");
+  if (guardianPhone && isIndianMobile(guardianPhone) && isIndianMobile(phone) && guardianPhone === phone) invalid.add("guardianPhone");
+  if (referencePhone && !isIndianMobile(referencePhone)) invalid.add("referencePhone");
+  if (!positiveId(input.batchId)) invalid.add("batchId");
+  if (optionalDate(input.joinedOn) === "invalid") invalid.add("joinedOn");
+  return [...invalid];
+}
 export function validateDirectAdmission(input: Record<string, unknown>):
   | { ok: true; value: DirectAdmissionInput }
-  | { ok: false } {
+  | { ok: false; invalidFields: DirectAdmissionField[] } {
+  const invalidFields = directAdmissionInvalidFields(input);
+  if (invalidFields.length > 0) return { ok: false, invalidFields };
+
   const student = validateStudentInput(input, { requireGuardian: true });
   const batchId = positiveId(input.batchId);
   const joinedOn = optionalDate(input.joinedOn);
-  if (!student.ok || !batchId || joinedOn === "invalid") return { ok: false };
+  if (!student.ok || !batchId || joinedOn === "invalid") return { ok: false, invalidFields: [] };
   return { ok: true, value: { ...student.value, batchId, joinedOn } };
 }
 

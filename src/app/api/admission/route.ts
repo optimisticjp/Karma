@@ -33,19 +33,11 @@ export async function POST(req: NextRequest) {
     return apiError("bad_json", 400, requestId);
   }
 
-  // Honeypot BEFORE validation: quiet fake success, zero signal for bots.
-  const hp = (body as { website?: unknown } | null)?.website;
-  if (typeof hp === "string" && hp.length > 0) {
-    return NextResponse.json({ ok: true, reference: "KDS-RECEIVED" });
-  }
 
   const parsed = admissionSchema.safeParse(body);
   if (!parsed.success) return apiError("validation", 400, requestId);
   const d = parsed.data;
 
-  if (Date.now() - d.startedAt < 5000) {
-    return NextResponse.json({ ok: true, reference: "KDS-RECEIVED" });
-  }
 
   // Fail closed (audit): in production, missing Turnstile blocks submissions.
   // demoModeAllowed covers staging (ALLOW_DEMO_MODE=true); never skip in clean production.

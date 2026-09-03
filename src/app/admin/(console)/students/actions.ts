@@ -34,6 +34,8 @@ export type StudentsState = {
     | "converted"
     | "enrolled"
     | "enrollmentUpdated";
+  values?: Record<string, string>;
+  invalidFields?: string[];
 };
 
 const errorState = (message: StudentsState["message"]): StudentsState => ({ status: "error", message });
@@ -62,13 +64,14 @@ export async function directAdmissionAction(
   _prev: StudentsState,
   formData: FormData
 ): Promise<StudentsState> {
+  const submittedValues = formSnapshot(formData);
   const auth = await authorizeAction({ permission: "students.manage" });
-  if (!auth.ok) return errorState("denied");
+  if (!auth.ok) return { ...errorState("denied"), values: submittedValues };
 
   const parsed = validateDirectAdmission(formObject(formData));
-  if (!parsed.ok) return errorState("invalid");
+  if (!parsed.ok) return { ...errorState("invalid"), values: submittedValues, invalidFields: parsed.invalidFields };
   const db = getDb();
-  if (!db) return errorState("generic");
+  if (!db) return { ...errorState("generic"), values: submittedValues };
 
   try {
     const d = parsed.value;
@@ -160,8 +163,8 @@ export async function directAdmissionAction(
       ]);
     });
   } catch (error) {
-    if (error instanceof SeatUnavailableError) return errorState("seat");
-    return mapDbError(error, "[students] direct admission");
+    if (error instanceof SeatUnavailableError) return { ...errorState("seat"), values: submittedValues };
+    return { ...mapDbError(error, "[students] direct admission"), values: submittedValues };
   }
 
   revalidateStudentPaths();
@@ -520,6 +523,14 @@ export async function updateEnrollmentAction(
 
   revalidateStudentPaths();
   return successState("enrollmentUpdated");
+}
+
+function formSnapshot(formData: FormData): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const [key, value] of formData.entries()) if (typeof value === "string") result[key] = value;
+  result.isMinor = formData.has("isMinor") ? "on" : "";
+  result.photoConsent = formData.has("photoConsent") ? "on" : "";
+  return result;
 }
 
 function formObject(formData: FormData): Record<string, unknown> {

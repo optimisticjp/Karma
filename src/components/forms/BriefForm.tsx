@@ -18,7 +18,6 @@ export function BriefForm() {
   const [done, setDone] = useState<{ reference: string; filesStored: number } | null>(null);
   const [token, setToken] = useState<string | undefined>();
   const [challengeVersion, setChallengeVersion] = useState(0);
-  const startedAt = useRef(Date.now());
   const formRef = useRef<HTMLFormElement>(null);
 
   const filesDeferredCopy = t("form.filesDeferred").replace(
@@ -40,7 +39,6 @@ export function BriefForm() {
     const form = e.currentTarget;
     const fd = new FormData(form);
     fd.set("locale", locale);
-    fd.set("startedAt", String(startedAt.current));
     if (token) fd.set("turnstileToken", token);
 
     /* Turnstile also writes a native hidden `turnstileToken` field. Prefer the
@@ -150,10 +148,6 @@ export function BriefForm() {
         <p className="t-micro">{t("form.files")}</p>
         <p className="t-meta mt-2">{filesDeferredCopy}</p>
         <p className="t-meta mt-2">{t("confidential")}</p>
-      </div>
-      <div className="hidden" aria-hidden="true">
-        <label htmlFor="brief-website">Website</label>
-        <input id="brief-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
       <div key={challengeVersion}>
         <TurnstileWidget onToken={setToken} />

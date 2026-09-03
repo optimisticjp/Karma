@@ -40,18 +40,9 @@ export async function POST(req: NextRequest) {
     if (typeof v === "string") fields[k] = v;
   }
 
-  // Honeypot first (quiet fake success for bots).
-  if (typeof fields.website === "string" && fields.website.length > 0) {
-    return NextResponse.json({ ok: true, reference: "KDS-B-RECEIVED" });
-  }
-
   const parsed = briefSchema.safeParse(fields);
   if (!parsed.success) return apiError("validation", 400, requestId);
   const d = parsed.data;
-
-  if (Date.now() - d.startedAt < 4000) {
-    return NextResponse.json({ ok: true, reference: "KDS-B-RECEIVED" });
-  }
 
   // demoModeAllowed covers staging (ALLOW_DEMO_MODE=true); never skip in clean production.
   if (isProduction && !demoModeAllowed && !process.env.TURNSTILE_SECRET_KEY) {
