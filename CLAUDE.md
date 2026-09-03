@@ -34,13 +34,14 @@ Bilingual (EN + Gujarati) website and student-management platform for Karma Desi
 - **Supabase Postgres** via Drizzle + `drizzle-orm/node-postgres` (`pg`). The Worker reaches it through Cloudflare **HYPERDRIVE**; migrations/seeds/backups/bootstrap use direct `DATABASE_URL`. NOT Neon.
 - **Supabase Auth** (`@supabase/supabase-js` + `@supabase/ssr`) for invite-only staff email/password sign-in. **Karma Console is password-only; MFA/TOTP is not an access requirement.** NOT Better Auth.
 - Cloudflare Workers via `@opennextjs/cloudflare`. Private R2 bindings are added only when the file/PDF phase is activated; do not assume R2 exists today.
-- Supabase custom SMTP for auth/invitation mail; Resend for application/brief/digest notification mail. Turnstile/R2/public-media work follows the deployment roadmap; do not invent dependencies that are not configured.
+- Supabase custom SMTP for auth/invitation mail; Resend for application/brief/digest notification mail. **Turnstile is active on the current Workers.dev production hostname.** Resend scheduling and R2/private-file delivery remain deferred until their explicit launch phases.
 
 ## Commands
 | Task | Command |
 | --- | --- |
 | Dev server | `npm run dev` |
 | Typecheck / lint / test | `npm run typecheck` / `npm run lint` / `npm test` |
+| Production dependency audit | `npm run audit:prod` |
 | Prod build | `npm run build` |
 | DB migrate / seed / backup | `npm run db:migrate` / `npm run db:seed` / `npm run db:backup` |
 | New migration after schema edits | `npm run db:generate` |
@@ -60,7 +61,7 @@ Cloudflare production deployment currently uses the dashboard command `OPEN_NEXT
 
 5. **No payment gateway.** Fees are discussed/recorded offline. Do not add checkout links, online payment flows, UPI payment requests or public price lists.
 
-6. **Public form defence stays layered and fail-closed.** Honeypot before validation, minimum-time check, Turnstile server verification when activated, per-IP + per-phone throttles. In production a missing required dependency returns a typed failure, never demo data.
+6. **Public form defence stays layered and fail-closed.** Honeypot before validation, minimum-time check, Turnstile server verification in production, per-IP + per-phone throttles. In production a missing required dependency returns a typed failure, never demo data.
 
 7. **Never `export const runtime = "edge"`.** OpenNext handles runtime selection.
 
@@ -93,7 +94,7 @@ Cloudflare production deployment currently uses the dashboard command `OPEN_NEXT
     - **Neon → Supabase Postgres.** Do not reintroduce Neon.
     - **Better Auth → Supabase Auth.** Do not reintroduce Better Auth.
 
-20. **Do not touch the custom domain.** `karmadesignstudio.in` is **not** connected, and connecting or rerouting it is not part of any other task. The live review surface is `https://karma-design-studio.essanciaonline.workers.dev`. The cutover is a deliberate owner-gated launch step with its own procedure in `docs/launch-checklist.md`. The same applies to activating **Cloudflare R2** and **Turnstile**: both are deferred on purpose, and `/api/health` reporting them absent is the expected state, not a bug to fix.
+20. **Do not touch the custom domain.** `karmadesignstudio.in` is **not** connected, and connecting or rerouting it is not part of any other task. The live review surface is `https://karma-design-studio.essanciaonline.workers.dev`. The cutover is a deliberate owner-gated launch step with its own procedure in `docs/launch-checklist.md`. **Cloudflare R2 remains deferred. Turnstile does not: it is already active on the current Workers.dev hostname and is a required production health check.** Only the custom-domain Turnstile hostname/config update belongs to the launch cutover. Deferred Resend may report unavailable in health telemetry without making the current Workers.dev deployment unhealthy.
 
 ## Karma Console product rules
 - Staff language is institute language, not ERP language: enquiry, walk-in, follow-up, batch, fees, receipt, હાજરી, certificate, design job, WhatsApp.
@@ -112,7 +113,7 @@ Cloudflare production deployment currently uses the dashboard command `OPEN_NEXT
 Run the same gates CI runs, and read the output rather than assuming:
 
 ```bash
-npm run typecheck && npm run lint && npm test && npm run build
+npm run typecheck && npm run lint && npm test && npm run audit:prod && npm run build
 ```
 
 Then: **feature branch → PR → CI + Cloudflare preview green → merge.** Do not push to `main`, and do not deploy by hand — Cloudflare builds from Git. If a check fails, fix it; a red build merged is a red production deploy.
@@ -157,10 +158,11 @@ to be replaced, not extended.
 Karma Console is explicitly **out of scope**: the compact post-PR-#53 Console
 is the baseline, and public CSS must not reach `/admin`.
 
-What still depends on the owner: real content (including the 32 studio
-photographs, which have typed, reserved frames in
-`src/content/photo-manifest.ts`) and the open confirmations in
-`docs/content-checklist.md`, including the **10:30 pm vs 23:00 last-class
-conflict**. Turnstile, R2/private file delivery, public-media upload tooling
-and custom-domain migration are separate infrastructure steps and must not be
+What still depends on the owner: the 32 real studio photographs, replacement or
+removal of sample proof, approval of the public Terms page, and the remaining
+fact confirmations recorded in `docs/content-checklist.md`. The latest closing
+time is already resolved at **11:00 PM** and must not be reopened. Turnstile is
+already active on the Workers.dev hostname. R2/private file delivery,
+public-media upload tooling, Resend launch scheduling and custom-domain
+migration remain separate owner-gated infrastructure steps and must not be
 silently activated by feature work.
