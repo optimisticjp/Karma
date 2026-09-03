@@ -70,6 +70,7 @@ export function validateApplicationUpdate(input: {
   if (!isApplicationStatus(input.status)) return { ok: false };
   const assignedTo = optionalPositiveId(input.assignedTo);
   const nextFollowUp = optionalDate(input.nextFollowUp);
+  if (assignedTo === undefined || nextFollowUp === undefined) return { ok: false };
 
   let closureReason: string | null = null;
   if (input.closureReason != null && input.closureReason !== "") {
@@ -173,7 +174,12 @@ export function validateManualEnquiry(input: Record<string, unknown>):
   const nextFollowUp = optionalDate(input.nextFollowUp);
   const heardFrom = input.heardFrom;
 
-  if (assignedTo === undefined || nextFollowUp === undefined) return { ok: false };
+  if (assignedTo === undefined || nextFollowUp === undefined) {
+    const fallback: ManualEnquiryField[] = [];
+    if (assignedTo === undefined) fallback.push("assignedTo");
+    if (nextFollowUp === undefined) fallback.push("nextFollowUp");
+    return { ok: false, invalidFields: fallback };
+  }
 
   return {
     ok: true,
