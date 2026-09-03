@@ -1,0 +1,437 @@
+name: Admission fix helper
+
+on:
+  push:
+    branches:
+      - fix/admission-flow-reliability
+    paths:
+      - .github/workflows/admission-fix-helper.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix/admission-flow-reliability
+      - name: Apply admission reliability fixes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          def read(path):
+              return Path(path).read_text()
+
+          def write(path, text):
+              Path(path).write_text(text)
+
+          def sub_once(path, pattern, replacement, flags=0):
+              text = read(path)
+              new, count = re.subn(pattern, replacement, text, count=1, flags=flags)
+              if count != 1:
+                  raise SystemExit(f"expected one match in {path}: {pattern!r}, got {count}")
+              write(path, new)
+
+          def replace_once(path, old, new):
+              text = read(path)
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"expected one exact match in {path}, got {count}: {old[:80]!r}")
+              write(path, text.replace(old, new, 1))
+
+          # Public admission: never return a success reference unless the row was
+          # actually persisted. Turnstile + rate limiting are the bot controls.
+          admission_route = "src/app/api/admission/route.ts"
+          sub_once(
+              admission_route,
+              r'\n  // Honeypot BEFORE validation: quiet fake success, zero signal for bots\.\n  const hp = .*?\n  const parsed =',
+              '\n  const parsed =',
+              re.S,
+          )
+          sub_once(
+              admission_route,
+              r'\n  if \(Date\.now\(\) - d\.startedAt < 5000\) \{\n    return NextResponse\.json\(\{ ok: true, reference: "KDS-RECEIVED" \}\);\n  \}\n',
+              '\n',
+          )
+
+          admission_form = "src/components/forms/AdmissionForm.tsx"
+          text = read(admission_form)
+          text = text.replace('  const startedAt = useRef(Date.now());\n', '')
+          text = text.replace('  const honeypot = useRef<HTMLInputElement>(null);\n', '')
+          text = text.replace('          startedAt: startedAt.current,\n', '')
+          text = text.replace('          website: honeypot.current?.value ?? "",\n', '')
+          text, count = re.subn(
+              r'\n            \{/\* Honeypot \*/\}\n            <div className="hidden" aria-hidden="true">\n              <label htmlFor="adm-website">\{t\("fields\.website"\)\}</label>\n              <input ref=\{honeypot\} id="adm-website" type="text" tabIndex=\{-1\} autoComplete="off" />\n            </div>\n',
+              '\n',
+              text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f"admission honeypot block match count: {count}")
+          write(admission_form, text)
+
+          # The design-brief flow used the same quiet-success heuristic. Remove
+          # it too so no human-facing form can claim storage without storage.
+          brief_route = "src/app/api/brief/route.ts"
+          sub_once(
+              brief_route,
+              r'\n  // Honeypot first \(quiet fake success for bots\)\.\n  if \(typeof fields\.website === "string" && fields\.website\.length > 0\) \{\n    return NextResponse\.json\(\{ ok: true, reference: "KDS-B-RECEIVED" \}\);\n  \}\n',
+              '\n',
+          )
+          sub_once(
+              brief_route,
+              r'\n  if \(Date\.now\(\) - d\.startedAt < 4000\) \{\n    return NextResponse\.json\(\{ ok: true, reference: "KDS-B-RECEIVED" \}\);\n  \}\n',
+              '\n',
+          )
+
+          brief_form = "src/components/forms/BriefForm.tsx"
+          text = read(brief_form)
+          text = text.replace('  const startedAt = useRef(Date.now());\n', '')
+          text = text.replace('    fd.set("startedAt", String(startedAt.current));\n', '')
+          text, count = re.subn(
+              r'\n      <div className="hidden" aria-hidden="true">\n        <label htmlFor="brief-website">Website</label>\n        <input id="brief-website" name="website" type="text" tabIndex=\{-1\} autoComplete="off" />\n      </div>\n',
+              '\n',
+              text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit(f"brief honeypot block match count: {count}")
+          write(brief_form, text)
+
+          validation = "src/lib/validation.ts"
+          text = read(validation)
+          text = text.replace('    startedAt: z.number(),\n', '')
+          text = text.replace('    website: z.string().optional() // honeypot: checked in the route BEFORE validation\n', '')
+          text = text.replace('    startedAt: z.coerce.number(),\n', '')
+          text = text.replace('    website: z.string().optional()\n', '')
+          write(validation, text)
+
+          # Direct admission: expose exactly which controls failed server-side
+          # validation. The core validator remains the final gate.
+          students = "src/lib/admin/students.ts"
+          old = '''export function validateDirectAdmission(input: Record<string, unknown>):
+  | { ok: true; value: DirectAdmissionInput }
+  | { ok: false } {
+  const student = validateStudentInput(input, { requireGuardian: true });
+  const batchId = positiveId(input.batchId);
+  const joinedOn = optionalDate(input.joinedOn);
+  if (!student.ok || !batchId || joinedOn === "invalid") return { ok: false };
+  return { ok: true, value: { ...student.value, batchId, joinedOn } };
+}
+'''
+          new = '''export type DirectAdmissionField =
+  | "fullName"
+  | "phone"
+  | "whatsapp"
+  | "email"
+  | "guardianName"
+  | "guardianPhone"
+  | "referencePhone"
+  | "batchId"
+  | "joinedOn";
+
+/**
+ * Return the controls that need attention on a direct admission. This mirrors
+ * `validateStudentInput` rather than making the client guess why the server
+ * rejected the record. The server action uses these names to restore, mark and
+ * focus the submitted controls after a failed mutation.
+ */
+export function directAdmissionInvalidFields(input: Record<string, unknown>): DirectAdmissionField[] {
+  const invalid = new Set<DirectAdmissionField>();
+  const fullName = text(input.fullName, 160);
+  const phone = cleanIndianMobile(text(input.phone, 30));
+  const rawWhatsapp = text(input.whatsapp, 30);
+  const whatsapp = rawWhatsapp ? cleanIndianMobile(rawWhatsapp) : null;
+  const parsedEmail = email(input.email);
+  const isMinor = input.isMinor === true || input.isMinor === "on" || input.isMinor === "true";
+  const guardianName = optionalText(input.guardianName, 160);
+  const rawGuardianPhone = text(input.guardianPhone, 30);
+  const guardianPhone = rawGuardianPhone ? cleanIndianMobile(rawGuardianPhone) : null;
+  const rawReferencePhone = text(input.referencePhone, 30);
+  const referencePhone = rawReferencePhone ? cleanIndianMobile(rawReferencePhone) : null;
+
+  if (fullName.length < 2) invalid.add("fullName");
+  if (!isIndianMobile(phone)) invalid.add("phone");
+  if (whatsapp && !isIndianMobile(whatsapp)) invalid.add("whatsapp");
+  if (parsedEmail === "invalid") invalid.add("email");
+  if (isMinor && !guardianName) invalid.add("guardianName");
+  if (!guardianPhone || !isIndianMobile(guardianPhone)) invalid.add("guardianPhone");
+  if (guardianPhone && isIndianMobile(guardianPhone) && isIndianMobile(phone) && guardianPhone === phone) {
+    invalid.add("guardianPhone");
+  }
+  if (referencePhone && !isIndianMobile(referencePhone)) invalid.add("referencePhone");
+  if (!positiveId(input.batchId)) invalid.add("batchId");
+  if (optionalDate(input.joinedOn) === "invalid") invalid.add("joinedOn");
+
+  return [...invalid];
+}
+
+export function validateDirectAdmission(input: Record<string, unknown>):
+  | { ok: true; value: DirectAdmissionInput }
+  | { ok: false; invalidFields: DirectAdmissionField[] } {
+  const invalidFields = directAdmissionInvalidFields(input);
+  if (invalidFields.length > 0) return { ok: false, invalidFields };
+
+  const student = validateStudentInput(input, { requireGuardian: true });
+  const batchId = positiveId(input.batchId);
+  const joinedOn = optionalDate(input.joinedOn);
+  if (!student.ok || !batchId || joinedOn === "invalid") return { ok: false, invalidFields: [] };
+  return { ok: true, value: { ...student.value, batchId, joinedOn } };
+}
+'''
+          replace_once(students, old, new)
+
+          student_actions = "src/app/admin/(console)/students/actions.ts"
+          text = read(student_actions)
+          text = text.replace(
+              '    | "enrollmentUpdated";\n};',
+              '    | "enrollmentUpdated";\n  /** Submitted controls are returned on failure so React cannot wipe the operator\'s work. */\n  values?: Record<string, string>;\n  /** Server-validated control names to mark and focus in the direct-admission form. */\n  invalidFields?: string[];\n};',
+              1,
+          )
+          old = '''export async function directAdmissionAction(
+  _prev: StudentsState,
+  formData: FormData
+): Promise<StudentsState> {
+  const auth = await authorizeAction({ permission: "students.manage" });
+  if (!auth.ok) return errorState("denied");
+
+  const parsed = validateDirectAdmission(formObject(formData));
+  if (!parsed.ok) return errorState("invalid");
+  const db = getDb();
+  if (!db) return errorState("generic");
+'''
+          new = '''export async function directAdmissionAction(
+  _prev: StudentsState,
+  formData: FormData
+): Promise<StudentsState> {
+  const submittedValues = formSnapshot(formData);
+  const auth = await authorizeAction({ permission: "students.manage" });
+  if (!auth.ok) return { ...errorState("denied"), values: submittedValues };
+
+  const parsed = validateDirectAdmission(formObject(formData));
+  if (!parsed.ok) {
+    return { ...errorState("invalid"), values: submittedValues, invalidFields: parsed.invalidFields };
+  }
+  const db = getDb();
+  if (!db) return { ...errorState("generic"), values: submittedValues };
+'''
+          if old not in text:
+              raise SystemExit("direct admission action head not found")
+          text = text.replace(old, new, 1)
+          text = text.replace(
+              '''  } catch (error) {
+    if (error instanceof SeatUnavailableError) return errorState("seat");
+    return mapDbError(error, "[students] direct admission");
+  }
+
+  revalidateStudentPaths();
+  return successState("studentCreated");
+}''',
+              '''  } catch (error) {
+    if (error instanceof SeatUnavailableError) return { ...errorState("seat"), values: submittedValues };
+    return { ...mapDbError(error, "[students] direct admission"), values: submittedValues };
+  }
+
+  revalidateStudentPaths();
+  return successState("studentCreated");
+}''',
+              1,
+          )
+          marker = '''function formObject(formData: FormData): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of formData.entries()) result[key] = value;
+  return result;
+}'''
+          replacement = '''function formSnapshot(formData: FormData): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const [key, value] of formData.entries()) {
+    if (typeof value === "string") result[key] = value;
+  }
+  // Missing checkboxes are meaningful values and must also survive a failed submit.
+  result.isMinor = formData.has("isMinor") ? "on" : "";
+  result.photoConsent = formData.has("photoConsent") ? "on" : "";
+  return result;
+}
+
+function formObject(formData: FormData): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of formData.entries()) result[key] = value;
+  return result;
+}'''
+          if marker not in text:
+              raise SystemExit("formObject marker not found")
+          text = text.replace(marker, replacement, 1)
+          write(student_actions, text)
+
+          # Restore the values after React's server-action reset and mark/focus
+          # controls named by the server. This applies on validation, seat,
+          # duplicate and transient DB failures, so an operator never retypes.
+          student_forms = "src/app/admin/(console)/students/StudentForms.tsx"
+          text = read(student_forms)
+          text = text.replace('import { useActionState } from "react";', 'import { useActionState, useEffect, useRef } from "react";', 1)
+          old = '''export function DirectAdmissionForm({ batches, copy }: { batches: BatchOption[]; copy: StudentsCopy }) {
+  const [state, action] = useActionState<StudentsState, FormData>(directAdmissionAction, IDLE);
+  return (
+    <form action={action} className="grid gap-5">
+      <Message state={state} copy={copy} />
+      <PersonFields copy={copy} requireGuardian />
+      <div className="grid gap-4 md:grid-cols-2">
+        <BatchField batches={batches} copy={copy} id="direct-batch" />
+        <Field label={copy.joinedOn} htmlFor="direct-joined"><input id="direct-joined" name="joinedOn" type="date" className="input" /></Field>
+      </div>
+      <div><Submit label={copy.createAdmission} busy={copy.saving} /></div>
+    </form>
+  );
+}
+'''
+          new = '''function restoreSubmittedForm(
+  form: HTMLFormElement,
+  values: Record<string, string> | undefined,
+  invalidFields: string[] | undefined
+) {
+  for (const control of Array.from(form.elements)) {
+    if (
+      control instanceof HTMLInputElement ||
+      control instanceof HTMLSelectElement ||
+      control instanceof HTMLTextAreaElement
+    ) {
+      control.classList.remove("input-error");
+      control.removeAttribute("aria-invalid");
+    }
+  }
+
+  if (values) {
+    for (const [name, value] of Object.entries(values)) {
+      const control = form.elements.namedItem(name);
+      if (control instanceof HTMLInputElement && control.type === "checkbox") {
+        control.checked = value === "on" || value === "true";
+      } else if (
+        control instanceof HTMLInputElement ||
+        control instanceof HTMLSelectElement ||
+        control instanceof HTMLTextAreaElement
+      ) {
+        control.value = value;
+      }
+    }
+  }
+
+  let firstInvalid: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null = null;
+  for (const name of invalidFields ?? []) {
+    const control = form.elements.namedItem(name);
+    if (
+      control instanceof HTMLInputElement ||
+      control instanceof HTMLSelectElement ||
+      control instanceof HTMLTextAreaElement
+    ) {
+      control.classList.add("input-error");
+      control.setAttribute("aria-invalid", "true");
+      firstInvalid ??= control;
+    }
+  }
+  firstInvalid?.focus();
+}
+
+export function DirectAdmissionForm({ batches, copy }: { batches: BatchOption[]; copy: StudentsCopy }) {
+  const [state, action] = useActionState<StudentsState, FormData>(directAdmissionAction, IDLE);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (!formRef.current || (!state.values && !state.invalidFields)) return;
+    const frame = requestAnimationFrame(() => {
+      if (formRef.current) restoreSubmittedForm(formRef.current, state.values, state.invalidFields);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [state.values, state.invalidFields]);
+
+  return (
+    <form ref={formRef} action={action} className="grid gap-5">
+      <Message state={state} copy={copy} />
+      <PersonFields copy={copy} requireGuardian />
+      <div className="grid gap-4 md:grid-cols-2">
+        <BatchField batches={batches} copy={copy} id="direct-batch" />
+        <Field label={copy.joinedOn} htmlFor="direct-joined"><input id="direct-joined" name="joinedOn" type="date" className="input" /></Field>
+      </div>
+      <div><Submit label={copy.createAdmission} busy={copy.saving} /></div>
+    </form>
+  );
+}
+'''
+          if old not in text:
+              raise SystemExit("DirectAdmissionForm block not found")
+          text = text.replace(old, new, 1)
+          write(student_forms, text)
+
+          # Regression coverage for both reported bugs and the adjacent brief flow.
+          tests = "tests/admission-flow.test.ts"
+          text = read(tests)
+          addition = r'''
+
+/* --------------------- submission acknowledgement integrity --------------------- */
+
+describe("human submissions are never acknowledged without persistence", () => {
+  const admissionRoute = read("src/app/api/admission/route.ts");
+  const admissionForm = read("src/components/forms/AdmissionForm.tsx");
+  const briefRoute = read("src/app/api/brief/route.ts");
+  const briefForm = read("src/components/forms/BriefForm.tsx");
+
+  it("does not silently accept a fast public admission without writing it", () => {
+    expect(admissionRoute).not.toContain("KDS-RECEIVED");
+    expect(admissionRoute).not.toContain("Date.now() - d.startedAt");
+    expect(admissionForm).not.toContain('id="adm-website"');
+    expect(admissionForm).not.toContain("startedAt.current");
+  });
+
+  it("does not use the same false-success shortcut on a design brief", () => {
+    expect(briefRoute).not.toContain("KDS-B-RECEIVED");
+    expect(briefRoute).not.toContain("Date.now() - d.startedAt");
+    expect(briefForm).not.toContain('name="website"');
+    expect(briefForm).not.toContain("startedAt.current");
+  });
+});
+
+/* ------------------------- recoverable direct admission ------------------------- */
+
+describe("direct admission validation is recoverable", () => {
+  it("returns the exact invalid control names", () => {
+    const missingGuardian = validateDirectAdmission({ ...student, guardianPhone: "" });
+    expect(missingGuardian.ok).toBe(false);
+    if (!missingGuardian.ok) expect(missingGuardian.invalidFields).toContain("guardianPhone");
+
+    const sameGuardian = validateDirectAdmission({ ...student, guardianPhone: student.phone });
+    expect(sameGuardian.ok).toBe(false);
+    if (!sameGuardian.ok) expect(sameGuardian.invalidFields).toContain("guardianPhone");
+
+    const badBatch = validateDirectAdmission({ ...student, batchId: "" });
+    expect(badBatch.ok).toBe(false);
+    if (!badBatch.ok) expect(badBatch.invalidFields).toContain("batchId");
+  });
+
+  it("returns submitted values on every direct-admission failure and restores them in the form", () => {
+    const actions = read("src/app/admin/(console)/students/actions.ts");
+    const form = read("src/app/admin/(console)/students/StudentForms.tsx");
+    expect(actions).toContain("const submittedValues = formSnapshot(formData)");
+    expect(actions).toContain("values: submittedValues, invalidFields: parsed.invalidFields");
+    expect(form).toContain("restoreSubmittedForm");
+    expect(form).toContain('classList.add("input-error")');
+    expect(form).toContain('setAttribute("aria-invalid", "true")');
+  });
+});
+'''
+          if "human submissions are never acknowledged without persistence" in text:
+              raise SystemExit("tests already patched")
+          write(tests, text.rstrip() + addition + "\n")
+
+          # The helper is intentionally one-shot and must not land in main.
+          Path(".github/workflows/admission-fix-helper.yml").unlink()
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: make admission submissions reliable"
+          git push origin HEAD:fix/admission-flow-reliability
