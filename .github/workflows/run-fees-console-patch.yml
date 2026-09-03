@@ -1,0 +1,51 @@
+name: Run front desk UX patch
+
+on:
+  push:
+    branches:
+      - feat/fees-and-console-ux
+    paths:
+      - .github/workflows/run-fees-console-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: feat/fees-and-console-ux
+      - name: Apply embedded patch source
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path('.github/workflows/apply-fees-console-ux.yml').read_text()
+          marker = "          python - <<'PY'\n"
+          start = source.index(marker) + len(marker)
+          end = source.index("\n          PY\n", start)
+          body = source[start:end]
+          body = "\n".join(line[10:] if line.startswith("          ") else line for line in body.splitlines())
+          exec(compile(body, 'embedded-fees-console-patch.py', 'exec'))
+          PY
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Verify patch
+        run: |
+          npm run typecheck
+          npm run lint
+          npm test
+      - name: Commit patch
+        shell: bash
+        run: |
+          git config user.name "optimisticjp"
+          git config user.email "optimistic.jp@gmail.com"
+          git add messages src tests docs/project-context.md
+          git diff --cached --check
+          git commit -m "feat: simplify front desk fees and admission recovery"
+          git push origin HEAD:feat/fees-and-console-ux
