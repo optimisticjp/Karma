@@ -63,7 +63,7 @@ export default async function TodayPage() {
     hasPermission(session.staff, "attendance.manage") && canAttendance ? { href: "/admin/attendance", label: copy.home.attendance, detail: copy.home.attendanceHint, icon: "calendar" as const } : null,
     canStudents ? { href: "/admin/students", label: copy.home.findStudent, detail: copy.home.findStudentHint, icon: "search" as const } : null,
     hasPermission(session.staff, "applications.manage") && canManageAdmissions ? { href: "/admin/admissions?status=new", label: copy.home.reviewAdmissions, detail: copy.home.reviewAdmissionsHint, icon: "tray" as const } : null
-  ].filter((item): item is HomeAction => item !== null).slice(0, 4);
+  ].filter((item) => item !== null).slice(0, 4);
 
   const attention = [
     canAdmissions ? { href: "/admin/admissions?status=new", label: copy.home.newApplications, value: c.newApplications, urgent: c.newApplications > 0 } : null,
