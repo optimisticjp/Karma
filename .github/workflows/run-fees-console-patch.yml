@@ -22,7 +22,9 @@ jobs:
           node-version: 22
           cache: npm
       - name: Apply front desk patch
-        run: python .github/scripts/apply_front_desk_patch.py
+        run: |
+          python .github/scripts/apply_front_desk_patch.py
+          python .github/scripts/fix_front_desk_patch.py
       - run: npm ci
       - name: Verify patch
         run: |
