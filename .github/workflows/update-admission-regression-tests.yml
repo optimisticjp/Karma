@@ -1,0 +1,81 @@
+name: Update admission regression tests
+
+on:
+  push:
+    branches:
+      - fix/admission-flow-reliability
+    paths:
+      - .github/workflows/update-admission-regression-tests.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix/admission-flow-reliability
+      - name: Align regression tests with persisted-submission safety
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+
+          def replace(path: str, old: str, new: str):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f"expected block missing in {path}: {old[:120]!r}")
+              p.write_text(text.replace(old, new, 1))
+
+          # Manual enquiry now deliberately returns exact invalid controls.
+          replace(
+              "tests/admissions-console.test.ts",
+              '''    expect(\n      validateManualEnquiry({\n        fullName: "Student",\n        whatsapp: "9876543210",\n        heardFrom: "phone",\n        ageBand: "under18"\n      })\n    ).toEqual({ ok: false });''',
+              '''    const result = validateManualEnquiry({\n      fullName: "Student",\n      whatsapp: "9876543210",\n      heardFrom: "phone",\n      ageBand: "under18"\n    });\n    expect(result.ok).toBe(false);\n    if (!result.ok) expect(result.invalidFields).toEqual(["guardianName", "guardianPhone"]);'''
+          )
+
+          # Public admission safety now relies on Turnstile + throttling + idempotency.
+          replace(
+              "tests/compact-density-admission.test.ts",
+              '''    expect(source, "honeypot").toContain("honeypot");\n    expect(source, "minimum fill-time window").toContain("startedAt");\n    expect(source, "client idempotency key").toContain("idempotencyKey");''',
+              '''    expect(source, "client idempotency key").toContain("idempotencyKey");\n    expect(source, "saved draft for recoverable retries").toContain("DRAFT_KEY");\n    const route = stripComments(read("src/app/api/admission/route.ts"));\n    expect(route, "server Turnstile verification").toContain("verifyTurnstile");\n    expect(route, "server rate limiting").toContain("rateLimit");\n    expect(route, "server idempotency").toContain("idempotencyKey");\n    /* A success sentinel that bypasses persistence is explicitly forbidden. */\n    expect(route).not.toContain("KDS-RECEIVED");'''
+          )
+
+          replace(
+              "tests/machine-lab-admission.test.tsx",
+              '''  it("still runs the layered public-form defence", () => {\n    for (const guard of ["honeypot", "TurnstileWidget", "idemKey", "startedAt"]) {\n      expect(form, guard).toContain(guard);\n    }\n    /* The minimum-fill window is enforced on the server, where a bot cannot\n       skip it. The client only reports when the form was opened. */\n    const route = read("src/app/api/admission/route.ts");\n    expect(route).toContain("Date.now() - d.startedAt");\n    expect(read("src/lib/validation.ts")).toContain("startedAt");\n  });''',
+              '''  it("still runs layered public-form defence without acknowledging unstored submissions", () => {\n    for (const guard of ["TurnstileWidget", "idemKey", "idempotencyKey"]) {\n      expect(form, guard).toContain(guard);\n    }\n    const route = read("src/app/api/admission/route.ts");\n    for (const guard of ["verifyTurnstile", "rateLimit", "idempotencyKey"]) {\n      expect(route, guard).toContain(guard);\n    }\n    /* A public success must come from the persistence path, never a timing or\n       honeypot shortcut that can discard a legitimate autofilled submission. */\n    expect(route).not.toContain("KDS-RECEIVED");\n    expect(route).not.toContain("Date.now() - d.startedAt");\n  });'''
+          )
+
+          replace(
+              "tests/kds-cleanup.test.ts",
+              '''      /* The honeypot: the brief form names the input, the admission form\n         reads it through a ref and posts it under the same key. Either way\n         the field exists and the server still checks it. */\n      expect(src, file).toMatch(/name="website"|ref=\\{honeypot\\}/);\n      expect(src, file).toContain("startedAt"); // minimum-time check\n      expect(src, file).toContain("TurnstileWidget");\n      expect(src, file).toContain('aria-live'); // the persistent error region\n    }\n    expect(read("src/components/forms/AdmissionForm.tsx")).toContain("guardianPhone");\n    expect(read("src/components/forms/AdmissionForm.tsx")).toContain("termsVersion");''',
+              '''      expect(src, file).toContain("TurnstileWidget");\n      expect(src, file).toContain('aria-live'); // the persistent error region\n    }\n    const admissionForm = read("src/components/forms/AdmissionForm.tsx");\n    const briefForm = read("src/components/forms/BriefForm.tsx");\n    expect(admissionForm).toContain("idempotencyKey");\n    expect(admissionForm).toContain("guardianPhone");\n    expect(admissionForm).toContain("termsVersion");\n    expect(briefForm).toContain("MAX_FILES");\n    expect(briefForm).toContain("MAX_FILE_BYTES");\n    /* Neither endpoint may claim success through the old non-persisting\n       anti-bot sentinels. */\n    expect(read("src/app/api/admission/route.ts")).not.toContain("KDS-RECEIVED");\n    expect(read("src/app/api/brief/route.ts")).not.toContain("KDS-B-RECEIVED");'''
+          )
+
+          replace(
+              "tests/kds-secondary.test.ts",
+              '''    for (const defence of ["startedAt", 'name="website"', "turnstileToken"]) {\n      expect(form, defence).toContain(defence);\n    }''',
+              '''    for (const defence of ["TurnstileWidget", "turnstileToken", "MAX_FILES", "MAX_FILE_BYTES"]) {\n      expect(form, defence).toContain(defence);\n    }\n    expect(read("src/app/api/brief/route.ts")).not.toContain("KDS-B-RECEIVED");'''
+          )
+
+          # Remove the translation that belonged only to the deleted honeypot input.
+          for message_file in ["messages/en.json", "messages/gu.json"]:
+              p = Path(message_file)
+              data = json.loads(p.read_text())
+              fields = data.get("admissionForm", {}).get("fields", {})
+              if "website" not in fields:
+                  raise SystemExit(f"website translation already missing in {message_file}")
+              del fields["website"]
+              p.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests messages
+          git commit -m "test: align intake safety checks with persisted submissions"
+          git push origin HEAD:fix/admission-flow-reliability
