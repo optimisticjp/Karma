@@ -25,6 +25,7 @@ jobs:
         run: |
           python .github/scripts/apply_front_desk_patch.py
           python .github/scripts/fix_front_desk_patch.py
+          python .github/scripts/fix_set_based_test.py
       - run: npm ci
       - name: Verify patch
         run: |
