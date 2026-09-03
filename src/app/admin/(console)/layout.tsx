@@ -39,8 +39,8 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
     { tab: { href: "/admin", label: t("nav.today"), icon: "home" }, allowed: true },
     { tab: { href: "/admin/admissions", label: t("nav.admissions"), icon: "tray" }, allowed: canUseAdmissions },
     { tab: { href: "/admin/students", label: t("nav.students"), icon: "people" }, allowed: canUseStudents },
-    { tab: { href: "/admin/batches", label: t("nav.batches"), icon: "calendar" }, allowed: canUseBatches },
     { tab: { href: "/admin/fees", label: t("nav.fees"), icon: "check" }, allowed: canUseFees },
+    { tab: { href: "/admin/batches", label: t("nav.batches"), icon: "calendar" }, allowed: canUseBatches },
     { tab: { href: "/admin/attendance", label: t("nav.attendance"), icon: "check" }, allowed: canUseAttendance },
     { tab: { href: "/admin/design", label: t("nav.designDesk"), icon: "pencil" }, allowed: canUseDesign },
     { tab: { href: "/admin/reports", label: t("nav.reports"), icon: "printer" }, allowed: canUseReports }

@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { and, asc, desc, eq, inArray, isNull, or, sum } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, or } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guard";
 import { PageHead } from "@/components/admin/PageHead";
 import { hasPermission } from "@/lib/auth/access";
 import { studentsCopy } from "@/lib/admin/students-copy";
+import { feesCopy } from "@/lib/admin/fees-copy";
+import { summariseFees } from "@/lib/admin/fee-status";
 import { isEnrollmentStatus, positiveId, type EnrollmentStatus } from "@/lib/admin/students";
 import { recordsCopy } from "@/lib/admin/records-copy";
 import { canPerform } from "@/lib/admin/record-actions";
@@ -28,8 +30,11 @@ export default async function StudentsPage({ searchParams }: Props) {
   const session = await requireAdmin("/admin/students");
   const canView = hasPermission(session.staff, "students.view") || hasPermission(session.staff, "students.manage");
   const canManage = hasPermission(session.staff, "students.manage");
+  const canViewFees = hasPermission(session.staff, "fees.view") || hasPermission(session.staff, "fees.manage");
+  const canManageFees = hasPermission(session.staff, "fees.manage");
   if (!canView) redirect("/admin/no-access?reason=permission");
   const copy = studentsCopy(session.staff.adminLocale);
+  const feeCopy = feesCopy(session.staff.adminLocale);
   const records = recordsCopy(session.staff.adminLocale);
   const sheets = printCopy(session.staff.adminLocale);
   const subject = {
@@ -81,7 +86,10 @@ export default async function StudentsPage({ searchParams }: Props) {
       seatsTaken: schema.batches.seatsTaken,
       status: schema.batches.status,
       courseNameEn: schema.courses.nameEn,
-      courseNameGu: schema.courses.nameGu
+      courseNameGu: schema.courses.nameGu,
+      feeTotal: schema.courses.feeTotal,
+      feeAdmission: schema.courses.feeAdmission,
+      feeBalanceDueDays: schema.courses.feeBalanceDueDays
     }).from(schema.batches)
       .innerJoin(schema.courses, eq(schema.batches.courseId, schema.courses.id))
       /* Archived courses and batches never appear in an admission picker. */
@@ -121,7 +129,7 @@ export default async function StudentsPage({ searchParams }: Props) {
    * stores a paid flag, and this row must not become the place one appears.
    */
   const visibleIds = students.map((student) => student.id);
-  const [currentEnrolments, balances] = visibleIds.length
+  const [currentEnrolments, directoryFeeRows] = visibleIds.length
     ? await Promise.all([
         db
           .select({
@@ -139,14 +147,18 @@ export default async function StudentsPage({ searchParams }: Props) {
         db
           .select({
             studentId: schema.enrollments.studentId,
-            agreed: sum(schema.enrollments.agreedFeeTotal),
-            discount: sum(schema.feeRecords.discount),
-            received: sum(schema.feeRecords.received)
+            enrollmentId: schema.enrollments.id,
+            agreedFeeTotal: schema.enrollments.agreedFeeTotal,
+            agreedAdmissionAmount: schema.enrollments.agreedAdmissionAmount,
+            agreedBalanceDueOn: schema.enrollments.agreedBalanceDueOn,
+            received: schema.feeRecords.received,
+            discount: schema.feeRecords.discount,
+            courseFee: schema.feeRecords.courseFee,
+            dueDate: schema.feeRecords.dueDate
           })
           .from(schema.enrollments)
           .leftJoin(schema.feeRecords, eq(schema.feeRecords.enrollmentId, schema.enrollments.id))
           .where(inArray(schema.enrollments.studentId, visibleIds))
-          .groupBy(schema.enrollments.studentId)
       ])
     : [[], []];
 
@@ -154,12 +166,42 @@ export default async function StudentsPage({ searchParams }: Props) {
   for (const row of currentEnrolments) {
     if (!enrolmentByStudent.has(row.studentId)) enrolmentByStudent.set(row.studentId, row);
   }
+  const directoryByEnrollment = new Map<number, {
+    studentId: number;
+    agreement: { agreedFeeTotal: number | null; agreedAdmissionAmount: number | null; agreedBalanceDueOn: string | null };
+    entries: Array<{ received: number; discount: number | null; courseFee: number | null; dueDate: string | null }>;
+  }>();
+  for (const row of directoryFeeRows) {
+    let current = directoryByEnrollment.get(row.enrollmentId);
+    if (!current) {
+      current = {
+        studentId: row.studentId,
+        agreement: {
+          agreedFeeTotal: row.agreedFeeTotal,
+          agreedAdmissionAmount: row.agreedAdmissionAmount,
+          agreedBalanceDueOn: row.agreedBalanceDueOn
+        },
+        entries: []
+      };
+      directoryByEnrollment.set(row.enrollmentId, current);
+    }
+    if (row.received != null) {
+      current.entries.push({
+        received: row.received,
+        discount: row.discount,
+        courseFee: row.courseFee,
+        dueDate: row.dueDate
+      });
+    }
+  }
   const balanceByStudent = new Map<number, number>();
-  for (const row of balances) {
-    const agreed = Number(row.agreed ?? 0);
-    if (!agreed) continue;
-    const owed = agreed - Number(row.discount ?? 0) - Number(row.received ?? 0);
-    balanceByStudent.set(row.studentId, Math.max(0, owed));
+  for (const enrollment of directoryByEnrollment.values()) {
+    const summary = summariseFees(enrollment.agreement, enrollment.entries);
+    if (summary.balance <= 0) continue;
+    balanceByStudent.set(
+      enrollment.studentId,
+      (balanceByStudent.get(enrollment.studentId) ?? 0) + summary.balance
+    );
   }
   const selectedId = requestedStudent && studentRows.some((s) => s.id === requestedStudent)
     ? requestedStudent
@@ -171,13 +213,17 @@ export default async function StudentsPage({ searchParams }: Props) {
     courseName: session.staff.adminLocale === "gu" ? batch.courseNameGu : batch.courseNameEn,
     seats: batch.seats,
     seatsTaken: batch.seatsTaken,
-    status: batch.status
+    status: batch.status,
+    feeTotal: batch.feeTotal,
+    feeAdmission: batch.feeAdmission,
+    feeBalanceDueDays: batch.feeBalanceDueDays
   }));
 
   let guardian: { name: string; phone: string; relation: string | null } | null = null;
   let enrollments: Array<{
     id: number; batchId: number; batchLabel: string; courseName: string; status: EnrollmentStatus;
     joinedOn: string | null; completedOn: string | null;
+    agreedFeeTotal: number | null; agreedAdmissionAmount: number | null; agreedBalanceDueOn: string | null;
   }> = [];
   let attendance: Array<{ status: "present" | "absent" | "late" | "excused" }> = [];
   let fees: Array<{ enrollmentId: number; courseFee: number; discount: number; received: number; receiptNo: string | null; dueDate: string | null; createdAt: Date }> = [];
@@ -195,7 +241,10 @@ export default async function StudentsPage({ searchParams }: Props) {
         courseNameGu: schema.courses.nameGu,
         status: schema.enrollments.status,
         joinedOn: schema.enrollments.joinedOn,
-        completedOn: schema.enrollments.completedOn
+        completedOn: schema.enrollments.completedOn,
+        agreedFeeTotal: schema.enrollments.agreedFeeTotal,
+        agreedAdmissionAmount: schema.enrollments.agreedAdmissionAmount,
+        agreedBalanceDueOn: schema.enrollments.agreedBalanceDueOn
       }).from(schema.enrollments)
         .innerJoin(schema.batches, eq(schema.enrollments.batchId, schema.batches.id))
         .innerJoin(schema.courses, eq(schema.batches.courseId, schema.courses.id))
@@ -211,7 +260,10 @@ export default async function StudentsPage({ searchParams }: Props) {
       courseName: session.staff.adminLocale === "gu" ? e.courseNameGu : e.courseNameEn,
       status: isEnrollmentStatus(e.status) ? e.status : "active",
       joinedOn: e.joinedOn,
-      completedOn: e.completedOn
+      completedOn: e.completedOn,
+      agreedFeeTotal: e.agreedFeeTotal,
+      agreedAdmissionAmount: e.agreedAdmissionAmount,
+      agreedBalanceDueOn: e.agreedBalanceDueOn
     }));
     attendance = attendanceRows;
     const enrollmentIds = enrollments.map((e) => e.id);
@@ -227,7 +279,26 @@ export default async function StudentsPage({ searchParams }: Props) {
 
   const present = attendance.filter((a) => a.status === "present" || a.status === "late").length;
   const attendanceRate = attendance.length ? Math.round((present / attendance.length) * 100) : null;
-  const feeSummary = summarizeFees(fees);
+  const feeRowsByEnrollment = new Map<number, typeof fees>();
+  for (const row of fees) {
+    const list = feeRowsByEnrollment.get(row.enrollmentId) ?? [];
+    list.push(row);
+    feeRowsByEnrollment.set(row.enrollmentId, list);
+  }
+  const selectedFeeSummaries = enrollments.map((enrollment) =>
+    summariseFees(
+      {
+        agreedFeeTotal: enrollment.agreedFeeTotal,
+        agreedAdmissionAmount: enrollment.agreedAdmissionAmount,
+        agreedBalanceDueOn: enrollment.agreedBalanceDueOn
+      },
+      feeRowsByEnrollment.get(enrollment.id) ?? []
+    )
+  );
+  const feeSummary = {
+    received: selectedFeeSummaries.reduce((sum, summary) => sum + summary.received, 0),
+    due: selectedFeeSummaries.reduce((sum, summary) => sum + summary.balance, 0)
+  };
   const editValue: StudentEditValue | null = selected ? {
     id: selected.id,
     fullName: selected.fullName,
@@ -268,7 +339,7 @@ export default async function StudentsPage({ searchParams }: Props) {
         <section className="mt-3 grid gap-2 lg:grid-cols-2">
           <details className="panel">
             <summary className="panel-head cursor-pointer list-none"><h2 className="text-h4">{copy.directAdmission}</h2><span aria-hidden className="text-h4">＋</span></summary>
-            <div className="panel-body border-t border-rule"><p className="form-note mb-3">{copy.directAdmissionHint}</p><DirectAdmissionForm batches={batches} copy={copy} /></div>
+            <div className="panel-body border-t border-rule"><p className="form-note mb-3">{copy.directAdmissionHint}</p><DirectAdmissionForm batches={batches} copy={copy} feeCopy={canManageFees ? feeCopy : undefined} /></div>
           </details>
           <details className="panel">
             <summary className="panel-head cursor-pointer list-none"><h2 className="text-h4">{copy.convertEnquiry}</h2><span aria-hidden className="text-h4">＋</span></summary>
@@ -412,7 +483,14 @@ export default async function StudentsPage({ searchParams }: Props) {
               </section>
 
               <section className="grid gap-6 xl:grid-cols-2">
-                <div className="panel"><div className="panel-head"><h3 className="text-h4">{copy.fees}</h3></div><div className="panel-body"><div className="grid grid-cols-2 gap-4"><Fact label={copy.paid} value={formatInr(feeSummary.received)} /><Fact label={copy.due} value={formatInr(feeSummary.due)} /></div>{fees.length === 0 ? <p className="form-note mt-4">{copy.noFees}</p> : <p className="form-note mt-4">{fees.length} ledger entr{fees.length === 1 ? "y" : "ies"}</p>}</div></div>
+                <div className="panel">
+                  <div className="panel-head"><h3 className="text-h4">{copy.fees}</h3></div>
+                  <div className="panel-body">
+                    <div className="grid grid-cols-2 gap-4"><Fact label={copy.paid} value={formatInr(feeSummary.received)} /><Fact label={copy.due} value={formatInr(feeSummary.due)} /></div>
+                    {fees.length === 0 ? <p className="form-note mt-4">{copy.noFees}</p> : <p className="form-note mt-4">{fees.length} ledger entr{fees.length === 1 ? "y" : "ies"}</p>}
+                    {canViewFees ? <p className="mt-4"><Link className="btn btn-secondary" href={`/admin/fees?q=${encodeURIComponent(selected.admissionNo)}`}>{feeCopy.openLedger}</Link></p> : null}
+                  </div>
+                </div>
                 <div className="panel"><div className="panel-head"><h3 className="text-h4">{copy.certificates}</h3></div><div className="panel-body">{certificates.length === 0 ? <p className="form-note">{copy.noCertificates}</p> : <div className="grid gap-3">{certificates.map((cert) => <div key={cert.certNo} className="flex items-center justify-between gap-3 border-b border-rule pb-3 last:border-0 last:pb-0"><div><p className="font-semibold">{cert.courseName}</p><p className="form-note">{cert.certNo} · {formatDate(cert.issuedOn, session.staff.adminLocale)}</p></div><span className={`status ${cert.status === "issued" ? "status-active" : "status-off"}`}>{cert.status}</span></div>)}</div>}</div></div>
               </section>
             </div>
@@ -421,18 +499,6 @@ export default async function StudentsPage({ searchParams }: Props) {
       </div>
     </div>
   );
-}
-
-function summarizeFees(rows: Array<{ enrollmentId: number; courseFee: number; discount: number; received: number }>) {
-  const byEnrollment = new Map<number, { courseFee: number; discount: number; received: number }>();
-  for (const row of rows) {
-    const current = byEnrollment.get(row.enrollmentId);
-    if (!current) byEnrollment.set(row.enrollmentId, { courseFee: row.courseFee, discount: row.discount, received: row.received });
-    else current.received += row.received;
-  }
-  let agreed = 0, received = 0;
-  for (const value of byEnrollment.values()) { agreed += Math.max(0, value.courseFee - value.discount); received += value.received; }
-  return { received, due: Math.max(0, agreed - received) };
 }
 
 function Fact({ label, value }: { label: string; value: string }) { return <div><dt className="microlabel">{label}</dt><dd className="mt-1 text-smallmeta">{value}</dd></div>; }

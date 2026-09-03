@@ -288,10 +288,12 @@ describe("the core admin workflows show records, not chrome", () => {
 
   it("keeps the new reads set-based, never per row", () => {
     /* The student row gained a course, a batch, an enrolment status and a
-       balance. Two grouped queries over the ids already on screen — they
-       shrink with the list rather than multiplying by it. */
+       balance. Reads stay scoped to the ids already on screen and never become
+       a query per student. Fee rows are joined raw and summarised per enrolment
+       in memory so multiple receipts cannot duplicate the agreement total. */
     expect(students).toContain("inArray(schema.enrollments.studentId, visibleIds)");
-    expect(students).toContain(".groupBy(schema.enrollments.studentId)");
+    expect(students).toContain(".leftJoin(schema.feeRecords");
+    expect(students).toContain("directoryByEnrollment");
     expect(students).not.toMatch(/for \(const student of students\)[\s\S]{0,200}await db/);
   });
 

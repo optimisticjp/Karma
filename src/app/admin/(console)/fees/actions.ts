@@ -5,7 +5,7 @@ import { desc, eq } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { authorizeAction } from "@/lib/auth/guard";
 import { auditValues, FEE_AUDIT_ACTIONS } from "@/lib/admin/audit";
-import { validateAgreementUpdate, validateFeeRecord } from "@/lib/admin/fees";
+import { validateAgreementUpdate, validatePaymentEntry } from "@/lib/admin/fees";
 import { pad } from "@/lib/utils";
 
 export type FeeState = {
@@ -19,6 +19,8 @@ export type FeeState = {
     | "missing"
     | "overpaid"
     | "belowReceived"
+    | "agreementMissing"
+    | "discountDecrease"
     | "generic";
 };
 
@@ -28,25 +30,41 @@ const fail = (message: FeeState["message"]): FeeState => ({ status: "error", mes
 export async function addFeeRecordAction(_prev: FeeState, formData: FormData): Promise<FeeState> {
   const auth = await authorizeAction({ permission: "fees.manage" });
   if (!auth.ok) return fail("denied");
-  const parsed = validateFeeRecord(Object.fromEntries(formData.entries()));
+  const parsed = validatePaymentEntry(Object.fromEntries(formData.entries()));
   if (!parsed.ok) return fail("invalid");
   const db = getDb();
   if (!db) return fail("generic");
 
   try {
     const d = parsed.value;
-    const enrollment = await db.select({ id: schema.enrollments.id }).from(schema.enrollments).where(eq(schema.enrollments.id, d.enrollmentId)).limit(1);
+    const enrollment = await db
+      .select({ id: schema.enrollments.id, agreedFeeTotal: schema.enrollments.agreedFeeTotal })
+      .from(schema.enrollments)
+      .where(eq(schema.enrollments.id, d.enrollmentId))
+      .limit(1);
     if (!enrollment[0]) return fail("missing");
-    const previous = await db.select({ received: schema.feeRecords.received }).from(schema.feeRecords).where(eq(schema.feeRecords.enrollmentId, d.enrollmentId)).orderBy(desc(schema.feeRecords.createdAt));
+
+    const previous = await db
+      .select({ received: schema.feeRecords.received, discount: schema.feeRecords.discount, courseFee: schema.feeRecords.courseFee })
+      .from(schema.feeRecords)
+      .where(eq(schema.feeRecords.enrollmentId, d.enrollmentId))
+      .orderBy(desc(schema.feeRecords.createdAt));
+
+    const agreedFeeTotal = enrollment[0].agreedFeeTotal ?? previous[0]?.courseFee ?? null;
+    if (agreedFeeTotal == null) return fail("agreementMissing");
     const alreadyReceived = previous.reduce((sum, row) => sum + row.received, 0);
-    const netFee = Math.max(0, d.courseFee - d.discount);
+    const currentDiscount = previous.reduce((max, row) => Math.max(max, row.discount), 0);
+    if (d.discount != null && d.discount < currentDiscount) return fail("discountDecrease");
+    const discount = d.discount ?? currentDiscount;
+    if (discount > agreedFeeTotal) return fail("invalid");
+    const netFee = Math.max(0, agreedFeeTotal - discount);
     if (alreadyReceived + d.received > netFee) return fail("overpaid");
 
     await db.transaction(async (tx) => {
       const inserted = await tx.insert(schema.feeRecords).values({
         enrollmentId: d.enrollmentId,
-        courseFee: d.courseFee,
-        discount: d.discount,
+        courseFee: agreedFeeTotal,
+        discount,
         received: d.received,
         method: d.method,
         receiptNo: d.receiptNo,
@@ -62,15 +80,7 @@ export async function addFeeRecordAction(_prev: FeeState, formData: FormData): P
         action: FEE_AUDIT_ACTIONS.recordCreated,
         entity: "fee_record",
         entityId: id,
-        newValue: {
-          enrollmentId: d.enrollmentId,
-          courseFee: d.courseFee,
-          discount: d.discount,
-          received: d.received,
-          method: d.method,
-          receiptNo,
-          dueDate: d.dueDate
-        },
+        newValue: { enrollmentId: d.enrollmentId, courseFee: agreedFeeTotal, discount, received: d.received, method: d.method, receiptNo, dueDate: d.dueDate },
         reason: d.notes ?? "offline fee ledger entry"
       }));
     });

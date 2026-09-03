@@ -141,7 +141,7 @@ describe("console completion source contracts", () => {
     expect(today).toContain("canAudit ? getRecentActivity() : Promise.resolve([])");
     expect(today).toContain('hasPermission(session.staff, "applications.manage")');
     expect(today).toContain('hasPermission(session.staff, "attendance.manage")');
-    expect(today).toContain('hasPermission(session.staff, "content.manage")');
+    expect(today).toContain('hasPermission(session.staff, "fees.manage")');
   });
 
   it("removes the obsolete MFA product surface", () => {
