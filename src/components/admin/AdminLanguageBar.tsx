@@ -13,6 +13,7 @@ export function AdminLanguageBar({ locale }: { locale: AdminLocale }) {
         <span className="console-language-label">{copy.language.label}</span>
         <span className="console-language-hint">{copy.language.hint}</span>
       </div>
+      <span className="console-language-mark" aria-hidden="true">EN।ગુજ</span>
       <form action={quickSetAdminLocale} className="console-language-switch" aria-label={copy.language.label}>
         <button type="submit" name="locale" value="en" aria-pressed={locale === "en"} lang="en">
           EN

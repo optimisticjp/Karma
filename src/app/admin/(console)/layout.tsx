@@ -44,7 +44,9 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
     label: string,
     icon: NavEntry["icon"]
   ): NavEntry | null => allowed ? { href, label, available: true, icon } : null;
-  const compact = (items: Array<NavEntry | null>) => items.filter((item): item is NavEntry => item !== null);
+  const compact = (items: Array<NavEntry | null>) => items.filter(
+    (item): item is NavEntry => item !== null && item.available && item.href !== null
+  );
 
   const tabCandidates: Array<{ tab: NavTab; allowed: boolean }> = [
     { tab: { href: "/admin", label: t("nav.today"), icon: "home" }, allowed: true },
@@ -61,7 +63,7 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
       title: console.sections.frontDesk,
       entries: compact([
         entry(true, "/admin", t("nav.today"), "home"),
-        entry(canUseAdmissions, "/admin/admissions", t("nav.admissions"), "tray"),
+        { href: canUseAdmissions ? "/admin/admissions" : null, label: t("nav.admissions"), available: canUseAdmissions, icon: "tray" },
         entry(canUseStudents, "/admin/students", t("nav.students"), "people"),
         entry(canUseFees, "/admin/fees", t("nav.fees"), "check"),
         entry(canUseAttendance, "/admin/attendance", t("nav.attendance"), "calendar")
@@ -70,8 +72,8 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
     {
       title: console.sections.studio,
       entries: compact([
-        entry(canUseBatches, "/admin/batches", t("nav.batches"), "calendar"),
-        entry(canUseCourses, "/admin/courses", t("nav.courses"), "machine")
+        { href: canUseBatches ? "/admin/batches" : null, label: t("nav.batches"), available: canUseBatches, icon: "calendar" },
+        { href: canUseCourses ? "/admin/courses" : null, label: t("nav.courses"), available: canUseCourses, icon: "machine" }
       ])
     },
     {
