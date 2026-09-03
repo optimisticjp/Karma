@@ -1,7 +1,9 @@
+import "../../admin-console.css";
 import { AdminLanguageBar } from "@/components/admin/AdminLanguageBar";
-import { ConsoleShell, type NavSection, type NavTab } from "@/components/admin/ConsoleShell";
+import { ConsoleShell, type NavEntry, type NavSection, type NavTab } from "@/components/admin/ConsoleShell";
 import { SignOutLink } from "@/components/admin/SignOutLink";
 import { getAdminT } from "@/lib/admin/i18n";
+import { consoleCopy } from "@/lib/admin/console-copy";
 import { recordsCopy } from "@/lib/admin/records-copy";
 import { canPerform, deletableEntities } from "@/lib/admin/record-actions";
 import { requireAdmin } from "@/lib/auth/guard";
@@ -12,6 +14,7 @@ import { hasPermission } from "@/lib/auth/access";
 export default async function ConsoleLayout({ children }: { children: React.ReactNode }) {
   const session = await requireAdmin();
   const t = getAdminT(session.staff.adminLocale);
+  const console = consoleCopy(session.staff.adminLocale);
   const records = recordsCopy(session.staff.adminLocale);
 
   const canUseAdmissions = hasPermission(session.staff, "applications.view") || hasPermission(session.staff, "applications.manage");
@@ -35,54 +38,74 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
     canPerform(recordSubject, entity, "delete")
   );
 
+  const entry = (
+    allowed: boolean,
+    href: string,
+    label: string,
+    icon: NavEntry["icon"]
+  ): NavEntry | null => allowed ? { href, label, available: true, icon } : null;
+  const compact = (items: Array<NavEntry | null>) => items.filter((item): item is NavEntry => item !== null);
+
   const tabCandidates: Array<{ tab: NavTab; allowed: boolean }> = [
     { tab: { href: "/admin", label: t("nav.today"), icon: "home" }, allowed: true },
     { tab: { href: "/admin/admissions", label: t("nav.admissions"), icon: "tray" }, allowed: canUseAdmissions },
     { tab: { href: "/admin/students", label: t("nav.students"), icon: "people" }, allowed: canUseStudents },
     { tab: { href: "/admin/fees", label: t("nav.fees"), icon: "check" }, allowed: canUseFees },
-    { tab: { href: "/admin/batches", label: t("nav.batches"), icon: "calendar" }, allowed: canUseBatches },
-    { tab: { href: "/admin/attendance", label: t("nav.attendance"), icon: "check" }, allowed: canUseAttendance },
-    { tab: { href: "/admin/design", label: t("nav.designDesk"), icon: "pencil" }, allowed: canUseDesign },
-    { tab: { href: "/admin/reports", label: t("nav.reports"), icon: "printer" }, allowed: canUseReports }
+    { tab: { href: "/admin/attendance", label: t("nav.attendance"), icon: "calendar" }, allowed: canUseAttendance },
+    { tab: { href: "/admin/batches", label: t("nav.batches"), icon: "calendar" }, allowed: canUseBatches }
   ];
   const tabs = tabCandidates.filter((c) => c.allowed).slice(0, 4).map((c) => c.tab);
 
   const sections: NavSection[] = [
     {
-      title: t("nav.sections.operations"),
-      entries: [
-        { href: "/admin", label: t("nav.today"), available: true },
-        { href: canUseAdmissions ? "/admin/admissions" : null, label: t("nav.admissions"), available: canUseAdmissions },
-        { href: canUseStudents ? "/admin/students" : null, label: t("nav.students"), available: canUseStudents },
-        { href: canUseFees ? "/admin/fees" : null, label: t("permissions.groups.fees"), available: canUseFees }
-      ]
+      title: console.sections.frontDesk,
+      entries: compact([
+        entry(true, "/admin", t("nav.today"), "home"),
+        entry(canUseAdmissions, "/admin/admissions", t("nav.admissions"), "tray"),
+        entry(canUseStudents, "/admin/students", t("nav.students"), "people"),
+        entry(canUseFees, "/admin/fees", t("nav.fees"), "check"),
+        entry(canUseAttendance, "/admin/attendance", t("nav.attendance"), "calendar")
+      ])
     },
     {
-      title: t("nav.sections.studio"),
-      entries: [
-        { href: canUseBatches ? "/admin/batches" : null, label: t("nav.batches"), available: canUseBatches },
-        { href: canUseCourses ? "/admin/courses" : null, label: t("nav.courses"), available: canUseCourses },
-        { href: canUseAttendance ? "/admin/attendance" : null, label: t("nav.attendance"), available: canUseAttendance },
-        { href: canUseDesign ? "/admin/design" : null, label: t("nav.designDesk"), available: canUseDesign },
-        { href: canUseCertificates ? "/admin/certificates" : null, label: t("nav.certificates"), available: canUseCertificates },
-        { href: canUseContent ? "/admin/content" : null, label: t("nav.content"), available: canUseContent },
-        { href: canUseReports ? "/admin/reports" : null, label: t("nav.reports"), available: canUseReports }
-      ]
+      title: console.sections.studio,
+      entries: compact([
+        entry(canUseBatches, "/admin/batches", t("nav.batches"), "calendar"),
+        entry(canUseCourses, "/admin/courses", t("nav.courses"), "machine")
+      ])
     },
     {
-      title: t("nav.sections.administration"),
-      entries: [
-        ...(canUseCleanup ? [{ href: "/admin/records", label: records.cleanupTitle, available: true }] : []),
-        ...(session.role === "owner" ? [{ href: "/admin/team", label: t("nav.team"), available: true }] : []),
-        { href: "/admin/account/security", label: t("nav.account"), available: true }
-      ]
+      title: console.sections.other,
+      entries: compact([
+        entry(canUseDesign, "/admin/design", t("nav.designDesk"), "pencil"),
+        entry(canUseCertificates, "/admin/certificates", t("nav.certificates"), "printer"),
+        entry(canUseContent, "/admin/content", t("nav.content"), "camera"),
+        entry(canUseReports, "/admin/reports", t("nav.reports"), "printer")
+      ])
+    },
+    {
+      title: console.sections.administration,
+      entries: compact([
+        entry(canUseCleanup, "/admin/records", records.cleanupTitle, "trash"),
+        entry(session.role === "owner", "/admin/team", t("nav.team"), "people"),
+        entry(true, "/admin/account/security", t("nav.account"), "check")
+      ])
     }
-  ];
+  ].filter((section) => section.entries.length > 0);
+
+  const primaryAction: NavTab | null = hasPermission(session.staff, "students.manage")
+    ? { href: "/admin/students", label: console.primary.newAdmission, icon: "plus" }
+    : hasPermission(session.staff, "applications.manage")
+      ? { href: "/admin/admissions", label: console.primary.reviewAdmissions, icon: "tray" }
+      : hasPermission(session.staff, "fees.manage")
+        ? { href: "/admin/fees?status=pending", label: console.primary.collectFee, icon: "check" }
+        : null;
 
   return (
     <ConsoleShell
       sections={sections}
       tabs={tabs}
+      primaryAction={primaryAction}
       brand={t("brand")}
       studio={t("studio")}
       personName={session.staff.name}

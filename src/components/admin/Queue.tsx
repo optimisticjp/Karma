@@ -1,26 +1,8 @@
 import Link from "next/link";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
 
-/**
- * A work queue: the count, then the rows behind it.
- *
- * WHY THIS REPLACED THE METRIC CARDS
- * ----------------------------------
- * "7 follow-ups due" tells an operator that seven things need attention.
- * A queue tells them WHICH seven, so the first one can be opened without a
- * second navigation and a scan of a list. That is the difference between a
- * dashboard and a work desk, and this screen is a work desk.
- *
- * The count did not disappear — it heads the queue, where it is a label for
- * what follows rather than a number in a box.
- *
- * DENSITY AND TOUCH SIZE ARE NOT IN TENSION
- * -----------------------------------------
- * Rows are visually tight and every row is a full-width target with a ≥44px
- * hit area, using padding that overflows the row rather than a taller row.
- * The console is used standing up, on a phone, between a machine and a
- * counter.
- */
+/** A work queue: the count, then the rows behind it. */
 export function Queue({
   title,
   count,
@@ -28,22 +10,25 @@ export function Queue({
   moreHref,
   moreLabel,
   children,
-  urgent = false
+  urgent = false,
+  icon
 }: {
   title: string;
-  /** Total, which may exceed the rows shown. */
   count: number;
   emptyLabel: string;
   moreHref?: string;
   moreLabel?: string;
   children?: React.ReactNode;
-  /** Draws the count in the accent when there is something to do. */
   urgent?: boolean;
+  icon?: IconName;
 }) {
   return (
-    <section className="queue" aria-label={title}>
+    <section className="queue queue-v2" aria-label={title}>
       <div className="queue-head">
-        <h3 className="queue-title">{title}</h3>
+        <div className="queue-title-wrap">
+          {icon ? <span className="queue-icon" aria-hidden="true"><Icon name={icon} size={17} /></span> : null}
+          <h3 className="queue-title">{title}</h3>
+        </div>
         <span className={cn("queue-count", urgent && count > 0 && "is-urgent")}>{count}</span>
       </div>
       {count === 0 ? (
@@ -62,16 +47,7 @@ export function Queue({
   );
 }
 
-/**
- * One row in a queue.
- *
- * Title, one line of dot-separated facts, and an optional status. Nothing
- * else fits on a 360px screen without either truncating the name or hiding
- * the thing that decides whether to act.
- *
- * A phone number is deliberately not a queue field: a queue is scanned in
- * public, at a counter, and the number lives one tap away on the record.
- */
+/** One row in a queue. The whole row is one generous touch target. */
 export function QueueRow({
   href,
   title,
@@ -98,6 +74,7 @@ export function QueueRow({
             {status}
           </span>
         ) : null}
+        <span className="queue-row-arrow" aria-hidden="true"><Icon name="arrow" size={14} /></span>
       </Link>
     </li>
   );

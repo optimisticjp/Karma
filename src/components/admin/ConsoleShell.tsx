@@ -8,48 +8,26 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 export type NavEntry = {
   href: string | null;
   label: string;
-  /** Sections whose module has not shipped yet are shown, but plainly inert. */
   available: boolean;
+  icon?: IconName;
 };
 
 export type NavSection = { title: string; entries: NavEntry[] };
-
-/**
- * A bottom-navigation destination.
- *
- * The bar takes at most four of these plus More. Which four is decided in the
- * layout, from a priority-ordered candidate list filtered by what the caller
- * can actually reach — so an operator whose one daily module is not in the
- * default four gets it promoted into a free slot instead of a dead tab.
- */
 export type NavTab = { href: string; label: string; icon: IconName };
 
 /**
- * Karma Console frame.
+ * Shared console frame for desktop and mobile.
  *
- * DESKTOP is a persistent working rail. MOBILE, since 2026-08-31, is a
- * compact app bar plus a permanent bottom navigation — because the console is
- * used standing up, between a machine and a counter, and every module switch
- * used to cost a full-viewport drawer. The owner's drawer measured 795px:
- * twelve rows, three group headings and a footer, opened and closed dozens of
- * times a shift to reach four or five destinations.
- *
- * The bar carries at most FOUR destinations plus More. Which four is the
- * layout's decision (see the candidate list there), not this component's — the
- * shell renders what it is handed. A destination the caller cannot reach is
- * OMITTED rather than greyed: a dead tab in a bar of five is a fifth of the
- * product's navigation.
- *
- * More opens the same drawer as before, now anchored above the bar as a sheet.
- * It holds the full sectioned navigation, the account row and sign-out.
- *
- * Navigation remains a UX affordance only. Every destination
- * re-checks authorization server-side, and hidden navigation has never been
- * the security boundary.
+ * The navigation is intentionally task-first. Permissions decide what is
+ * rendered, while every destination still re-checks authorization server-side.
+ * On phones the app bar says where the operator is, the bottom bar keeps the
+ * four highest-frequency destinations one tap away, and More holds everything
+ * else. On desktop the same information is grouped into a quiet working rail.
  */
 export function ConsoleShell({
   sections,
   tabs,
+  primaryAction,
   brand,
   studio,
   personName,
@@ -66,6 +44,7 @@ export function ConsoleShell({
 }: {
   sections: NavSection[];
   tabs: NavTab[];
+  primaryAction?: NavTab | null;
   brand: string;
   studio: string;
   personName: string;
@@ -122,29 +101,40 @@ export function ConsoleShell({
     };
   }, [open]);
 
+  const isCurrent = (href: string) =>
+    pathname === href || (href !== "/admin" && pathname.startsWith(`${href}/`));
+
+  const activeEntry = sections
+    .flatMap((section) => section.entries)
+    .find((entry) => entry.href && isCurrent(entry.href));
+  const currentLabel = activeEntry?.label ?? brand;
+
   const nav = (
-    <nav aria-label={moreNavLabel} className="grid gap-4">
+    <nav aria-label={moreNavLabel} className="console-nav">
       {sections.map((section) => (
-        <div key={section.title}>
-          <p className="microlabel px-3">{section.title}</p>
-          <ul className="mt-1 grid gap-0.5">
+        <section key={section.title}>
+          <p className="console-nav-section-label">{section.title}</p>
+          <ul className="console-nav-list">
             {section.entries.map((entry) => {
-              const active =
-                entry.href != null &&
-                (pathname === entry.href ||
-                  (entry.href !== "/admin" && pathname.startsWith(`${entry.href}/`)));
+              const active = entry.href != null && isCurrent(entry.href);
               return (
-                <li key={entry.label}>
+                <li key={`${section.title}-${entry.label}`}>
                   {entry.available && entry.href ? (
                     <Link
                       href={entry.href}
-                      className="navlink"
+                      className="console-navlink-v2"
                       aria-current={active ? "page" : undefined}
                     >
+                      <span className="console-nav-icon" aria-hidden="true">
+                        {entry.icon ? <Icon name={entry.icon} size={18} /> : null}
+                      </span>
                       <span className="min-w-0 truncate">{entry.label}</span>
                     </Link>
                   ) : (
-                    <span className="navlink" aria-disabled="true">
+                    <span className="console-navlink-v2" aria-disabled="true">
+                      <span className="console-nav-icon" aria-hidden="true">
+                        {entry.icon ? <Icon name={entry.icon} size={18} /> : null}
+                      </span>
                       <span className="min-w-0 truncate">{entry.label}</span>
                       <span className="sr-only"> — {comingLaterLabel}</span>
                     </span>
@@ -153,33 +143,31 @@ export function ConsoleShell({
               );
             })}
           </ul>
-        </div>
+        </section>
       ))}
     </nav>
   );
 
-  /* A tab is current when it is the exact route, or a route beneath it. The
-     Today tab must match exactly: every console path starts with "/admin". */
-  const isCurrent = (href: string) =>
-    pathname === href || (href !== "/admin" && pathname.startsWith(`${href}/`));
-
-  /* More is "current" when nothing in the bar is, so the operator can always
-     see where they are — a bar where no tab is lit reads as broken. */
   const inBar = tabs.some((tab) => isCurrent(tab.href));
 
   return (
-    <div className="min-h-screen lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
+    <div className="admin-console min-h-screen lg:grid lg:grid-cols-[16.5rem_minmax(0,1fr)]">
       <aside className="console-rail hidden border-r border-line lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto">
         <div className="console-rail-brand border-b border-line">
           <p className="font-display text-h4 font-semibold leading-tight">{brand}</p>
-          <p className="form-note mt-1.5">{studio}</p>
-          <span aria-hidden className="stitch-line mt-4 block w-12" />
+          <p className="form-note mt-1">{studio}</p>
+          {primaryAction ? (
+            <Link href={primaryAction.href} className="console-primary-action">
+              <Icon name={primaryAction.icon} size={18} />
+              <span>{primaryAction.label}</span>
+            </Link>
+          ) : null}
         </div>
-        <div className="flex-1 px-3 py-5">{nav}</div>
-        <div className="border-t border-line bg-card/55 p-5">
+        <div className="flex-1 px-3 py-4">{nav}</div>
+        <div className="border-t border-line bg-card/70 p-4">
           <p className="text-smallmeta font-bold text-carbon">{personName}</p>
           <p className="form-note mt-0.5">{roleLabel}</p>
-          <div className="mt-4 flex items-center justify-between gap-3">
+          <div className="mt-3 flex items-center justify-between gap-3">
             <Link href={accountHref} className="stitch-link text-smallmeta font-semibold">
               {accountLabel}
             </Link>
@@ -189,18 +177,21 @@ export function ConsoleShell({
       </aside>
 
       <div className="min-w-0 flex flex-col">
-        {/* The app bar. It used to be 72px carrying the brand at 20px over
-            `personName · roleLabel` at 15px — identity the operator already
-            knows, restated on every screen. The name and role moved into the
-            More sheet, where they belong beside the account link, and the bar
-            is a 52px context line with the one utility a phone needs. */}
-        <header className="console-appbar sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-line bg-card/96 px-4 backdrop-blur md:px-6 lg:hidden">
-          <p className="min-w-0 truncate font-display text-base font-semibold leading-tight">
-            {brand}
-          </p>
-          <Link href={accountHref} className="tap text-smallmeta font-semibold text-stone">
-            {accountLabel}
-          </Link>
+        <header className="console-appbar sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-line px-4 backdrop-blur md:px-6 lg:hidden">
+          <div className="console-appbar-copy">
+            <span className="console-appbar-kicker">{brand}</span>
+            <span className="console-appbar-title">{currentLabel}</span>
+          </div>
+          {primaryAction ? (
+            <Link href={primaryAction.href} className="console-appbar-action" aria-label={primaryAction.label}>
+              <Icon name={primaryAction.icon} size={17} />
+              <span className="hidden sm:inline">{primaryAction.label}</span>
+            </Link>
+          ) : (
+            <Link href={accountHref} className="tap text-smallmeta font-semibold text-stone">
+              {accountLabel}
+            </Link>
+          )}
         </header>
 
         {open ? (
@@ -219,6 +210,12 @@ export function ConsoleShell({
               aria-label={moreNavLabel}
               className="console-sheet lg:hidden"
             >
+              {primaryAction ? (
+                <Link href={primaryAction.href} className="console-primary-action mx-3 mb-4">
+                  <Icon name={primaryAction.icon} size={18} />
+                  <span>{primaryAction.label}</span>
+                </Link>
+              ) : null}
               {nav}
               <div className="mt-4 border-t border-line px-3 pt-3">
                 <p className="text-smallmeta font-bold text-carbon">{personName}</p>
@@ -234,12 +231,10 @@ export function ConsoleShell({
           </>
         ) : null}
 
-        <main id="main" className="console-main flex-1 px-4 py-4 sm:px-6 md:px-8 lg:px-10 lg:py-10 xl:px-12">
+        <main id="main" className="console-main flex-1 px-4 py-3 sm:px-6 md:px-8 lg:px-9 lg:py-8 xl:px-11">
           {children}
         </main>
 
-        {/* The bottom navigation. Four destinations at most, plus More.
-            Rendered only below `lg`, where the rail is not on screen. */}
         <nav aria-label={primaryNavLabel} className="console-bar lg:hidden">
           <ul className="console-bar-list">
             {tabs.map((tab) => {
