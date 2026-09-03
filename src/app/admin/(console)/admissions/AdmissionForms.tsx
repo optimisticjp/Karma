@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import type { AdmissionsCopy } from "@/lib/admin/admissions-copy";
 import {
@@ -44,6 +44,35 @@ function SubmitButton({ label, busy }: { label: string; busy: string }) {
   );
 }
 
+function restoreSubmittedForm(
+  form: HTMLFormElement,
+  values?: Record<string, string>,
+  invalidFields?: string[]
+) {
+  for (const item of Array.from(form.elements)) {
+    if (item instanceof HTMLInputElement || item instanceof HTMLSelectElement || item instanceof HTMLTextAreaElement) {
+      item.classList.remove("input-error");
+      item.removeAttribute("aria-invalid");
+    }
+  }
+  for (const [name, value] of Object.entries(values ?? {})) {
+    const item = form.elements.namedItem(name);
+    if (item instanceof HTMLInputElement || item instanceof HTMLSelectElement || item instanceof HTMLTextAreaElement) {
+      item.value = value;
+    }
+  }
+  let first: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null = null;
+  for (const name of invalidFields ?? []) {
+    const item = form.elements.namedItem(name);
+    if (item instanceof HTMLInputElement || item instanceof HTMLSelectElement || item instanceof HTMLTextAreaElement) {
+      item.classList.add("input-error");
+      item.setAttribute("aria-invalid", "true");
+      first ??= item;
+    }
+  }
+  first?.focus();
+}
+
 export function ManualEnquiryForm({
   staff,
   courses,
@@ -56,9 +85,18 @@ export function ManualEnquiryForm({
   copy: AdmissionsCopy;
 }) {
   const [state, formAction] = useActionState<AdmissionsState, FormData>(createManualEnquiryAction, IDLE);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (!formRef.current || (!state.values && !state.invalidFields)) return;
+    const frame = requestAnimationFrame(() => {
+      if (formRef.current) restoreSubmittedForm(formRef.current, state.values, state.invalidFields);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [state.values, state.invalidFields]);
 
   return (
-    <form action={formAction} className="grid gap-5">
+    <form ref={formRef} action={formAction} className="grid gap-5">
       <ActionMessage state={state} copy={copy} />
       <div className="grid gap-4 md:grid-cols-3">
         <Field label={copy.enquirySource} htmlFor="manual-enquiry-source">

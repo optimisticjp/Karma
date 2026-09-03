@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { admissionSchema, briefSchema } from "@/lib/validation";
 import { validateDirectAdmission } from "@/lib/admin/students";
+import { validateManualEnquiry } from "@/lib/admin/admissions";
 
 const read = (path: string) => readFileSync(path, "utf8");
 
@@ -125,6 +126,38 @@ describe("direct admission errors are recoverable", () => {
     expect(action).toContain("values: submittedValues, invalidFields: parsed.invalidFields");
     expect(form).toContain("restoreSubmittedForm");
     expect(form).toContain('classList.add("input-error")');
+    expect(form).toContain('setAttribute("aria-invalid", "true")');
+  });
+});
+
+describe("manual enquiry errors are recoverable", () => {
+  it("returns exact invalid controls", () => {
+    const result = validateManualEnquiry({
+      fullName: "A",
+      whatsapp: "bad",
+      email: "bad",
+      heardFrom: "walk_in",
+      locale: "gu",
+      ageBand: "under18",
+      guardianName: "",
+      guardianPhone: ""
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.invalidFields).toContain("fullName");
+      expect(result.invalidFields).toContain("whatsapp");
+      expect(result.invalidFields).toContain("email");
+      expect(result.invalidFields).toContain("guardianName");
+      expect(result.invalidFields).toContain("guardianPhone");
+    }
+  });
+
+  it("preserves staff-entered values after a failed save", () => {
+    const action = read("src/app/admin/(console)/admissions/actions.ts");
+    const form = read("src/app/admin/(console)/admissions/AdmissionForms.tsx");
+    expect(action).toContain("const submittedValues = formSnapshot(formData)");
+    expect(action).toContain("values: submittedValues, invalidFields: parsed.invalidFields");
+    expect(form).toContain("restoreSubmittedForm");
     expect(form).toContain('setAttribute("aria-invalid", "true")');
   });
 });
